@@ -50,7 +50,7 @@ def mangle_docstrings(app, what, name, obj, options, lines,
         if sys.version_info[0] >= 3:
             doc = str(doc)
         else:
-            doc = str(doc).decode('utf-8')
+            doc = unicode(doc)
         lines[:] = doc.split(sixu("\n"))
 
     if app.config.numpydoc_edit_link and hasattr(obj, '__name__') and \
@@ -182,4 +182,3 @@ def wrap_mangling_directive(base_directive, objtype):
             return base_directive.run(self)
 
     return directive
-
