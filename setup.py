@@ -22,7 +22,7 @@ setup(
     keywords="sphinx numpy",
     author="Pauli Virtanen and others",
     author_email="pav@iki.fi",
-    url="http://github.com/numpy/numpy/tree/master/doc/sphinxext",
+    url="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt",
     license="BSD",
     requires=["sphinx (>= 1.0.1)"],
     package_data={'numpydoc': ['tests/test_*.py']},
