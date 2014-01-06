@@ -38,7 +38,9 @@ def mangle_docstrings(app, what, name, obj, options, lines,
                       reference_offset=[0]):
 
     cfg = dict(use_plots=app.config.numpydoc_use_plots,
-               show_class_members=app.config.numpydoc_show_class_members)
+               show_class_members=app.config.numpydoc_show_class_members,
+               class_members_toctree=app.config.numpydoc_class_members_toctree,
+              )
 
     if what == 'module':
         # Strip top title
@@ -114,6 +116,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_edit_link', None, False)
     app.add_config_value('numpydoc_use_plots', None, False)
     app.add_config_value('numpydoc_show_class_members', True, True)
+    app.add_config_value('numpydoc_class_members_toctree', True, True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
