@@ -40,6 +40,12 @@ The following options can be set in conf.py:
   Whether to show all members of a class in the Methods and Attributes
   sections automatically.
 
+- numpydoc_class_members_toctree: bool
+
+  Whether to create a Sphinx table of contents for the lists of class
+  methods and attributes. If a table of contents is made, Sphinx expects
+  each entry to have a separate page.
+
 - numpydoc_edit_link: bool  (DEPRECATED -- edit your HTML template instead)
 
   Whether to insert an edit link after docstrings.

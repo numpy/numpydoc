@@ -13,8 +13,12 @@ else:
 
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
-        self.use_plots = config.get('use_plots', False)
+        # Subclasses seemingly do not call this.
         NumpyDocString.__init__(self, docstring, config=config)
+
+    def load_config(self, config):
+        self.use_plots = config.get('use_plots', False)
+        self.class_members_toctree = config.get('class_members_toctree', True)
 
     # string conversion routines
     def _str_header(self, name, symbol='`'):
@@ -117,8 +121,10 @@ class SphinxDocString(NumpyDocString):
                     others.append((param, param_type, desc))
 
             if autosum:
-                out += ['.. autosummary::', '   :toctree:', '']
-                out += autosum
+                out += ['.. autosummary::']
+                if self.class_members_toctree:
+                    out += ['   :toctree:']
+                out += [''] + autosum
 
             if others:
                 maxlen_0 = max(3, max([len(x[0]) for x in others]))
@@ -233,17 +239,18 @@ class SphinxDocString(NumpyDocString):
 
 class SphinxFunctionDoc(SphinxDocString, FunctionDoc):
     def __init__(self, obj, doc=None, config={}):
-        self.use_plots = config.get('use_plots', False)
+        self.load_config(config)
         FunctionDoc.__init__(self, obj, doc=doc, config=config)
 
 class SphinxClassDoc(SphinxDocString, ClassDoc):
     def __init__(self, obj, doc=None, func_doc=None, config={}):
-        self.use_plots = config.get('use_plots', False)
+        self.load_config(config)
         ClassDoc.__init__(self, obj, doc=doc, func_doc=None, config=config)
 
 class SphinxObjDoc(SphinxDocString):
     def __init__(self, obj, doc=None, config={}):
         self._f = obj
+        self.load_config(config)
         SphinxDocString.__init__(self, doc, config=config)
 
 def get_doc_object(obj, what=None, doc=None, config={}):
