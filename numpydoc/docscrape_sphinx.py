@@ -13,8 +13,8 @@ else:
 
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
-        # Subclasses seemingly do not call this.
         NumpyDocString.__init__(self, docstring, config=config)
+        self.load_config(config)
 
     def load_config(self, config):
         self.use_plots = config.get('use_plots', False)
