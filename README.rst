@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/numpy/numpydoc.png?branch=master
+   :target: https://travis-ci.org/numpy/numpydoc/
+
 =====================================
 numpydoc -- Numpy's Sphinx extensions
 =====================================
