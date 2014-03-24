@@ -9,6 +9,7 @@ import re
 import pydoc
 from warnings import warn
 import collections
+import sys
 
 
 class Reader(object):
@@ -433,7 +434,10 @@ class FunctionDoc(NumpyDocString):
             func, func_name = self.get_func()
             try:
                 # try to read signature
-                argspec = inspect.getargspec(func)
+                if sys.version_info[0] >= 3:
+                    argspec = inspect.getfullargspec(func)
+                else:
+                    argspec = inspect.getargspec(func)
                 argspec = inspect.formatargspec(*argspec)
                 argspec = argspec.replace('*','\*')
                 signature = '%s%s' % (func_name, argspec)
