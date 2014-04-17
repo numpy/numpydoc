@@ -21,6 +21,9 @@ The following extensions are available:
     directive. Note that this implementation may still undergo severe
     changes or eventually be deprecated.
 
+See `A Guide to NumPy/SciPy Documentation <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`_
+for how to write docs that use this extension.
+
 
 numpydoc
 ========
