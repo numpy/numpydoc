@@ -21,6 +21,7 @@ import os, sys, re, pydoc
 import sphinx
 import inspect
 import collections
+import itertools
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -30,8 +31,23 @@ from sphinx.util.compat import Directive
 
 if sys.version_info[0] >= 3:
     sixu = lambda s: s
+    zip_longest = itertools.zip_longest
 else:
     sixu = lambda s: unicode(s, 'unicode_escape')
+    zip_longest = itertools.izip_longest
+
+def convert_tex(line):
+    if "$$" in line:
+        raise ValueError("Displaymath not supported, sorry. Use ReST.")
+
+    lst = line.split("$")
+    if len(lst) % 2 == 0:
+        raise ValueError("Trying to split inline math between lines? Sorry, no.")
+
+    text, math = lst[::2], lst[1::2]
+    math = [":math:`" + _ + "`" for _ in math]
+
+    return "".join([x+y for x, y in zip_longest(text, math, fillvalue="")])
 
 
 def mangle_docstrings(app, what, name, obj, options, lines,
@@ -88,6 +104,11 @@ def mangle_docstrings(app, what, name, obj, options, lines,
                                             sixu('.. [%s]') % new_r)
 
     reference_offset[0] += len(references)
+
+    # replace TeX delimiters $...$ with :math:`...`
+    for i,line in enumerate(lines):
+        lines[i] = convert_tex(line)
+
 
 def mangle_signature(app, what, name, obj, options, sig, retann):
     # Do not try to inspect classes that don't define `__init__`
