@@ -97,6 +97,7 @@ class NumpyDocString(object):
             'Extended Summary': [],
             'Parameters': [],
             'Returns': [],
+            'Yields': [],
             'Raises': [],
             'Warns': [],
             'Other Parameters': [],
