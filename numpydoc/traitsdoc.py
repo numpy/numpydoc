@@ -61,6 +61,7 @@ class SphinxTraitsDoc(SphinxClassDoc):
             'Extended Summary': [],
             'Parameters': [],
             'Returns': [],
+            'Yields': [],
             'Raises': [],
             'Warns': [],
             'Other Parameters': [],
