@@ -482,6 +482,9 @@ class ClassDoc(NumpyDocString):
             raise ValueError("Expected a class or None, but got %r" % cls)
         self._cls = cls
 
+        self.show_inherited_members = config.get('show_inherited_class_members',
+                                                 True)
+
         if modulename and not modulename.endswith('.'):
             modulename += '.'
         self._mod = modulename
@@ -505,27 +508,36 @@ class ClassDoc(NumpyDocString):
                 if not self[field]:
                     doc_list = []
                     for name in sorted(items):
-                         try:
+                        try:
                             doc_item = pydoc.getdoc(getattr(self._cls, name))
                             doc_list.append((name, '', splitlines_x(doc_item)))
-                         except AttributeError:
-                            pass # method doesn't exist
+                        except AttributeError:
+                            pass  # method doesn't exist
                     self[field] = doc_list
 
     @property
     def methods(self):
         if self._cls is None:
             return []
-        return [name for name,func in inspect.getmembers(self._cls)
+        return [name for name, func in inspect.getmembers(self._cls)
                 if ((not name.startswith('_')
                      or name in self.extra_public_methods)
-                    and isinstance(func, collections.Callable))]
+                    and isinstance(func, collections.Callable)
+                    and self._is_show_member(name))]
 
     @property
     def properties(self):
         if self._cls is None:
             return []
-        return [name for name,func in inspect.getmembers(self._cls)
-                if not name.startswith('_') and
-                (func is None or isinstance(func, property) or
-                 inspect.isgetsetdescriptor(func))]
+        return [name for name, func in inspect.getmembers(self._cls)
+                if (not name.startswith('_') and
+                    (func is None or isinstance(func, property) or
+                     inspect.isgetsetdescriptor(func))
+                    and self._is_show_member(name))]
+
+    def _is_show_member(self, name):
+        if self.show_inherited_members:
+            return True  # show all class members
+        if name not in self._cls.__dict__:
+            return False  # class member is inherited, we do not show it
+        return True

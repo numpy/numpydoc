@@ -646,6 +646,46 @@ def test_class_members():
         else:
             assert 'Spammity index' in str(doc), str(doc)
 
+    class SubDummy(Dummy):
+        """
+        Subclass of Dummy class.
+
+        """
+        def ham(self, c, d):
+            """Cheese\n\nNo cheese.\nOverloaded Dummy.ham"""
+            pass
+
+        def bar(self, a, b):
+            """Bar\n\nNo bar"""
+            pass
+
+    for cls in (ClassDoc, SphinxClassDoc):
+        doc = cls(SubDummy, config=dict(show_class_members=True,
+                                        show_inherited_class_members=False))
+        assert 'Methods' in str(doc), (cls, str(doc))
+        assert 'spam' not in str(doc), (cls, str(doc))
+        assert 'ham' in str(doc), (cls, str(doc))
+        assert 'bar' in str(doc), (cls, str(doc))
+        assert 'spammity' not in str(doc), (cls, str(doc))
+
+        if cls is SphinxClassDoc:
+            assert '.. autosummary::' in str(doc), str(doc)
+        else:
+            assert 'Spammity index' not in str(doc), str(doc)
+
+        doc = cls(SubDummy, config=dict(show_class_members=True,
+                                        show_inherited_class_members=True))
+        assert 'Methods' in str(doc), (cls, str(doc))
+        assert 'spam' in str(doc), (cls, str(doc))
+        assert 'ham' in str(doc), (cls, str(doc))
+        assert 'bar' in str(doc), (cls, str(doc))
+        assert 'spammity' in str(doc), (cls, str(doc))
+
+        if cls is SphinxClassDoc:
+            assert '.. autosummary::' in str(doc), str(doc)
+        else:
+            assert 'Spammity index' in str(doc), str(doc)
+
 def test_duplicate_signature():
     # Duplicate function signatures occur e.g. in ufuncs, when the
     # automatic mechanism adds one, and a more detailed comes from the
