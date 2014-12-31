@@ -86,7 +86,7 @@ class Reader(object):
         return not ''.join(self._str).strip()
 
 
-class NumpyDocString(object):
+class NumpyDocString(collections.Mapping):
     def __init__(self, docstring, config={}):
         docstring = textwrap.dedent(docstring).split('\n')
 
@@ -112,14 +112,20 @@ class NumpyDocString(object):
 
         self._parse()
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         return self._parsed_data[key]
 
-    def __setitem__(self,key,val):
+    def __setitem__(self, key, val):
         if key not in self._parsed_data:
             warn("Unknown section %s" % key)
         else:
             self._parsed_data[key] = val
+
+    def __iter__(self):
+        return iter(self._parsed_data)
+
+    def __len__(self):
+        return len(self._parsed_data)
 
     def _is_at_section(self):
         self._doc.seek_next_non_empty_line()
