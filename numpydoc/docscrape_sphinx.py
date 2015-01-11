@@ -63,23 +63,6 @@ class SphinxDocString(NumpyDocString):
                 out += ['']
         return out
 
-    def _str_yields(self):
-        out = []
-        if self['Yields']:
-            out += self._str_field_list('Yields')
-            out += ['']
-            for param, param_type, desc in self['Yields']:
-                if param_type:
-                    out += self._str_indent(['**%s** : %s' % (param.strip(),
-                                                              param_type)])
-                else:
-                    out += self._str_indent([param.strip()])
-                if desc:
-                    out += ['']
-                    out += self._str_indent(desc, 8)
-                out += ['']
-        return out
-
     def _str_param_list(self, name):
         out = []
         if self[name]:
@@ -242,6 +225,7 @@ class SphinxDocString(NumpyDocString):
         out += self._str_extended_summary()
         out += self._str_param_list('Parameters')
         out += self._str_returns()
+        out += self._str_param_list('Yields')
         for param_list in ('Other Parameters', 'Raises', 'Warns'):
             out += self._str_param_list(param_list)
         out += self._str_warnings()
