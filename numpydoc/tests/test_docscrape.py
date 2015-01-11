@@ -164,6 +164,29 @@ def test_returns():
     assert desc[0].startswith('This is not a real')
     assert desc[-1].endswith('anonymous return values.')
 
+def test_yields():
+    doc_text = """
+Test generator
+
+Yields
+------
+a : int
+    The number of apples.
+b : int
+    The number of bananas.
+
+"""
+    doc = NumpyDocString(doc_text)
+    section = doc['Yields']
+    print(section)
+    assert_equal(len(section), 2)
+    truth = [('a', 'apples.'), ('b', 'bananas.')]
+    for (arg, arg_type, desc), (arg_true, ending) in zip(section, truth):
+        assert_equal(arg, arg_true)
+        assert_equal(arg_type, 'int')
+        assert desc[0].startswith('The number of')
+        assert desc[0].endswith(ending)
+
 def test_notes():
     assert doc['Notes'][0].startswith('Instead')
     assert doc['Notes'][-1].endswith('definite.')

@@ -292,8 +292,9 @@ class NumpyDocString(object):
         for (section,content) in self._read_sections():
             if not section.startswith('..'):
                 section = ' '.join([s.capitalize() for s in section.split(' ')])
-            if section in ('Parameters', 'Returns', 'Raises', 'Warns',
-                           'Other Parameters', 'Attributes', 'Methods'):
+            if section in ('Parameters', 'Returns', 'Yields', 'Raises',
+                           'Warns', 'Other Parameters', 'Attributes',
+                           'Methods'):
                 self[section] = self._parse_param_list(content)
             elif section.startswith('.. index::'):
                 self['index'] = self._parse_index(section, content)
