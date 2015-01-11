@@ -178,7 +178,6 @@ b : int
 """
     doc = NumpyDocString(doc_text)
     section = doc['Yields']
-    print(section)
     assert_equal(len(section), 2)
     truth = [('a', 'apples.'), ('b', 'bananas.')]
     for (arg, arg_type, desc), (arg_true, ending) in zip(section, truth):
