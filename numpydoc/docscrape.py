@@ -289,7 +289,17 @@ class NumpyDocString(object):
         self._doc.reset()
         self._parse_summary()
 
-        for (section,content) in self._read_sections():
+        sections = list(self._read_sections())
+        section_names = set([section for section, content in sections])
+
+        has_returns = 'Returns' in section_names
+        has_yields = 'Yields' in section_names
+        # We could do more tests, but we are not. Arbitrarily.
+        if has_returns and has_yields:
+            msg = 'Docstring contains both a Returns and Yields section.'
+            raise ValueError(msg)
+
+        for (section, content) in sections:
             if not section.startswith('..'):
                 section = ' '.join([s.capitalize() for s in section.split(' ')])
             if section in ('Parameters', 'Returns', 'Yields', 'Raises',
