@@ -122,6 +122,20 @@ doc_txt = '''\
   '''
 doc = NumpyDocString(doc_txt)
 
+doc_yields_txt = """
+Test generator
+
+Yields
+------
+a : int
+    The number of apples.
+b : int
+    The number of bananas.
+int
+    The number of unknowns.
+"""
+doc_yields = NumpyDocString(doc_yields_txt)
+
 
 def test_signature():
     assert doc['Signature'].startswith('numpy.multivariate_normal(')
@@ -164,6 +178,37 @@ def test_returns():
     assert desc[0].startswith('This is not a real')
     assert desc[-1].endswith('anonymous return values.')
 
+def test_yields():
+    section = doc_yields['Yields']
+    assert_equal(len(section), 3)
+    truth = [('a', 'int', 'apples.'),
+             ('b', 'int', 'bananas.'),
+             ('int', '', 'unknowns.')]
+    for (arg, arg_type, desc), (arg_, arg_type_, end) in zip(section, truth):
+        assert_equal(arg, arg_)
+        assert_equal(arg_type, arg_type_)
+        assert desc[0].startswith('The number of')
+        assert desc[0].endswith(end)
+
+def test_returnyield():
+    doc_text = """
+Test having returns and yields.
+
+Returns
+-------
+int
+    The number of apples.
+
+Yields
+------
+a : int
+    The number of apples.
+b : int
+    The number of bananas.
+
+"""
+    assert_raises(ValueError, NumpyDocString, doc_text)
+
 def test_notes():
     assert doc['Notes'][0].startswith('Instead')
     assert doc['Notes'][-1].endswith('definite.')
@@ -193,6 +238,9 @@ def non_blank_line_by_line_compare(a,b):
                                  "\n>>> %s\n<<< %s\n" %
                                  (n,line,b[n]))
 def test_str():
+    # doc_txt has the order of Notes and See Also sections flipped.
+    # This should be handled automatically, and so, one thing this test does
+    # is to make sure that See Also precedes Notes in the output.
     non_blank_line_by_line_compare(str(doc),
 """numpy.multivariate_normal(mean, cov, shape=None, spam=None)
 
@@ -300,6 +348,22 @@ standard deviation:
 
 .. index:: random
    :refguide: random;distributions, random;gauss""")
+
+
+def test_yield_str():
+    non_blank_line_by_line_compare(str(doc_yields),
+"""Test generator
+
+Yields
+------
+a : int
+    The number of apples.
+b : int
+    The number of bananas.
+int
+    The number of unknowns.
+
+.. index:: """)
 
 
 def test_sphinx_str():
@@ -424,6 +488,27 @@ standard deviation:
 
 >>> print list( (x[0,0,:] - mean) < 0.6 )
 [True, True]
+""")
+
+
+def test_sphinx_yields_str():
+    sphinx_doc = SphinxDocString(doc_yields_txt)
+    non_blank_line_by_line_compare(str(sphinx_doc),
+"""Test generator
+
+:Yields:
+
+    **a** : int
+
+        The number of apples.
+
+    **b** : int
+
+        The number of bananas.
+
+    int
+
+        The number of unknowns.
 """)
 
 
