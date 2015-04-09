@@ -10,7 +10,8 @@ It will:
 - Convert Parameters etc. sections to field lists.
 - Convert See Also section to a See also entry.
 - Renumber references.
-- Extract the signature from the docstring, if it can't be determined otherwise.
+- Extract the signature from the docstring, if it can't be determined
+  otherwise.
 
 .. [1] https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt
 
@@ -39,28 +40,28 @@ else:
 def mangle_docstrings(app, what, name, obj, options, lines,
                       reference_offset=[0]):
 
-    cfg = dict(
-        use_plots=app.config.numpydoc_use_plots,
-        show_class_members=app.config.numpydoc_show_class_members,
-        show_inherited_class_members=app.config.numpydoc_show_inherited_class_members,
-        class_members_toctree=app.config.numpydoc_class_members_toctree,
-    )
+    cfg = {'use_plots': app.config.numpydoc_use_plots,
+           'show_class_members': app.config.numpydoc_show_class_members,
+           'show_inherited_class_members':
+           app.config.numpydoc_show_inherited_class_members,
+           'class_members_toctree': app.config.numpydoc_class_members_toctree}
 
+    u_NL = sixu('\n')
     if what == 'module':
         # Strip top title
-        title_re = re.compile(sixu('^\\s*[#*=]{4,}\\n[a-z0-9 -]+\\n[#*=]{4,}\\s*'),
-                              re.I|re.S)
-        lines[:] = title_re.sub(sixu(''), sixu("\n").join(lines)).split(sixu("\n"))
+        pattern = '^\\s*[#*=]{4,}\\n[a-z0-9 -]+\\n[#*=]{4,}\\s*'
+        title_re = re.compile(sixu(pattern), re.I | re.S)
+        lines[:] = title_re.sub(sixu(''), u_NL.join(lines)).split(u_NL)
     else:
-        doc = get_doc_object(obj, what, sixu("\n").join(lines), config=cfg)
+        doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg)
         if sys.version_info[0] >= 3:
             doc = str(doc)
         else:
             doc = unicode(doc)
-        lines[:] = doc.split(sixu("\n"))
+        lines[:] = doc.split(u_NL)
 
-    if app.config.numpydoc_edit_link and hasattr(obj, '__name__') and \
-           obj.__name__:
+    if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
+            obj.__name__):
         if hasattr(obj, '__module__'):
             v = dict(full_name=sixu("%s.%s") % (obj.__module__, obj.__name__))
         else:
@@ -93,24 +94,30 @@ def mangle_docstrings(app, what, name, obj, options, lines,
 
     reference_offset[0] += len(references)
 
+
 def mangle_signature(app, what, name, obj, options, sig, retann):
     # Do not try to inspect classes that don't define `__init__`
     if (inspect.isclass(obj) and
         (not hasattr(obj, '__init__') or
-        'initializes x; see ' in pydoc.getdoc(obj.__init__))):
+            'initializes x; see ' in pydoc.getdoc(obj.__init__))):
         return '', ''
 
-    if not (isinstance(obj, collections.Callable) or hasattr(obj, '__argspec_is_invalid_')): return
-    if not hasattr(obj, '__doc__'): return
+    if not (isinstance(obj, collections.Callable) or
+            hasattr(obj, '__argspec_is_invalid_')):
+        return
+
+    if not hasattr(obj, '__doc__'):
+        return
 
     doc = SphinxDocString(pydoc.getdoc(obj))
     if doc['Signature']:
         sig = re.sub(sixu("^[^(]*"), sixu(""), doc['Signature'])
         return sig, sixu('')
 
+
 def setup(app, get_doc_object_=get_doc_object):
     if not hasattr(app, 'add_config_value'):
-        return # probably called by nose, better bail out
+        return  # probably called by nose, better bail out
 
     global get_doc_object
     get_doc_object = get_doc_object_
@@ -127,13 +134,14 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_domain(NumpyPythonDomain)
     app.add_domain(NumpyCDomain)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Docstring-mangling domains
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 from docutils.statemachine import ViewList
 from sphinx.domains.c import CDomain
 from sphinx.domains.python import PythonDomain
+
 
 class ManglingDomainBase(object):
     directive_mangling_map = {}
@@ -146,6 +154,7 @@ class ManglingDomainBase(object):
         for name, objtype in list(self.directive_mangling_map.items()):
             self.directives[name] = wrap_mangling_directive(
                 self.directives[name], objtype)
+
 
 class NumpyPythonDomain(ManglingDomainBase, PythonDomain):
     name = 'np'
@@ -160,6 +169,7 @@ class NumpyPythonDomain(ManglingDomainBase, PythonDomain):
     }
     indices = []
 
+
 class NumpyCDomain(ManglingDomainBase, CDomain):
     name = 'np-c'
     directive_mangling_map = {
@@ -169,6 +179,7 @@ class NumpyCDomain(ManglingDomainBase, CDomain):
         'type': 'class',
         'var': 'object',
     }
+
 
 def wrap_mangling_directive(base_directive, objtype):
     class directive(base_directive):
