@@ -130,7 +130,7 @@ class SphinxDocString(NumpyDocString):
                 maxlen_0 = max(3, max([len(x[0]) for x in others]))
                 hdr = sixu("=")*maxlen_0 + sixu("  ") + sixu("=")*10
                 fmt = sixu('%%%ds  %%s  ') % (maxlen_0,)
-                out += ['', hdr]
+                out += ['', '', hdr]
                 for param, param_type, desc in others:
                     desc = sixu(" ").join(x.strip() for x in desc).strip()
                     if param_type:

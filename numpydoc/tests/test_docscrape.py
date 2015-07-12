@@ -677,6 +677,8 @@ class_doc_txt = """
         Current time.
     y : ndarray
         Current variable values.
+    x : float
+        Some parameter
 
     Methods
     -------
@@ -712,6 +714,8 @@ def test_class_members_doc():
         Current time.
     y : ndarray
         Current variable values.
+    x : float
+        Some parameter
 
     Methods
     -------
@@ -726,7 +730,13 @@ def test_class_members_doc():
     """)
 
 def test_class_members_doc_sphinx():
-    doc = SphinxClassDoc(None, class_doc_txt)
+    class Foo:
+        @property
+        def x(self):
+            """Test attribute"""
+            return None
+
+    doc = SphinxClassDoc(Foo, class_doc_txt)
     non_blank_line_by_line_compare(str(doc),
     """
     Foo
@@ -746,6 +756,11 @@ def test_class_members_doc_sphinx():
     For usage examples, see `ode`.
 
     .. rubric:: Attributes
+
+    .. autosummary::
+       :toctree:
+
+       x
 
     ===  ==========
       t  (float) Current time.
