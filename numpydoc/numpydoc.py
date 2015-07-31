@@ -133,6 +133,9 @@ def setup(app, get_doc_object_=get_doc_object):
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
     app.add_domain(NumpyCDomain)
+    
+    metadata = {'parallel_read_safe': True}
+    return metadata
 
 # ------------------------------------------------------------------------------
 # Docstring-mangling domains
