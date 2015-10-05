@@ -88,8 +88,17 @@ class Reader(object):
         return not ''.join(self._str).strip()
 
 
+class ParseError(Exception):
+    def __str__(self):
+        message = self.message
+        if hasattr(self, 'docstring'):
+            message = "%s in %r" % (message, self.docstring)
+        return message
+
+
 class NumpyDocString(collections.Mapping):
     def __init__(self, docstring, config={}):
+        orig_docstring = docstring
         docstring = textwrap.dedent(docstring).split('\n')
 
         self._doc = Reader(docstring)
@@ -113,7 +122,11 @@ class NumpyDocString(collections.Mapping):
             'index': {}
             }
 
-        self._parse()
+        try:
+            self._parse()
+        except ParseError as e:
+            e.docstring = orig_docstring
+            raise
 
     def __getitem__(self, key):
         return self._parsed_data[key]
@@ -219,7 +232,7 @@ class NumpyDocString(collections.Mapping):
                     return g[3], None
                 else:
                     return g[2], g[1]
-            raise ValueError("%s is not a item name" % text)
+            raise ParseError("%s is not a item name" % text)
 
         def push_item(name, rest):
             if not name:
