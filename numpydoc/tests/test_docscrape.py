@@ -536,6 +536,12 @@ def test_escape_stars():
     signature = str(doc3).split('\n')[0]
     assert_equal(signature, 'my_signature(\*params, \*\*kwds)')
 
+    def my_func(a, b, **kwargs):
+        pass
+
+    fdoc = FunctionDoc(func=my_func)
+    assert_equal(fdoc['Signature'], 'my_func(a, b, \*\*kwargs)')
+
 doc4 = NumpyDocString(
     """a.conj()
 
