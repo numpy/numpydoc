@@ -473,9 +473,9 @@ class FunctionDoc(NumpyDocString):
         if not self['Signature'] and func is not None:
             func, func_name = self.get_func()
             try:
-                if hasattr(inspect, 'signature'):
+                try:
                     signature = str(inspect.signature(func))
-                else:
+                except (AttributeError, ValueError):
                     # try to read signature, backward compat for older Python
                     if sys.version_info[0] >= 3:
                         argspec = inspect.getfullargspec(func)
