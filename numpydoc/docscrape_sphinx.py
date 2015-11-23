@@ -219,6 +219,24 @@ class SphinxDocString(NumpyDocString):
             return self._f
         return None
 
+    def _get_class_that_defined_method(self, method):
+        try:
+            method_name = method.__name__
+            if method.__self__:
+                classes = [method.__self__.__class__]
+            else:
+                #unbound method
+                classes = [method.im_class]
+            while classes:
+                c = classes.pop()
+                if method_name in c.__dict__:
+                    return '~' + c.__module__ + '.' + c.__name__ + '.'
+                else:
+                    classes = list(c.__bases__) + classes
+            return ''
+        except:
+            return ''
+
     def _str_member_list(self, name):
         """
         Generate a member listing, autosummary:: table where possible,
@@ -247,7 +265,7 @@ class SphinxDocString(NumpyDocString):
 
                 if param_obj and pydoc.getdoc(param_obj):
                     # Referenced object has a docstring
-                    autosum += ["   %s%s" % (prefix, param)]
+                    autosum += ["   %s%s%s" % (self._get_class_that_defined_method(param_obj), prefix, param)]
                 else:
                     others.append((param, param_type, desc))
 
@@ -268,7 +286,7 @@ class SphinxDocString(NumpyDocString):
                         desc = "(%s) %s" % (param_type, desc)
                     out += [fmt % ("**" + param.strip() + "**", desc)]
                 out += [hdr]
-            out += ['']
+
         return out
 
     def _str_section(self, name):
