@@ -1,2 +1,8 @@
+include MANIFEST.in
 recursive-include numpydoc/tests *.py
 include *.txt
+include *.rst
+
+# Exclude what we don't want to include
+prune */__pycache__
+global-exclude *.pyc *~ *.bak *.swp *.pyo
