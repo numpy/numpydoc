@@ -1,6 +1,8 @@
 from __future__ import division, print_function
 
 import sys
+
+from distutils.command.sdist import sdist
 import setuptools
 from distutils.core import setup
 
@@ -27,4 +29,5 @@ setup(
     requires=["sphinx (>= 1.0.1)"],
     package_data={'numpydoc': ['tests/test_*.py']},
     test_suite = 'nose.collector',
+    cmdclass={"sdist": sdist},
 )
