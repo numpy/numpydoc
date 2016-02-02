@@ -9,7 +9,7 @@ from distutils.core import setup
 if sys.version_info[:2] < (2, 6) or (3, 0) <= sys.version_info[0:2] < (3, 3):
     raise RuntimeError("Python version 2.6, 2.7 or >= 3.3 required.")
 
-version = "0.6.dev"
+version = "0.6.0"
 
 setup(
     name="numpydoc",
@@ -17,10 +17,18 @@ setup(
     version=version,
     description="Sphinx extension to support docstrings in Numpy format",
     # classifiers from http://pypi.python.org/pypi?%3Aaction=list_classifiers
-    classifiers=["Development Status :: 3 - Alpha",
+    classifiers=["Development Status :: 4 - Beta",
                  "Environment :: Plugins",
                  "License :: OSI Approved :: BSD License",
-                 "Topic :: Documentation"],
+                 "Topic :: Documentation",
+                 "Programming Language :: Python",
+                 "Programming Language :: Python :: 2",
+                 "Programming Language :: Python :: 2.6",
+                 "Programming Language :: Python :: 2.7",
+                 "Programming Language :: Python :: 3",
+                 "Programming Language :: Python :: 3.3",
+                 "Programming Language :: Python :: 3.4",
+                 "Programming Language :: Python :: 3.5"],
     keywords="sphinx numpy",
     author="Pauli Virtanen and others",
     author_email="pav@iki.fi",
