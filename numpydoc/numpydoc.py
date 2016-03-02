@@ -47,8 +47,6 @@ def rename_references(app, what, name, obj, options, lines,
         if m:
             references.append(m.group(1))
 
-    # start renaming from the longest string, to avoid overwriting parts
-    references.sort(key=lambda x: -len(x))
     if references:
         for i, line in enumerate(lines):
             for r in references:
