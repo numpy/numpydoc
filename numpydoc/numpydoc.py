@@ -43,7 +43,8 @@ def rename_references(app, what, name, obj, options, lines,
     references = []
     for line in lines:
         line = line.strip()
-        m = re.match(sixu('^.. \\[([a-z0-9_.-])\\]'), line, re.I)
+        m = re.match(sixu('^.. \\[(%s)\\]') % app.config.numpydoc_citation_re,
+                     line, re.I)
         if m:
             references.append(m.group(1))
 
@@ -133,6 +134,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_show_class_members', True, True)
     app.add_config_value('numpydoc_show_inherited_class_members', True, True)
     app.add_config_value('numpydoc_class_members_toctree', True, True)
+    app.add_config_value('numpydoc_citation_re', '[a-z0-9_.-]', True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
