@@ -9,6 +9,7 @@ import re
 import pydoc
 from warnings import warn
 import collections
+import copy
 import sys
 
 
@@ -122,7 +123,7 @@ class NumpyDocString(collections.Mapping):
         docstring = textwrap.dedent(docstring).split('\n')
 
         self._doc = Reader(docstring)
-        self._parsed_data = NumpyDocString.sections.copy()
+        self._parsed_data = copy.deepcopy(self.sections)
 
         try:
             self._parse()
