@@ -58,6 +58,7 @@ class SphinxDocString(NumpyDocString):
             out += ['']
             for param, param_type, desc in self[name]:
                 if param_type:
+                    param_type = make_links(param_type)
                     out += self._str_indent(['**%s** : %s' % (param.strip(),
                                                               param_type)])
                 else:
@@ -75,6 +76,7 @@ class SphinxDocString(NumpyDocString):
             out += ['']
             for param, param_type, desc in self[name]:
                 if param_type:
+                    param_type = make_links(param_type)
                     out += self._str_indent(['**%s** : %s' % (param.strip(),
                                                               param_type)])
                 else:
@@ -242,6 +244,25 @@ class SphinxDocString(NumpyDocString):
             out += self._str_member_list(param_list)
         out = self._str_indent(out, indent)
         return '\n'.join(out)
+
+
+def make_links(param_type):
+    """Try to parse the param type to make Sphinx links"""
+    constants = ('None', 'True', 'False')
+    # This is not a great way to parse the list yet... at the very least:
+    # 1. It doesn't handle e.g. {}-style entries
+    # 2. Using `str.replace()` instead of something smarter to find
+    #    instances is not safe
+    for type_ in param_type.split():
+        type_ = type_.strip(',')
+        if type_ not in ('|', 'instance', 'of', 'or', 'optional') + constants:
+            param_type = param_type.replace(
+                type_, ':class:`%s`' % type_)
+        if type_ in constants:
+            # This doesn't link properly yet
+            param_type.replace(
+                type_, ':const:`%s`' % type_)
+    return param_type
 
 
 class SphinxFunctionDoc(SphinxDocString, FunctionDoc):
