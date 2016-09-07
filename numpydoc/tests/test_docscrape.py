@@ -893,18 +893,18 @@ def test_class_members_doc_sphinx():
 
        x
 
-    ===  ==========
-      t  (float) Current time.
-      y  (ndarray) Current variable values.
-    ===  ==========
+    =====  ==========
+    **t**  (float) Current time.
+    **y**  (ndarray) Current variable values.
+    =====  ==========
 
     .. rubric:: Methods
 
-    ===  ==========
-      a
-      b
-      c
-    ===  ==========
+    =====  ==========
+    **a**
+    **b**
+    **c**
+    =====  ==========
 
     """)
 
