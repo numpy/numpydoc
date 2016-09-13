@@ -209,6 +209,22 @@ b : int
 """
     assert_raises(ValueError, NumpyDocString, doc_text)
 
+
+def test_section_twice():
+    doc_text = """
+Test having a section Notes twice
+
+Notes
+-----
+See the next note for more information
+
+Notes
+-----
+That should break...
+"""
+    assert_raises(ValueError, NumpyDocString, doc_text)
+
+
 def test_notes():
     assert doc['Notes'][0].startswith('Instead')
     assert doc['Notes'][-1].endswith('definite.')
