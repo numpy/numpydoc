@@ -37,8 +37,33 @@ else:
     sixu = lambda s: unicode(s, 'unicode_escape')
 
 
-def mangle_docstrings(app, what, name, obj, options, lines,
+def rename_references(app, what, name, obj, options, lines,
                       reference_offset=[0]):
+    # replace reference numbers so that there are no duplicates
+    references = []
+    for line in lines:
+        line = line.strip()
+        m = re.match(sixu('^.. \\[(%s)\\]') % app.config.numpydoc_citation_re,
+                     line, re.I)
+        if m:
+            references.append(m.group(1))
+
+    if references:
+        for i, line in enumerate(lines):
+            for r in references:
+                if re.match(sixu('^\\d+$'), r):
+                    new_r = sixu("R%d") % (reference_offset[0] + int(r))
+                else:
+                    new_r = sixu("%s%d") % (r, reference_offset[0])
+                lines[i] = lines[i].replace(sixu('[%s]_') % r,
+                                            sixu('[%s]_') % new_r)
+                lines[i] = lines[i].replace(sixu('.. [%s]') % r,
+                                            sixu('.. [%s]') % new_r)
+
+    reference_offset[0] += len(references)
+
+
+def mangle_docstrings(app, what, name, obj, options, lines):
 
     cfg = {'use_plots': app.config.numpydoc_use_plots,
            'show_class_members': app.config.numpydoc_show_class_members,
@@ -70,29 +95,9 @@ def mangle_docstrings(app, what, name, obj, options, lines,
         lines += [sixu('    %s') % x for x in
                   (app.config.numpydoc_edit_link % v).split("\n")]
 
-    # replace reference numbers so that there are no duplicates
-    references = []
-    for line in lines:
-        line = line.strip()
-        m = re.match(sixu('^.. \\[([a-z0-9_.-])\\]'), line, re.I)
-        if m:
-            references.append(m.group(1))
-
-    # start renaming from the longest string, to avoid overwriting parts
-    references.sort(key=lambda x: -len(x))
-    if references:
-        for i, line in enumerate(lines):
-            for r in references:
-                if re.match(sixu('^\\d+$'), r):
-                    new_r = sixu("R%d") % (reference_offset[0] + int(r))
-                else:
-                    new_r = sixu("%s%d") % (r, reference_offset[0])
-                lines[i] = lines[i].replace(sixu('[%s]_') % r,
-                                            sixu('[%s]_') % new_r)
-                lines[i] = lines[i].replace(sixu('.. [%s]') % r,
-                                            sixu('.. [%s]') % new_r)
-
-    reference_offset[0] += len(references)
+    # call function to replace reference numbers so that there are no
+    # duplicates
+    rename_references(app, what, name, obj, options, lines)
 
 
 def mangle_signature(app, what, name, obj, options, sig, retann):
@@ -129,6 +134,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_show_class_members', True, True)
     app.add_config_value('numpydoc_show_inherited_class_members', True, True)
     app.add_config_value('numpydoc_class_members_toctree', True, True)
+    app.add_config_value('numpydoc_citation_re', '[a-z0-9_.-]+', True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
