@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 
 import sys
+import re
 
 from distutils.command.sdist import sdist
 import setuptools
@@ -9,7 +10,9 @@ from distutils.core import setup
 if sys.version_info[:2] < (2, 6) or (3, 0) <= sys.version_info[0:2] < (3, 3):
     raise RuntimeError("Python version 2.6, 2.7 or >= 3.3 required.")
 
-version = "0.6.0"
+versionsrc = open('numpydoc/_version.py', "rt").read()
+version = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                    versionsrc, re.M).group(1)
 
 setup(
     name="numpydoc",
