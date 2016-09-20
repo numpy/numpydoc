@@ -327,7 +327,7 @@ class NumpyDocString(collections.Mapping):
             if not section.startswith('..'):
                 section = (s.capitalize() for s in section.split(' '))
                 section = ' '.join(section)
-                if self[section]:
+                if self.get(section):
                     msg = ("The section %s appears twice in the docstring." %
                            section)
                     raise ValueError(msg)
