@@ -140,7 +140,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_domain(NumpyPythonDomain)
     app.add_domain(NumpyCDomain)
     
-    metadata = {'parallel_read_safe': True}
+    metadata = {'parallel_read_safe': True, 'parallel_write_safe': True}
     return metadata
 
 # ------------------------------------------------------------------------------
