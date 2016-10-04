@@ -9,6 +9,7 @@ import re
 import pydoc
 from warnings import warn
 import collections
+import copy
 import sys
 
 
@@ -97,30 +98,32 @@ class ParseError(Exception):
 
 
 class NumpyDocString(collections.Mapping):
+    sections = {
+        'Signature': '',
+        'Summary': [''],
+        'Extended Summary': [],
+        'Parameters': [],
+        'Returns': [],
+        'Yields': [],
+        'Raises': [],
+        'Warns': [],
+        'Other Parameters': [],
+        'Attributes': [],
+        'Methods': [],
+        'See Also': [],
+        'Notes': [],
+        'Warnings': [],
+        'References': '',
+        'Examples': '',
+        'index': {}
+    }
+
     def __init__(self, docstring, config={}):
         orig_docstring = docstring
         docstring = textwrap.dedent(docstring).split('\n')
 
         self._doc = Reader(docstring)
-        self._parsed_data = {
-            'Signature': '',
-            'Summary': [''],
-            'Extended Summary': [],
-            'Parameters': [],
-            'Returns': [],
-            'Yields': [],
-            'Raises': [],
-            'Warns': [],
-            'Other Parameters': [],
-            'Attributes': [],
-            'Methods': [],
-            'See Also': [],
-            'Notes': [],
-            'Warnings': [],
-            'References': '',
-            'Examples': '',
-            'index': {}
-            }
+        self._parsed_data = copy.deepcopy(self.sections)
 
         try:
             self._parse()
