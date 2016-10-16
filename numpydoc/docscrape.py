@@ -128,8 +128,8 @@ class NumpyDocString(collections.Mapping):
         'See Also': [],
         'Notes': [],
         'Warnings': [],
-        'References': '',
-        'Examples': '',
+        'References': [],
+        'Examples': [],
         'index': {}
     }
 
@@ -365,8 +365,6 @@ class NumpyDocString(collections.Mapping):
                 existing_content = self.get(section, [])
                 if existing_content:
                     existing_content += ['']
-                else:
-                    existing_content = []
                 self[section] = existing_content + content
 
     def _error_location(self, msg, error=True):
