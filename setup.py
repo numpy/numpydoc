@@ -9,7 +9,11 @@ from distutils.core import setup
 if sys.version_info[:2] < (2, 6) or (3, 0) <= sys.version_info[0:2] < (3, 3):
     raise RuntimeError("Python version 2.6, 2.7 or >= 3.3 required.")
 
-version = "0.6.0"
+with open('numpydoc/__init__.py') as fid:
+    for line in fid:
+        if line.startswith('__version__'):
+            version = line.strip().split()[-1][1:-1]
+            break
 
 setup(
     name="numpydoc",
