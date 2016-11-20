@@ -2,6 +2,9 @@
 from __future__ import division, absolute_import, print_function
 
 import sys, textwrap
+import io
+
+import jinja2
 
 from numpydoc.docscrape import NumpyDocString, FunctionDoc, ClassDoc
 from numpydoc.docscrape_sphinx import SphinxDocString, SphinxClassDoc
@@ -248,11 +251,8 @@ def non_blank_line_by_line_compare(a,b):
     b = textwrap.dedent(b)
     a = [l.rstrip() for l in a.split('\n') if l.strip()]
     b = [l.rstrip() for l in b.split('\n') if l.strip()]
-    for n,line in enumerate(a):
-        if not line == b[n]:
-            raise AssertionError("Lines %s of a and b differ: "
-                                 "\n>>> %s\n<<< %s\n" %
-                                 (n,line,b[n]))
+    assert_list_equal(a, b)
+
 def test_str():
     # doc_txt has the order of Notes and See Also sections flipped.
     # This should be handled automatically, and so, one thing this test does
@@ -923,6 +923,29 @@ def test_class_members_doc_sphinx():
     =====  ==========
 
     """)
+
+def test_templated_sections():
+    doc = SphinxClassDoc(None, class_doc_txt,
+                         config={'template': jinja2.Template('{{examples}}{{parameters}}')})
+    non_blank_line_by_line_compare(str(doc),
+    """
+    .. rubric:: Examples
+
+    For usage examples, see `ode`.
+
+
+    :Parameters:
+
+        **f** : callable ``f(t, y, *f_args)``
+
+            Aaa.
+
+        **jac** : callable ``jac(t, y, *jac_args)``
+
+            Bbb.
+
+    """)
+
 
 if __name__ == "__main__":
     import nose
