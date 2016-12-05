@@ -6,8 +6,8 @@ from distutils.command.sdist import sdist
 import setuptools
 from distutils.core import setup
 
-if sys.version_info[:2] < (2, 6) or (3, 0) <= sys.version_info[0:2] < (3, 3):
-    raise RuntimeError("Python version 2.6, 2.7 or >= 3.3 required.")
+if sys.version_info[:2] < (2, 7) or (3, 0) <= sys.version_info[0:2] < (3, 4):
+    raise RuntimeError("Python version 2.7 or >= 3.4 required.")
 
 with open('numpydoc/__init__.py') as fid:
     for line in fid:
@@ -27,12 +27,11 @@ setup(
                  "Topic :: Documentation",
                  "Programming Language :: Python",
                  "Programming Language :: Python :: 2",
-                 "Programming Language :: Python :: 2.6",
                  "Programming Language :: Python :: 2.7",
                  "Programming Language :: Python :: 3",
-                 "Programming Language :: Python :: 3.3",
                  "Programming Language :: Python :: 3.4",
-                 "Programming Language :: Python :: 3.5"],
+                 "Programming Language :: Python :: 3.5",
+                 "Programming Language :: Python :: 3.6"],
     keywords="sphinx numpy",
     author="Pauli Virtanen and others",
     author_email="pav@iki.fi",
