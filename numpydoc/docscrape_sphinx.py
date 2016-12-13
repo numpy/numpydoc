@@ -126,6 +126,9 @@ class SphinxDocString(NumpyDocString):
                     others.append((param, param_type, desc))
 
             if autosum:
+                out += ['.. currentmodule:: '
+                        + self._obj.__module__ + '.' + self._obj.__name__]
+                out += []
                 out += ['.. autosummary::']
                 if self.class_members_toctree:
                     out += ['   :toctree:']
