@@ -904,6 +904,8 @@ def test_class_members_doc_sphinx():
 
     .. rubric:: Attributes
 
+    .. currentmodule:: test_docscrape.Foo
+
     .. autosummary::
        :toctree:
 
