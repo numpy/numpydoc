@@ -77,7 +77,8 @@ def mangle_docstrings(app, what, name, obj, options, lines):
         title_re = re.compile(sixu(pattern), re.I | re.S)
         lines[:] = title_re.sub(sixu(''), u_NL.join(lines)).split(u_NL)
     else:
-        doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg)
+        doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg,
+                             builder=app.builder)
         if sys.version_info[0] >= 3:
             doc = str(doc)
         else:

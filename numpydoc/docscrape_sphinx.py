@@ -5,8 +5,13 @@ import re
 import inspect
 import textwrap
 import pydoc
-import sphinx
 import collections
+import os
+
+from jinja2 import FileSystemLoader
+from jinja2.sandbox import SandboxedEnvironment
+import sphinx
+from sphinx.jinja2glue import BuiltinTemplateLoader
 
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
 
@@ -24,6 +29,12 @@ class SphinxDocString(NumpyDocString):
     def load_config(self, config):
         self.use_plots = config.get('use_plots', False)
         self.class_members_toctree = config.get('class_members_toctree', True)
+        self.template = config.get('template', None)
+        if self.template is None:
+            template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
+            template_loader = FileSystemLoader(template_dirs)
+            template_env = SandboxedEnvironment(loader=template_loader)
+            self.template = template_env.get_template('numpydoc_docstring.rst')
 
     # string conversion routines
     def _str_header(self, name, symbol='`'):
@@ -223,25 +234,29 @@ class SphinxDocString(NumpyDocString):
             return self._str_section('Examples')
 
     def __str__(self, indent=0, func_role="obj"):
-        out = []
-        out += self._str_signature()
-        out += self._str_index() + ['']
-        out += self._str_summary()
-        out += self._str_extended_summary()
-        out += self._str_param_list('Parameters')
-        out += self._str_returns('Returns')
-        out += self._str_returns('Yields')
-        for param_list in ('Other Parameters', 'Raises', 'Warns'):
-            out += self._str_param_list(param_list)
-        out += self._str_warnings()
-        out += self._str_see_also(func_role)
-        out += self._str_section('Notes')
-        out += self._str_references()
-        out += self._str_examples()
-        for param_list in ('Attributes', 'Methods'):
-            out += self._str_member_list(param_list)
-        out = self._str_indent(out, indent)
-        return '\n'.join(out)
+        ns = {
+            'signature':  self._str_signature(),
+            'index': self._str_index(),
+            'summary': self._str_summary(),
+            'extended_summary': self._str_extended_summary(),
+            'parameters': self._str_param_list('Parameters'),
+            'returns': self._str_returns('Returns'),
+            'yields': self._str_returns('Yields'),
+            'other_parameters': self._str_param_list('Other Parameters'),
+            'raises': self._str_param_list('Raises'),
+            'warns': self._str_param_list('Warns'),
+            'warnings': self._str_warnings(),
+            'see_also': self._str_see_also(func_role),
+            'notes': self._str_section('Notes'),
+            'references': self._str_references(),
+            'examples': self._str_examples(),
+            'attributes': self._str_member_list('Attributes'),
+            'methods': self._str_member_list('Methods'),
+        }
+        ns = dict((k, '\n'.join(v)) for k, v in ns.items())
+
+        rendered = self.template.render(**ns)
+        return '\n'.join(self._str_indent(rendered.split('\n'), indent))
 
 
 class SphinxFunctionDoc(SphinxDocString, FunctionDoc):
@@ -263,7 +278,7 @@ class SphinxObjDoc(SphinxDocString):
         SphinxDocString.__init__(self, doc, config=config)
 
 
-def get_doc_object(obj, what=None, doc=None, config={}):
+def get_doc_object(obj, what=None, doc=None, config={}, builder=None):
     if what is None:
         if inspect.isclass(obj):
             what = 'class'
@@ -273,6 +288,16 @@ def get_doc_object(obj, what=None, doc=None, config={}):
             what = 'function'
         else:
             what = 'object'
+
+    template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
+    if builder is not None:
+        template_loader = BuiltinTemplateLoader()
+        template_loader.init(builder, dirs=template_dirs)
+    else:
+        template_loader = FileSystemLoader(template_dirs)
+    template_env = SandboxedEnvironment(loader=template_loader)
+    config['template'] = template_env.get_template('numpydoc_docstring.rst')
+
     if what == 'class':
         return SphinxClassDoc(obj, func_doc=SphinxFunctionDoc, doc=doc,
                               config=config)
