@@ -38,7 +38,7 @@ setup(
     url="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt",
     license="BSD",
     install_requires=["sphinx >= 1.0.1", 'Jinja2>=2.3'],
-    package_data={'numpydoc': ['tests/test_*.py']},
+    package_data={'numpydoc': ['tests/test_*.py', 'templates/*.rst']},
     test_suite = 'nose.collector',
     cmdclass={"sdist": sdist},
 )
