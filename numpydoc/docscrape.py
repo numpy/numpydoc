@@ -91,7 +91,7 @@ class Reader(object):
 
 class ParseError(Exception):
     def __str__(self):
-        message = self.message
+        message = self.args[0]
         if hasattr(self, 'docstring'):
             message = "%s in %r" % (message, self.docstring)
         return message

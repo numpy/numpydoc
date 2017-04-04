@@ -6,7 +6,12 @@ import io
 
 import jinja2
 
-from numpydoc.docscrape import NumpyDocString, FunctionDoc, ClassDoc
+from numpydoc.docscrape import (
+    NumpyDocString,
+    FunctionDoc,
+    ClassDoc,
+    ParseError
+)
 from numpydoc.docscrape_sphinx import SphinxDocString, SphinxClassDoc
 from nose.tools import *
 
@@ -634,6 +639,23 @@ def test_see_also():
             assert desc == ['some other func over', 'multiple lines']
         elif func == 'class_j':
             assert desc == ['fubar', 'foobar']
+
+
+def test_see_also_parse_error():
+    text = (
+    """
+    z(x,theta)
+
+    See Also
+    --------
+    :func:`~foo`
+    """)
+    with assert_raises(ParseError) as err:
+        NumpyDocString(text)
+    assert_equal(
+        str(r":func:`~foo` is not a item name in '\n    z(x,theta)\n\n    See Also\n    --------\n    :func:`~foo`\n    '"),
+        str(err.exception)
+    )
 
 def test_see_also_print():
     class Dummy(object):
