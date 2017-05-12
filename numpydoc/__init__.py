@@ -1,5 +1,5 @@
 from __future__ import division, absolute_import, print_function
 
-__version__ = '0.6.0'
+from ._version import __version__
 
 from .numpydoc import setup
