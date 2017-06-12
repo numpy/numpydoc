@@ -28,6 +28,8 @@ class SphinxDocString(NumpyDocString):
 
     def load_config(self, config):
         self.use_plots = config.get('use_plots', False)
+        self.plot_examples_re = re.compile(
+            config.get('plot_examples_re', 'import matplotlib'))
         self.class_members_toctree = config.get('class_members_toctree', True)
         self.template = config.get('template', None)
         if self.template is None:
@@ -225,8 +227,8 @@ class SphinxDocString(NumpyDocString):
     def _str_examples(self):
         examples_str = "\n".join(self['Examples'])
 
-        if (self.use_plots and 'import matplotlib' in examples_str
-                and 'plot::' not in examples_str):
+        if (self.use_plots and 'plot::' not in examples_str
+                and self.plot_examples_re.search(examples_str)):
             out = []
             out += self._str_header('Examples')
             out += ['.. plot::', '']
