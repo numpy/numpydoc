@@ -1,8 +1,8 @@
 # -*- encoding:utf-8 -*-
 from __future__ import division, absolute_import, print_function
 
-import sys, textwrap
-import io
+import sys
+import textwrap
 
 import jinja2
 
@@ -12,8 +12,10 @@ from numpydoc.docscrape import (
     ClassDoc,
     ParseError
 )
-from numpydoc.docscrape_sphinx import SphinxDocString, SphinxClassDoc
-from nose.tools import *
+from numpydoc.docscrape_sphinx import (SphinxDocString, SphinxClassDoc,
+                                       SphinxFunctionDoc)
+from nose.tools import (assert_equal, assert_raises, assert_list_equal,
+                        assert_true)
 
 if sys.version_info[0] >= 3:
     sixu = lambda s: s
@@ -231,6 +233,51 @@ Notes
 That should break...
 """
     assert_raises(ValueError, NumpyDocString, doc_text)
+
+    # if we have a numpydoc object, we know where the error came from
+    class Dummy(object):
+        """
+        Dummy class.
+
+        Notes
+        -----
+        First note.
+
+        Notes
+        -----
+        Second note.
+
+        """
+        def spam(self, a, b):
+            """Spam\n\nSpam spam."""
+            pass
+
+        def ham(self, c, d):
+            """Cheese\n\nNo cheese."""
+            pass
+
+    def dummy_func(arg):
+        """
+        Dummy function.
+
+        Notes
+        -----
+        First note.
+
+        Notes
+        -----
+        Second note.
+        """
+
+    try:
+        SphinxClassDoc(Dummy)
+    except ValueError as e:
+        assert_true("test_section_twice.<locals>.Dummy" in str(e))
+
+    try:
+        SphinxFunctionDoc(dummy_func)
+    except ValueError as e:
+        assert_true("test_section_twice.<locals>.dummy_func" in str(e))
 
 
 def test_notes():
@@ -967,6 +1014,8 @@ def test_templated_sections():
             Bbb.
 
     """)
+
+
 
 
 if __name__ == "__main__":
