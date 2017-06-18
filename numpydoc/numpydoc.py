@@ -113,7 +113,6 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
 
     if not hasattr(obj, '__doc__'):
         return
-
     doc = SphinxDocString(pydoc.getdoc(obj))
     sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
     if sig:
