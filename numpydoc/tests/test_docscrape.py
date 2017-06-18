@@ -272,12 +272,16 @@ That should break...
     try:
         SphinxClassDoc(Dummy)
     except ValueError as e:
-        assert_true("test_section_twice.<locals>.Dummy" in str(e))
+        # python 3 version or python 2 version
+        assert_true("test_section_twice.<locals>.Dummy" in str(e)
+                    or 'test_docscrape.Dummy' in str(e))
 
     try:
         SphinxFunctionDoc(dummy_func)
     except ValueError as e:
-        assert_true("test_section_twice.<locals>.dummy_func" in str(e))
+        # python 3 version or python 2 version
+        assert_true("test_section_twice.<locals>.dummy_func" in str(e)
+                    or 'function dummy_func' in str(e))
 
 
 def test_notes():
