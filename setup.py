@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 
 import sys
+import os
 
 from distutils.command.sdist import sdist
 import setuptools
@@ -15,11 +16,23 @@ with open('numpydoc/__init__.py') as fid:
             version = line.strip().split()[-1][1:-1]
             break
 
+def read(fname):
+    """Utility function to get README.rst into long_description.
+
+    ``long_description`` is what ends up on the PyPI front page.
+    """
+    with open(os.path.join(os.path.dirname(__file__), fname)) as f:
+        contents = f.read()
+
+    return contents
+
+
 setup(
     name="numpydoc",
     packages=["numpydoc"],
     version=version,
     description="Sphinx extension to support docstrings in Numpy format",
+    long_description=read('README.rst'),
     # classifiers from http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=["Development Status :: 4 - Beta",
                  "Environment :: Plugins",
