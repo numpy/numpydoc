@@ -136,7 +136,7 @@ class NumpyDocString(collections.Mapping):
 
     def __setitem__(self, key, val):
         if key not in self._parsed_data:
-            warn("Unknown section %s" % key)
+            self._error_location("Unknown section %s" % key, error=False)
         else:
             self._parsed_data[key] = val
 
@@ -331,19 +331,8 @@ class NumpyDocString(collections.Mapping):
                 section = (s.capitalize() for s in section.split(' '))
                 section = ' '.join(section)
                 if self.get(section):
-                    if hasattr(self, '_obj'):
-                        # we know where the docs came from:
-                        try:
-                            filename = inspect.getsourcefile(self._obj)
-                        except TypeError:
-                            filename = None
-                        msg = ("The section %s appears twice in "
-                               "the docstring of %s in %s." %
-                               (section, self._obj, filename))
-                        raise ValueError(msg)
-                    else:
-                        msg = ("The section %s appears twice" % section)
-                        raise ValueError(msg)
+                    self._error_location("The section %s appears twice"
+                                         % section)
 
             if section in ('Parameters', 'Returns', 'Yields', 'Raises',
                            'Warns', 'Other Parameters', 'Attributes',
@@ -355,6 +344,20 @@ class NumpyDocString(collections.Mapping):
                 self['See Also'] = self._parse_see_also(content)
             else:
                 self[section] = content
+
+    def _error_location(self, msg, error=True):
+        if hasattr(self, '_obj'):
+            # we know where the docs came from:
+            try:
+                filename = inspect.getsourcefile(self._obj)
+            except TypeError:
+                filename = None
+            msg = msg + (" in the docstring of %s in %s."
+                         % (self._obj, filename))
+        if error:
+            raise ValueError(msg)
+        else:
+            warn(msg)
 
     # string conversion routines
 

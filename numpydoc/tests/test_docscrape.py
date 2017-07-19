@@ -3,6 +3,7 @@ from __future__ import division, absolute_import, print_function
 
 import sys
 import textwrap
+import warnings
 
 import jinja2
 
@@ -151,12 +152,15 @@ def test_signature():
     assert doc['Signature'].startswith('numpy.multivariate_normal(')
     assert doc['Signature'].endswith('spam=None)')
 
+
 def test_summary():
     assert doc['Summary'][0].startswith('Draw values')
     assert doc['Summary'][-1].endswith('covariance.')
 
+
 def test_extended_summary():
     assert doc['Extended Summary'][0].startswith('The multivariate normal')
+
 
 def test_parameters():
     assert_equal(len(doc['Parameters']), 3)
@@ -167,12 +171,14 @@ def test_parameters():
     assert desc[0].startswith('Covariance matrix')
     assert doc['Parameters'][0][-1][-2] == '   (1+2+3)/3'
 
+
 def test_other_parameters():
     assert_equal(len(doc['Other Parameters']), 1)
     assert_equal([n for n,_,_ in doc['Other Parameters']], ['spam'])
     arg, arg_type, desc = doc['Other Parameters'][0]
     assert_equal(arg_type, 'parrot')
     assert desc[0].startswith('A parrot off its mortal coil')
+
 
 def test_returns():
     assert_equal(len(doc['Returns']), 2)
@@ -188,6 +194,7 @@ def test_returns():
     assert desc[0].startswith('This is not a real')
     assert desc[-1].endswith('anonymous return values.')
 
+
 def test_yields():
     section = doc_yields['Yields']
     assert_equal(len(section), 3)
@@ -199,6 +206,7 @@ def test_yields():
         assert_equal(arg_type, arg_type_)
         assert desc[0].startswith('The number of')
         assert desc[0].endswith(end)
+
 
 def test_returnyield():
     doc_text = """
@@ -289,25 +297,30 @@ def test_notes():
     assert doc['Notes'][-1].endswith('definite.')
     assert_equal(len(doc['Notes']), 17)
 
+
 def test_references():
     assert doc['References'][0].startswith('..')
     assert doc['References'][-1].endswith('2001.')
 
+
 def test_examples():
     assert doc['Examples'][0].startswith('>>>')
     assert doc['Examples'][-1].endswith('True]')
+
 
 def test_index():
     assert_equal(doc['index']['default'], 'random')
     assert_equal(len(doc['index']), 2)
     assert_equal(len(doc['index']['refguide']), 2)
 
-def non_blank_line_by_line_compare(a,b):
+
+def non_blank_line_by_line_compare(a, b):
     a = textwrap.dedent(a)
     b = textwrap.dedent(b)
     a = [l.rstrip() for l in a.split('\n') if l.strip()]
     b = [l.rstrip() for l in b.split('\n') if l.strip()]
     assert_list_equal(a, b)
+
 
 def test_str():
     # doc_txt has the order of Notes and See Also sections flipped.
@@ -595,14 +608,17 @@ doc2 = NumpyDocString("""
         If None, the index is into the flattened array, otherwise along
         the specified axis""")
 
+
 def test_parameters_without_extended_description():
     assert_equal(len(doc2['Parameters']), 2)
+
 
 doc3 = NumpyDocString("""
     my_signature(*params, **kwds)
 
     Return this and that.
     """)
+
 
 def test_escape_stars():
     signature = str(doc3).split('\n')[0]
@@ -614,13 +630,16 @@ def test_escape_stars():
     fdoc = FunctionDoc(func=my_func)
     assert_equal(fdoc['Signature'], 'my_func(a, b, \*\*kwargs)')
 
+
 doc4 = NumpyDocString(
     """a.conj()
 
     Return an array with all complex-valued elements conjugated.""")
 
+
 def test_empty_extended_summary():
     assert_equal(doc4['Extended Summary'], [])
+
 
 doc5 = NumpyDocString(
     """
@@ -637,17 +656,20 @@ doc5 = NumpyDocString(
         If needed
     """)
 
+
 def test_raises():
     assert_equal(len(doc5['Raises']), 1)
     name,_,desc = doc5['Raises'][0]
     assert_equal(name,'LinAlgException')
     assert_equal(desc,['If array is singular.'])
 
+
 def test_warns():
     assert_equal(len(doc5['Warns']), 1)
     name,_,desc = doc5['Warns'][0]
     assert_equal(name,'SomeWarning')
     assert_equal(desc,['If needed'])
+
 
 def test_see_also():
     doc6 = NumpyDocString(
@@ -726,11 +748,44 @@ def test_see_also_print():
     assert('    some relationship' in s)
     assert(':func:`func_d`' in s)
 
+
+def test_unknown_section():
+    doc_text = """
+Test having an unknown section
+
+Mope
+----
+This should be ignored and warned about
+"""
+
+    class BadSection(object):
+        """Class with bad section.
+
+        Nope
+        ----
+        This class has a nope section.
+        """
+        pass
+
+    with warnings.catch_warnings(record=True) as w:
+        NumpyDocString(doc_text)
+        assert len(w) == 1
+        assert "Unknown section Mope" == str(w[0].message)
+
+    with warnings.catch_warnings(record=True) as w:
+        SphinxClassDoc(BadSection)
+        assert len(w) == 1
+        assert_true('test_docscrape.test_unknown_section.<locals>.BadSection'
+                    in str(w[0].message)
+                    or 'test_docscrape.BadSection' in str(w[0].message))
+
+
 doc7 = NumpyDocString("""
 
         Doc starts on second line.
 
         """)
+
 
 def test_empty_first_line():
     assert doc7['Summary'][0].startswith('Doc starts')
@@ -762,6 +817,7 @@ def test_unicode():
     assert isinstance(doc['Summary'][0], str)
     assert doc['Summary'][0] == 'öäöäöäöäöåååå'
 
+
 def test_plot_examples():
     cfg = dict(use_plots=True)
 
@@ -784,6 +840,7 @@ def test_plot_examples():
        plt.show()
     """, config=cfg)
     assert str(doc).count('plot::') == 1, str(doc)
+
 
 def test_class_members():
 
@@ -866,6 +923,7 @@ def test_class_members():
         else:
             assert 'Spammity index' in str(doc), str(doc)
 
+
 def test_duplicate_signature():
     # Duplicate function signatures occur e.g. in ufuncs, when the
     # automatic mechanism adds one, and a more detailed comes from the
@@ -911,6 +969,7 @@ class_doc_txt = """
     For usage examples, see `ode`.
 """
 
+
 def test_class_members_doc():
     doc = ClassDoc(None, class_doc_txt)
     non_blank_line_by_line_compare(str(doc),
@@ -948,6 +1007,7 @@ def test_class_members_doc():
     .. index::
 
     """)
+
 
 def test_class_members_doc_sphinx():
     class Foo:
@@ -997,6 +1057,7 @@ def test_class_members_doc_sphinx():
 
     """)
 
+
 def test_templated_sections():
     doc = SphinxClassDoc(None, class_doc_txt,
                          config={'template': jinja2.Template('{{examples}}{{parameters}}')})
@@ -1018,8 +1079,6 @@ def test_templated_sections():
             Bbb.
 
     """)
-
-
 
 
 if __name__ == "__main__":
