@@ -7,6 +7,10 @@ import textwrap
 import pydoc
 import collections
 import os
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
 
 from jinja2 import FileSystemLoader
 from jinja2.sandbox import SandboxedEnvironment
@@ -19,6 +23,53 @@ if sys.version_info[0] >= 3:
     sixu = lambda s: s
 else:
     sixu = lambda s: unicode(s, 'unicode_escape')
+
+
+def _grid_table_rst(data_rows, header_row=None):
+    """
+    >>> t = _grid_table_rst([['Hello', ['- cells', '- contain', '- blocks']],
+    ...                      ['World', 'Shorter']],
+    ...                     header_row=['Cell 1', 'Cell 2'])
+    >>> print('\\n'.join(t))
+    +--------+-----------+
+    | Cell 1 | Cell 2    |
+    +========+===========+
+    | Hello  | - cells   |
+    |        | - contain |
+    |        | - blocks  |
+    +--------+-----------+
+    | World  | Shorter   |
+    +--------+-----------+
+    """
+    if header_row is not None:
+        rows = [header_row] + data_rows
+    else:
+        rows = data_rows
+
+    rule_idxs = []
+    lines = []
+    for row in rows:
+        # TODO: check equal number of cells per row
+        row = [cell if isinstance(cell, list) else [cell] for cell in row]
+        lines.extend(zip_longest(*row, fillvalue=''))
+        rule_idxs.append(len(lines))
+
+    col_widths = [max(len(l) for l in col) for col in zip(*lines)]
+    fmt = ('| {:<%ds} ' * len(col_widths) + '|') % tuple(col_widths)
+
+    lines = [fmt.format(*line) for line in lines]
+
+    rule = '+%s+' % ('+'.join((w + 2) * '-'  for w in col_widths))
+    if header_row is not None:
+        header_idx = rule_idxs[0]
+    else:
+        header_idx = None
+    rule_idxs.insert(0, 0)
+    for idx in reversed(rule_idxs):
+        lines.insert(idx, (rule if idx is not header_idx
+                           else rule.replace('-', '=')))
+
+    return lines
 
 
 class SphinxDocString(NumpyDocString):
@@ -143,16 +194,12 @@ class SphinxDocString(NumpyDocString):
                 out += [''] + autosum
 
             if others:
-                maxlen_0 = max(3, max([len(x[0]) + 4 for x in others]))
-                hdr = sixu("=") * maxlen_0 + sixu("  ") + sixu("=") * 10
-                fmt = sixu('%%%ds  %%s  ') % (maxlen_0,)
-                out += ['', '', hdr]
+                table = []
                 for param, param_type, desc in others:
-                    desc = sixu(" ").join(x.strip() for x in desc).strip()
                     if param_type:
-                        desc = "(%s) %s" % (param_type, desc)
-                    out += [fmt % ("**" + param.strip() + "**", desc)]
-                out += [hdr]
+                        desc = [param_type, ''] + desc
+                    table.append(["**" + param.strip() + "**", desc])
+                out += ['', ''] + _grid_table_rst(table)
             out += ['']
         return out
 
