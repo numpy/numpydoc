@@ -896,7 +896,10 @@ class_doc_txt = """
     t : float
         Current time.
     y : ndarray
-        Current variable values.
+        Current variable values:
+
+        - foo
+        - bar
     x : float
         Some parameter
 
@@ -933,7 +936,10 @@ def test_class_members_doc():
     t : float
         Current time.
     y : ndarray
-        Current variable values.
+        Current variable values:
+
+        - foo
+        - bar
     x : float
         Some parameter
 
@@ -982,18 +988,28 @@ def test_class_members_doc_sphinx():
 
        x
 
-    =====  ==========
-    **t**  (float) Current time.
-    **y**  (ndarray) Current variable values.
-    =====  ==========
+    +-------+--------------------------+
+    | **t** | float                    |
+    |       |                          |
+    |       | Current time.            |
+    +-------+--------------------------+
+    | **y** | ndarray                  |
+    |       |                          |
+    |       | Current variable values: |
+    |       |                          |
+    |       | - foo                    |
+    |       | - bar                    |
+    +-------+--------------------------+
 
     .. rubric:: Methods
 
-    =====  ==========
-    **a**
-    **b**
-    **c**
-    =====  ==========
+    +-------+--+
+    | **a** |  |
+    +-------+--+
+    | **b** |  |
+    +-------+--+
+    | **c** |  |
+    +-------+--+
 
     """)
 
