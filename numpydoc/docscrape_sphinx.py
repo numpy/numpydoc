@@ -7,7 +7,10 @@ import textwrap
 import pydoc
 import collections
 import os
-from itertools import zip_longest
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
 
 from jinja2 import FileSystemLoader
 from jinja2.sandbox import SandboxedEnvironment
