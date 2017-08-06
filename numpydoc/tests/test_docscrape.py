@@ -17,6 +17,8 @@ from numpydoc.docscrape_sphinx import (SphinxDocString, SphinxClassDoc,
 from nose.tools import (assert_equal, assert_raises, assert_list_equal,
                         assert_true)
 
+assert_list_equal.__self__.maxDiff = None
+
 if sys.version_info[0] >= 3:
     sixu = lambda s: s
 else:
@@ -975,17 +977,21 @@ def test_class_members_doc_sphinx():
 
     For usage examples, see `ode`.
 
-    .. rubric:: Attributes
+    :Attributes:
 
-    .. autosummary::
-       :toctree:
+        **t** : float
+            Current time.
+        **y** : ndarray
+            Current variable values.
+        :obj:`x <x>` : float
+            Test attribute
 
-       x
+    ..
+        HACK to make autogen generate docs:
+        .. autosummary::
+            :toctree:
 
-    =====  ==========
-    **t**  (float) Current time.
-    **y**  (ndarray) Current variable values.
-    =====  ==========
+            x
 
     .. rubric:: Methods
 

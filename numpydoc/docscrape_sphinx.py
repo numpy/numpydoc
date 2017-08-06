@@ -79,21 +79,74 @@ class SphinxDocString(NumpyDocString):
                 out += ['']
         return out
 
-    def _str_param_list(self, name):
+    def _str_param_list(self, name, fake_autosummary=False):
         out = []
         if self[name]:
+            if fake_autosummary:
+                prefix = getattr(self, '_name', '')
+                if prefix:
+                    autosum_prefix = '~%s.' % prefix
+                    link_prefix = '%s.' % prefix
+                else:
+                    autosum_prefix = ''
+                    link_prefix = ''
+                autosum = []
+
             out += self._str_field_list(name)
             out += ['']
             for param, param_type, desc in self[name]:
+                param = param.strip()
+
+                display_param = '**%s**' % param
+
+                if fake_autosummary:
+                    param_obj = getattr(self._obj, param, None)
+                    if not (callable(param_obj)
+                            or isinstance(param_obj, property)
+                            or inspect.isgetsetdescriptor(param_obj)):
+                        param_obj = None
+                    obj_doc = pydoc.getdoc(param_obj)
+
+                    if param_obj and (obj_doc or not desc):
+                        # Referenced object has a docstring
+                        autosum += ["    %s%s" % (autosum_prefix, param)]
+                        # TODO: add signature to display as in autosummary
+                        #       Difficult because autosummary's processing
+                        #       involves sphinx's plugin mechanism, for
+                        #       directives only
+                        display_param = ':obj:`%s <%s%s>`' % (param,
+                                                              link_prefix,
+                                                              param)
+                        if obj_doc:
+                            # Overwrite desc. Take summary logic of autosummary
+                            desc = re.split('\n\s*\n', obj_doc.strip(), 1)[0]
+                            # XXX: Should this have DOTALL?
+                            #      It does not in autosummary
+                            m = re.search(r"^([A-Z].*?\.)(?:\s|$)", desc)
+                            if m:
+                                desc = m.group(1).strip()
+                            else:
+                                desc = desc.partition('\n')[0]
+                            desc = desc.split('\n')
+
                 if param_type:
-                    out += self._str_indent(['**%s** : %s' % (param.strip(),
-                                                              param_type)])
+                    out += self._str_indent(['%s : %s' % (display_param,
+                                                          param_type)])
                 else:
-                    out += self._str_indent(['**%s**' % param.strip()])
+                    out += self._str_indent([display_param])
                 if desc:
                     out += ['']
                     out += self._str_indent(desc, 8)
                 out += ['']
+
+            if fake_autosummary and autosum:
+                if self.class_members_toctree:
+                    autosum.insert(0, '    :toctree:')
+                autosum.insert(0, '.. autosummary::')
+                out += ['..', '    HACK to make autogen generate docs:']
+                out += self._str_indent(autosum, 4)
+                out += ['']
+
         return out
 
     @property
@@ -250,7 +303,8 @@ class SphinxDocString(NumpyDocString):
             'notes': self._str_section('Notes'),
             'references': self._str_references(),
             'examples': self._str_examples(),
-            'attributes': self._str_member_list('Attributes'),
+            'attributes': self._str_param_list('Attributes',
+                                               fake_autosummary=True),
             'methods': self._str_member_list('Methods'),
         }
         ns = dict((k, '\n'.join(v)) for k, v in ns.items())
