@@ -899,8 +899,17 @@ class_doc_txt = """
         Current time.
     y : ndarray
         Current variable values.
-    x : float
-        Some parameter
+
+        * hello
+        * world
+    an_attribute : float
+        The docstring is printed instead
+    no_docstring : str
+        But a description
+    no_docstring2 : str
+    multiline_sentence
+    midword_period
+    no_period
 
     Methods
     -------
@@ -936,8 +945,17 @@ def test_class_members_doc():
         Current time.
     y : ndarray
         Current variable values.
-    x : float
-        Some parameter
+
+        * hello
+        * world
+    an_attribute : float
+        The docstring is printed instead
+    no_docstring : str
+        But a description
+    no_docstring2 : str
+    multiline_sentence
+    midword_period
+    no_period
 
     Methods
     -------
@@ -954,8 +972,36 @@ def test_class_members_doc():
 def test_class_members_doc_sphinx():
     class Foo:
         @property
-        def x(self):
+        def an_attribute(self):
             """Test attribute"""
+            return None
+
+        @property
+        def no_docstring(self):
+            return None
+
+        @property
+        def no_docstring2(self):
+            return None
+
+        @property
+        def multiline_sentence(self):
+            """This is a
+            sentence. It spans multiple lines."""
+            return None
+
+        @property
+        def midword_period(self):
+            """The sentence for numpy.org."""
+            return None
+
+        @property
+        def no_period(self):
+            """This does not have a period
+            so we truncate its summary to the first linebreak
+
+            Apparently.
+            """
             return None
 
     doc = SphinxClassDoc(Foo, class_doc_txt)
@@ -983,15 +1029,30 @@ def test_class_members_doc_sphinx():
             Current time.
         **y** : ndarray
             Current variable values.
-        :obj:`x <x>` : float
+
+            * hello
+            * world
+        :obj:`an_attribute <an_attribute>` : float
             Test attribute
+        **no_docstring** : str
+            But a description
+        **no_docstring2** : str
+        :obj:`multiline_sentence <multiline_sentence>`
+            This is a sentence.
+        :obj:`midword_period <midword_period>`
+            The sentence for numpy.org.
+        :obj:`no_period <no_period>`
+            This does not have a period
 
     ..
         HACK to make autogen generate docs:
         .. autosummary::
             :toctree:
 
-            x
+            an_attribute
+            multiline_sentence
+            midword_period
+            no_period
 
     .. rubric:: Methods
 

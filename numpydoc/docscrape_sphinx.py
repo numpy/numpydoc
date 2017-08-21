@@ -107,7 +107,7 @@ class SphinxDocString(NumpyDocString):
                         param_obj = None
                     obj_doc = pydoc.getdoc(param_obj)
 
-                    if param_obj and (obj_doc or not desc):
+                    if param_obj and obj_doc:
                         # Referenced object has a docstring
                         autosum += ["    %s%s" % (autosum_prefix, param)]
                         # TODO: add signature to display as in autosummary
@@ -122,7 +122,8 @@ class SphinxDocString(NumpyDocString):
                             desc = re.split('\n\s*\n', obj_doc.strip(), 1)[0]
                             # XXX: Should this have DOTALL?
                             #      It does not in autosummary
-                            m = re.search(r"^([A-Z].*?\.)(?:\s|$)", desc)
+                            m = re.search(r"^([A-Z].*?\.)(?:\s|$)",
+                                          ' '.join(desc.split()))
                             if m:
                                 desc = m.group(1).strip()
                             else:
@@ -183,7 +184,7 @@ class SphinxDocString(NumpyDocString):
                         or inspect.isgetsetdescriptor(param_obj)):
                     param_obj = None
 
-                if param_obj and (pydoc.getdoc(param_obj) or not desc):
+                if param_obj and pydoc.getdoc(param_obj):
                     # Referenced object has a docstring
                     autosum += ["   %s%s" % (prefix, param)]
                 else:
