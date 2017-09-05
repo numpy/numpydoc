@@ -20,6 +20,10 @@ The following options can be set in your Sphinx ``conf.py``:
 numpydoc_use_plots : bool
   Whether to produce ``plot::`` directives for Examples sections that
   contain ``import matplotlib``.
+numpydoc_use_blockqutoes : bool
+  Until version 0.8, parameter definitions were shown as blockquotes, rather
+  than in a definition list.  If your styling requires blockquotes, switch
+  this config option to True.  This option will be removed in version 0.10.
 numpydoc_show_class_members : bool
   Whether to show all members of a class in the Methods and Attributes
   sections automatically.

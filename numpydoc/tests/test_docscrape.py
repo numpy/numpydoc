@@ -468,28 +468,24 @@ of the one-dimensional normal distribution to higher dimensions.
 
 :Parameters:
 
-    **mean** : (N,) ndarray
-
+    mean : (N,) ndarray
         Mean of the N-dimensional distribution.
 
         .. math::
 
            (1+2+3)/3
 
-    **cov** : (N, N) ndarray
-
+    cov : (N, N) ndarray
         Covariance matrix of the distribution.
 
-    **shape** : tuple of ints
-
+    shape : tuple of ints
         Given a shape of, for example, (m,n,k), m*n*k samples are
         generated, and packed in an m-by-n-by-k arrangement.  Because
         each sample is N-dimensional, the output shape is (m,n,k,N).
 
 :Returns:
 
-    **out** : ndarray
-
+    out : ndarray
         The drawn samples, arranged according to `shape`.  If the
         shape given is (m,n,...), then the shape of `out` is is
         (m,n,...,N).
@@ -498,26 +494,22 @@ of the one-dimensional normal distribution to higher dimensions.
         value drawn from the distribution.
 
     list of str
-
         This is not a real return value.  It exists to test
         anonymous return values.
 
 :Other Parameters:
 
-    **spam** : parrot
-
+    spam : parrot
         A parrot off its mortal coil.
 
 :Raises:
 
-    **RuntimeError**
-
+    RuntimeError
         Some error
 
 :Warns:
 
-    **RuntimeWarning**
-
+    RuntimeWarning
         Some warning
 
 .. warning::
@@ -585,16 +577,13 @@ def test_sphinx_yields_str():
 
 :Yields:
 
-    **a** : int
-
+    a : int
         The number of apples.
 
-    **b** : int
-
+    b : int
         The number of bananas.
 
     int
-
         The number of unknowns.
 """)
 
@@ -1071,12 +1060,10 @@ def test_class_members_doc_sphinx():
 
     :Parameters:
 
-        **f** : callable ``f(t, y, *f_args)``
-
+        f : callable ``f(t, y, *f_args)``
             Aaa.
 
-        **jac** : callable ``jac(t, y, *jac_args)``
-
+        jac : callable ``jac(t, y, *jac_args)``
             Bbb.
 
     .. rubric:: Examples
@@ -1137,12 +1124,10 @@ def test_templated_sections():
 
     :Parameters:
 
-        **f** : callable ``f(t, y, *f_args)``
-
+        f : callable ``f(t, y, *f_args)``
             Aaa.
 
-        **jac** : callable ``jac(t, y, *jac_args)``
-
+        jac : callable ``jac(t, y, *jac_args)``
             Bbb.
 
     """)

@@ -28,6 +28,7 @@ class SphinxDocString(NumpyDocString):
 
     def load_config(self, config):
         self.use_plots = config.get('use_plots', False)
+        self.use_blockquotes = config.get('use_blockquotes', False)
         self.class_members_toctree = config.get('class_members_toctree', True)
         self.template = config.get('template', None)
         if self.template is None:
@@ -63,18 +64,26 @@ class SphinxDocString(NumpyDocString):
         return self['Extended Summary'] + ['']
 
     def _str_returns(self, name='Returns'):
+        if self.use_blockquotes:
+            typed_fmt = '**%s** : %s'
+            untyped_fmt = '**%s**'
+        else:
+            typed_fmt = '%s : %s'
+            untyped_fmt = '%s'
+
         out = []
         if self[name]:
             out += self._str_field_list(name)
             out += ['']
             for param, param_type, desc in self[name]:
                 if param_type:
-                    out += self._str_indent(['**%s** : %s' % (param.strip(),
-                                                              param_type)])
+                    out += self._str_indent([typed_fmt % (param.strip(),
+                                                          param_type)])
                 else:
-                    out += self._str_indent([param.strip()])
+                    out += self._str_indent([untyped_fmt % param.strip()])
                 if desc:
-                    out += ['']
+                    if self.use_blockquotes:
+                        out += ['']
                     out += self._str_indent(desc, 8)
                 out += ['']
         return out
@@ -117,7 +126,7 @@ class SphinxDocString(NumpyDocString):
         relies on Sphinx's plugin mechanism.
         """
         param = param.strip()
-        display_param = '**%s**' % param
+        display_param = ('**%s**' if self.use_blockquotes else '%s') % param
 
         if autosum is None:
             return display_param, desc
@@ -197,7 +206,8 @@ class SphinxDocString(NumpyDocString):
                 else:
                     out += self._str_indent([display_param])
                 if desc:
-                    out += ['']  # produces a blockquote, rather than a dt/dd
+                    if self.use_blockquotes:
+                        out += ['']
                     out += self._str_indent(desc, 8)
                 out += ['']
 
