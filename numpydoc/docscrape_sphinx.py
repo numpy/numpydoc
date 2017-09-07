@@ -89,7 +89,8 @@ class SphinxDocString(NumpyDocString):
         param : str
             The name of the parameter
         desc : list of str
-            The parameter description as given in the docstring
+            The parameter description as given in the docstring. This is
+            ignored when autosummary logic applies.
         autosum : list or None
             If a list, autosummary-style behaviour will apply for params
             that are attributes of the class and have a docstring.
@@ -152,6 +153,25 @@ class SphinxDocString(NumpyDocString):
         return display_param, desc
 
     def _str_param_list(self, name, fake_autosummary=False):
+        """Generate RST for a listing of parameters or similar
+
+        Parameter names are displayed as bold text, and descriptions
+        are in blockquotes.  Descriptions may therefore contain block
+        markup as well.
+
+        Parameters
+        ----------
+        name : str
+            Section name (e.g. Parameters)
+        fake_autosummary : bool
+            When True, the parameter names may correspond to attributes of the
+            object beign documented, usually ``property`` instances on a class.
+            In this case, names will be linked to fuller descriptions.
+
+        Returns
+        -------
+        rst : list of str
+        """
         out = []
         if self[name]:
             if fake_autosummary:
@@ -170,7 +190,7 @@ class SphinxDocString(NumpyDocString):
                 else:
                     out += self._str_indent([display_param])
                 if desc:
-                    out += ['']
+                    out += ['']  # produces a blockquote, rather than a dt/dd
                     out += self._str_indent(desc, 8)
                 out += ['']
 
