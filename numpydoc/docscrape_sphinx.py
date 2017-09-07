@@ -108,6 +108,13 @@ class SphinxDocString(NumpyDocString):
             ``desc``, if ``autosum is None`` or ``param`` is not a class
             attribute, or it will be a summary of the class attribute's
             docstring.
+
+        Notes
+        -----
+        This does not have the autosummary functionality to display a method's
+        signature, and hence is not used to format methods.  It may be
+        complicated to incorporate autosummary's signature mangling, as it
+        relies on Sphinx's plugin mechanism.
         """
         param = param.strip()
         display_param = '**%s**' % param
