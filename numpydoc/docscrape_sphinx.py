@@ -79,56 +79,90 @@ class SphinxDocString(NumpyDocString):
                 out += ['']
         return out
 
+    def _process_param(self, param, desc, autosum):
+        """Determine how to display a parameter
+
+        Emulates autosummary behavior if autosum is not None.
+
+        Parameters
+        ----------
+        param : str
+            The name of the parameter
+        desc : list of str
+            The parameter description as given in the docstring
+        autosum : list or None
+            If a list, autosummary-style behaviour will apply for params
+            that are attributes of the class and have a docstring.
+            Names for autosummary generation will be appended to this list.
+
+            If None, autosummary is disabled.
+
+        Returns
+        -------
+        display_param : str
+            The marked up parameter name for display. This may include a link
+            to the corresponding attribute's own documentation.
+        desc : list of str
+            A list of description lines. This may be identical to the input
+            ``desc``, if ``autosum is None`` or ``param`` is not a class
+            attribute, or it will be a summary of the class attribute's
+            docstring.
+        """
+        param = param.strip()
+        display_param = '**%s**' % param
+
+        if autosum is None:
+            return display_param, desc
+
+        param_obj = getattr(self._obj, param, None)
+        if not (callable(param_obj)
+                or isinstance(param_obj, property)
+                or inspect.isgetsetdescriptor(param_obj)):
+            param_obj = None
+        obj_doc = pydoc.getdoc(param_obj)
+
+        if not (param_obj and obj_doc):
+            return display_param, desc
+
+        prefix = getattr(self, '_name', '')
+        if prefix:
+            autosum_prefix = '~%s.' % prefix
+            link_prefix = '%s.' % prefix
+        else:
+            autosum_prefix = ''
+            link_prefix = ''
+
+        # Referenced object has a docstring
+        autosum.append("    %s%s" % (autosum_prefix, param))
+        display_param = ':obj:`%s <%s%s>`' % (param,
+                                              link_prefix,
+                                              param)
+        if obj_doc:
+            # Overwrite desc. Take summary logic of autosummary
+            desc = re.split('\n\s*\n', obj_doc.strip(), 1)[0]
+            # XXX: Should this have DOTALL?
+            #      It does not in autosummary
+            m = re.search(r"^([A-Z].*?\.)(?:\s|$)",
+                          ' '.join(desc.split()))
+            if m:
+                desc = m.group(1).strip()
+            else:
+                desc = desc.partition('\n')[0]
+            desc = desc.split('\n')
+        return display_param, desc
+
     def _str_param_list(self, name, fake_autosummary=False):
         out = []
         if self[name]:
             if fake_autosummary:
-                prefix = getattr(self, '_name', '')
-                if prefix:
-                    autosum_prefix = '~%s.' % prefix
-                    link_prefix = '%s.' % prefix
-                else:
-                    autosum_prefix = ''
-                    link_prefix = ''
                 autosum = []
+            else:
+                autosum = None
 
             out += self._str_field_list(name)
             out += ['']
             for param, param_type, desc in self[name]:
-                param = param.strip()
-
-                display_param = '**%s**' % param
-
-                if fake_autosummary:
-                    param_obj = getattr(self._obj, param, None)
-                    if not (callable(param_obj)
-                            or isinstance(param_obj, property)
-                            or inspect.isgetsetdescriptor(param_obj)):
-                        param_obj = None
-                    obj_doc = pydoc.getdoc(param_obj)
-
-                    if param_obj and obj_doc:
-                        # Referenced object has a docstring
-                        autosum += ["    %s%s" % (autosum_prefix, param)]
-                        # TODO: add signature to display as in autosummary
-                        #       Difficult because autosummary's processing
-                        #       involves sphinx's plugin mechanism, for
-                        #       directives only
-                        display_param = ':obj:`%s <%s%s>`' % (param,
-                                                              link_prefix,
-                                                              param)
-                        if obj_doc:
-                            # Overwrite desc. Take summary logic of autosummary
-                            desc = re.split('\n\s*\n', obj_doc.strip(), 1)[0]
-                            # XXX: Should this have DOTALL?
-                            #      It does not in autosummary
-                            m = re.search(r"^([A-Z].*?\.)(?:\s|$)",
-                                          ' '.join(desc.split()))
-                            if m:
-                                desc = m.group(1).strip()
-                            else:
-                                desc = desc.partition('\n')[0]
-                            desc = desc.split('\n')
+                display_param, desc = self._process_param(param, desc, autosum)
 
                 if param_type:
                     out += self._str_indent(['%s : %s' % (display_param,
