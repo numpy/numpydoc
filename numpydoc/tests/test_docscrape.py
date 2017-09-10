@@ -787,6 +787,20 @@ def test_plot_examples():
     """, config=cfg)
     assert str(doc).count('plot::') == 1, str(doc)
 
+    # test alternate plot_examples_re
+    cfg = dict(use_plots=True,
+               plot_examples_re='from matplotlib import pyplot as plt')
+
+    doc = SphinxDocString("""
+    Examples
+    --------
+    >>> from matplotlib import pyplot as plt
+    >>> plt.plot([1,2,3],[4,5,6])
+    >>> plt.show()
+    """, config=cfg)
+    assert 'plot::' in str(doc), str(doc)
+
+
 def test_class_members():
 
     class Dummy(object):

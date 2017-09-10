@@ -39,7 +39,12 @@ The following options can be set in conf.py:
 - numpydoc_use_plots: bool
 
   Whether to produce ``plot::`` directives for Examples sections that
-  contain ``import matplotlib``.
+  match `numpydoc_plot_examples_re`.
+
+- numpydoc_plot_examples_re : str
+
+  The regular expression used to match Examples sections containing plots.
+  ``'import matplotlib'`` by default.
 
 - numpydoc_show_class_members: bool
 
