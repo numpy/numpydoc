@@ -665,21 +665,23 @@ def test_see_also():
     func_f, func_g, :meth:`func_h`, func_j,
     func_k
     :obj:`baz.obj_q`
+    :obj:`~baz.obj_r`
     :class:`class_j`: fubar
         foobar
     """)
 
-    assert len(doc6['See Also']) == 12
+    assert len(doc6['See Also']) == 13
     for func, desc, role in doc6['See Also']:
         if func in ('func_a', 'func_b', 'func_c', 'func_f',
-                    'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q'):
+                    'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q',
+                    '~baz.obj_r'):
             assert(not desc)
         else:
             assert(desc)
 
         if func == 'func_h':
             assert role == 'meth'
-        elif func == 'baz.obj_q':
+        elif func == 'baz.obj_q' or func == '~baz.obj_r':
             assert role == 'obj'
         elif func == 'class_j':
             assert role == 'class'
