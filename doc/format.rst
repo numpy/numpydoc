@@ -12,7 +12,7 @@ the numpydoc extension for `Sphinx <http://sphinx-doc.org/>`__.
 
 .. Note::
 
-   For an accompanying example, see :ref:`example.py`.
+   For an accompanying example, see :ref:`example.py <example>`.
 
    Some features described in this document require a recent version of
    ``numpydoc``. For example, the **Yields** section was added in
