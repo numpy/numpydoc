@@ -20,3 +20,7 @@ script:
     cd dist
     pip install numpydoc* -v
   - nosetests numpydoc
+  - |
+    cd doc
+    make html
+    make latexpdf
