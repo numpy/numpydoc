@@ -27,7 +27,7 @@ The following extensions are available:
     directive. Note that this implementation may still undergo severe
     changes or eventually be deprecated.
 
-See `numpydoc docstring guide <https://numpydoc.readthedocs.io/latest/en/format.html>`_
+See `numpydoc docstring guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_
 for how to write docs that use this extension, and the `user guide <https://numpydoc.readthedocs.io>`_
 
 Numpydoc inserts a hook into Sphinx's autodoc that converts docstrings
