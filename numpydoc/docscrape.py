@@ -98,6 +98,12 @@ class ParseError(Exception):
 
 
 class NumpyDocString(collections.Mapping):
+    """Parses a numpydoc string to an abstract representation
+
+    Instances define a mapping from section title to structured data.
+
+    """
+
     sections = {
         'Signature': '',
         'Summary': [''],
