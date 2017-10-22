@@ -1,6 +1,12 @@
 .. image:: https://travis-ci.org/numpy/numpydoc.png?branch=master
    :target: https://travis-ci.org/numpy/numpydoc/
 
+.. |docs| image:: https://readthedocs.org/projects/numpydoc/badge/?version=latest
+   :alt: Documentation Status
+   :scale: 100%
+   :target: https://numpydoc.readthedocs.io/en/latest/?badge=latest
+
+
 =====================================
 numpydoc -- Numpy's Sphinx extensions
 =====================================
@@ -21,45 +27,8 @@ The following extensions are available:
     directive. Note that this implementation may still undergo severe
     changes or eventually be deprecated.
 
-See `A Guide to NumPy/SciPy Documentation <https://github.com/numpy/numpydoc/blob/master/doc/format.rst>`_
-for how to write docs that use this extension.
-
-
-numpydoc
-========
+See `numpydoc docstring guide <https://numpydoc.readthedocs.io/latest/en/format.html>`_
+for how to write docs that use this extension, and the `user guide <https://numpydoc.readthedocs.io>`_
 
 Numpydoc inserts a hook into Sphinx's autodoc that converts docstrings
 following the Numpy/Scipy format to a form palatable to Sphinx.
-
-Options
--------
-
-The following options can be set in conf.py:
-
-- numpydoc_use_plots: bool
-
-  Whether to produce ``plot::`` directives for Examples sections that
-  contain ``import matplotlib``.
-
-- numpydoc_show_class_members: bool
-
-  Whether to show all members of a class in the Methods and Attributes
-  sections automatically.
-  ``True`` by default.
-
-- numpydoc_show_inherited_class_members: bool
-
-  Whether to show all inherited members of a class in the Methods and Attributes
-  sections automatically. If it's false, inherited members won't shown.
-  ``True`` by default.
-
-- numpydoc_class_members_toctree: bool
-
-  Whether to create a Sphinx table of contents for the lists of class
-  methods and attributes. If a table of contents is made, Sphinx expects
-  each entry to have a separate page.
-  ``True`` by default.
-
-- numpydoc_edit_link: bool  (DEPRECATED -- edit your HTML template instead)
-
-  Whether to insert an edit link after docstrings.
