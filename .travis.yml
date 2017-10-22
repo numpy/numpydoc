@@ -21,6 +21,6 @@ script:
     pip install numpydoc* -v
   - nosetests numpydoc
   - |
-    cd doc
+    cd ../doc
     make html
     make latexpdf
