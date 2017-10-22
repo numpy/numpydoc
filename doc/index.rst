@@ -1,6 +1,3 @@
-.. image:: https://travis-ci.org/numpy/numpydoc.png?branch=master
-   :target: https://travis-ci.org/numpy/numpydoc/
-
 =====================================
 numpydoc -- Numpy's Sphinx extensions
 =====================================
@@ -12,6 +9,11 @@ of them in third-party projects.
 The ``numpydoc`` extension provides support for the Numpy docstring format in
 Sphinx, and adds the code description directives ``np:function``,
 ``np-c:function``, etc.  that support the Numpy docstring syntax.
+
+- Development: https://github.com/numpy/numpydoc/
+- Documentation: https://numpydoc.readthedocs.org/
+- PyPI: https://pypi.python.org/pypi/numpydoc/
+
 
 Documentation
 =============
