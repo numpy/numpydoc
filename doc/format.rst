@@ -597,6 +597,24 @@ Other points to keep in mind
   (i.e. scalar types, sequence types), those arguments can be documented
   with type `array_like`.
 
+* Links : If you need to include hyperlinks in your docstring, note that
+  some docstring sections are not parsed as standard reST, and in these
+  sections, numpydoc may become confused by hyperlink targets such as::
+
+      .. _Example: http://www.example.com
+
+  If the Sphinx build issues a warning of the form
+  ``WARNING: Unknown target name: "example"``, then that is what is happening.
+  There are two possible workarounds.  First, the inline form can be used::
+
+      `Example <http://www.example.com>`_
+
+  Second, the hyperlink target can be placed in a section that *is* parsed
+  as standard reST, such as **Notes**.  The inline form is recommended, since
+  it is more likely to "just work", and not require trial-and-error
+  experimentation with target placement.
+
+
 Common reST concepts
 --------------------
 For paragraphs, indentation is significant and indicates indentation in the
