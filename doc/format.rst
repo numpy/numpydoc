@@ -605,14 +605,9 @@ Other points to keep in mind
 
   If the Sphinx build issues a warning of the form
   ``WARNING: Unknown target name: "example"``, then that is what is happening.
-  There are two possible workarounds.  First, the inline form can be used::
+  To avoid this problem, use the inline hyperlink form::
 
       `Example <http://www.example.com>`_
-
-  Second, the hyperlink target can be placed in a section that *is* parsed
-  as standard reST, such as **Notes**.  The inline form is recommended, since
-  it is more likely to "just work", and not require trial-and-error
-  experimentation with target placement.
 
 
 Common reST concepts
