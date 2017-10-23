@@ -22,8 +22,8 @@ else:
 
 
 class SphinxDocString(NumpyDocString):
-    def __init__(self, docstring, config={}):
-        NumpyDocString.__init__(self, docstring, config=config)
+    def __init__(self, docstring, obj_info, config={}):
+        NumpyDocString.__init__(self, docstring, obj_info, config=config)
         self.load_config(config)
 
     def load_config(self, config):
@@ -245,7 +245,7 @@ class SphinxDocString(NumpyDocString):
                         or inspect.isgetsetdescriptor(param_obj)):
                     param_obj = None
 
-                if param_obj and pydoc.getdoc(param_obj):
+                if param_obj and (pydoc.getdoc(param_obj) or not desc):
                     # Referenced object has a docstring
                     autosum += ["   %s%s" % (prefix, param)]
                 else:
@@ -376,25 +376,29 @@ class SphinxDocString(NumpyDocString):
 
 
 class SphinxFunctionDoc(SphinxDocString, FunctionDoc):
-    def __init__(self, obj, doc=None, config={}):
+    def __init__(self, obj, doc=None, config={}, name=''):
         self.load_config(config)
-        FunctionDoc.__init__(self, obj, doc=doc, config=config)
+        FunctionDoc.__init__(self, obj, doc=doc, config=config,
+                             funcname=name)
 
 
 class SphinxClassDoc(SphinxDocString, ClassDoc):
-    def __init__(self, obj, doc=None, func_doc=None, config={}):
+    def __init__(self, obj, doc=None, func_doc=None, config={}, name=''):
         self.load_config(config)
-        ClassDoc.__init__(self, obj, doc=doc, func_doc=None, config=config)
+        ClassDoc.__init__(self, obj, doc=doc, func_doc=func_doc, config=config,
+                          modulename=name)
 
 
 class SphinxObjDoc(SphinxDocString):
-    def __init__(self, obj, doc=None, config={}):
+    def __init__(self, obj, doc=None, config={}, name=''):
         self._f = obj
         self.load_config(config)
-        SphinxDocString.__init__(self, doc, config=config)
+        module = getattr(obj, '__module__', None)
+        qualname = getattr(obj, '__qualname__', name)
+        SphinxDocString.__init__(self, doc, (module, qualname), config=config)
 
 
-def get_doc_object(obj, what=None, doc=None, config={}, builder=None):
+def get_doc_object(obj, what=None, doc=None, config={}, builder=None, name=None):
     if what is None:
         if inspect.isclass(obj):
             what = 'class'
@@ -416,10 +420,10 @@ def get_doc_object(obj, what=None, doc=None, config={}, builder=None):
 
     if what == 'class':
         return SphinxClassDoc(obj, func_doc=SphinxFunctionDoc, doc=doc,
-                              config=config)
+                              config=config, name=name)
     elif what in ('function', 'method'):
-        return SphinxFunctionDoc(obj, doc=doc, config=config)
+        return SphinxFunctionDoc(obj, doc=doc, config=config, name=name)
     else:
         if doc is None:
             doc = pydoc.getdoc(obj)
-        return SphinxObjDoc(obj, doc, config=config)
+        return SphinxObjDoc(obj, doc, config=config, name=name)

@@ -124,10 +124,11 @@ class NumpyDocString(collections.Mapping):
         'index': {}
     }
 
-    def __init__(self, docstring, config={}):
+    def __init__(self, docstring, obj_info, config={}):
         orig_docstring = docstring
         docstring = textwrap.dedent(docstring).split('\n')
 
+        self._module, self._name = obj_info
         self._doc = Reader(docstring)
         self._parsed_data = copy.deepcopy(self.sections)
 
@@ -337,9 +338,8 @@ class NumpyDocString(collections.Mapping):
                 section = (s.capitalize() for s in section.split(' '))
                 section = ' '.join(section)
                 if self.get(section):
-                    self._error_location("The section %s appears twice"
-                                         % section)
-
+                    self._error_location("The section {} appears twice"
+                                         .format(section))
             if section in ('Parameters', 'Returns', 'Yields', 'Raises',
                            'Warns', 'Other Parameters', 'Attributes',
                            'Methods'):
@@ -352,14 +352,8 @@ class NumpyDocString(collections.Mapping):
                 self[section] = content
 
     def _error_location(self, msg, error=True):
-        if hasattr(self, '_obj'):
-            # we know where the docs came from:
-            try:
-                filename = inspect.getsourcefile(self._obj)
-            except TypeError:
-                filename = None
-            msg = msg + (" in the docstring of %s in %s."
-                         % (self._obj, filename))
+        msg = msg + (" in the docstring of {} in {}."
+                     .format(self._name, self._module))
         if error:
             raise ValueError(msg)
         else:
@@ -487,7 +481,7 @@ def header(text, style='-'):
 
 
 class FunctionDoc(NumpyDocString):
-    def __init__(self, func, role='func', doc=None, config={}):
+    def __init__(self, func, role='func', doc=None, config={}, funcname=''):
         self._f = func
         self._role = role  # e.g. "func" or "meth"
 
@@ -495,7 +489,10 @@ class FunctionDoc(NumpyDocString):
             if func is None:
                 raise ValueError("No function or docstring given")
             doc = inspect.getdoc(func) or ''
-        NumpyDocString.__init__(self, doc)
+
+        module = getattr(func, '__module__', None)
+        qualname = getattr(func, '__qualname__', funcname)
+        NumpyDocString.__init__(self, doc, (module, qualname))
 
         if not self['Signature'] and func is not None:
             func, func_name = self.get_func()
@@ -563,7 +560,9 @@ class ClassDoc(NumpyDocString):
                 raise ValueError("No class or documentation string given")
             doc = pydoc.getdoc(cls)
 
-        NumpyDocString.__init__(self, doc)
+        module = getattr(cls, '__module__', None)
+        qualname = getattr(cls, '__qualname__', modulename)
+        NumpyDocString.__init__(self, doc, (module, qualname))
 
         if config.get('show_class_members', True):
             def splitlines_x(s):

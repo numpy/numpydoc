@@ -78,7 +78,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
         lines[:] = title_re.sub(sixu(''), u_NL.join(lines)).split(u_NL)
     else:
         doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg,
-                             builder=app.builder)
+                             builder=app.builder, name=name)
         if sys.version_info[0] >= 3:
             doc = str(doc)
         else:
@@ -113,7 +113,10 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
 
     if not hasattr(obj, '__doc__'):
         return
-    doc = SphinxDocString(pydoc.getdoc(obj))
+
+    module = getattr(obj, '__module__', None)
+    qualname = getattr(obj, '__qualname__', name)
+    doc = SphinxDocString(pydoc.getdoc(obj), (module, qualname))
     sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
     if sig:
         sig = re.sub(sixu("^[^(]*"), sixu(""), sig)
