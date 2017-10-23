@@ -39,6 +39,6 @@ numpydoc_citation_re : str
   duplication across the documentation.  Defaults
   to ``[\w-]+``.
 numpydoc_edit_link : bool
-  .. deprecated: edit your HTML template instead
+  .. deprecated:: edit your HTML template instead
 
   Whether to insert an edit link after docstrings.
