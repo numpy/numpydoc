@@ -88,7 +88,12 @@ facilitate reading the docstrings in text terminals.
 
 Sections
 --------
-The sections of the docstring are:
+
+The docstring consists of a number of sections separated by headings (except
+for the deprecation warning). Each heading should be underlined in hyphens, and
+the section ordering should be consistent with the description below.
+
+The sections of a function's docstring are:
 
 1. **Short summary**
 
@@ -264,7 +269,16 @@ The sections of the docstring are:
    This section should be used judiciously, i.e., only for errors
    that are non-obvious or have a large chance of getting raised.
 
-9. **See Also**
+9. **Warns**
+
+   An optional section detailing which warnings get raised and
+   under what conditions, formatted similarly to Raises.
+
+10. **Warnings**
+
+   An optional section with cautions to the user in free text/reST.
+
+11. **See Also**
 
    An optional section used to refer to related code.  This section
    can be very useful, but should be used judiciously.  The goal is to
@@ -303,7 +317,7 @@ The sections of the docstring are:
      func_b, func_c_, func_d
      func_e
 
-10. **Notes**
+12. **Notes**
 
     An optional section that provides additional information about the
     code, possibly including a discussion of the algorithm. This
@@ -348,7 +362,7 @@ The sections of the docstring are:
     where filename is a path relative to the reference guide source
     directory.
 
-11. **References**
+13. **References**
 
     References cited in the **notes** section may be listed here,
     e.g. if you cited the article below using the text ``[1]_``,
@@ -373,7 +387,7 @@ The sections of the docstring are:
     should not be required to understand it.  References are numbered, starting
     from one, in the order in which they are cited.
 
-12. **Examples**
+14. **Examples**
 
     An optional section for examples, using the `doctest
     <http://docs.python.org/library/doctest.html>`_ format.
