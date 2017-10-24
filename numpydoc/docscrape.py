@@ -403,7 +403,8 @@ class NumpyDocString(collections.Mapping):
                     out += ['%s : %s' % (param, param_type)]
                 else:
                     out += [param]
-                out += self._str_indent(desc)
+                if desc and ''.join(desc).strip():
+                    out += self._str_indent(desc)
             out += ['']
         return out
 

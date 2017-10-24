@@ -285,7 +285,6 @@ class SphinxDocString(NumpyDocString):
         out = []
         if self[name]:
             out += self._str_header(name)
-            out += ['']
             content = textwrap.dedent("\n".join(self[name])).split("\n")
             out += content
             out += ['']
@@ -304,6 +303,7 @@ class SphinxDocString(NumpyDocString):
         if self['Warnings']:
             out = ['.. warning::', '']
             out += self._str_indent(self['Warnings'])
+            out += ['']
         return out
 
     def _str_index(self):
@@ -320,6 +320,7 @@ class SphinxDocString(NumpyDocString):
                 out += ['   single: %s' % (', '.join(references))]
             else:
                 out += ['   %s: %s' % (section, ','.join(references))]
+        out += ['']
         return out
 
     def _str_references(self):

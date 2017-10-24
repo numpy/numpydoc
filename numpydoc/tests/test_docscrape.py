@@ -1,6 +1,7 @@
 # -*- encoding:utf-8 -*-
 from __future__ import division, absolute_import, print_function
 
+import re
 import sys
 import textwrap
 import warnings
@@ -316,11 +317,19 @@ def test_index():
     assert_equal(len(doc['index']['refguide']), 2)
 
 
-def non_blank_line_by_line_compare(a, b):
+def _strip_blank_lines(s):
+    "Remove leading, trailing and multiple blank lines"
+    s = re.sub(r'^\s*\n', '', s)
+    s = re.sub(r'\n\s*$', '', s)
+    s = re.sub(r'\n\s*\n', r'\n\n', s)
+    return s
+
+
+def line_by_line_compare(a, b):
     a = textwrap.dedent(a)
     b = textwrap.dedent(b)
-    a = [l.rstrip() for l in a.split('\n') if l.strip()]
-    b = [l.rstrip() for l in b.split('\n') if l.strip()]
+    a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
+    b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
     assert_list_equal(a, b)
 
 
@@ -328,7 +337,7 @@ def test_str():
     # doc_txt has the order of Notes and See Also sections flipped.
     # This should be handled automatically, and so, one thing this test does
     # is to make sure that See Also precedes Notes in the output.
-    non_blank_line_by_line_compare(str(doc),
+    line_by_line_compare(str(doc),
 """numpy.multivariate_normal(mean, cov, shape=None, spam=None)
 
 Draw values from a multivariate normal distribution with specified
@@ -387,6 +396,7 @@ Certain warnings apply.
 
 See Also
 --------
+
 `some`_, `other`_, `funcs`_
 
 `otherfunc`_
@@ -438,7 +448,7 @@ standard deviation:
 
 
 def test_yield_str():
-    non_blank_line_by_line_compare(str(doc_yields),
+    line_by_line_compare(str(doc_yields),
 """Test generator
 
 Yields
@@ -455,7 +465,7 @@ int
 
 def test_sphinx_str():
     sphinx_doc = SphinxDocString(doc_txt)
-    non_blank_line_by_line_compare(str(sphinx_doc),
+    line_by_line_compare(str(sphinx_doc),
 """
 .. index:: random
    single: random;distributions, random;gauss
@@ -572,7 +582,7 @@ standard deviation:
 
 def test_sphinx_yields_str():
     sphinx_doc = SphinxDocString(doc_yields_txt)
-    non_blank_line_by_line_compare(str(sphinx_doc),
+    line_by_line_compare(str(sphinx_doc),
 """Test generator
 
 :Yields:
@@ -972,7 +982,7 @@ class_doc_txt = """
 
 def test_class_members_doc():
     doc = ClassDoc(None, class_doc_txt)
-    non_blank_line_by_line_compare(str(doc),
+    line_by_line_compare(str(doc),
     """
     Foo
 
@@ -1008,9 +1018,7 @@ def test_class_members_doc():
     Methods
     -------
     a
-
     b
-
     c
 
     .. index::
@@ -1054,7 +1062,7 @@ def test_class_members_doc_sphinx():
             return None
 
     doc = SphinxClassDoc(Foo, class_doc_txt)
-    non_blank_line_by_line_compare(str(doc),
+    line_by_line_compare(str(doc),
     """
     Foo
 
@@ -1072,22 +1080,29 @@ def test_class_members_doc_sphinx():
 
     :Attributes:
 
-        **t** : float
+        t : float
             Current time.
-        **y** : ndarray
+
+        y : ndarray
             Current variable values.
 
             * hello
             * world
+
         :obj:`an_attribute <an_attribute>` : float
             Test attribute
-        **no_docstring** : str
+
+        no_docstring : str
             But a description
-        **no_docstring2** : str
+
+        no_docstring2 : str
+
         :obj:`multiline_sentence <multiline_sentence>`
             This is a sentence.
+
         :obj:`midword_period <midword_period>`
             The sentence for numpy.org.
+
         :obj:`no_period <no_period>`
             This does not have a period
 
@@ -1095,7 +1110,6 @@ def test_class_members_doc_sphinx():
         HACK to make autogen generate docs:
         .. autosummary::
             :toctree:
-
             an_attribute
             multiline_sentence
             midword_period
@@ -1114,13 +1128,12 @@ def test_class_members_doc_sphinx():
 
 def test_templated_sections():
     doc = SphinxClassDoc(None, class_doc_txt,
-                         config={'template': jinja2.Template('{{examples}}{{parameters}}')})
-    non_blank_line_by_line_compare(str(doc),
+                         config={'template': jinja2.Template('{{examples}}\n{{parameters}}')})
+    line_by_line_compare(str(doc),
     """
     .. rubric:: Examples
 
     For usage examples, see `ode`.
-
 
     :Parameters:
 
