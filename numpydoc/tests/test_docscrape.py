@@ -172,7 +172,7 @@ def test_parameters():
     arg, arg_type, desc = doc['Parameters'][1]
     assert_equal(arg_type, '(N, N) ndarray')
     assert desc[0].startswith('Covariance matrix')
-    assert doc['Parameters'][0][-1][-2] == '   (1+2+3)/3'
+    assert doc['Parameters'][0][-1][-1] == '   (1+2+3)/3'
 
 
 def test_other_parameters():
@@ -354,7 +354,6 @@ mean : (N,) ndarray
     .. math::
 
        (1+2+3)/3
-
 cov : (N, N) ndarray
     Covariance matrix of the distribution.
 shape : tuple of ints
@@ -948,6 +947,7 @@ class_doc_txt = """
     f : callable ``f(t, y, *f_args)``
         Aaa.
     jac : callable ``jac(t, y, *jac_args)``
+
         Bbb.
 
     Attributes
