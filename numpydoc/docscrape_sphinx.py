@@ -340,7 +340,7 @@ class SphinxDocString(NumpyDocString):
     def _str_examples(self):
         examples_str = "\n".join(self['Examples'])
 
-        if (self.use_plots and IMPORT_MATPLOTLIB_RE.search(examples_str)
+        if (self.use_plots and re.search(IMPORT_MATPLOTLIB_RE, examples_str)
                 and 'plot::' not in examples_str):
             out = []
             out += self._str_header('Examples')
