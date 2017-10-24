@@ -842,6 +842,46 @@ def test_plot_examples():
     assert str(doc).count('plot::') == 1, str(doc)
 
 
+def test_use_blockquotes():
+    cfg = dict(use_blockquotes=True)
+    doc = SphinxDocString("""
+    Parameters
+    ----------
+    abc : def
+        ghi
+    jkl
+        mno
+
+    Returns
+    -------
+    ABC : DEF
+        GHI
+    JKL
+        MNO
+    """, config=cfg)
+    line_by_line_compare(str(doc), '''
+    :Parameters:
+
+        **abc** : def
+
+            ghi
+
+        **jkl**
+
+            mno
+
+    :Returns:
+
+        **ABC** : DEF
+
+            GHI
+
+        **JKL**
+
+            MNO
+    ''')
+
+
 def test_class_members():
 
     class Dummy(object):
