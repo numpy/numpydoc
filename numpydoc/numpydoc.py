@@ -29,6 +29,7 @@ if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
 
 from .docscrape_sphinx import get_doc_object, SphinxDocString
+from . import __version__
 
 if sys.version_info[0] >= 3:
     sixu = lambda s: s
@@ -140,7 +141,8 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_domain(NumpyPythonDomain)
     app.add_domain(NumpyCDomain)
 
-    metadata = {'parallel_read_safe': True}
+    metadata = {'version': __version__,
+                'parallel_read_safe': True}
     return metadata
 
 # ------------------------------------------------------------------------------
