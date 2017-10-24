@@ -4,13 +4,13 @@ import sys
 import os
 
 from distutils.command.sdist import sdist
-import setuptools
 from distutils.core import setup
+
+from numpydoc import __version__ as version
 
 if sys.version_info[:2] < (2, 7) or (3, 0) <= sys.version_info[0:2] < (3, 4):
     raise RuntimeError("Python version 2.7 or >= 3.4 required.")
 
-from numpydoc import __version__ as version
 
 def read(fname):
     """Utility function to get README.rst into long_description.
