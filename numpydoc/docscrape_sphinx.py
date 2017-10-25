@@ -22,8 +22,9 @@ else:
 
 
 class SphinxDocString(NumpyDocString):
-    def __init__(self, docstring, obj_info, config={}):
-        NumpyDocString.__init__(self, docstring, obj_info, config=config)
+    def __init__(self, docstring, config={}, obj_info=(None, None)):
+        NumpyDocString.__init__(self, docstring, config=config,
+                                obj_info=obj_info)
         self.load_config(config)
 
     def load_config(self, config):
@@ -245,7 +246,7 @@ class SphinxDocString(NumpyDocString):
                         or inspect.isgetsetdescriptor(param_obj)):
                     param_obj = None
 
-                if param_obj and (pydoc.getdoc(param_obj) or not desc):
+                if param_obj and pydoc.getdoc(param_obj):
                     # Referenced object has a docstring
                     autosum += ["   %s%s" % (prefix, param)]
                 else:
@@ -395,7 +396,8 @@ class SphinxObjDoc(SphinxDocString):
         self.load_config(config)
         module = getattr(obj, '__module__', None)
         qualname = getattr(obj, '__qualname__', name)
-        SphinxDocString.__init__(self, doc, (module, qualname), config=config)
+        SphinxDocString.__init__(self, doc, config=config,
+                                 obj_info=(module, qualname))
 
 
 def get_doc_object(obj, what=None, doc=None, config={}, builder=None, name=None):

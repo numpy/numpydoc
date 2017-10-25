@@ -124,7 +124,7 @@ class NumpyDocString(collections.Mapping):
         'index': {}
     }
 
-    def __init__(self, docstring, obj_info, config={}):
+    def __init__(self, docstring, config={}, obj_info=(None, None)):
         orig_docstring = docstring
         docstring = textwrap.dedent(docstring).split('\n')
 
@@ -492,7 +492,7 @@ class FunctionDoc(NumpyDocString):
 
         module = getattr(func, '__module__', None)
         qualname = getattr(func, '__qualname__', funcname)
-        NumpyDocString.__init__(self, doc, (module, qualname))
+        NumpyDocString.__init__(self, doc, obj_info=(module, qualname))
 
         if not self['Signature'] and func is not None:
             func, func_name = self.get_func()
@@ -562,7 +562,7 @@ class ClassDoc(NumpyDocString):
 
         module = getattr(cls, '__module__', None)
         qualname = getattr(cls, '__qualname__', modulename)
-        NumpyDocString.__init__(self, doc, (module, qualname))
+        NumpyDocString.__init__(self, doc, obj_info=(module, qualname))
 
         if config.get('show_class_members', True):
             def splitlines_x(s):

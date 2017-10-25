@@ -116,7 +116,7 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
 
     module = getattr(obj, '__module__', None)
     qualname = getattr(obj, '__qualname__', name)
-    doc = SphinxDocString(pydoc.getdoc(obj), (module, qualname))
+    doc = SphinxDocString(pydoc.getdoc(obj), obj_info=(module, qualname))
     sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
     if sig:
         sig = re.sub(sixu("^[^(]*"), sixu(""), sig)
