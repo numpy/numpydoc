@@ -39,27 +39,28 @@ else:
 def rename_references(app, what, name, obj, options, lines,
                       reference_offset=[0]):
     # replace reference numbers so that there are no duplicates
-    references = []
+    references = set()
     for line in lines:
         line = line.strip()
         m = re.match(sixu('^.. \\[(%s)\\]') % app.config.numpydoc_citation_re,
                      line, re.I)
         if m:
-            references.append(m.group(1))
+            references.add(m.group(1))
 
     if references:
-        for i, line in enumerate(lines):
-            for r in references:
-                if re.match(sixu('^\\d+$'), r):
-                    new_r = sixu("R%d") % (reference_offset[0] + int(r))
-                else:
-                    new_r = sixu("%s%d") % (r, reference_offset[0])
+        for r in references:
+            if r.isdigit():
+                new_r = sixu("R%d") % (reference_offset[0] + int(r))
+            else:
+                new_r = sixu("%s%d") % (r, reference_offset[0])
+
+            for i, line in enumerate(lines):
                 lines[i] = lines[i].replace(sixu('[%s]_') % r,
                                             sixu('[%s]_') % new_r)
                 lines[i] = lines[i].replace(sixu('.. [%s]') % r,
                                             sixu('.. [%s]') % new_r)
 
-    reference_offset[0] += len(references)
+        reference_offset[0] += len(references)
 
 
 def mangle_docstrings(app, what, name, obj, options, lines):
