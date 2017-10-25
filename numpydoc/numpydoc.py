@@ -54,6 +54,18 @@ def rename_references(app, what, name, obj, options, lines,
                     new_r = sixu("R%d") % (reference_offset[0] + int(r))
                 else:
                     new_r = sixu("%s%d") % (r, reference_offset[0])
+                # Attempt to preserve *trailing* whitespace, e.g. in grid table
+                if len(r) < len(new_r):
+                    # Now longer: Want to remove now redundant trailing whitespace
+                    pad = " " * (len(new_r) - len(r))
+                    lines[i] = lines[i].replace(sixu('[%s]_%s') % (r, pad),
+                                                sixu('[%s]_') % new_r)
+                elif len(new_r) < len(r):
+                    # Now shorter: Must insert extra trailing whitespace
+                    # (but only if there was trailing whitespace)
+                    pad = " " * (len(r) - len(new_r))
+                    lines[i] = lines[i].replace(sixu('[%s]_ ') % r,
+                                                sixu('[%s]_%s ') % (new_r, pad))
                 lines[i] = lines[i].replace(sixu('[%s]_') % r,
                                             sixu('[%s]_') % new_r)
                 lines[i] = lines[i].replace(sixu('.. [%s]') % r,
