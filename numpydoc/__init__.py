@@ -3,6 +3,6 @@ from __future__ import division, absolute_import, print_function
 __version__ = '0.8.0.dev0'
 
 
-def setup(*args, **kwargs):
+def setup(app, *args, **kwargs):
     from .numpydoc import setup
-    return setup(*args, **kwargs)
+    return setup(app, *args, **kwargs)
