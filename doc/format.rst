@@ -127,12 +127,12 @@ The sections of the docstring are:
 
    * New recommended way of obtaining the same functionality.
 
-   This section should use the note Sphinx directive instead of an
+   This section should use the ``deprecated`` Sphinx directive instead of an
    underlined section header.
 
    ::
 
-     .. note:: Deprecated in NumPy 1.6.0
+     .. deprecated:: 1.6.0
                `ndobj_old` will be removed in NumPy 2.0.0, it is replaced by
                `ndobj_new` because the latter works also with array subclasses.
 
