@@ -21,10 +21,13 @@ from __future__ import division, absolute_import, print_function
 import sys
 import re
 import pydoc
-import sphinx
 import inspect
 import collections
 import hashlib
+
+from docutils.nodes import citation, Text
+import sphinx
+from sphinx.addnodes import pending_xref
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -65,8 +68,6 @@ def rename_references(app, what, name, obj, options, lines):
 
 def relabel_references(app, doc):
     # Change name_ref to ref in label text
-    from docutils.nodes import citation, Text
-    from sphinx.addnodes import pending_xref
     for citation_node in doc.traverse(citation):
         label_node = citation_node[0]
         new_text = Text(citation_node['names'][0].split('-')[-1])
