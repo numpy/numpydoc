@@ -67,7 +67,7 @@ def rename_references(app, what, name, obj, options, lines):
 
 
 def relabel_references(app, doc):
-    # Change name_ref to ref in label text
+    # Change 'hash-ref' to 'ref' in label text
     for citation_node in doc.traverse(citation):
         label_node = citation_node[0]
         new_text = Text(citation_node['names'][0].split('-')[-1])
