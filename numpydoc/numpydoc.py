@@ -81,7 +81,7 @@ def relabel_references(app, doc):
                 return (isinstance(node, pending_xref) and
                         node[0].astext() == '[%s]' % ref_text)
 
-            for xref_node in ref.parent.traverse():
+            for xref_node in ref.parent.traverse(matching_pending_xref):
                 xref_node.replace(xref_node[0], Text('[%s]' % new_text))
             ref.replace(ref_text, new_text.copy())
 
