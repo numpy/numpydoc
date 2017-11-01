@@ -3,6 +3,7 @@ from __future__ import division, print_function
 import sys
 import os
 
+import setuptools  # may monkeypatch distutils in some versions. # noqa
 from distutils.command.sdist import sdist
 from distutils.core import setup
 
