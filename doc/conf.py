@@ -38,6 +38,7 @@ os.environ['MPLBACKEND'] = 'Agg'  # avoid tkinter import errors on rtfd.io
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.pngmath',
@@ -223,7 +224,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('index', '.tex', u'numpydoc Documentation',
+    ('index', 'numpydoc.tex', u'numpydoc Documentation',
      u'Numpydoc maintainers', 'manual'),
 ]
 
