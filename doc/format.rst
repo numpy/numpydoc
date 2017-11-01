@@ -443,6 +443,13 @@ The sections of a function's docstring are:
     ``import matplotlib.pyplot as plt``. All other imports, including the
     demonstrated function, must be explicit.
 
+    When matplotlib is imported in the example, the Example code will be
+    wrapped in `matplotlib's Sphinx `plot` directive
+    <http://matplotlib.org/sampledoc/extensions.html>`_.  When matplotlib is
+    not explicitly imported, `.. plot::` can be used directly if
+    `matplotlib.sphinxext.plot_directive` is loaded as a Sphinx extension in
+    ``conf.py``.
+
 
 Documenting classes
 -------------------
