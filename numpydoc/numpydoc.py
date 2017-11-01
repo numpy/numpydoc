@@ -27,7 +27,7 @@ import hashlib
 
 from docutils.nodes import citation, Text
 import sphinx
-from sphinx.addnodes import pending_xref, desc
+from sphinx.addnodes import pending_xref, desc_content
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -70,7 +70,7 @@ def rename_references(app, what, name, obj, options, lines):
 
 
 def _ascend(node, cls):
-    while not isinstance(node, cls) and node.parent:
+    while node and not isinstance(node, cls):
         node = node.parent
     return node
 
@@ -78,7 +78,7 @@ def _ascend(node, cls):
 def relabel_references(app, doc):
     # Change 'hash-ref' to 'ref' in label text
     for citation_node in doc.traverse(citation):
-        if _ascend(citation_node, desc) is None:
+        if _ascend(citation_node, desc_content) is None:
             # no desc node in ancestry -> not in a docstring
             # XXX: should we also somehow check it's in a References section?
             continue
