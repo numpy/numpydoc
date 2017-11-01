@@ -105,7 +105,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
     # duplicates
     rename_references(app, what, name, obj, options, lines)
 
-    lines += ['..', '    ' + DEDUPLICATION_TAG]
+    lines += ['..', DEDUPLICATION_TAG]
 
 
 def mangle_signature(app, what, name, obj, options, sig, retann):
