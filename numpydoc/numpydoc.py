@@ -63,11 +63,11 @@ def rename_references(app, what, name, obj, options, lines,
         reference_offset[0] += len(references)
 
 
-DEDUPLICATION_TAG = ['..', '    processed by numpydoc']
+DEDUPLICATION_TAG = '    !! processed by numpydoc !!'
 
 
 def mangle_docstrings(app, what, name, obj, options, lines):
-    if lines[-len(DEDUPLICATION_TAG):] == DEDUPLICATION_TAG:
+    if DEDUPLICATION_TAG in lines:
         return
 
     cfg = {'use_plots': app.config.numpydoc_use_plots,
@@ -105,7 +105,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
     # duplicates
     rename_references(app, what, name, obj, options, lines)
 
-    lines += DEDUPLICATION_TAG
+    lines += ['..', '    ' + DEDUPLICATION_TAG]
 
 
 def mangle_signature(app, what, name, obj, options, sig, retann):
