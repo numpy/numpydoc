@@ -19,7 +19,7 @@ The following options can be set in your Sphinx ``conf.py``:
 
 numpydoc_use_plots : bool
   Whether to produce ``plot::`` directives for Examples sections that
-  contain ``import matplotlib``.
+  contain ``import matplotlib`` or ``from matplotlib import``.
 numpydoc_show_class_members : bool
   Whether to show all members of a class in the Methods and Attributes
   sections automatically.

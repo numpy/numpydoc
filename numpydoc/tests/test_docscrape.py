@@ -835,6 +835,15 @@ def test_plot_examples():
     doc = SphinxDocString("""
     Examples
     --------
+    >>> from matplotlib import pyplot as plt
+    >>> plt.plot([1,2,3],[4,5,6])
+    >>> plt.show()
+    """, config=cfg)
+    assert 'plot::' in str(doc), str(doc)
+
+    doc = SphinxDocString("""
+    Examples
+    --------
     .. plot::
 
        import matplotlib.pyplot as plt
