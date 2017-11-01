@@ -27,7 +27,7 @@ import hashlib
 
 from docutils.nodes import citation, Text
 import sphinx
-from sphinx.addnodes import pending_xref
+from sphinx.addnodes import pending_xref, desc
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -38,6 +38,9 @@ if sys.version_info[0] >= 3:
     sixu = lambda s: s
 else:
     sixu = lambda s: unicode(s, 'unicode_escape')
+
+
+HASH_LEN = 12
 
 
 def rename_references(app, what, name, obj, options, lines):
@@ -55,7 +58,7 @@ def rename_references(app, what, name, obj, options, lines):
         # we use a hash to mangle the reference name to avoid invalid names
         sha = hashlib.sha256()
         sha.update(name.encode('utf8'))
-        prefix = 'R' + sha.hexdigest()
+        prefix = 'R' + sha.hexdigest()[:HASH_LEN]
 
         for r in references:
             new_r = prefix + '-' + r
@@ -66,11 +69,23 @@ def rename_references(app, what, name, obj, options, lines):
                                             sixu('.. [%s]') % new_r)
 
 
+def _ascend(node, cls):
+    while not isinstance(node, cls) and node.parent:
+        node = node.parent
+    return node
+
+
 def relabel_references(app, doc):
     # Change 'hash-ref' to 'ref' in label text
     for citation_node in doc.traverse(citation):
+        if _ascend(citation_node, desc) is None:
+            # no desc node in ancestry -> not in a docstring
+            # XXX: should we also somehow check it's in a References section?
+            continue
         label_node = citation_node[0]
-        new_text = Text(citation_node['names'][0].split('-')[-1])
+        prefix, _, new_label = label_node[0].astext().partition('-')
+        assert len(prefix) == HASH_LEN + 1
+        new_text = Text(new_label)
         label_node.replace(label_node[0], new_text)
 
         for id in citation_node['backrefs']:
