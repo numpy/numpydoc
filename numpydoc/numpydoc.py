@@ -71,6 +71,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
         return
 
     cfg = {'use_plots': app.config.numpydoc_use_plots,
+           'use_blockquotes': app.config.numpydoc_use_blockquotes,
            'show_class_members': app.config.numpydoc_show_class_members,
            'show_inherited_class_members':
            app.config.numpydoc_show_inherited_class_members,
@@ -139,6 +140,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.connect('autodoc-process-signature', mangle_signature)
     app.add_config_value('numpydoc_edit_link', None, False)
     app.add_config_value('numpydoc_use_plots', None, False)
+    app.add_config_value('numpydoc_use_blockquotes', None, False)
     app.add_config_value('numpydoc_show_class_members', True, True)
     app.add_config_value('numpydoc_show_inherited_class_members', True, True)
     app.add_config_value('numpydoc_class_members_toctree', True, True)

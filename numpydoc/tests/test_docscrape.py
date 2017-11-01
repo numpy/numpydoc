@@ -1,6 +1,7 @@
 # -*- encoding:utf-8 -*-
 from __future__ import division, absolute_import, print_function
 
+import re
 import sys
 import textwrap
 import warnings
@@ -171,7 +172,7 @@ def test_parameters():
     arg, arg_type, desc = doc['Parameters'][1]
     assert_equal(arg_type, '(N, N) ndarray')
     assert desc[0].startswith('Covariance matrix')
-    assert doc['Parameters'][0][-1][-2] == '   (1+2+3)/3'
+    assert doc['Parameters'][0][-1][-1] == '   (1+2+3)/3'
 
 
 def test_other_parameters():
@@ -316,11 +317,19 @@ def test_index():
     assert_equal(len(doc['index']['refguide']), 2)
 
 
-def non_blank_line_by_line_compare(a, b):
+def _strip_blank_lines(s):
+    "Remove leading, trailing and multiple blank lines"
+    s = re.sub(r'^\s*\n', '', s)
+    s = re.sub(r'\n\s*$', '', s)
+    s = re.sub(r'\n\s*\n', r'\n\n', s)
+    return s
+
+
+def line_by_line_compare(a, b):
     a = textwrap.dedent(a)
     b = textwrap.dedent(b)
-    a = [l.rstrip() for l in a.split('\n') if l.strip()]
-    b = [l.rstrip() for l in b.split('\n') if l.strip()]
+    a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
+    b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
     assert_list_equal(a, b)
 
 
@@ -328,7 +337,7 @@ def test_str():
     # doc_txt has the order of Notes and See Also sections flipped.
     # This should be handled automatically, and so, one thing this test does
     # is to make sure that See Also precedes Notes in the output.
-    non_blank_line_by_line_compare(str(doc),
+    line_by_line_compare(str(doc),
 """numpy.multivariate_normal(mean, cov, shape=None, spam=None)
 
 Draw values from a multivariate normal distribution with specified
@@ -345,7 +354,6 @@ mean : (N,) ndarray
     .. math::
 
        (1+2+3)/3
-
 cov : (N, N) ndarray
     Covariance matrix of the distribution.
 shape : tuple of ints
@@ -387,6 +395,7 @@ Certain warnings apply.
 
 See Also
 --------
+
 `some`_, `other`_, `funcs`_
 
 `otherfunc`_
@@ -438,7 +447,7 @@ standard deviation:
 
 
 def test_yield_str():
-    non_blank_line_by_line_compare(str(doc_yields),
+    line_by_line_compare(str(doc_yields),
 """Test generator
 
 Yields
@@ -455,7 +464,7 @@ int
 
 def test_sphinx_str():
     sphinx_doc = SphinxDocString(doc_txt)
-    non_blank_line_by_line_compare(str(sphinx_doc),
+    line_by_line_compare(str(sphinx_doc),
 """
 .. index:: random
    single: random;distributions, random;gauss
@@ -468,28 +477,24 @@ of the one-dimensional normal distribution to higher dimensions.
 
 :Parameters:
 
-    **mean** : (N,) ndarray
-
+    mean : (N,) ndarray
         Mean of the N-dimensional distribution.
 
         .. math::
 
            (1+2+3)/3
 
-    **cov** : (N, N) ndarray
-
+    cov : (N, N) ndarray
         Covariance matrix of the distribution.
 
-    **shape** : tuple of ints
-
+    shape : tuple of ints
         Given a shape of, for example, (m,n,k), m*n*k samples are
         generated, and packed in an m-by-n-by-k arrangement.  Because
         each sample is N-dimensional, the output shape is (m,n,k,N).
 
 :Returns:
 
-    **out** : ndarray
-
+    out : ndarray
         The drawn samples, arranged according to `shape`.  If the
         shape given is (m,n,...), then the shape of `out` is is
         (m,n,...,N).
@@ -498,26 +503,22 @@ of the one-dimensional normal distribution to higher dimensions.
         value drawn from the distribution.
 
     list of str
-
         This is not a real return value.  It exists to test
         anonymous return values.
 
 :Other Parameters:
 
-    **spam** : parrot
-
+    spam : parrot
         A parrot off its mortal coil.
 
 :Raises:
 
-    **RuntimeError**
-
+    RuntimeError
         Some error
 
 :Warns:
 
-    **RuntimeWarning**
-
+    RuntimeWarning
         Some warning
 
 .. warning::
@@ -580,21 +581,18 @@ standard deviation:
 
 def test_sphinx_yields_str():
     sphinx_doc = SphinxDocString(doc_yields_txt)
-    non_blank_line_by_line_compare(str(sphinx_doc),
+    line_by_line_compare(str(sphinx_doc),
 """Test generator
 
 :Yields:
 
-    **a** : int
-
+    a : int
         The number of apples.
 
-    **b** : int
-
+    b : int
         The number of bananas.
 
     int
-
         The number of unknowns.
 """)
 
@@ -855,6 +853,46 @@ def test_plot_examples():
     assert str(doc).count('plot::') == 1, str(doc)
 
 
+def test_use_blockquotes():
+    cfg = dict(use_blockquotes=True)
+    doc = SphinxDocString("""
+    Parameters
+    ----------
+    abc : def
+        ghi
+    jkl
+        mno
+
+    Returns
+    -------
+    ABC : DEF
+        GHI
+    JKL
+        MNO
+    """, config=cfg)
+    line_by_line_compare(str(doc), '''
+    :Parameters:
+
+        **abc** : def
+
+            ghi
+
+        **jkl**
+
+            mno
+
+    :Returns:
+
+        **ABC** : DEF
+
+            GHI
+
+        **JKL**
+
+            MNO
+    ''')
+
+
 def test_class_members():
 
     class Dummy(object):
@@ -960,6 +998,7 @@ class_doc_txt = """
     f : callable ``f(t, y, *f_args)``
         Aaa.
     jac : callable ``jac(t, y, *jac_args)``
+
         Bbb.
 
     Attributes
@@ -994,7 +1033,7 @@ class_doc_txt = """
 
 def test_class_members_doc():
     doc = ClassDoc(None, class_doc_txt)
-    non_blank_line_by_line_compare(str(doc),
+    line_by_line_compare(str(doc),
     """
     Foo
 
@@ -1030,9 +1069,7 @@ def test_class_members_doc():
     Methods
     -------
     a
-
     b
-
     c
 
     .. index::
@@ -1076,18 +1113,16 @@ def test_class_members_doc_sphinx():
             return None
 
     doc = SphinxClassDoc(Foo, class_doc_txt)
-    non_blank_line_by_line_compare(str(doc),
+    line_by_line_compare(str(doc),
     """
     Foo
 
     :Parameters:
 
-        **f** : callable ``f(t, y, *f_args)``
-
+        f : callable ``f(t, y, *f_args)``
             Aaa.
 
-        **jac** : callable ``jac(t, y, *jac_args)``
-
+        jac : callable ``jac(t, y, *jac_args)``
             Bbb.
 
     .. rubric:: Examples
@@ -1096,22 +1131,29 @@ def test_class_members_doc_sphinx():
 
     :Attributes:
 
-        **t** : float
+        t : float
             Current time.
-        **y** : ndarray
+
+        y : ndarray
             Current variable values.
 
             * hello
             * world
+
         :obj:`an_attribute <an_attribute>` : float
             Test attribute
-        **no_docstring** : str
+
+        no_docstring : str
             But a description
-        **no_docstring2** : str
+
+        no_docstring2 : str
+
         :obj:`multiline_sentence <multiline_sentence>`
             This is a sentence.
+
         :obj:`midword_period <midword_period>`
             The sentence for numpy.org.
+
         :obj:`no_period <no_period>`
             This does not have a period
 
@@ -1128,22 +1170,19 @@ def test_class_members_doc_sphinx():
 
 def test_templated_sections():
     doc = SphinxClassDoc(None, class_doc_txt,
-                         config={'template': jinja2.Template('{{examples}}{{parameters}}')})
-    non_blank_line_by_line_compare(str(doc),
+                         config={'template': jinja2.Template('{{examples}}\n{{parameters}}')})
+    line_by_line_compare(str(doc),
     """
     .. rubric:: Examples
 
     For usage examples, see `ode`.
 
-
     :Parameters:
 
-        **f** : callable ``f(t, y, *f_args)``
-
+        f : callable ``f(t, y, *f_args)``
             Aaa.
 
-        **jac** : callable ``jac(t, y, *jac_args)``
-
+        jac : callable ``jac(t, y, *jac_args)``
             Bbb.
 
     """)

@@ -13,6 +13,15 @@ import copy
 import sys
 
 
+def strip_blank_lines(l):
+    "Remove leading and trailing blank lines from a list of lines"
+    while l and not l[0].strip():
+        del l[0]
+    while l and not l[-1].strip():
+        del l[-1]
+    return l
+
+
 class Reader(object):
     """A line-based string reader.
 
@@ -214,6 +223,7 @@ class NumpyDocString(collections.Mapping):
 
             desc = r.read_to_next_unindented_line()
             desc = dedent_lines(desc)
+            desc = strip_blank_lines(desc)
 
             params.append((arg_name, arg_type, desc))
 
@@ -404,7 +414,8 @@ class NumpyDocString(collections.Mapping):
                     out += ['%s : %s' % (param, param_type)]
                 else:
                     out += [param]
-                out += self._str_indent(desc)
+                if desc and ''.join(desc).strip():
+                    out += self._str_indent(desc)
             out += ['']
         return out
 

@@ -38,6 +38,10 @@ numpydoc_citation_re : str
   should be mangled to avoid conflicts due to
   duplication across the documentation.  Defaults
   to ``[\w-]+``.
+numpydoc_use_blockqutoes : bool
+  Until version 0.8, parameter definitions were shown as blockquotes, rather
+  than in a definition list.  If your styling requires blockquotes, switch
+  this config option to True.  This option will be removed in version 0.10.
 numpydoc_edit_link : bool
   .. deprecated:: edit your HTML template instead
 
