@@ -1104,16 +1104,6 @@ def test_class_members_doc_sphinx():
         :obj:`no_period <no_period>`
             This does not have a period
 
-    ..
-        HACK to make autogen generate docs:
-        .. autosummary::
-            :toctree:
-
-            an_attribute
-            multiline_sentence
-            midword_period
-            no_period
-
     .. rubric:: Methods
 
     =====  ==========
