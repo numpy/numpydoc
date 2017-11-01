@@ -21,6 +21,9 @@ else:
     sixu = lambda s: unicode(s, 'unicode_escape')
 
 
+IMPORT_MATPLOTLIB_RE = r'\b(import +matplotlib|from +matplotlib +import)\b'
+
+
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
         NumpyDocString.__init__(self, docstring, config=config)
@@ -79,10 +82,10 @@ class SphinxDocString(NumpyDocString):
                 out += ['']
         return out
 
-    def _process_param(self, param, desc, autosum):
+    def _process_param(self, param, desc, fake_autosummary):
         """Determine how to display a parameter
 
-        Emulates autosummary behavior if autosum is not None.
+        Emulates autosummary behavior if fake_autosummary
 
         Parameters
         ----------
@@ -91,12 +94,9 @@ class SphinxDocString(NumpyDocString):
         desc : list of str
             The parameter description as given in the docstring. This is
             ignored when autosummary logic applies.
-        autosum : list or None
-            If a list, autosummary-style behaviour will apply for params
+        fake_autosummary : bool
+            If True, autosummary-style behaviour will apply for params
             that are attributes of the class and have a docstring.
-            Names for autosummary generation will be appended to this list.
-
-            If None, autosummary is disabled.
 
         Returns
         -------
@@ -119,7 +119,7 @@ class SphinxDocString(NumpyDocString):
         param = param.strip()
         display_param = '**%s**' % param
 
-        if autosum is None:
+        if not fake_autosummary:
             return display_param, desc
 
         param_obj = getattr(self._obj, param, None)
@@ -141,7 +141,6 @@ class SphinxDocString(NumpyDocString):
             link_prefix = ''
 
         # Referenced object has a docstring
-        autosum.append("    %s%s" % (autosum_prefix, param))
         display_param = ':obj:`%s <%s%s>`' % (param,
                                               link_prefix,
                                               param)
@@ -181,15 +180,11 @@ class SphinxDocString(NumpyDocString):
         """
         out = []
         if self[name]:
-            if fake_autosummary:
-                autosum = []
-            else:
-                autosum = None
-
             out += self._str_field_list(name)
             out += ['']
             for param, param_type, desc in self[name]:
-                display_param, desc = self._process_param(param, desc, autosum)
+                display_param, desc = self._process_param(param, desc,
+                                                          fake_autosummary)
 
                 if param_type:
                     out += self._str_indent(['%s : %s' % (display_param,
@@ -199,14 +194,6 @@ class SphinxDocString(NumpyDocString):
                 if desc:
                     out += ['']  # produces a blockquote, rather than a dt/dd
                     out += self._str_indent(desc, 8)
-                out += ['']
-
-            if fake_autosummary and autosum:
-                if self.class_members_toctree:
-                    autosum.insert(0, '    :toctree:')
-                autosum.insert(0, '.. autosummary::')
-                out += ['..', '    HACK to make autogen generate docs:']
-                out += self._str_indent(autosum, 4)
                 out += ['']
 
         return out
@@ -337,7 +324,7 @@ class SphinxDocString(NumpyDocString):
     def _str_examples(self):
         examples_str = "\n".join(self['Examples'])
 
-        if (self.use_plots and 'import matplotlib' in examples_str
+        if (self.use_plots and re.search(IMPORT_MATPLOTLIB_RE, examples_str)
                 and 'plot::' not in examples_str):
             out = []
             out += self._str_header('Examples')
