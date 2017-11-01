@@ -88,7 +88,12 @@ facilitate reading the docstrings in text terminals.
 
 Sections
 --------
-The sections of the docstring are:
+
+The docstring consists of a number of sections separated by headings (except
+for the deprecation warning). Each heading should be underlined in hyphens, and
+the section ordering should be consistent with the description below.
+
+The sections of a function's docstring are:
 
 1. **Short summary**
 
@@ -127,12 +132,12 @@ The sections of the docstring are:
 
    * New recommended way of obtaining the same functionality.
 
-   This section should use the note Sphinx directive instead of an
+   This section should use the ``deprecated`` Sphinx directive instead of an
    underlined section header.
 
    ::
 
-     .. note:: Deprecated in NumPy 1.6.0
+     .. deprecated:: 1.6.0
                `ndobj_old` will be removed in NumPy 2.0.0, it is replaced by
                `ndobj_new` because the latter works also with array subclasses.
 
@@ -264,7 +269,16 @@ The sections of the docstring are:
    This section should be used judiciously, i.e., only for errors
    that are non-obvious or have a large chance of getting raised.
 
-9. **See Also**
+9. **Warns**
+
+   An optional section detailing which warnings get raised and
+   under what conditions, formatted similarly to Raises.
+
+10. **Warnings**
+
+   An optional section with cautions to the user in free text/reST.
+
+11. **See Also**
 
    An optional section used to refer to related code.  This section
    can be very useful, but should be used judiciously.  The goal is to
@@ -303,7 +317,7 @@ The sections of the docstring are:
      func_b, func_c_, func_d
      func_e
 
-10. **Notes**
+12. **Notes**
 
     An optional section that provides additional information about the
     code, possibly including a discussion of the algorithm. This
@@ -348,7 +362,7 @@ The sections of the docstring are:
     where filename is a path relative to the reference guide source
     directory.
 
-11. **References**
+13. **References**
 
     References cited in the **notes** section may be listed here,
     e.g. if you cited the article below using the text ``[1]_``,
@@ -373,7 +387,7 @@ The sections of the docstring are:
     should not be required to understand it.  References are numbered, starting
     from one, in the order in which they are cited.
 
-12. **Examples**
+14. **Examples**
 
     An optional section for examples, using the `doctest
     <http://docs.python.org/library/doctest.html>`_ format.
@@ -596,6 +610,19 @@ Other points to keep in mind
   a type `ndarray`, but also types that can be converted to an ndarray
   (i.e. scalar types, sequence types), those arguments can be documented
   with type `array_like`.
+
+* Links : If you need to include hyperlinks in your docstring, note that
+  some docstring sections are not parsed as standard reST, and in these
+  sections, numpydoc may become confused by hyperlink targets such as::
+
+      .. _Example: http://www.example.com
+
+  If the Sphinx build issues a warning of the form
+  ``WARNING: Unknown target name: "example"``, then that is what is happening.
+  To avoid this problem, use the inline hyperlink form::
+
+      `Example <http://www.example.com>`_
+
 
 Common reST concepts
 --------------------

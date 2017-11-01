@@ -685,21 +685,23 @@ def test_see_also():
     func_f, func_g, :meth:`func_h`, func_j,
     func_k
     :obj:`baz.obj_q`
+    :obj:`~baz.obj_r`
     :class:`class_j`: fubar
         foobar
     """)
 
-    assert len(doc6['See Also']) == 12
+    assert len(doc6['See Also']) == 13
     for func, desc, role in doc6['See Also']:
         if func in ('func_a', 'func_b', 'func_c', 'func_f',
-                    'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q'):
+                    'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q',
+                    '~baz.obj_r'):
             assert(not desc)
         else:
             assert(desc)
 
         if func == 'func_h':
             assert role == 'meth'
-        elif func == 'baz.obj_q':
+        elif func == 'baz.obj_q' or func == '~baz.obj_r':
             assert role == 'obj'
         elif func == 'class_j':
             assert role == 'class'
@@ -825,6 +827,15 @@ def test_plot_examples():
     Examples
     --------
     >>> import matplotlib.pyplot as plt
+    >>> plt.plot([1,2,3],[4,5,6])
+    >>> plt.show()
+    """, config=cfg)
+    assert 'plot::' in str(doc), str(doc)
+
+    doc = SphinxDocString("""
+    Examples
+    --------
+    >>> from matplotlib import pyplot as plt
     >>> plt.plot([1,2,3],[4,5,6])
     >>> plt.show()
     """, config=cfg)
@@ -1145,15 +1156,6 @@ def test_class_members_doc_sphinx():
 
         :obj:`no_period <no_period>`
             This does not have a period
-
-    ..
-        HACK to make autogen generate docs:
-        .. autosummary::
-            :toctree:
-            an_attribute
-            multiline_sentence
-            midword_period
-            no_period
 
     .. rubric:: Methods
 

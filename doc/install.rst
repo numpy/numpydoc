@@ -19,11 +19,7 @@ The following options can be set in your Sphinx ``conf.py``:
 
 numpydoc_use_plots : bool
   Whether to produce ``plot::`` directives for Examples sections that
-  contain ``import matplotlib``.
-numpydoc_use_blockqutoes : bool
-  Until version 0.8, parameter definitions were shown as blockquotes, rather
-  than in a definition list.  If your styling requires blockquotes, switch
-  this config option to True.  This option will be removed in version 0.10.
+  contain ``import matplotlib`` or ``from matplotlib import``.
 numpydoc_show_class_members : bool
   Whether to show all members of a class in the Methods and Attributes
   sections automatically.
@@ -42,7 +38,11 @@ numpydoc_citation_re : str
   should be mangled to avoid conflicts due to
   duplication across the documentation.  Defaults
   to ``[\w-]+``.
+numpydoc_use_blockqutoes : bool
+  Until version 0.8, parameter definitions were shown as blockquotes, rather
+  than in a definition list.  If your styling requires blockquotes, switch
+  this config option to True.  This option will be removed in version 0.10.
 numpydoc_edit_link : bool
-  .. deprecated: edit your HTML template instead
+  .. deprecated:: edit your HTML template instead
 
   Whether to insert an edit link after docstrings.

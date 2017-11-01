@@ -229,7 +229,8 @@ class NumpyDocString(collections.Mapping):
 
         return params
 
-    _name_rgx = re.compile(r"^\s*(:(?P<role>\w+):`(?P<name>[a-zA-Z0-9_.-]+)`|"
+    _name_rgx = re.compile(r"^\s*(:(?P<role>\w+):"
+                           r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`|"
                            r" (?P<name2>[a-zA-Z0-9_.-]+))\s*", re.X)
 
     def _parse_see_also(self, content):
