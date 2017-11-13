@@ -67,12 +67,8 @@ class SphinxDocString(NumpyDocString):
         return self['Extended Summary'] + ['']
 
     def _str_returns(self, name='Returns'):
-        if self.use_blockquotes:
-            typed_fmt = '**%s** : %s'
-            untyped_fmt = '**%s**'
-        else:
-            typed_fmt = '%s : %s'
-            untyped_fmt = '%s'
+        typed_fmt = '**%s** : %s'
+        untyped_fmt = '**%s**'
 
         out = []
         if self[name]:
@@ -126,7 +122,9 @@ class SphinxDocString(NumpyDocString):
         relies on Sphinx's plugin mechanism.
         """
         param = param.strip()
-        display_param = ('**%s**' if self.use_blockquotes else '%s') % param
+        # XXX: If changing the following, please check the rendering when param
+        # ends with '_', e.g. 'word_'
+        display_param = '**%s**' % param
 
         if not fake_autosummary:
             return display_param, desc
