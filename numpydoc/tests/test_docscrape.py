@@ -1147,6 +1147,7 @@ def test_class_members_doc_sphinx():
             But a description
 
         **no_docstring2** : str
+            ..
 
         :obj:`multiline_sentence <multiline_sentence>`
             This is a sentence.

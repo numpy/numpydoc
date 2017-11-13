@@ -62,6 +62,7 @@ def foo(var1, var2, long_var_name='hi'):
         Explanation of return value named `describe`.
     out : type
         Explanation of `out`.
+    type_without_description
 
     Other Parameters
     ----------------

@@ -198,10 +198,12 @@ class SphinxDocString(NumpyDocString):
                                                           param_type)])
                 else:
                     out += self._str_indent([display_param])
-                if desc:
-                    if self.use_blockquotes:
-                        out += ['']
-                    out += self._str_indent(desc, 8)
+                if desc and self.use_blockquotes:
+                    out += ['']
+                elif not desc:
+                    # empty definition
+                    desc = ['..']
+                out += self._str_indent(desc, 8)
                 out += ['']
 
         return out
