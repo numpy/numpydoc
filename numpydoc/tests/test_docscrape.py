@@ -151,6 +151,25 @@ int
 doc_yields = NumpyDocString(doc_yields_txt)
 
 
+doc_sent_txt = """
+Test generator
+
+Yields
+------
+a : int
+    The number of apples.
+
+Sent
+----
+b : int
+    The number of bananas.
+c : int
+    The number of oranges.
+
+"""
+doc_sent = NumpyDocString(doc_sent_txt)
+
+
 def test_signature():
     assert doc['Signature'].startswith('numpy.multivariate_normal(')
     assert doc['Signature'].endswith('spam=None)')
@@ -209,6 +228,38 @@ def test_yields():
         assert_equal(arg_type, arg_type_)
         assert desc[0].startswith('The number of')
         assert desc[0].endswith(end)
+
+
+def test_sent():
+    section = doc_sent['Sent']
+    assert_equal(len(section), 2)
+    truth = [('b', 'int', 'bananas.'),
+             ('c', 'int', 'oranges.')]
+    for (arg, arg_type, desc), (arg_, arg_type_, end) in zip(section, truth):
+        assert_equal(arg, arg_)
+        assert_equal(arg_type, arg_type_)
+        assert desc[0].startswith('The number of')
+        assert desc[0].endswith(end)
+
+
+def test_returnyield():
+    doc_text = """
+Test having returns and yields.
+
+Returns
+-------
+int
+    The number of apples.
+
+Yields
+------
+a : int
+    The number of apples.
+b : int
+    The number of bananas.
+
+"""
+    assert_raises(ValueError, NumpyDocString, doc_text)
 
 
 def test_returnyield():
@@ -458,6 +509,25 @@ b : int
     The number of bananas.
 int
     The number of unknowns.
+
+.. index:: """)
+
+
+def test_sent_str():
+    line_by_line_compare(str(doc_sent),
+"""Test generator
+
+Yields
+------
+a : int
+    The number of apples.
+
+Sent
+----
+b : int
+    The number of bananas.
+c : int
+    The number of oranges.
 
 .. index:: """)
 
