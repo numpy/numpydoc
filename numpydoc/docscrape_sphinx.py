@@ -24,6 +24,10 @@ else:
 IMPORT_MATPLOTLIB_RE = r'\b(import +matplotlib|from +matplotlib +import)\b'
 
 
+def _name_to_class(name, infix=''):
+    return 'numpydoc-%s%s' % (infix, re.sub(r'\W', '-', name.lower()))
+
+
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
         NumpyDocString.__init__(self, docstring, config=config)
@@ -42,16 +46,25 @@ class SphinxDocString(NumpyDocString):
 
     # string conversion routines
     def _str_header(self, name, symbol='`'):
-        return ['.. rubric:: ' + name, '']
+        return self._str_heading_classes(name) + ['.. rubric:: ' + name, '']
 
     def _str_field_list(self, name):
-        return [':' + name + ':']
+        return self._str_heading_classes(name) + [':' + name + ':']
+
+    def _str_heading_classes(self, name):
+        return ['.. rst-class:: numpydoc-heading %s' %
+                _name_to_class(name, 'heading-'), '']
 
     def _str_indent(self, doc, indent=4):
         out = []
         for line in doc:
             out += [' '*indent + line]
         return out
+
+    def _in_container(self, content, name):
+        return (['.. rst-class:: numpydoc-section %s' % _name_to_class(name),
+                 ''] +
+                self._str_indent(content, 4))
 
     def _str_signature(self):
         return ['']
@@ -190,7 +203,9 @@ class SphinxDocString(NumpyDocString):
         out = []
         if self[name]:
             out += self._str_field_list(name)
-            out += ['']
+            out += ['',
+                    '.. rst-class:: numpydoc-section %s' % _name_to_class(name),
+                    '']
             for param, param_type, desc in self[name]:
                 display_param, desc = self._process_param(param, desc,
                                                           fake_autosummary)
@@ -224,7 +239,6 @@ class SphinxDocString(NumpyDocString):
         """
         out = []
         if self[name]:
-            out += ['.. rubric:: %s' % name, '']
             prefix = getattr(self, '_name', '')
 
             if prefix:
@@ -266,6 +280,9 @@ class SphinxDocString(NumpyDocString):
                     out += [fmt % ("**" + param.strip() + "**", desc)]
                 out += [hdr]
             out += ['']
+
+            out = (self._str_header(name) +
+                   self._in_container(out, name))
         return out
 
     def _str_section(self, name):
@@ -273,7 +290,7 @@ class SphinxDocString(NumpyDocString):
         if self[name]:
             out += self._str_header(name)
             content = textwrap.dedent("\n".join(self[name])).split("\n")
-            out += content
+            out += self._in_container(content, name)
             out += ['']
         return out
 
