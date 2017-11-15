@@ -64,6 +64,7 @@ doc_txt = '''\
   list of str
       This is not a real return value.  It exists to test
       anonymous return values.
+  no_description
 
   Other Parameters
   ----------------
@@ -184,7 +185,7 @@ def test_other_parameters():
 
 
 def test_returns():
-    assert_equal(len(doc['Returns']), 2)
+    assert_equal(len(doc['Returns']), 3)
     arg, arg_type, desc = doc['Returns'][0]
     assert_equal(arg, 'out')
     assert_equal(arg_type, 'ndarray')
@@ -196,6 +197,11 @@ def test_returns():
     assert_equal(arg_type, '')
     assert desc[0].startswith('This is not a real')
     assert desc[-1].endswith('anonymous return values.')
+
+    arg, arg_type, desc = doc['Returns'][2]
+    assert_equal(arg, 'no_description')
+    assert_equal(arg_type, '')
+    assert not ''.join(desc).strip()
 
 
 def test_yields():
@@ -373,6 +379,7 @@ out : ndarray
 list of str
     This is not a real return value.  It exists to test
     anonymous return values.
+no_description
 
 Other Parameters
 ----------------
@@ -505,6 +512,9 @@ of the one-dimensional normal distribution to higher dimensions.
     list of str
         This is not a real return value.  It exists to test
         anonymous return values.
+
+    no_description
+        ..
 
 :Other Parameters:
 
