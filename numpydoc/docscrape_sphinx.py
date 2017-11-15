@@ -46,14 +46,10 @@ class SphinxDocString(NumpyDocString):
 
     # string conversion routines
     def _str_header(self, name, symbol='`'):
-        return self._str_heading_classes(name) + ['.. rubric:: ' + name, '']
+        return ['.. rubric:: ' + name, '']
 
     def _str_field_list(self, name):
-        return self._str_heading_classes(name) + [':' + name + ':']
-
-    def _str_heading_classes(self, name):
-        return ['.. rst-class:: numpydoc-heading %s' %
-                _name_to_class(name, 'heading-'), '']
+        return [':' + name + ':']
 
     def _str_indent(self, doc, indent=4):
         out = []
@@ -61,10 +57,9 @@ class SphinxDocString(NumpyDocString):
             out += [' '*indent + line]
         return out
 
-    def _in_container(self, content, name):
-        return (['.. rst-class:: numpydoc-section %s' % _name_to_class(name),
-                 ''] +
-                self._str_indent(content, 4))
+    def _wrap_section(self, content, name, directive='rst-class'):
+        return (['.. %s:: numpydoc-section %s' % (directive, _name_to_class(name)),
+                 ''] + self._str_indent(content))
 
     def _str_signature(self):
         return ['']
@@ -89,19 +84,19 @@ class SphinxDocString(NumpyDocString):
 
         out = []
         if self[name]:
-            out += self._str_field_list(name)
-            out += ['']
             for param, param_type, desc in self[name]:
                 if param_type:
-                    out += self._str_indent([typed_fmt % (param.strip(),
-                                                          param_type)])
+                    out += [typed_fmt % (param.strip(), param_type)]
                 else:
-                    out += self._str_indent([untyped_fmt % param.strip()])
+                    out += [untyped_fmt % param.strip()]
                 if desc:
                     if self.use_blockquotes:
                         out += ['']
-                    out += self._str_indent(desc, 8)
+                    out += self._str_indent(desc)
                 out += ['']
+
+            out = (self._str_field_list(name) + [''] +
+                   self._str_indent(self._wrap_section(out, name)))
         return out
 
     def _process_param(self, param, desc, fake_autosummary):
@@ -202,24 +197,22 @@ class SphinxDocString(NumpyDocString):
         """
         out = []
         if self[name]:
-            out += self._str_field_list(name)
-            out += ['',
-                    '.. rst-class:: numpydoc-section %s' % _name_to_class(name),
-                    '']
             for param, param_type, desc in self[name]:
                 display_param, desc = self._process_param(param, desc,
                                                           fake_autosummary)
 
                 if param_type:
-                    out += self._str_indent(['%s : %s' % (display_param,
-                                                          param_type)])
+                    out += ['%s : %s' % (display_param, param_type)]
                 else:
-                    out += self._str_indent([display_param])
+                    out += [display_param]
                 if desc:
                     if self.use_blockquotes:
                         out += ['']
-                    out += self._str_indent(desc, 8)
+                    out += self._str_indent(desc)
                 out += ['']
+
+            out = (self._str_field_list(name) + [''] +
+                   self._str_indent(self._wrap_section(out, name)))
 
         return out
 
@@ -281,8 +274,7 @@ class SphinxDocString(NumpyDocString):
                 out += [hdr]
             out += ['']
 
-            out = (self._str_header(name) +
-                   self._in_container(out, name))
+            out = self._str_header(name) + self._wrap_section(out, name)
         return out
 
     def _str_section(self, name):
@@ -290,7 +282,7 @@ class SphinxDocString(NumpyDocString):
         if self[name]:
             out += self._str_header(name)
             content = textwrap.dedent("\n".join(self[name])).split("\n")
-            out += self._in_container(content, name)
+            out += content
             out += ['']
         return out
 
