@@ -206,10 +206,12 @@ class SphinxDocString(NumpyDocString):
                     out += ['%s : %s' % (display_param, param_type)]
                 else:
                     out += [display_param]
-                if desc:
-                    if self.use_blockquotes:
-                        out += ['']
-                    out += self._str_indent(desc)
+                if desc and self.use_blockquotes:
+                    out += ['']
+                elif not desc:
+                    # empty definition
+                    desc = ['..']
+                out += self._str_indent(desc)
                 out += ['']
 
             out = (self._str_field_list(name) + [''] +
