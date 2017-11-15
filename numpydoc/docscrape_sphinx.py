@@ -459,4 +459,4 @@ if __name__ == '__main__':
     for part in parts[split_point:]:
         obj = getattr(obj, part)
 
-    print(get_doc_object(obj, config=dict(args.config)))
+    print(get_doc_object(obj, config=dict(args.config or [])))
