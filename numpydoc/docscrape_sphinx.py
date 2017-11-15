@@ -24,6 +24,10 @@ else:
 IMPORT_MATPLOTLIB_RE = r'\b(import +matplotlib|from +matplotlib +import)\b'
 
 
+def _name_to_class(name, infix=''):
+    return 'numpydoc-%s%s' % (infix, re.sub(r'\W', '-', name.lower()))
+
+
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
         NumpyDocString.__init__(self, docstring, config=config)
@@ -53,6 +57,11 @@ class SphinxDocString(NumpyDocString):
             out += [' '*indent + line]
         return out
 
+    def _wrap_section(self, content, name, directive='rst-class'):
+        return (['.. %s:: numpydoc-section %s' % (directive,
+                                                  _name_to_class(name)),
+                 ''] + self._str_indent(content))
+
     def _str_signature(self):
         return ['']
         if self['Signature']:
@@ -76,19 +85,19 @@ class SphinxDocString(NumpyDocString):
 
         out = []
         if self[name]:
-            out += self._str_field_list(name)
-            out += ['']
             for param, param_type, desc in self[name]:
                 if param_type:
-                    out += self._str_indent([typed_fmt % (param.strip(),
-                                                          param_type)])
+                    out += [typed_fmt % (param.strip(), param_type)]
                 else:
-                    out += self._str_indent([untyped_fmt % param.strip()])
+                    out += [untyped_fmt % param.strip()]
                 if desc:
                     if self.use_blockquotes:
                         out += ['']
-                    out += self._str_indent(desc, 8)
+                    out += self._str_indent(desc)
                 out += ['']
+
+            out = (self._str_field_list(name) + [''] +
+                   self._str_indent(self._wrap_section(out, name)))
         return out
 
     def _process_param(self, param, desc, fake_autosummary):
@@ -189,24 +198,24 @@ class SphinxDocString(NumpyDocString):
         """
         out = []
         if self[name]:
-            out += self._str_field_list(name)
-            out += ['']
             for param, param_type, desc in self[name]:
                 display_param, desc = self._process_param(param, desc,
                                                           fake_autosummary)
 
                 if param_type:
-                    out += self._str_indent(['%s : %s' % (display_param,
-                                                          param_type)])
+                    out += ['%s : %s' % (display_param, param_type)]
                 else:
-                    out += self._str_indent([display_param])
+                    out += [display_param]
                 if desc and self.use_blockquotes:
                     out += ['']
                 elif not desc:
                     # empty definition
                     desc = ['..']
-                out += self._str_indent(desc, 8)
+                out += self._str_indent(desc)
                 out += ['']
+
+            out = (self._str_field_list(name) + [''] +
+                   self._str_indent(self._wrap_section(out, name)))
 
         return out
 
@@ -226,7 +235,6 @@ class SphinxDocString(NumpyDocString):
         """
         out = []
         if self[name]:
-            out += ['.. rubric:: %s' % name, '']
             prefix = getattr(self, '_name', '')
 
             if prefix:
@@ -268,6 +276,8 @@ class SphinxDocString(NumpyDocString):
                     out += [fmt % ("**" + param.strip() + "**", desc)]
                 out += [hdr]
             out += ['']
+
+            out = self._str_header(name) + out
         return out
 
     def _str_section(self, name):

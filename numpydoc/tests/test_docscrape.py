@@ -477,49 +477,59 @@ of the one-dimensional normal distribution to higher dimensions.
 
 :Parameters:
 
-    mean : (N,) ndarray
-        Mean of the N-dimensional distribution.
+    .. rst-class:: numpydoc-section numpydoc-parameters
 
-        .. math::
+        mean : (N,) ndarray
+            Mean of the N-dimensional distribution.
 
-           (1+2+3)/3
+            .. math::
 
-    cov : (N, N) ndarray
-        Covariance matrix of the distribution.
+               (1+2+3)/3
 
-    shape : tuple of ints
-        Given a shape of, for example, (m,n,k), m*n*k samples are
-        generated, and packed in an m-by-n-by-k arrangement.  Because
-        each sample is N-dimensional, the output shape is (m,n,k,N).
+        cov : (N, N) ndarray
+            Covariance matrix of the distribution.
+
+        shape : tuple of ints
+            Given a shape of, for example, (m,n,k), m*n*k samples are
+            generated, and packed in an m-by-n-by-k arrangement.  Because
+            each sample is N-dimensional, the output shape is (m,n,k,N).
 
 :Returns:
 
-    out : ndarray
-        The drawn samples, arranged according to `shape`.  If the
-        shape given is (m,n,...), then the shape of `out` is is
-        (m,n,...,N).
+    .. rst-class:: numpydoc-section numpydoc-returns
 
-        In other words, each entry ``out[i,j,...,:]`` is an N-dimensional
-        value drawn from the distribution.
+        out : ndarray
+            The drawn samples, arranged according to `shape`.  If the
+            shape given is (m,n,...), then the shape of `out` is is
+            (m,n,...,N).
 
-    list of str
-        This is not a real return value.  It exists to test
-        anonymous return values.
+            In other words, each entry ``out[i,j,...,:]`` is an N-dimensional
+            value drawn from the distribution.
+
+        list of str
+            This is not a real return value.  It exists to test
+            anonymous return values.
 
 :Other Parameters:
 
-    spam : parrot
-        A parrot off its mortal coil.
+    .. rst-class:: numpydoc-section numpydoc-other-parameters
+
+        spam : parrot
+            A parrot off its mortal coil.
 
 :Raises:
 
-    RuntimeError
-        Some error
+    .. rst-class:: numpydoc-section numpydoc-raises
+
+        RuntimeError
+            Some error
 
 :Warns:
 
-    RuntimeWarning
-        Some warning
+    .. rst-class:: numpydoc-section numpydoc-warns
+
+        RuntimeWarning
+            Some warning
 
 .. warning::
 
@@ -586,14 +596,16 @@ def test_sphinx_yields_str():
 
 :Yields:
 
-    a : int
-        The number of apples.
+    .. rst-class:: numpydoc-section numpydoc-yields
 
-    b : int
-        The number of bananas.
+        a : int
+            The number of apples.
 
-    int
-        The number of unknowns.
+        b : int
+            The number of bananas.
+
+        int
+            The number of unknowns.
 """)
 
 
@@ -873,23 +885,27 @@ def test_use_blockquotes():
     line_by_line_compare(str(doc), '''
     :Parameters:
 
-        **abc** : def
+        .. rst-class:: numpydoc-section numpydoc-parameters
 
-            ghi
+            **abc** : def
 
-        **jkl**
+                ghi
 
-            mno
+            **jkl**
+
+                mno
 
     :Returns:
 
-        **ABC** : DEF
+        .. rst-class:: numpydoc-section numpydoc-returns
 
-            GHI
+            **ABC** : DEF
 
-        **JKL**
+                GHI
 
-            MNO
+            **JKL**
+
+                MNO
     ''')
 
 
@@ -1119,11 +1135,13 @@ def test_class_members_doc_sphinx():
 
     :Parameters:
 
-        f : callable ``f(t, y, *f_args)``
-            Aaa.
+        .. rst-class:: numpydoc-section numpydoc-parameters
 
-        jac : callable ``jac(t, y, *jac_args)``
-            Bbb.
+            f : callable ``f(t, y, *f_args)``
+                Aaa.
+
+            jac : callable ``jac(t, y, *jac_args)``
+                Bbb.
 
     .. rubric:: Examples
 
@@ -1131,32 +1149,34 @@ def test_class_members_doc_sphinx():
 
     :Attributes:
 
-        t : float
-            Current time.
+        .. rst-class:: numpydoc-section numpydoc-attributes
 
-        y : ndarray
-            Current variable values.
+            t : float
+                Current time.
 
-            * hello
-            * world
+            y : ndarray
+                Current variable values.
 
-        :obj:`an_attribute <an_attribute>` : float
-            Test attribute
+                * hello
+                * world
 
-        no_docstring : str
-            But a description
+            :obj:`an_attribute <an_attribute>` : float
+                Test attribute
 
-        no_docstring2 : str
-            ..
+            no_docstring : str
+                But a description
 
-        :obj:`multiline_sentence <multiline_sentence>`
-            This is a sentence.
+            no_docstring2 : str
+                ..
 
-        :obj:`midword_period <midword_period>`
-            The sentence for numpy.org.
+            :obj:`multiline_sentence <multiline_sentence>`
+                This is a sentence.
 
-        :obj:`no_period <no_period>`
-            This does not have a period
+            :obj:`midword_period <midword_period>`
+                The sentence for numpy.org.
+
+            :obj:`no_period <no_period>`
+                This does not have a period
 
     .. rubric:: Methods
 
@@ -1180,11 +1200,13 @@ def test_templated_sections():
 
     :Parameters:
 
-        f : callable ``f(t, y, *f_args)``
-            Aaa.
+        .. rst-class:: numpydoc-section numpydoc-parameters
 
-        jac : callable ``jac(t, y, *jac_args)``
-            Bbb.
+            f : callable ``f(t, y, *f_args)``
+                Aaa.
+
+            jac : callable ``jac(t, y, *jac_args)``
+                Bbb.
 
     """)
 

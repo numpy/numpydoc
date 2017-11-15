@@ -121,3 +121,11 @@ def foo(var1, var2, long_var_name='hi'):
     """
 
     pass
+
+
+class Foobar:
+    """Hello
+    """
+
+    def do_something(self):
+        "world"
