@@ -58,7 +58,8 @@ class SphinxDocString(NumpyDocString):
         return out
 
     def _wrap_section(self, content, name, directive='rst-class'):
-        return (['.. %s:: numpydoc-section %s' % (directive, _name_to_class(name)),
+        return (['.. %s:: numpydoc-section %s' % (directive,
+                                                  _name_to_class(name)),
                  ''] + self._str_indent(content))
 
     def _str_signature(self):
@@ -274,7 +275,7 @@ class SphinxDocString(NumpyDocString):
                 out += [hdr]
             out += ['']
 
-            out = self._str_header(name) + self._wrap_section(out, name)
+            out = self._str_header(name) + out
         return out
 
     def _str_section(self, name):
