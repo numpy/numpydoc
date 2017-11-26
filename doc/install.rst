@@ -9,8 +9,8 @@ The extension is available from:
 * `numpydoc on GitHub <https://github.com/numpy/numpydoc/>`_
 
 'numpydoc' should be added to the ``extensions`` option in your Sphinx
-``conf.py``.
-
+``conf.py``. (Note that `sphinx.ext.autosummary` will automatically be loaded
+as well.)
 
 Sphinx config options
 =====================
