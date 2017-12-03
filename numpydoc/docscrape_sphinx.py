@@ -355,7 +355,7 @@ class SphinxDocString(NumpyDocString):
             'parameters': self._str_param_list('Parameters'),
             'returns': self._str_returns('Returns'),
             'yields': self._str_returns('Yields'),
-            'sent': self._str_returns('Sent'),
+            'receives': self._str_returns('Receives'),
             'other_parameters': self._str_param_list('Other Parameters'),
             'raises': self._str_param_list('Raises'),
             'warns': self._str_param_list('Warns'),

@@ -120,7 +120,7 @@ class NumpyDocString(collections.Mapping):
         'Parameters': [],
         'Returns': [],
         'Yields': [],
-        'Sent': [],
+        'Receives': [],
         'Raises': [],
         'Warns': [],
         'Other Parameters': [],
@@ -343,8 +343,8 @@ class NumpyDocString(collections.Mapping):
         if has_returns and has_yields:
             msg = 'Docstring contains both a Returns and Yields section.'
             raise ValueError(msg)
-        if not has_yields and 'Sent' in section_names:
-            msg = 'Docstring contains a Sent section but not Yields.'
+        if not has_yields and 'Receives' in section_names:
+            msg = 'Docstring contains a Receives section but not Yields.'
             raise ValueError(msg)
 
         for (section, content) in sections:
@@ -355,7 +355,7 @@ class NumpyDocString(collections.Mapping):
                     self._error_location("The section %s appears twice"
                                          % section)
 
-            if section in ('Parameters', 'Returns', 'Yields', 'Sent',
+            if section in ('Parameters', 'Returns', 'Yields', 'Receives',
                            'Raises', 'Warns', 'Other Parameters', 'Attributes',
                            'Methods'):
                 self[section] = self._parse_param_list(content)
@@ -472,7 +472,7 @@ class NumpyDocString(collections.Mapping):
         out += self._str_signature()
         out += self._str_summary()
         out += self._str_extended_summary()
-        for param_list in ('Parameters', 'Returns', 'Yields', 'Sent',
+        for param_list in ('Parameters', 'Returns', 'Yields', 'Receives',
                            'Other Parameters', 'Raises', 'Warns'):
             out += self._str_param_list(param_list)
         out += self._str_section('Warnings')

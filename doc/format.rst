@@ -250,13 +250,13 @@ The sections of a function's docstring are:
    Support for the **Yields** section was added in `numpydoc
    <https://github.com/numpy/numpydoc>`_ version 0.6.
 
-7. **Sent**
+7. **Receives**
 
    Explanation of parameters passed to a generator's ``.send()`` method,
    formatted as for Parameters, above.  Since, like for Yields and Returns, a
    single object is always passed to the method, this may describe either the
    single parameter, or positional arguments passed as a tuple.  If a docstring
-   includes Sent it must also include Yields.
+   includes Receives it must also include Yields.
 
 8. **Other Parameters**
 

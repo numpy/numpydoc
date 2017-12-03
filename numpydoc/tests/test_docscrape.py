@@ -159,8 +159,8 @@ Yields
 a : int
     The number of apples.
 
-Sent
-----
+Receives
+--------
 b : int
     The number of bananas.
 c : int
@@ -231,7 +231,7 @@ def test_yields():
 
 
 def test_sent():
-    section = doc_sent['Sent']
+    section = doc_sent['Receives']
     assert_equal(len(section), 2)
     truth = [('b', 'int', 'bananas.'),
              ('c', 'int', 'oranges.')]
@@ -522,8 +522,8 @@ Yields
 a : int
     The number of apples.
 
-Sent
-----
+Receives
+--------
 b : int
     The number of bananas.
 c : int
