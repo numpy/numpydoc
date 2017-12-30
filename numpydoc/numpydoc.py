@@ -29,6 +29,7 @@ if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
 
 from .docscrape_sphinx import get_doc_object, SphinxDocString
+from .xref import xref_param_type_role
 from . import __version__
 
 if sys.version_info[0] >= 3:
@@ -76,7 +77,10 @@ def mangle_docstrings(app, what, name, obj, options, lines):
            'show_class_members': app.config.numpydoc_show_class_members,
            'show_inherited_class_members':
            app.config.numpydoc_show_inherited_class_members,
-           'class_members_toctree': app.config.numpydoc_class_members_toctree}
+           'class_members_toctree': app.config.numpydoc_class_members_toctree,
+           'xref_param_type': app.config.numpydoc_xref_param_type,
+           'xref_aliases': app.config.numpydoc_xref_aliases,
+           }
 
     u_NL = sixu('\n')
     if what == 'module':
@@ -137,6 +141,7 @@ def setup(app, get_doc_object_=get_doc_object):
     global get_doc_object
     get_doc_object = get_doc_object_
 
+    app.add_role('xref_param_type', xref_param_type_role)
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
     app.add_config_value('numpydoc_edit_link', None, False)
@@ -146,6 +151,8 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_show_inherited_class_members', True, True)
     app.add_config_value('numpydoc_class_members_toctree', True, True)
     app.add_config_value('numpydoc_citation_re', '[a-z0-9_.-]+', True)
+    app.add_config_value('numpydoc_xref_param_type', True, True)
+    app.add_config_value('numpydoc_xref_aliases', dict(), True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)

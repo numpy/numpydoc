@@ -14,6 +14,7 @@ import sphinx
 from sphinx.jinja2glue import BuiltinTemplateLoader
 
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
+from .xref import make_xref_param_type
 
 if sys.version_info[0] >= 3:
     sixu = lambda s: s
@@ -33,6 +34,8 @@ class SphinxDocString(NumpyDocString):
         self.use_plots = config.get('use_plots', False)
         self.use_blockquotes = config.get('use_blockquotes', False)
         self.class_members_toctree = config.get('class_members_toctree', True)
+        self.xref_param_type = config.get('xref_param_type', False)
+        self.xref_aliases = config.get('xref_aliases', dict())
         self.template = config.get('template', None)
         if self.template is None:
             template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
@@ -80,6 +83,10 @@ class SphinxDocString(NumpyDocString):
             out += ['']
             for param, param_type, desc in self[name]:
                 if param_type:
+                    if self.xref_param_type:
+                        param_type = make_xref_param_type(
+                            param_type,
+                            self.xref_aliases)
                     out += self._str_indent([typed_fmt % (param.strip(),
                                                           param_type)])
                 else:
@@ -197,6 +204,10 @@ class SphinxDocString(NumpyDocString):
                                                           fake_autosummary)
 
                 if param_type:
+                    if self.xref_param_type:
+                        param_type = make_xref_param_type(
+                            param_type,
+                            self.xref_aliases)
                     out += self._str_indent(['%s : %s' % (display_param,
                                                           param_type)])
                 else:
