@@ -27,7 +27,7 @@ data = """
 (2,) :xref_param_type:`~numpy.ndarray`
 
 (...,M,N) array_like
-(...,M,N) :term:`numpy:array_like`
+(...,:xref_param_type:`M`,:xref_param_type:`N`) :term:`numpy:array_like`
 
 (float, float), optional
 (:xref_param_type:`float`, :xref_param_type:`float`), optional
@@ -72,16 +72,25 @@ str or pathlib.Path
 {:xref_param_type:`False`, :xref_param_type:`True`, 'greedy', 'optimal'}
 
 {{'begin', 1}, {'end', 0}}, {string, int}
-{{'begin', 1}, {'end', 0}}, {string, :xref_param_type:`int`}
+{{'begin', 1}, {'end', 0}}, {:xref_param_type:`str`, :xref_param_type:`int`}
 
 callable f'(x,*args)
-:xref_param_type:`callable` f'(x,*args)
+:xref_param_type:`callable` f'(:xref_param_type:`x`,*args)
 
 callable ``fhess(x, *args)``, optional
 :xref_param_type:`callable` ``fhess(x, *args)``, optional
 
 spmatrix (format: ``csr``, ``bsr``, ``dia`` or coo``)
 :xref_param_type:`spmatrix` (format: ``csr``, ``bsr``, ``dia`` or coo``)
+
+:ref:`strftime <strftime-strptime-behavior>`
+:ref:`strftime <strftime-strptime-behavior>`
+
+callable or :ref:`strftime <strftime-strptime-behavior>`
+:xref_param_type:`callable` or :ref:`strftime <strftime-strptime-behavior>`
+
+callable or :ref:`strftime behavior <strftime-strptime-behavior>`
+:xref_param_type:`callable` or :ref:`strftime behavior <strftime-strptime-behavior>`
 
 list(int)
 :xref_param_type:`list`(:xref_param_type:`int`)
