@@ -47,6 +47,53 @@ numpydoc_attributes_as_param_list : bool
   as the Parameter section. If it's False, the Attributes section will be
   formatted as the Methods section using an autosummary table.
   ``True`` by default.
+numpydoc_xref_param_type : bool
+  Whether to create cross-references for the parameter types in the
+  ``Parameters``, ``Other Parameters``, ``Returns`` and ``Yields``
+  sections of the docstring.
+  ``True`` by default.
+numpydoc_xref_aliases : dict
+  Mappings to fully qualified paths (or correct ReST references) for the
+  aliases/shortcuts used when specifying the types of parameters.
+  The keys should not have any spaces. Together with the ``intersphinx``
+  extension, you can map to links in any documentation.
+  The default is an empty ``dict``.
+
+  If you have the following ``intersphinx`` namespace configuration::
+
+      intersphinx_mapping = {
+          'python': ('https://docs.python.org/3/', None),
+          'numpy': ('https://docs.scipy.org/doc/numpy', None),
+      }
+
+  A useful ``dict`` may look like the following::
+
+      numpydoc_xref_aliases = {
+          # python
+          'sequence': ':term:`python:sequence`',
+          'iterable': ':term:`python:iterable`',
+          'string': 'str',
+          # numpy
+          'array': 'numpy.ndarray',
+          'dtype': 'numpy.dtype',
+          'ndarray': 'numpy.ndarray',
+          'matrix': 'numpy.matrix',
+          'array-like': ':term:`numpy:array_like`',
+          'array_like': ':term:`numpy:array_like`',
+      }
+
+   This option depends on the ``numpydoc_xref_param_type`` option
+   being ``True``.
+
+numpydoc_xref_ignore : set
+    Words not to cross-reference. Most likely, these are common words
+    used in parameter type descriptions that may be confused for
+    classes of the same name. For example::
+
+        numpydoc_xref_ignore = {'type', 'optional', 'default'}
+
+    The default is an empty set.
+
 numpydoc_edit_link : bool
   .. deprecated:: edit your HTML template instead
 

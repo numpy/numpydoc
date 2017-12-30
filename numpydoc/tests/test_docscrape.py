@@ -1423,6 +1423,85 @@ A top section before
     ''')
 
 
+xref_doc_txt = """
+Test xref in Parameters, Other Parameters and Returns
+
+Parameters
+----------
+p1 : int
+    Integer value
+
+p2 : float, optional
+    Integer value
+
+Other Parameters
+----------------
+p3 : list[int]
+    List of integers
+p4 : :class:`pandas.DataFrame`
+    A dataframe
+p5 : sequence of int
+    A sequence
+
+Returns
+-------
+out : array
+    Numerical return value
+"""
+
+
+xref_doc_txt_expected = """
+Test xref in Parameters, Other Parameters and Returns
+
+
+:Parameters:
+
+    p1 : :xref_param_type:`int`
+        Integer value
+
+    p2 : :xref_param_type:`float`, optional
+        Integer value
+
+:Returns:
+
+    out : :xref_param_type:`array <numpy.ndarray>`
+        Numerical return value
+
+
+:Other Parameters:
+
+    p3 : :xref_param_type:`list`\[:xref_param_type:`int`]
+        List of integers
+
+    p4 : :class:`pandas.DataFrame`
+        A dataframe
+
+    p5 : :term:`python:sequence` of :xref_param_type:`int`
+        A sequence
+"""
+
+
+def test_xref():
+    xref_aliases = {
+        'sequence': ':term:`python:sequence`',
+        'iterable': ':term:`python:iterable`',
+        'array': 'numpy.ndarray',
+    }
+
+    xref_ignore = {'of', 'default', 'optional'}
+
+    doc = SphinxDocString(
+        xref_doc_txt,
+        config=dict(
+            xref_param_type=True,
+            xref_aliases=xref_aliases,
+            xref_ignore=xref_ignore
+        )
+    )
+
+    line_by_line_compare(str(doc), xref_doc_txt_expected)
+
+
 if __name__ == "__main__":
     import pytest
     pytest.main()
