@@ -157,7 +157,7 @@ def xref_param_type_role(role, rawtext, text, lineno, inliner,
             elif prefix == '~':
                 title = target.split('.')[-1]
 
-    contnode = nodes.inline(title, title)
+    contnode = nodes.Text(title, title)
     node = addnodes.pending_xref('', refdomain='py', refexplicit=False,
                                  reftype='class', reftarget=target)
     node += contnode
