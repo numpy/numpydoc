@@ -1,5 +1,8 @@
 import re
+
+from docutils import nodes
 from sphinx import addnodes
+from sphinx.util.nodes import split_explicit_title
 
 # When sphinx (including the napoleon extension) parses the parameters
 # section of a docstring, it converts the information into field lists.
@@ -57,6 +60,7 @@ def make_xref_param_type(param_type, xref_aliases):
     that looks like type information and no other. The
     function tries to be clever and catch type information
     in different disguises.
+
     Parameters
     ----------
     param_type : str
@@ -64,6 +68,7 @@ def make_xref_param_type(param_type, xref_aliases):
     xref_aliases : dict
         Mapping used to resolve common abbreviations and aliases
         to fully qualified names that can be cross-referenced.
+
     Returns
     -------
     out : str
@@ -71,11 +76,16 @@ def make_xref_param_type(param_type, xref_aliases):
         ``xref_param_type`` role.
     """
     if param_type in xref_aliases:
-        param_type = xref_aliases[param_type]
+        link, title = xref_aliases[param_type], param_type
+        param_type = link
+    else:
+        link = title = param_type
 
-    if (QUALIFIED_NAME_RE.match(param_type) and
-            param_type not in IGNORE):
-        return ':xref_param_type:`%s`' % param_type
+    if QUALIFIED_NAME_RE.match(link) and link not in IGNORE:
+        if link != title:
+            return ':xref_param_type:`%s <%s>`' % (title, link)
+        else:
+            return ':xref_param_type:`%s`' % link
 
     def _split_and_apply_re(s, pattern):
         """
@@ -85,13 +95,21 @@ def make_xref_param_type(param_type, xref_aliases):
         """
         results = []
         tokens = pattern.split(s)
-        if len(tokens) > 1:
-            for tok in tokens:
+        n = len(tokens)
+        if n > 1:
+            for i, tok in enumerate(tokens):
                 if pattern.match(tok):
                     results.append(tok)
                 else:
-                    results.append(
-                        make_xref_param_type(tok, xref_aliases))
+                    res = make_xref_param_type(tok, xref_aliases)
+                    # Openning brackets immediated after a role is
+                    # bad markup. Detect that and add backslash.
+                    # :role:`type`( to :role:`type`\(
+                    if res and res[-1] == '`' and i < n-1:
+                        next_char = tokens[i+1][0]
+                        if next_char in '([{':
+                            res += '\\'
+                    results.append(res)
 
             return ''.join(results)
         return s
@@ -125,19 +143,21 @@ def xref_param_type_role(role, rawtext, text, lineno, inliner,
     """
     Add a pending_xref for the param_type of a field list
     """
-    if text.startswith(('~', '.')):
-        prefix, target = text[0], text[1:]
-        if prefix == '.':
-            env = inliner.document.settings.env
-            modname = env.ref_context.get('py:module')
-            text = text[1:]
-            target = '%s.%s' % (modname, text)
-        elif prefix == '~':
-            text = text.split('.')[-1]
+    has_title, title, target = split_explicit_title(text)
+    if has_title:
+        target = target.lstrip('~')
     else:
-        target = text
+        if target.startswith(('~', '.')):
+            prefix, target = target[0], target[1:]
+            if prefix == '.':
+                env = inliner.document.settings.env
+                modname = env.ref_context.get('py:module')
+                target = target[1:]
+                target = '%s.%s' % (modname, target)
+            elif prefix == '~':
+                title = target.split('.')[-1]
 
-    contnode = addnodes.literal_emphasis(text, text)
+    contnode = nodes.inline(title, title)
     node = addnodes.pending_xref('', refdomain='py', refexplicit=False,
                                  reftype='class', reftarget=target)
     node += contnode

@@ -1240,13 +1240,13 @@ Test xref in Parameters, Other Parameters and Returns
 
 :Returns:
 
-    out : :xref_param_type:`~numpy.array`
+    out : :xref_param_type:`array <numpy.ndarray>`
         Numerical return value
 
 
 :Other Parameters:
 
-    p3 : :xref_param_type:`list`[:xref_param_type:`int`]
+    p3 : :xref_param_type:`list`\[:xref_param_type:`int`]
         List of integers
 
     p4 : :class:`pandas.DataFrame`
@@ -1261,7 +1261,7 @@ def test_xref():
     xref_aliases = {
         'sequence': ':term:`python:sequence`',
         'iterable': ':term:`python:iterable`',
-        'array': '~numpy.array',
+        'array': 'numpy.ndarray',
     }
 
     doc = SphinxDocString(

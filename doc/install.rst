@@ -69,9 +69,9 @@ numpydoc_xref_aliases : dict
           'iterable': ':term:`python:iterable`',
           'string': 'str',
           # numpy
-          'array': '~numpy.array',
-          'dtype': '~numpy.dtype',
-          'ndarray': '~numpy.ndarray',
+          'array': 'numpy.ndarray',
+          'dtype': 'numpy.dtype',
+          'ndarray': 'numpy.ndarray',
           'matrix': 'numpy.matrix',
           'array-like': ':term:`numpy:array_like`',
           'array_like': ':term:`numpy:array_like`',

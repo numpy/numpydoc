@@ -10,9 +10,9 @@ xref_aliases = {
     'iterable': ':term:`python:iterable`',
     'string': 'str',
     # numpy
-    'array': '~numpy.array',
+    'array': 'numpy.ndarray',
     'dtype': 'numpy.dtype',
-    'ndarray': '~numpy.ndarray',
+    'ndarray': 'numpy.ndarray',
     'matrix': 'numpy.matrix',
     'array-like': ':term:`numpy:array_like`',
     'array_like': ':term:`numpy:array_like`',
@@ -24,7 +24,7 @@ data = """
 (...) :term:`numpy:array_like`, :xref_param_type:`float`, optional
 
 (2,) ndarray
-(2,) :xref_param_type:`~numpy.ndarray`
+(2,) :xref_param_type:`ndarray <numpy.ndarray>`
 
 (...,M,N) array_like
 (...,:xref_param_type:`M`,:xref_param_type:`N`) :term:`numpy:array_like`
@@ -33,10 +33,10 @@ data = """
 (:xref_param_type:`float`, :xref_param_type:`float`), optional
 
 1-D array or sequence
-1-D :xref_param_type:`~numpy.array` or :term:`python:sequence`
+1-D :xref_param_type:`array <numpy.ndarray>` or :term:`python:sequence`
 
 array of str or unicode-like
-:xref_param_type:`~numpy.array` of :xref_param_type:`str` or unicode-like
+:xref_param_type:`array <numpy.ndarray>` of :xref_param_type:`str` or unicode-like
 
 array_like of float
 :term:`numpy:array_like` of :xref_param_type:`float`
@@ -60,7 +60,7 @@ str or pathlib.Path
 :xref_param_type:`str` or :xref_param_type:`pathlib.Path`
 
 {'', string}, optional
-{'', :xref_param_type:`str`}, optional
+{'', :xref_param_type:`string <str>`}, optional
 
 {'C', 'F', 'A', or 'K'}, optional
 {'C', 'F', 'A', or 'K'}, optional
@@ -72,7 +72,7 @@ str or pathlib.Path
 {:xref_param_type:`False`, :xref_param_type:`True`, 'greedy', 'optimal'}
 
 {{'begin', 1}, {'end', 0}}, {string, int}
-{{'begin', 1}, {'end', 0}}, {:xref_param_type:`str`, :xref_param_type:`int`}
+{{'begin', 1}, {'end', 0}}, {:xref_param_type:`string <str>`, :xref_param_type:`int`}
 
 callable f'(x,*args)
 :xref_param_type:`callable` f'(:xref_param_type:`x`,*args)
@@ -93,22 +93,22 @@ callable or :ref:`strftime behavior <strftime-strptime-behavior>`
 :xref_param_type:`callable` or :ref:`strftime behavior <strftime-strptime-behavior>`
 
 list(int)
-:xref_param_type:`list`(:xref_param_type:`int`)
+:xref_param_type:`list`\(:xref_param_type:`int`)
 
 list[int]
-:xref_param_type:`list`[:xref_param_type:`int`]
+:xref_param_type:`list`\[:xref_param_type:`int`]
 
 dict(str, int)
-:xref_param_type:`dict`(:xref_param_type:`str`, :xref_param_type:`int`)
+:xref_param_type:`dict`\(:xref_param_type:`str`, :xref_param_type:`int`)
 
 dict[str,  int]
-:xref_param_type:`dict`[:xref_param_type:`str`,  :xref_param_type:`int`]
+:xref_param_type:`dict`\[:xref_param_type:`str`,  :xref_param_type:`int`]
 
 tuple(float, float)
-:xref_param_type:`tuple`(:xref_param_type:`float`, :xref_param_type:`float`)
+:xref_param_type:`tuple`\(:xref_param_type:`float`, :xref_param_type:`float`)
 
 dict[tuple(str, str), int]
-:xref_param_type:`dict`[:xref_param_type:`tuple`(:xref_param_type:`str`, :xref_param_type:`str`), :xref_param_type:`int`]
+:xref_param_type:`dict`\[:xref_param_type:`tuple`\(:xref_param_type:`str`, :xref_param_type:`str`), :xref_param_type:`int`]
 """  # noqa: E501
 
 
