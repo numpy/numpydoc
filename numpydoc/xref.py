@@ -17,6 +17,8 @@ from sphinx.util.nodes import split_explicit_title
 # When the role is processed, we create pending_xref nodes which are
 # later turned into links.
 
+# Note: we never split on commas that are not followed by a space
+# You risk creating bad rst markup if you do so.
 
 QUALIFIED_NAME_RE = re.compile(
     # e.g int, numpy.array, ~numpy.array, .class_in_current_module
@@ -30,7 +32,13 @@ QUALIFIED_NAME_RE = re.compile(
 CONTAINER_SPLIT_RE = re.compile(
     # splits dict(str, int) into
     #    ['dict', '[', 'str', ', ', 'int', ']', '']
-    r'(\s*[\[\]\(\)\{\},]\s*)'
+    r'(\s*[\[\]\(\)\{\}]\s*|,\s+)'
+)
+
+CONTAINER_SPLIT_REJECT_RE = re.compile(
+    # Leads to bad markup e.g.
+    # {int}qualified_name
+    r'[\]\)\}]\w'
 )
 
 DOUBLE_QUOTE_SPLIT_RE = re.compile(
@@ -44,10 +52,16 @@ ROLE_SPLIT_RE = re.compile(
     r'(:\w+:`.+?(?<!\\)`)'
 )
 
+SINGLE_QUOTE_SPLIT_RE = re.compile(
+    # splits to preserve quoted expressions roles
+    r'(`.+?`)'
+)
+
 TEXT_SPLIT_RE = re.compile(
     # splits on ' or ', ' | ', ', ' and ' '
     r'(\s+or\s+|\s+\|\s+|,\s+|\s+)'
 )
+
 
 IGNORE = {'of', 'either', 'or', 'with', 'in', 'default', 'optional'}
 CONTAINER_CHARS = set('[](){}')
@@ -130,8 +144,14 @@ def make_xref_param_type(param_type, xref_aliases):
     if ':`' in param_type:
         return _split_and_apply_re(param_type, ROLE_SPLIT_RE)
 
+    # Any quoted expressions
+    if '`' in param_type:
+        return _split_and_apply_re(param_type, SINGLE_QUOTE_SPLIT_RE)
+
     # Any sort of bracket '[](){}'
     if any(c in CONTAINER_CHARS for c in param_type):
+        if CONTAINER_SPLIT_REJECT_RE.search(param_type):
+            return param_type
         return _split_and_apply_re(param_type, CONTAINER_SPLIT_RE)
 
     # Common splitter tokens

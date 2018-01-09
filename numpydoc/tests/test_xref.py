@@ -27,7 +27,10 @@ data = """
 (2,) :xref_param_type:`ndarray <numpy.ndarray>`
 
 (...,M,N) array_like
-(...,:xref_param_type:`M`,:xref_param_type:`N`) :term:`numpy:array_like`
+(...,M,N) :term:`numpy:array_like`
+
+(..., M, N) array_like
+(..., :xref_param_type:`M`, :xref_param_type:`N`) :term:`numpy:array_like`
 
 (float, float), optional
 (:xref_param_type:`float`, :xref_param_type:`float`), optional
@@ -75,7 +78,7 @@ str or pathlib.Path
 {{'begin', 1}, {'end', 0}}, {:xref_param_type:`string <str>`, :xref_param_type:`int`}
 
 callable f'(x,*args)
-:xref_param_type:`callable` f'(:xref_param_type:`x`,*args)
+:xref_param_type:`callable` f'(x,*args)
 
 callable ``fhess(x, *args)``, optional
 :xref_param_type:`callable` ``fhess(x, *args)``, optional
