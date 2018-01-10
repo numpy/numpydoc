@@ -56,8 +56,8 @@ def foo(var1, var2, long_var_name='hi'):
 
     Returns
     -------
-    type
-        Explanation of anonymous return value of type ``type``.
+    type_
+        Explanation of anonymous return value of type ``type_``.
     describe : type
         Explanation of return value named `describe`.
     out : type

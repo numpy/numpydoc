@@ -28,7 +28,7 @@ else:
 
 
 doc_txt = '''\
-  numpy.multivariate_normal(mean, cov, shape=None, spam=None)
+  numpy.multivariate_normal(mean, cov, shape=None, spam_=None)
 
   Draw values from a multivariate normal distribution with specified
   mean and covariance.
@@ -67,7 +67,7 @@ doc_txt = '''\
 
   Other Parameters
   ----------------
-  spam : parrot
+  spam_ : parrot
       A parrot off its mortal coil.
 
   Raises
@@ -153,7 +153,7 @@ doc_yields = NumpyDocString(doc_yields_txt)
 
 def test_signature():
     assert doc['Signature'].startswith('numpy.multivariate_normal(')
-    assert doc['Signature'].endswith('spam=None)')
+    assert doc['Signature'].endswith('spam_=None)')
 
 
 def test_summary():
@@ -177,7 +177,7 @@ def test_parameters():
 
 def test_other_parameters():
     assert_equal(len(doc['Other Parameters']), 1)
-    assert_equal([n for n,_,_ in doc['Other Parameters']], ['spam'])
+    assert_equal([n for n,_,_ in doc['Other Parameters']], ['spam_'])
     arg, arg_type, desc = doc['Other Parameters'][0]
     assert_equal(arg_type, 'parrot')
     assert desc[0].startswith('A parrot off its mortal coil')
@@ -338,7 +338,7 @@ def test_str():
     # This should be handled automatically, and so, one thing this test does
     # is to make sure that See Also precedes Notes in the output.
     line_by_line_compare(str(doc),
-"""numpy.multivariate_normal(mean, cov, shape=None, spam=None)
+"""numpy.multivariate_normal(mean, cov, shape=None, spam_=None)
 
 Draw values from a multivariate normal distribution with specified
 mean and covariance.
@@ -376,7 +376,7 @@ list of str
 
 Other Parameters
 ----------------
-spam : parrot
+spam_ : parrot
     A parrot off its mortal coil.
 
 Raises
@@ -508,7 +508,7 @@ of the one-dimensional normal distribution to higher dimensions.
 
 :Other Parameters:
 
-    spam : parrot
+    spam\\_ : parrot
         A parrot off its mortal coil.
 
 :Raises:
