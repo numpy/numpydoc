@@ -23,5 +23,5 @@ script:
   - nosetests numpydoc
   - |
     cd ../doc
-    make html
-    make latexpdf
+    make SPHINXOPTS='-W' html
+    make SPHINXOPTS='-W' latexpdf
