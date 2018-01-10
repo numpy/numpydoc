@@ -79,6 +79,7 @@ class SphinxDocString(NumpyDocString):
             out += self._str_field_list(name)
             out += ['']
             for param, param_type, desc in self[name]:
+                param = self._escape_param(param)
                 if param_type:
                     out += self._str_indent([typed_fmt % (param.strip(),
                                                           param_type)])
@@ -91,6 +92,16 @@ class SphinxDocString(NumpyDocString):
                 out += self._str_indent(desc, 8)
                 out += ['']
         return out
+
+    def _escape_param(self, param):
+        """Escape a parameter name for reST
+
+        Currently only handles param names with final underscore
+        """
+        param = param.strip()
+        if param[-1:] == '_':
+            param = param[:-1] + '\\_'
+        return param
 
     def _process_param(self, param, desc, fake_autosummary):
         """Determine how to display a parameter
@@ -127,7 +138,8 @@ class SphinxDocString(NumpyDocString):
         relies on Sphinx's plugin mechanism.
         """
         param = param.strip()
-        display_param = ('**%s**' if self.use_blockquotes else '%s') % param
+        display_param = ('**%s**' if self.use_blockquotes
+                         else '%s') % self._escape_param(param)
 
         if not fake_autosummary:
             return display_param, desc
