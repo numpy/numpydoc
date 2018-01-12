@@ -80,6 +80,15 @@ numpydoc_xref_aliases : dict
    This option depends on the ``numpydoc_xref_param_type`` option
    being ``True``.
 
+numpydoc_xref_ignore : set
+    Words not to cross-reference. Most likely, these are common words
+    used in parameter type descriptions that may be confused for
+    classes of the same name. For example::
+
+        numpydoc_xref_ignore = {'type', 'optional', 'default'}
+
+    The default is an empty set.
+
 numpydoc_edit_link : bool
   .. deprecated:: edit your HTML template instead
 

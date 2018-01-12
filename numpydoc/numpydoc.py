@@ -80,6 +80,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
            'class_members_toctree': app.config.numpydoc_class_members_toctree,
            'xref_param_type': app.config.numpydoc_xref_param_type,
            'xref_aliases': app.config.numpydoc_xref_aliases,
+           'xref_ignore': app.config.numpydoc_xref_ignore,
            }
 
     u_NL = sixu('\n')
@@ -153,6 +154,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_citation_re', '[a-z0-9_.-]+', True)
     app.add_config_value('numpydoc_xref_param_type', True, True)
     app.add_config_value('numpydoc_xref_aliases', dict(), True)
+    app.add_config_value('numpydoc_xref_ignore', set(), True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)

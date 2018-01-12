@@ -36,6 +36,7 @@ class SphinxDocString(NumpyDocString):
         self.class_members_toctree = config.get('class_members_toctree', True)
         self.xref_param_type = config.get('xref_param_type', False)
         self.xref_aliases = config.get('xref_aliases', dict())
+        self.xref_ignore = config.get('xref_ignore', set())
         self.template = config.get('template', None)
         if self.template is None:
             template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
@@ -86,7 +87,8 @@ class SphinxDocString(NumpyDocString):
                     if self.xref_param_type:
                         param_type = make_xref_param_type(
                             param_type,
-                            self.xref_aliases)
+                            self.xref_aliases,
+                            self.xref_ignore)
                     out += self._str_indent([typed_fmt % (param.strip(),
                                                           param_type)])
                 else:
@@ -207,7 +209,8 @@ class SphinxDocString(NumpyDocString):
                     if self.xref_param_type:
                         param_type = make_xref_param_type(
                             param_type,
-                            self.xref_aliases)
+                            self.xref_aliases,
+                            self.xref_ignore)
                     out += self._str_indent(['%s : %s' % (display_param,
                                                           param_type)])
                 else:

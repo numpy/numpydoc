@@ -1264,11 +1264,14 @@ def test_xref():
         'array': 'numpy.ndarray',
     }
 
+    xref_ignore = {'of', 'default', 'optional'}
+
     doc = SphinxDocString(
         xref_doc_txt,
         config=dict(
             xref_param_type=True,
-            xref_aliases=xref_aliases
+            xref_aliases=xref_aliases,
+            xref_ignore=xref_ignore
         )
     )
 

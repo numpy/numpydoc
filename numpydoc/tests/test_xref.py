@@ -114,9 +114,15 @@ dict[tuple(str, str), int]
 :xref_param_type:`dict`\[:xref_param_type:`tuple`\(:xref_param_type:`str`, :xref_param_type:`str`), :xref_param_type:`int`]
 """  # noqa: E501
 
+xref_ignore = {'or', 'in', 'of', 'default', 'optional'}
+
 
 def test_make_xref_param_type():
     for s in data.strip().split('\n\n'):
         param_type, expected_result = s.split('\n')
-        result = make_xref_param_type(param_type, xref_aliases)
+        result = make_xref_param_type(
+            param_type,
+            xref_aliases,
+            xref_ignore
+        )
         assert_equal(result, expected_result)

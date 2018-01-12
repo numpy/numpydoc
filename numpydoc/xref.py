@@ -62,12 +62,10 @@ TEXT_SPLIT_RE = re.compile(
     r'(\s+or\s+|\s+\|\s+|,\s+|\s+)'
 )
 
-
-IGNORE = {'of', 'either', 'or', 'with', 'in', 'default', 'optional'}
 CONTAINER_CHARS = set('[](){}')
 
 
-def make_xref_param_type(param_type, xref_aliases):
+def make_xref_param_type(param_type, xref_aliases, xref_ignore):
     """
     Enclose str in a role that creates a cross-reference
     The role ``xref_param_type`` *may be* added to any token
@@ -82,6 +80,8 @@ def make_xref_param_type(param_type, xref_aliases):
     xref_aliases : dict
         Mapping used to resolve common abbreviations and aliases
         to fully qualified names that can be cross-referenced.
+    xref_ignore : set
+        Words not to cross-reference.
 
     Returns
     -------
@@ -95,7 +95,7 @@ def make_xref_param_type(param_type, xref_aliases):
     else:
         link = title = param_type
 
-    if QUALIFIED_NAME_RE.match(link) and link not in IGNORE:
+    if QUALIFIED_NAME_RE.match(link) and link not in xref_ignore:
         if link != title:
             return ':xref_param_type:`%s <%s>`' % (title, link)
         else:
@@ -115,7 +115,8 @@ def make_xref_param_type(param_type, xref_aliases):
                 if pattern.match(tok):
                     results.append(tok)
                 else:
-                    res = make_xref_param_type(tok, xref_aliases)
+                    res = make_xref_param_type(
+                        tok, xref_aliases, xref_ignore)
                     # Openning brackets immediated after a role is
                     # bad markup. Detect that and add backslash.
                     # :role:`type`( to :role:`type`\(
