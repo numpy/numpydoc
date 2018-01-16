@@ -50,8 +50,8 @@ numpydoc_xref_param_type : bool
 numpydoc_xref_aliases : dict
   Mappings to fully qualified paths (or correct ReST references) for the
   aliases/shortcuts used when specifying the types of parameters.
-  Together with the ``intersphinx`` extension, you can map to links
-  in any documentation.
+  The keys should not have any spaces. Together with the ``intersphinx``
+  extension, you can map to links in any documentation.
   The default is an empty ``dict``.
 
   If you have the following ``intersphinx`` namespace configuration::
