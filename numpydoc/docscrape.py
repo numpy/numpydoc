@@ -199,14 +199,6 @@ class NumpyDocString(collections.Mapping):
 
         return section
 
-    def _escape_args_and_kwargs(self, name):
-        if name[:2] == '**':
-            return r'\*\*' + name[2:]
-        elif name[:1] == '*':
-            return r'\*' + name[1:]
-        else:
-            return name
-
     def _read_sections(self):
         while not self._doc.eof():
             data = self._read_to_next_section()
@@ -229,7 +221,6 @@ class NumpyDocString(collections.Mapping):
             else:
                 arg_name, arg_type = header, ''
 
-            arg_name = self._escape_args_and_kwargs(arg_name)
             desc = r.read_to_next_unindented_line()
             desc = dedent_lines(desc)
             desc = strip_blank_lines(desc)
