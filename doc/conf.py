@@ -269,5 +269,5 @@ latex_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('http://docs.python.org/', None),
-    'scikit-learn': ('http://scikit-learn.org/stable/', None),
+    'scikitlearn': ('http://scikit-learn.org/stable/', None),
 }
