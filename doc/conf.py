@@ -41,12 +41,18 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.imgmath',
     'sphinx.ext.todo',
     'numpydoc',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
 ]
+
+try:
+    import sphinx.ext.imgmath  # noqa
+except ImportError:
+    extensions.append('sphinx.ext.pngmath')
+else:
+    extensions.append('sphinx.ext.imgmath')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
