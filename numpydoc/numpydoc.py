@@ -21,9 +21,13 @@ from __future__ import division, absolute_import, print_function
 import sys
 import re
 import pydoc
-import sphinx
 import inspect
 import collections
+import hashlib
+
+from docutils.nodes import citation, Text
+import sphinx
+from sphinx.addnodes import pending_xref, desc_content
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -37,9 +41,12 @@ else:
     sixu = lambda s: unicode(s, 'unicode_escape')
 
 
-def rename_references(app, what, name, obj, options, lines,
-                      reference_offset=[0]):
-    # replace reference numbers so that there are no duplicates
+HASH_LEN = 12
+
+
+def rename_references(app, what, name, obj, options, lines):
+    # decorate reference numbers so that there are no duplicates
+    # these are later undecorated in the doctree, in relabel_references
     references = set()
     for line in lines:
         line = line.strip()
@@ -49,19 +56,51 @@ def rename_references(app, what, name, obj, options, lines,
             references.add(m.group(1))
 
     if references:
-        for r in references:
-            if r.isdigit():
-                new_r = sixu("R%d") % (reference_offset[0] + int(r))
-            else:
-                new_r = sixu("%s%d") % (r, reference_offset[0])
+        # we use a hash to mangle the reference name to avoid invalid names
+        sha = hashlib.sha256()
+        sha.update(name.encode('utf8'))
+        prefix = 'R' + sha.hexdigest()[:HASH_LEN]
 
+        for r in references:
+            new_r = prefix + '-' + r
             for i, line in enumerate(lines):
                 lines[i] = lines[i].replace(sixu('[%s]_') % r,
                                             sixu('[%s]_') % new_r)
                 lines[i] = lines[i].replace(sixu('.. [%s]') % r,
                                             sixu('.. [%s]') % new_r)
 
-        reference_offset[0] += len(references)
+
+def _ascend(node, cls):
+    while node and not isinstance(node, cls):
+        node = node.parent
+    return node
+
+
+def relabel_references(app, doc):
+    # Change 'hash-ref' to 'ref' in label text
+    for citation_node in doc.traverse(citation):
+        if _ascend(citation_node, desc_content) is None:
+            # no desc node in ancestry -> not in a docstring
+            # XXX: should we also somehow check it's in a References section?
+            continue
+        label_node = citation_node[0]
+        prefix, _, new_label = label_node[0].astext().partition('-')
+        assert len(prefix) == HASH_LEN + 1
+        new_text = Text(new_label)
+        label_node.replace(label_node[0], new_text)
+
+        for id in citation_node['backrefs']:
+            ref = doc.ids[id]
+            ref_text = ref[0]
+
+            # Sphinx has created pending_xref nodes with [reftext] text.
+            def matching_pending_xref(node):
+                return (isinstance(node, pending_xref) and
+                        node[0].astext() == '[%s]' % ref_text)
+
+            for xref_node in ref.parent.traverse(matching_pending_xref):
+                xref_node.replace(xref_node[0], Text('[%s]' % new_text))
+            ref.replace(ref_text, new_text.copy())
 
 
 DEDUPLICATION_TAG = '    !! processed by numpydoc !!'
@@ -139,6 +178,7 @@ def setup(app, get_doc_object_=get_doc_object):
 
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
+    app.connect('doctree-read', relabel_references)
     app.add_config_value('numpydoc_edit_link', None, False)
     app.add_config_value('numpydoc_use_plots', None, False)
     app.add_config_value('numpydoc_use_blockquotes', None, False)

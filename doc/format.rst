@@ -387,6 +387,12 @@ The sections of a function's docstring are:
     should not be required to understand it.  References are numbered, starting
     from one, in the order in which they are cited.
 
+    .. warning:: **References will break tables**
+
+        Where references like [1] appear in a tables within a numpydoc
+        docstring, the table markup will be broken by numpydoc processing.  See
+        `numpydoc issue #130 <https://github.com/numpy/numpydoc/issues/130>`_
+
 14. **Examples**
 
     An optional section for examples, using the `doctest
