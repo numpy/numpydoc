@@ -9,8 +9,8 @@ The extension is available from:
 * `numpydoc on GitHub <https://github.com/numpy/numpydoc/>`_
 
 'numpydoc' should be added to the ``extensions`` option in your Sphinx
-``conf.py``.
-
+``conf.py``. (Note that `sphinx.ext.autosummary` will automatically be loaded
+as well.)
 
 Sphinx config options
 =====================
@@ -38,7 +38,7 @@ numpydoc_citation_re : str
   should be mangled to avoid conflicts due to
   duplication across the documentation.  Defaults
   to ``[\w-]+``.
-numpydoc_use_blockqutoes : bool
+numpydoc_use_blockquotes : bool
   Until version 0.8, parameter definitions were shown as blockquotes, rather
   than in a definition list.  If your styling requires blockquotes, switch
   this config option to True.  This option will be removed in version 0.10.

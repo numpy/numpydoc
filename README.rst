@@ -11,16 +11,16 @@
 numpydoc -- Numpy's Sphinx extensions
 =====================================
 
-Numpy's documentation uses several custom extensions to Sphinx.  These
-are shipped in this ``numpydoc`` package, in case you want to make use
-of them in third-party projects.
+This package provides the ``numpydoc`` Sphinx extension for handling
+docstrings formatted according to the `NumPy documentation format
+<https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`__.
+The extension also adds the code description directives
+``np:function``, ``np-c:function``, etc.
 
-The ``numpydoc`` extension provides support for the Numpy docstring format in
-Sphinx, and adds the code description directives ``np:function``,
-``np-c:function``, etc.  that support the Numpy docstring syntax.
+For usage information, please refer to the `documentation
+<https://numpydoc.readthedocs.io/>`_.
 
-See `numpydoc docstring guide <https://numpydoc.readthedocs.io/en/latest/format.html>`_
-for how to write docs that use this extension, and the `user guide <https://numpydoc.readthedocs.io>`_
-
-Numpydoc inserts a hook into Sphinx's autodoc that converts docstrings
-following the Numpy/Scipy format to a form palatable to Sphinx.
+The `numpydoc docstring guide
+<https://numpydoc.readthedocs.io/en/latest/format.html>`_ explains how
+to write docs formatted for this extension, and the `user guide
+<https://numpydoc.readthedocs.io>`_ explains how to use it with Sphinx.
