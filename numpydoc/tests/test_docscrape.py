@@ -513,7 +513,7 @@ of the one-dimensional normal distribution to higher dimensions.
         This is not a real return value.  It exists to test
         anonymous return values.
 
-    no_description
+    **no_description**
         ..
 
 :Other Parameters:
