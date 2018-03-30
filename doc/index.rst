@@ -11,7 +11,7 @@ Sphinx, and adds the code description directives ``np:function``,
 ``np-c:function``, etc.  that support the Numpy docstring syntax.
 
 - Development: https://github.com/numpy/numpydoc/
-- Documentation: https://numpydoc.readthedocs.org/
+- Documentation: https://numpydoc.readthedocs.io/
 - PyPI: https://pypi.python.org/pypi/numpydoc/
 
 
