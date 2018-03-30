@@ -1179,6 +1179,32 @@ def test_class_members_doc_sphinx():
     """)
 
 
+def test_class_members_as_member_list():
+
+    class Foo:
+        @property
+        def an_attribute(self):
+            """Test attribute"""
+            return None
+
+    attr_doc = """:Attributes:
+
+    :obj:`an_attribute <an_attribute>`
+        Test attribute"""
+
+    assert attr_doc in str(SphinxClassDoc(Foo))
+
+    attr_doc2 = """.. rubric:: Attributes
+
+.. autosummary::
+   :toctree:
+
+   an_attribute"""
+
+    cfg = dict(attributes_as_param_list=False)
+    assert attr_doc2 in str(SphinxClassDoc(Foo, config=cfg))
+
+
 def test_templated_sections():
     doc = SphinxClassDoc(None, class_doc_txt,
                          config={'template': jinja2.Template('{{examples}}\n{{parameters}}')})
