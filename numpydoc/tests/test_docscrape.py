@@ -15,7 +15,7 @@ from numpydoc.docscrape import (
     ParseError
 )
 from numpydoc.docscrape_sphinx import (SphinxDocString, SphinxClassDoc,
-                                       SphinxFunctionDoc)
+                                       SphinxFunctionDoc, get_doc_object)
 from nose.tools import (assert_equal, assert_raises, assert_list_equal,
                         assert_true)
 
@@ -1197,6 +1197,33 @@ def test_templated_sections():
             Bbb.
 
     """)
+
+
+def test_nonstandard_property():
+    # test discovery of a property that does not satisfy isinstace(.., property)
+
+    class SpecialProperty(object):
+
+        def __init__(self, axis=0, doc=""):
+            self.axis = axis
+            self.__doc__ = doc
+
+        def __get__(self, obj, type):
+            if obj is None:
+                # Only instances have actual _data, not classes
+                return self
+            else:
+                return obj._data.axes[self.axis]
+
+        def __set__(self, obj, value):
+            obj._set_axis(self.axis, value)
+
+    class Dummy:
+
+        attr = SpecialProperty(doc="test attribute")
+
+    doc = get_doc_object(Dummy)
+    assert "test attribute" in str(doc)
 
 
 if __name__ == "__main__":
