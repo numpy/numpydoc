@@ -1226,6 +1226,32 @@ def test_nonstandard_property():
     assert "test attribute" in str(doc)
 
 
+def test_args_and_kwargs():
+    cfg = dict()
+    doc = SphinxDocString("""
+    Parameters
+    ----------
+    param1 : int
+        First parameter
+    *args : tuple
+        Arguments
+    **kwargs : dict
+        Keyword arguments
+    """, config=cfg)
+    line_by_line_compare(str(doc), """
+:Parameters:
+
+    **param1** : int
+        First parameter
+
+    **\*args** : tuple
+        Arguments
+
+    **\*\*kwargs** : dict
+        Keyword arguments
+    """)
+
+
 if __name__ == "__main__":
     import nose
     nose.run()
