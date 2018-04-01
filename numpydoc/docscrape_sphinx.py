@@ -88,6 +88,14 @@ class SphinxDocString(NumpyDocString):
                 out += ['']
         return out
 
+    def _escape_args_and_kwargs(self, name):
+        if name[:2] == '**':
+            return r'\*\*' + name[2:]
+        elif name[:1] == '*':
+            return r'\*' + name[1:]
+        else:
+            return name
+
     def _process_param(self, param, desc, fake_autosummary):
         """Determine how to display a parameter
 
@@ -122,7 +130,8 @@ class SphinxDocString(NumpyDocString):
         complicated to incorporate autosummary's signature mangling, as it
         relies on Sphinx's plugin mechanism.
         """
-        param = param.strip()
+        param = self._escape_args_and_kwargs(param.strip())
+        # param = param.strip()
         # XXX: If changing the following, please check the rendering when param
         # ends with '_', e.g. 'word_'
         # See https://github.com/numpy/numpydoc/pull/144
