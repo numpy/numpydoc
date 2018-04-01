@@ -2,12 +2,15 @@
 #   http://lint.travis-ci.org/
 language: python
 sudo: false
-python:
-  - 3.6
-  - 2.7
 env:
   - SPHINX_SPEC="Sphinx==1.2.3"
   - SPHINX_SPEC="Sphinx"
+matrix:
+  include:
+    - python: 3.6
+    - python: 2.7
+      env:
+        - SPHINXOPTS='-W'
 cache:
   directories:
     - $HOME/.cache/pip
@@ -23,5 +26,5 @@ script:
   - nosetests numpydoc
   - |
     cd ../doc
-    make html
-    make latexpdf
+    make SPHINXOPTS=$SPHINXOPTS html
+    make SPHINXOPTS=$SPHINXOPTS latexpdf

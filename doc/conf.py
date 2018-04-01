@@ -41,12 +41,18 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.pngmath',
     'sphinx.ext.todo',
     'numpydoc',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
 ]
+
+try:
+    import sphinx.ext.imgmath  # noqa
+except ImportError:
+    extensions.append('sphinx.ext.pngmath')
+else:
+    extensions.append('sphinx.ext.imgmath')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -149,13 +155,12 @@ else:
     html_sidebars = {}
 
 html_title = "%s v%s Manual" % (project, version)
-html_static_path = ['_static']
 html_last_updated_fmt = '%b %d, %Y'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []  # ['_static']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -264,5 +269,5 @@ latex_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('http://docs.python.org/', None),
-    'scikit-learn': ('http://scikit-learn.org/stable/', None),
+    'scikitlearn': ('http://scikit-learn.org/stable/', None),
 }
