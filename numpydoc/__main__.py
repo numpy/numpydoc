@@ -24,7 +24,7 @@ def main(argv=None):
 
     parts = args.import_path.split('.')
 
-    for split_point in range(len(parts), 0, -1)[::-1]:
+    for split_point in range(len(parts), 0, -1):
         try:
             path = '.'.join(parts[:split_point])
             obj = importlib.import_module(path)
