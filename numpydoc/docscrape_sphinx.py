@@ -7,6 +7,7 @@ import textwrap
 import pydoc
 import collections
 import os
+import locale
 
 from jinja2 import FileSystemLoader
 from jinja2.sandbox import SandboxedEnvironment
@@ -146,6 +147,9 @@ class SphinxDocString(NumpyDocString):
                 or inspect.isgetsetdescriptor(param_obj)):
             param_obj = None
         obj_doc = pydoc.getdoc(param_obj)
+        if isinstance(obj_doc, bytes):
+            # reverse the encoding performed in getdoc
+            obj_doc = obj_doc.decode(locale.getpreferredencoding())
 
         if not (param_obj and obj_doc):
             return display_param, desc

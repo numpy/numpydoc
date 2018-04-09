@@ -829,6 +829,27 @@ def test_unicode():
     assert isinstance(doc['Summary'][0], str)
     assert doc['Summary'][0] == 'öäöäöäöäöåååå'
 
+    class UnicodeProperty(object):
+        """Class with Attribute having its own non-ascii docstring
+
+        Attributes
+        ----------
+        testattr : None
+            Description here is overwritten
+        testattr2 : None
+            Description here is overwritten
+        """
+        @property
+        def testattr(self):
+            """öäöäöäöäöåååå"""
+
+        @property
+        def testattr2(self):
+            u"""öäöäöäöäöåååå"""
+
+    doc = SphinxClassDoc(UnicodeProperty)
+    assert isinstance(str(doc), str)
+
 
 def test_plot_examples():
     cfg = dict(use_plots=True)
