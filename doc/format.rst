@@ -413,6 +413,14 @@ The sections of a function's docstring are:
       >>> np.add([1, 2], [3, 4])
       array([4, 6])
 
+    The example code may be split across multiple lines, with each line after
+    the first starting with '... '::
+
+      >>> np.add([[1, 2], [3, 4]],
+      ...        [[5, 6], [7, 8]])
+      array([[ 6,  8],
+             [10, 12]])
+
     For tests with a result that is random or platform-dependent, mark the
     output as such::
 
