@@ -13,7 +13,7 @@ It will:
 - Extract the signature from the docstring, if it can't be determined
   otherwise.
 
-.. [1] https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt
+.. [1] https://github.com/numpy/numpydoc
 
 """
 from __future__ import division, absolute_import, print_function

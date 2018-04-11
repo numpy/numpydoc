@@ -12,8 +12,7 @@ numpydoc -- Numpy's Sphinx extensions
 =====================================
 
 This package provides the ``numpydoc`` Sphinx extension for handling
-docstrings formatted according to the `NumPy documentation format
-<https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`__.
+docstrings formatted according to the NumPy documentation format.
 The extension also adds the code description directives
 ``np:function``, ``np-c:function``, etc.
 
