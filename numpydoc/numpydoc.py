@@ -28,11 +28,11 @@ except ImportError:
     from collections import Callable
 import hashlib
 import itertools
-import logging
 
 from docutils.nodes import citation, Text, section, comment, reference
 import sphinx
-from sphinx.addnodes import pending_xref, desc_content, only
+from sphinx.addnodes import pending_xref, desc_content
+from sphinx.util import logging
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -181,7 +181,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
                 doc = unicode(doc)
             lines[:] = doc.split(u_NL)
         except:
-            logger.error('While processing numpydoc for %r', name)
+            logger.error('[numpydoc] While processing docstring for %r', name)
             raise
 
     if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
