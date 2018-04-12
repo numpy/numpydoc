@@ -236,6 +236,24 @@ class NumpyDocString(Mapping):
 
         return params
 
+    _role = r":(?P<role>\w+):"
+    _funcbacktick = r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`"
+    _funcplain = r"(?P<name2>[a-zA-Z0-9_.-]+)"
+    _funcname = r"(" + _role + _funcbacktick + r"|" + _funcplain + r")"
+    _funcnamenext = _funcname.replace('role', 'rolenext').replace('name', 'namenext')
+    _description = r"(?P<description>\s*:(\s+(?P<desc>\S+.*))?)?\s*$"
+    _func_rgx = re.compile(r"^\s*" + _funcname + r"\s*", re.X)
+    # _funcs_rgx = re.compile(r"^\s*" + _funcname + r"(?P<morefuncs>([,\s]\s*" + _funcnamenext + r")*)" + r"\s*", re.X)
+    _line_rgx = re.compile(r"^\s*"
+                           + r"(?P<allfuncs>"            #  group for all function names
+                           + _funcname
+                           + r"(?P<morefuncs>([,]\s+"
+                           + _funcnamenext + r")*)"
+                           + r")"                        #  end of "allfuncs"
+                           + r"(\s*,)?"                  #  Some function lists have a trailing comma
+                           + _description,
+                           re.X)
+
     _name_rgx = re.compile(r"^\s*(:(?P<role>\w+):"
                            r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`|"
                            r" (?P<name2>[a-zA-Z0-9_.-]+))\s*", re.X)
@@ -252,48 +270,62 @@ class NumpyDocString(Mapping):
 
         def parse_item_name(text):
             """Match ':role:`name`' or 'name'"""
-            m = self._name_rgx.match(text)
-            if m:
-                g = m.groups()
-                if g[1] is None:
-                    return g[3], None
-                else:
-                    return g[2], g[1]
-            raise ParseError("%s is not a item name" % text)
+            m = self._func_rgx.match(text)
+            if not m:
+                raise ParseError("%s is not a item name" % text)
+            role = m.groupdict().get('role')
+            if role:
+                name = m.group('name')
+            else:
+                name = m.group('name2')
+            return name, role, m
 
         def push_item(name, rest):
             if not name:
                 return
-            name, role = parse_item_name(name)
+            name, role, m2 = parse_item_name(name)
             items.append((name, list(rest), role))
             del rest[:]
 
-        current_func = None
         rest = []
 
         for line in content:
             if not line.strip():
                 continue
 
-            m = self._name_rgx.match(line)
-            if m and line[m.end():].strip().startswith(':'):
-                push_item(current_func, rest)
-                current_func, line = line[:m.end()], line[m.end():]
-                rest = [line.split(':', 1)[1].strip()]
-                if not rest[0]:
-                    rest = []
-            elif not line.startswith(' '):
-                push_item(current_func, rest)
-                current_func = None
-                if ',' in line:
-                    for func in line.split(','):
-                        if func.strip():
-                            push_item(func, [])
-                elif line.strip():
-                    current_func = line
-            elif current_func is not None:
+            ml = self._line_rgx.match(line)
+            description = None
+            if ml:
+                if 'description' in ml.groupdict():
+                    description = ml.groupdict().get('desc')
+            if not description and line.startswith(' '):
                 rest.append(line.strip())
-        push_item(current_func, rest)
+            elif ml:
+                funcs = []
+                text = ml.group('allfuncs')
+                while True:
+                    if not text.strip():
+                        break
+                    name, role, m2 = parse_item_name(text)
+                    # m2 = self._func_rgx.match(text)
+                    # if not m2:
+                    #     raise ParseError("%s is not a item name" % line)
+                    # role = m2.groupdict().get('role')
+                    # if role:
+                    #     name = m2.group('name')
+                    # else:
+                    #     name = m2.group('name2')
+                    funcs.append((name, role))
+                    text = text[m2.end():].strip()
+                    if text and text[0] == ',':
+                        text = text[1:].strip()
+                if description:
+                    rest = [description]
+                else:
+                    rest = []
+                items.append((funcs, rest))
+            else:
+                raise ParseError("%s is not a item name" % line)
         return items
 
     def _parse_index(self, section, content):
@@ -440,25 +472,35 @@ class NumpyDocString(Mapping):
             return []
         out = []
         out += self._str_header("See Also")
+        out += ['']
         last_had_desc = True
-        for func, desc, role in self['See Also']:
-            if role:
-                link = ':%s:`%s`' % (role, func)
-            elif func_role:
-                link = ':%s:`%s`' % (func_role, func)
-            else:
-                link = "`%s`_" % func
-            if desc or last_had_desc:
-                out += ['']
-                out += [link]
-            else:
-                out[-1] += ", %s" % link
+        for funcs, desc in self['See Also']:
+            assert isinstance(funcs, (list, tuple))
+            links = []
+            for func, role in funcs:
+                if role:
+                    link = ':%s:`%s`' % (role, func)
+                elif func_role:
+                    link = ':%s:`%s`' % (func_role, func)
+                else:
+                    link = "`%s`_" % func
+                links.append(link)
+            link = ', '.join(links)
+            out += [link]
             if desc:
                 out += self._str_indent([' '.join(desc)])
                 last_had_desc = True
             else:
                 last_had_desc = False
+                out += ['']
+        if last_had_desc:
+            out += ['']
         out += ['']
+        # if 1:
+        #     print()
+        #     for l in out:
+        #         print(repr(l))
+        #     # print(out)
         return out
 
     def _str_index(self):

@@ -709,36 +709,51 @@ def test_see_also():
              multiple lines
     func_f, func_g, :meth:`func_h`, func_j,
     func_k
+    func_f1, func_g1, :meth:`func_h1`, func_j1
+    func_f2, func_g2, :meth:`func_h2`, func_j2 : description of multiple
     :obj:`baz.obj_q`
     :obj:`~baz.obj_r`
     :class:`class_j`: fubar
         foobar
     """)
 
-    assert len(doc6['See Also']) == 13
-    for func, desc, role in doc6['See Also']:
-        if func in ('func_a', 'func_b', 'func_c', 'func_f',
-                    'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q',
-                    '~baz.obj_r'):
-            assert(not desc)
-        else:
-            assert(desc)
+    assert len(doc6['See Also']) == 10, str([len(doc6['See Also'])])
+    for funcs, desc in doc6['See Also']:
+        print(funcs, desc)
+        for func, role in funcs:
+            if func in ('func_a', 'func_b', 'func_c', 'func_f',
+                        'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q',
+                        'func_f1', 'func_g1', 'func_h1', 'func_j1',
+                        '~baz.obj_r'):
+                assert (not desc), str([func, desc])
+            elif func in ('func_f2', 'func_g2', 'func_h2', 'func_j2'):
+                    assert (desc), str([func, desc])
+            else:
+                assert(desc), str([func, desc])
 
-        if func == 'func_h':
-            assert role == 'meth'
-        elif func == 'baz.obj_q' or func == '~baz.obj_r':
-            assert role == 'obj'
-        elif func == 'class_j':
-            assert role == 'class'
-        else:
-            assert role is None
+            if func == 'func_h':
+                assert role == 'meth'
+            elif func == 'baz.obj_q' or func == '~baz.obj_r':
+                assert role == 'obj'
+            elif func == 'class_j':
+                assert role == 'class'
+            elif func in ['func_h1', 'func_h2']:
+                assert role == 'meth'
+            else:
+                assert role is None, str([func, role])
 
-        if func == 'func_d':
-            assert desc == ['some equivalent func']
-        elif func == 'foo.func_e':
-            assert desc == ['some other func over', 'multiple lines']
-        elif func == 'class_j':
-            assert desc == ['fubar', 'foobar']
+            if func == 'func_d':
+                assert desc == ['some equivalent func']
+            elif func == 'foo.func_e':
+                assert desc == ['some other func over', 'multiple lines']
+            elif func == 'class_j':
+                assert desc == ['fubar', 'foobar']
+            elif func == 'func_j2':
+                assert desc == ['description of multiple'], str([desc, ['description of multiple']])
+
+        # s = str(doc6)
+        # print(repr(s))
+        # assert 1 == 0
 
 
 def test_see_also_parse_error():
