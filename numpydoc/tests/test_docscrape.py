@@ -331,7 +331,7 @@ def _strip_blank_lines(s):
 
 
 def line_by_line_compare(a, b):
-    a = textwrap.dedent(a)
+    a = textwrap.dedent(a).replace(u'\u200B', '')
     b = textwrap.dedent(b)
     a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
     b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
@@ -717,9 +717,8 @@ def test_see_also():
         foobar
     """)
 
-    assert len(doc6['See Also']) == 10, str([len(doc6['See Also'])])
+    assert len(doc6['See Also']) == 10
     for funcs, desc in doc6['See Also']:
-        print(funcs, desc)
         for func, role in funcs:
             if func in ('func_a', 'func_b', 'func_c', 'func_f',
                         'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q',
@@ -748,12 +747,8 @@ def test_see_also():
                 assert desc == ['some other func over', 'multiple lines']
             elif func == 'class_j':
                 assert desc == ['fubar', 'foobar']
-            elif func == 'func_j2':
+            elif func in ['func_f2', 'func_g2', 'func_h2', 'func_j2']:
                 assert desc == ['description of multiple'], str([desc, ['description of multiple']])
-
-        # s = str(doc6)
-        # print(repr(s))
-        # assert 1 == 0
 
 
 def test_see_also_parse_error():

@@ -492,15 +492,10 @@ class NumpyDocString(Mapping):
                 last_had_desc = True
             else:
                 last_had_desc = False
-                out += ['']
+                out += self._str_indent(['\u200B'])
         if last_had_desc:
             out += ['']
         out += ['']
-        # if 1:
-        #     print()
-        #     for l in out:
-        #         print(repr(l))
-        #     # print(out)
         return out
 
     def _str_index(self):
