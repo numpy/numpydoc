@@ -331,7 +331,12 @@ def _strip_blank_lines(s):
 
 
 def line_by_line_compare(a, b):
-    a = textwrap.dedent(a).replace(u'\u200B', '')
+    if sys.version_info.major >= 3:
+        zerowidthspace = '\u200B'
+    else:
+        zerowidthspace = '\xE2\x80\x8B'
+
+    a = textwrap.dedent(a).replace(zerowidthspace, '')
     b = textwrap.dedent(b)
     a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
     b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
