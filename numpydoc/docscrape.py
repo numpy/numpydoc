@@ -258,10 +258,7 @@ class NumpyDocString(Mapping):
                            r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`|"
                            r" (?P<name2>[a-zA-Z0-9_.-]+))\s*", re.X)
 
-    if sys.version_info[0] >= 3:
-        zerowidthspace = '\u200B'
-    else:
-        zerowidthspace = '\xE2\x80\x8B'
+    empty_description = '..'
 
     def _parse_see_also(self, content):
         """
@@ -497,7 +494,7 @@ class NumpyDocString(Mapping):
                 last_had_desc = True
             else:
                 last_had_desc = False
-                out += self._str_indent([self.zerowidthspace])
+                out += self._str_indent([self.empty_description])
 
         if last_had_desc:
             out += ['']

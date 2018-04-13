@@ -331,17 +331,14 @@ def _strip_blank_lines(s):
 
 
 def line_by_line_compare(a, b):
-    if sys.version_info.major >= 3:
-        zerowidthspace = '\u200B'
-    else:
-        zerowidthspace = '\xE2\x80\x8B'
+    empty_description = '..'
+    rgx = re.compile(r"^\s+" + re.escape(empty_description) + "$")
 
-    a = textwrap.dedent(a).replace(zerowidthspace, '')
+    a = textwrap.dedent(a)
     b = textwrap.dedent(b)
-    a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
-    b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
+    a = [rgx.sub('', l.rstrip()) for l in _strip_blank_lines(a).split('\n')]
+    b = [rgx.sub('', l.rstrip()) for l in _strip_blank_lines(b).split('\n')]
     assert all(x == y for x, y in zip(a, b))
-
 
 def test_str():
     # doc_txt has the order of Notes and See Also sections flipped.
