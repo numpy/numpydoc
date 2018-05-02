@@ -211,14 +211,14 @@ def test_returns():
     assert desc[-1].endswith('distribution.')
 
     arg, arg_type, desc = doc['Returns'][1]
-    assert arg == 'list of str'
-    assert arg_type == ''
+    assert arg == ''
+    assert arg_type == 'list of str'
     assert desc[0].startswith('This is not a real')
     assert desc[-1].endswith('anonymous return values.')
 
     arg, arg_type, desc = doc['Returns'][2]
-    assert arg == 'no_description'
-    assert arg_type == ''
+    assert arg == ''
+    assert arg_type == 'no_description'
     assert not ''.join(desc).strip()
 
 
@@ -227,7 +227,7 @@ def test_yields():
     assert len(section) == 3
     truth = [('a', 'int', 'apples.'),
              ('b', 'int', 'bananas.'),
-             ('int', '', 'unknowns.')]
+             ('', 'int', 'unknowns.')]
     for (arg, arg_type, desc), (arg_, arg_type_, end) in zip(section, truth):
         assert arg == arg_
         assert arg_type == arg_type_
@@ -594,11 +594,11 @@ of the one-dimensional normal distribution to higher dimensions.
         In other words, each entry ``out[i,j,...,:]`` is an N-dimensional
         value drawn from the distribution.
 
-    **list of str**
+    list of str
         This is not a real return value.  It exists to test
         anonymous return values.
 
-    **no_description**
+    no_description
         ..
 
 :Other Parameters:
@@ -608,12 +608,12 @@ of the one-dimensional normal distribution to higher dimensions.
 
 :Raises:
 
-    **RuntimeError**
+    RuntimeError
         Some error
 
 :Warns:
 
-    **RuntimeWarning**
+    RuntimeWarning
         Some warning
 
 .. warning::
@@ -687,7 +687,7 @@ def test_sphinx_yields_str():
     **b** : int
         The number of bananas.
 
-    **int**
+    int
         The number of unknowns.
 """)
 
@@ -754,16 +754,18 @@ doc5 = NumpyDocString(
 
 def test_raises():
     assert len(doc5['Raises']) == 1
-    name, _, desc = doc5['Raises'][0]
-    assert name == 'LinAlgException'
-    assert desc == ['If array is singular.']
+    param = doc5['Raises'][0]
+    assert param.name == ''
+    assert param.type == 'LinAlgException'
+    assert param.desc == ['If array is singular.']
 
 
 def test_warns():
     assert len(doc5['Warns']) == 1
-    name, _, desc = doc5['Warns'][0]
-    assert name == 'SomeWarning'
-    assert desc == ['If needed']
+    param = doc5['Warns'][0]
+    assert param.name == ''
+    assert param.type == 'SomeWarning'
+    assert param.desc == ['If needed']
 
 
 def test_see_also():
@@ -995,7 +997,7 @@ def test_use_blockquotes():
 
             GHI
 
-        **JKL**
+        JKL
 
             MNO
     ''')
