@@ -17,7 +17,7 @@ cache:
 before_install:
   - sudo apt-get install texlive texlive-latex-extra latexmk
   - pip install --upgrade pip setuptools  # Upgrade pip and setuptools to get ones with `wheel` support
-  - pip install --find-links http://wheels.astropy.org/ --find-links http://wheels2.astropy.org/ --trusted-host wheels.astropy.org --trusted-host wheels2.astropy.org --use-wheel nose numpy matplotlib ${SPHINX_SPEC}
+  - pip install nose numpy matplotlib ${SPHINX_SPEC}
 script:
   - |
     python setup.py sdist
