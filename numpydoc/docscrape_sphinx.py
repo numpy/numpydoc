@@ -74,17 +74,18 @@ class SphinxDocString(NumpyDocString):
         if self[name]:
             out += self._str_field_list(name)
             out += ['']
-            for param, param_type, desc in self[name]:
-                if param_type:
-                    out += self._str_indent([typed_fmt % (param.strip(),
-                                                          param_type)])
+            for param in self[name]:
+                if param.type:
+                    out += self._str_indent([typed_fmt % (param.name.strip(),
+                                                          param.type)])
                 else:
-                    out += self._str_indent([untyped_fmt % param.strip()])
-                if desc and self.use_blockquotes:
-                    out += ['']
-                elif not desc:
-                    desc = ['..']
-                out += self._str_indent(desc, 8)
+                    out += self._str_indent([untyped_fmt % param.name.strip()])
+                if not param.desc:
+                    out += self._str_indent(['..'], 8)
+                else:
+                    if self.use_blockquotes:
+                        out += ['']
+                    out += self._str_indent(param.desc, 8)
                 out += ['']
         return out
 
@@ -200,13 +201,14 @@ class SphinxDocString(NumpyDocString):
         if self[name]:
             out += self._str_field_list(name)
             out += ['']
-            for param, param_type, desc in self[name]:
-                display_param, desc = self._process_param(param, desc,
+            for param in self[name]:
+                display_param, desc = self._process_param(param.name,
+                                                          param.desc,
                                                           fake_autosummary)
 
-                if param_type:
+                if param.type:
                     out += self._str_indent(['%s : %s' % (display_param,
-                                                          param_type)])
+                                                          param.type)])
                 else:
                     out += self._str_indent([display_param])
                 if desc and self.use_blockquotes:
@@ -243,11 +245,11 @@ class SphinxDocString(NumpyDocString):
 
             autosum = []
             others = []
-            for param, param_type, desc in self[name]:
-                param = param.strip()
+            for param in self[name]:
+                param = param._replace(name=param.name.strip())
 
                 # Check if the referenced member can have a docstring or not
-                param_obj = getattr(self._obj, param, None)
+                param_obj = getattr(self._obj, param.name, None)
                 if not (callable(param_obj)
                         or isinstance(param_obj, property)
                         or inspect.isdatadescriptor(param_obj)):
@@ -255,9 +257,9 @@ class SphinxDocString(NumpyDocString):
 
                 if param_obj and pydoc.getdoc(param_obj):
                     # Referenced object has a docstring
-                    autosum += ["   %s%s" % (prefix, param)]
+                    autosum += ["   %s%s" % (prefix, param.name)]
                 else:
-                    others.append((param, param_type, desc))
+                    others.append(param)
 
             if autosum:
                 out += ['.. autosummary::']
@@ -266,15 +268,17 @@ class SphinxDocString(NumpyDocString):
                 out += [''] + autosum
 
             if others:
-                maxlen_0 = max(3, max([len(x[0]) + 4 for x in others]))
+                maxlen_0 = max(3, max([len(p.name) + 4 for p in others]))
                 hdr = sixu("=") * maxlen_0 + sixu("  ") + sixu("=") * 10
                 fmt = sixu('%%%ds  %%s  ') % (maxlen_0,)
                 out += ['', '', hdr]
-                for param, param_type, desc in others:
-                    desc = sixu(" ").join(x.strip() for x in desc).strip()
-                    if param_type:
-                        desc = "(%s) %s" % (param_type, desc)
-                    out += [fmt % ("**" + param.strip() + "**", desc)]
+                for param in others:
+                    name = "**" + param.name.strip() + "**"
+                    desc = sixu(" ").join(x.strip()
+                                          for x in param.desc).strip()
+                    if param.type:
+                        desc = "(%s) %s" % (param.type, desc)
+                    out += [fmt % (name, desc)]
                 out += [hdr]
             out += ['']
         return out
