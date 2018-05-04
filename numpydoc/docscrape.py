@@ -106,6 +106,9 @@ class ParseError(Exception):
         return message
 
 
+Parameter = collections.namedtuple('Parameter', ['name', 'type', 'desc'])
+
+
 class NumpyDocString(collections.Mapping):
     """Parses a numpydoc string to an abstract representation
 
@@ -225,7 +228,7 @@ class NumpyDocString(collections.Mapping):
             desc = dedent_lines(desc)
             desc = strip_blank_lines(desc)
 
-            params.append((arg_name, arg_type, desc))
+            params.append(Parameter(arg_name, arg_type, desc))
 
         return params
 
@@ -409,13 +412,13 @@ class NumpyDocString(collections.Mapping):
         out = []
         if self[name]:
             out += self._str_header(name)
-            for param, param_type, desc in self[name]:
-                if param_type:
-                    out += ['%s : %s' % (param, param_type)]
+            for param in self[name]:
+                if param.type:
+                    out += ['%s : %s' % (param.name, param.type)]
                 else:
-                    out += [param]
-                if desc and ''.join(desc).strip():
-                    out += self._str_indent(desc)
+                    out += [param.name]
+                if param.desc and ''.join(param.desc).strip():
+                    out += self._str_indent(param.desc)
             out += ['']
         return out
 
@@ -591,7 +594,8 @@ class ClassDoc(NumpyDocString):
                     for name in sorted(items):
                         try:
                             doc_item = pydoc.getdoc(getattr(self._cls, name))
-                            doc_list.append((name, '', splitlines_x(doc_item)))
+                            doc_list.append(
+                                Parameter(name, '', splitlines_x(doc_item)))
                         except AttributeError:
                             pass  # method doesn't exist
                     self[field] = doc_list
