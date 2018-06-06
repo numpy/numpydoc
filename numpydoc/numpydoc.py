@@ -88,8 +88,8 @@ def relabel_references(app, doc):
         new_text = Text(new_label)
         label_node.replace(label_node[0], new_text)
 
-        for id in citation_node['backrefs']:
-            ref = doc.ids[id]
+        for id_ in citation_node['backrefs']:
+            ref = doc.ids[id_]
             ref_text = ref[0]
 
             # Sphinx has created pending_xref nodes with [reftext] text.
@@ -106,12 +106,12 @@ def clean_backrefs(app, doc, docname):
     # only::latex directive has resulted in citation backrefs without reference
     known_ref_ids = set()
     for ref in doc.traverse(reference, descend=True):
-        for id in ref['ids']:
-            known_ref_ids.add(id)
+        for id_ in ref['ids']:
+            known_ref_ids.add(id_)
     for citation_node in doc.traverse(citation, descend=True):
         # remove backrefs to non-existant refs
-        citation_node['backrefs'] = [id for id in citation_node['backrefs']
-                                     if id in known_ref_ids]
+        citation_node['backrefs'] = [id_ for id_ in citation_node['backrefs']
+                                     if id_ in known_ref_ids]
 
 
 DEDUPLICATION_TAG = '    !! processed by numpydoc !!'
