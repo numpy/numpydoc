@@ -22,3 +22,4 @@ Documentation
     install
     format
     example
+    validation
