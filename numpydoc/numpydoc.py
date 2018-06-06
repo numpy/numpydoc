@@ -24,10 +24,11 @@ import pydoc
 import inspect
 import collections
 import hashlib
+import itertools
 
-from docutils.nodes import citation, Text
+from docutils.nodes import citation, Text, section, comment
 import sphinx
-from sphinx.addnodes import pending_xref, desc_content
+from sphinx.addnodes import pending_xref
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -70,18 +71,35 @@ def rename_references(app, what, name, obj, options, lines):
                                             sixu('.. [%s]') % new_r)
 
 
-def _ascend(node, cls):
-    while node and not isinstance(node, cls):
-        node = node.parent
-    return node
+def _is_cite_in_numpydoc_docstring(citation_node):
+    # Find DEDUPLICATION_TAG in comment as last node of sibling section
+
+    # XXX: I failed to use citation_node.traverse to do this:
+    section_node = citation_node.parent
+    while not isinstance(section_node, section):
+        section_node = section_node.parent
+        if section_node is None:
+            return False
+
+    sibling_sections = itertools.chain(section_node.traverse(section,
+                                                             include_self=True,
+                                                             descend=False,
+                                                             siblings=True))
+    for sibling_section in sibling_sections:
+        if not sibling_section.children:
+            continue
+        last_child = sibling_section.children[-1]
+        if not isinstance(last_child, comment):
+            continue
+        if last_child.rawsource.strip() == DEDUPLICATION_TAG.strip():
+            return True
+    return False
 
 
 def relabel_references(app, doc):
     # Change 'hash-ref' to 'ref' in label text
     for citation_node in doc.traverse(citation):
-        if _ascend(citation_node, desc_content) is None:
-            # no desc node in ancestry -> not in a docstring
-            # XXX: should we also somehow check it's in a References section?
+        if not _is_cite_in_numpydoc_docstring(citation_node):
             continue
         label_node = citation_node[0]
         prefix, _, new_label = label_node[0].astext().partition('-')
