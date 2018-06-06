@@ -25,9 +25,9 @@ import inspect
 import collections
 import hashlib
 
-from docutils.nodes import citation, Text
+from docutils.nodes import citation, Text, reference
 import sphinx
-from sphinx.addnodes import pending_xref, desc_content
+from sphinx.addnodes import pending_xref, desc_content, only
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -42,7 +42,6 @@ else:
 
 
 HASH_LEN = 12
-
 
 def rename_references(app, what, name, obj, options, lines):
     # decorate reference numbers so that there are no duplicates
@@ -101,6 +100,18 @@ def relabel_references(app, doc):
             for xref_node in ref.parent.traverse(matching_pending_xref):
                 xref_node.replace(xref_node[0], Text('[%s]' % new_text))
             ref.replace(ref_text, new_text.copy())
+
+
+def clean_backrefs(app, doc, docname):
+    # only::latex directive has resulted in citation backrefs without reference
+    known_ref_ids = set()
+    for ref in doc.traverse(reference, descend=True):
+        for id in ref['ids']:
+            known_ref_ids.add(id)
+    for citation_node in doc.traverse(citation, descend=True):
+        # remove backrefs to non-existant refs
+        citation_node['backrefs'] = [id for id in citation_node['backrefs']
+                                     if id in known_ref_ids]
 
 
 DEDUPLICATION_TAG = '    !! processed by numpydoc !!'
@@ -179,6 +190,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
     app.connect('doctree-read', relabel_references)
+    app.connect('doctree-resolved', clean_backrefs)
     app.add_config_value('numpydoc_edit_link', None, False)
     app.add_config_value('numpydoc_use_plots', None, False)
     app.add_config_value('numpydoc_use_blockquotes', None, False)
