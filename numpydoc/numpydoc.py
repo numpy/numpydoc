@@ -28,7 +28,7 @@ import itertools
 
 from docutils.nodes import citation, Text, section, comment
 import sphinx
-from sphinx.addnodes import pending_xref
+from sphinx.addnodes import pending_xref, desc_content
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -76,12 +76,17 @@ def _is_cite_in_numpydoc_docstring(citation_node):
 
     # XXX: I failed to use citation_node.traverse to do this:
     section_node = citation_node.parent
-    while not isinstance(section_node, section):
+
+    def is_docstring_section(node):
+        return isinstance(node, (section, desc_content))
+
+    while not is_docstring_section(section_node):
+        print(section_node)
         section_node = section_node.parent
         if section_node is None:
             return False
 
-    sibling_sections = itertools.chain(section_node.traverse(section,
+    sibling_sections = itertools.chain(section_node.traverse(is_docstring_section,
                                                              include_self=True,
                                                              descend=False,
                                                              siblings=True))
