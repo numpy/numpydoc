@@ -247,59 +247,15 @@ See the next note for more information
 
 Notes
 -----
-That should break...
+That should merge
 """
-    assert_raises(ValueError, NumpyDocString, doc_text)
 
-    # if we have a numpydoc object, we know where the error came from
-    class Dummy(object):
-        """
-        Dummy class.
+    target = ['See the next note for more information',
+              '',
+              'That should merge']
 
-        Notes
-        -----
-        First note.
-
-        Notes
-        -----
-        Second note.
-
-        """
-        def spam(self, a, b):
-            """Spam\n\nSpam spam."""
-            pass
-
-        def ham(self, c, d):
-            """Cheese\n\nNo cheese."""
-            pass
-
-    def dummy_func(arg):
-        """
-        Dummy function.
-
-        Notes
-        -----
-        First note.
-
-        Notes
-        -----
-        Second note.
-        """
-
-    try:
-        SphinxClassDoc(Dummy)
-    except ValueError as e:
-        # python 3 version or python 2 version
-        assert_true("test_section_twice.<locals>.Dummy" in str(e)
-                    or 'test_docscrape.Dummy' in str(e))
-
-    try:
-        SphinxFunctionDoc(dummy_func)
-    except ValueError as e:
-        # python 3 version or python 2 version
-        assert_true("test_section_twice.<locals>.dummy_func" in str(e)
-                    or 'function dummy_func' in str(e))
-
+    doc = NumpyDocString(doc_text)
+    assert doc['Notes'] == target
 
 def test_notes():
     assert doc['Notes'][0].startswith('Instead')

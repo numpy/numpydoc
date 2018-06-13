@@ -131,8 +131,8 @@ class NumpyDocString(collections.Mapping):
         'See Also': [],
         'Notes': [],
         'Warnings': [],
-        'References': '',
-        'Examples': '',
+        'References': [],
+        'Examples': [],
         'index': {}
     }
 
@@ -350,20 +350,25 @@ class NumpyDocString(collections.Mapping):
             if not section.startswith('..'):
                 section = (s.capitalize() for s in section.split(' '))
                 section = ' '.join(section)
-                if self.get(section):
-                    self._error_location("The section %s appears twice"
-                                         % section)
 
             if section in ('Parameters', 'Returns', 'Yields', 'Raises',
                            'Warns', 'Other Parameters', 'Attributes',
                            'Methods'):
-                self[section] = self._parse_param_list(content)
+                existing_content = self.get(section, [])
+                self[section] = (existing_content +
+                                 self._parse_param_list(content))
+
             elif section.startswith('.. index::'):
                 self['index'] = self._parse_index(section, content)
             elif section == 'See Also':
-                self['See Also'] = self._parse_see_also(content)
+                existing_content = self.get('See Also', [])
+                self['See Also'] = (existing_content +
+                                    self._parse_see_also(content))
             else:
-                self[section] = content
+                existing_content = self.get(section, [])
+                if existing_content:
+                    existing_content += ['']
+                self[section] = existing_content + content
 
     def _error_location(self, msg, error=True):
         if hasattr(self, '_obj'):
