@@ -166,8 +166,8 @@ def test_extended_summary():
 
 def test_parameters():
     assert len(doc['Parameters']) == 3
-    names = [n for n,_,_ in doc['Parameters']]
-    assert all(a == b for a, b in zip(names, ['mean','cov','shape']))
+    names = [n for n, _, _ in doc['Parameters']]
+    assert all(a == b for a, b in zip(names, ['mean', 'cov', 'shape']))
 
     arg, arg_type, desc = doc['Parameters'][1]
     assert arg_type == '(N, N) ndarray'
@@ -177,7 +177,7 @@ def test_parameters():
 
 def test_other_parameters():
     assert len(doc['Other Parameters']) == 1
-    assert [n for n,_,_ in doc['Other Parameters']] == ['spam']
+    assert [n for n, _, _ in doc['Other Parameters']] == ['spam']
     arg, arg_type, desc = doc['Other Parameters'][0]
     assert arg_type == 'parrot'
     assert desc[0].startswith('A parrot off its mortal coil')
@@ -668,14 +668,14 @@ doc5 = NumpyDocString(
 
 def test_raises():
     assert len(doc5['Raises']) == 1
-    name,_,desc = doc5['Raises'][0]
+    name, _, desc = doc5['Raises'][0]
     assert name == 'LinAlgException'
     assert desc == ['If array is singular.']
 
 
 def test_warns():
     assert len(doc5['Warns']) == 1
-    name,_,desc = doc5['Warns'][0]
+    name, _, desc = doc5['Warns'][0]
     assert name == 'SomeWarning'
     assert desc == ['If needed']
 
@@ -738,7 +738,7 @@ def test_see_also_parse_error():
         NumpyDocString(text)
 
     s1 = str(r":func:`~foo` is not a item name in '\n    z(x,theta)\n\n    See Also\n    --------\n    :func:`~foo`\n    '")
-    s2 = str(err.value) 
+    s2 = str(err.value)
     assert s1 == s2
 
 
