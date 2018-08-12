@@ -461,7 +461,7 @@ class NumpyDocString(collections.Mapping):
         out = []
         output_index = False
         default_index = idx.get('default', '')
-        if len(default_index):
+        if default_index:
             output_index = True
         out += ['.. index:: %s' % default_index]
         for section, references in idx.items():
