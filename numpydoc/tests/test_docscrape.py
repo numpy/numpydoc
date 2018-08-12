@@ -468,6 +468,22 @@ int
 .. index:: """)
 
 
+def test_no_index_in_str():
+    assert "index" not in str(NumpyDocString("""Test idx
+
+    """))
+
+    assert "index" in str(NumpyDocString("""Test idx
+
+    .. index :: random
+    """))
+
+    assert "index" in str(NumpyDocString("""Test idx
+
+    .. index ::
+        foo
+    """))
+
 def test_sphinx_str():
     sphinx_doc = SphinxDocString(doc_txt)
     line_by_line_compare(str(sphinx_doc),
