@@ -150,6 +150,11 @@ int
 doc_yields = NumpyDocString(doc_yields_txt)
 
 
+def test_to_docstring():
+    # Simple test, this should just not raise
+    NumpyDocString(str(doc))
+
+
 def test_signature():
     assert doc['Signature'].startswith('numpy.multivariate_normal(')
     assert doc['Signature'].endswith('spam=None)')
@@ -402,9 +407,9 @@ Certain warnings apply.
 See Also
 --------
 
-`some`_, `other`_, `funcs`_
+some, other, funcs
 
-`otherfunc`_
+otherfunc
     relationship
 
 Notes

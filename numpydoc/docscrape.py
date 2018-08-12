@@ -442,7 +442,7 @@ class NumpyDocString(collections.Mapping):
             elif func_role:
                 link = ':%s:`%s`' % (func_role, func)
             else:
-                link = "`%s`_" % func
+                link = "%s" % func
             if desc or last_had_desc:
                 out += ['']
                 out += [link]
