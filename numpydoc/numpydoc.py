@@ -176,6 +176,8 @@ def setup(app, get_doc_object_=get_doc_object):
     global get_doc_object
     get_doc_object = get_doc_object_
 
+    app.setup_extension('sphinx.ext.autosummary')
+
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
     app.connect('doctree-read', relabel_references)
@@ -190,8 +192,6 @@ def setup(app, get_doc_object_=get_doc_object):
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
     app.add_domain(NumpyCDomain)
-
-    app.setup_extension('sphinx.ext.autosummary')
 
     metadata = {'version': __version__,
                 'parallel_read_safe': True}
