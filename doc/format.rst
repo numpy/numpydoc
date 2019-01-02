@@ -119,6 +119,8 @@ The sections of a function's docstring are:
 
      """
 
+.. highlight:: rst
+
 2. **Deprecation warning**
 
    A section (use if applicable) to warn users that the object is deprecated.
@@ -276,46 +278,46 @@ The sections of a function's docstring are:
 
 10. **Warnings**
 
-   An optional section with cautions to the user in free text/reST.
+    An optional section with cautions to the user in free text/reST.
 
 11. **See Also**
 
-   An optional section used to refer to related code.  This section
-   can be very useful, but should be used judiciously.  The goal is to
-   direct users to other functions they may not be aware of, or have
-   easy means of discovering (by looking at the module docstring, for
-   example).  Routines whose docstrings further explain parameters
-   used by this function are good candidates.
+    An optional section used to refer to related code.  This section
+    can be very useful, but should be used judiciously.  The goal is to
+    direct users to other functions they may not be aware of, or have
+    easy means of discovering (by looking at the module docstring, for
+    example).  Routines whose docstrings further explain parameters
+    used by this function are good candidates.
 
-   As an example, for ``numpy.mean`` we would have::
+    As an example, for ``numpy.mean`` we would have::
 
-     See Also
-     --------
-     average : Weighted average
+      See Also
+      --------
+      average : Weighted average
 
-   When referring to functions in the same sub-module, no prefix is
-   needed, and the tree is searched upwards for a match.
+    When referring to functions in the same sub-module, no prefix is
+    needed, and the tree is searched upwards for a match.
 
-   Prefix functions from other sub-modules appropriately.  E.g.,
-   whilst documenting the ``random`` module, refer to a function in
-   ``fft`` by
+    Prefix functions from other sub-modules appropriately.  E.g.,
+    whilst documenting the ``random`` module, refer to a function in
+    ``fft`` by
 
-   ::
+    ::
 
-     fft.fft2 : 2-D fast discrete Fourier transform
+      fft.fft2 : 2-D fast discrete Fourier transform
 
-   When referring to an entirely different module::
+    When referring to an entirely different module::
 
-     scipy.random.norm : Random variates, PDFs, etc.
+      scipy.random.norm : Random variates, PDFs, etc.
 
-   Functions may be listed without descriptions, and this is
-   preferable if the functionality is clear from the function name::
+    Functions may be listed without descriptions, and this is
+    preferable if the functionality is clear from the function name::
 
-     See Also
-     --------
-     func_a : Function a with its description.
-     func_b, func_c_, func_d
-     func_e
+      See Also
+      --------
+      func_a : Function a with its description.
+      func_b, func_c_, func_d
+      func_e
 
 12. **Notes**
 
@@ -393,6 +395,8 @@ The sections of a function's docstring are:
         docstring, the table markup will be broken by numpydoc processing.  See
         `numpydoc issue #130 <https://github.com/numpy/numpydoc/issues/130>`_
 
+.. highlight:: pycon
+
 14. **Examples**
 
     An optional section for examples, using the `doctest
@@ -464,6 +468,7 @@ The sections of a function's docstring are:
     `matplotlib.sphinxext.plot_directive` is loaded as a Sphinx extension in
     ``conf.py``.
 
+.. highlight:: rst
 
 Documenting classes
 -------------------
@@ -501,7 +506,9 @@ In general, it is not necessary to list class methods.  Those that are
 not part of the public API have names that start with an underscore.
 In some cases, however, a class may have a great many methods, of
 which only a few are relevant (e.g., subclasses of ndarray).  Then, it
-becomes useful to have an additional **Methods** section::
+becomes useful to have an additional **Methods** section:
+
+.. code-block:: python
 
   class Photo(ndarray):
       """
