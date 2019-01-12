@@ -8,7 +8,11 @@ import textwrap
 import re
 import pydoc
 from warnings import warn
-import collections
+from collections import namedtuple
+try:
+    from collections.abc import Callable, Mapping
+except ImportError:
+    from collections import Callable, Mapping
 import copy
 import sys
 
@@ -106,10 +110,10 @@ class ParseError(Exception):
         return message
 
 
-Parameter = collections.namedtuple('Parameter', ['name', 'type', 'desc'])
+Parameter = namedtuple('Parameter', ['name', 'type', 'desc'])
 
 
-class NumpyDocString(collections.Mapping):
+class NumpyDocString(Mapping):
     """Parses a numpydoc string to an abstract representation
 
     Instances define a mapping from section title to structured data.
@@ -607,7 +611,7 @@ class ClassDoc(NumpyDocString):
         return [name for name, func in inspect.getmembers(self._cls)
                 if ((not name.startswith('_')
                      or name in self.extra_public_methods)
-                    and isinstance(func, collections.Callable)
+                    and isinstance(func, Callable)
                     and self._is_show_member(name))]
 
     @property

@@ -5,7 +5,10 @@ import re
 import inspect
 import textwrap
 import pydoc
-import collections
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 import os
 
 from jinja2 import FileSystemLoader
@@ -413,7 +416,7 @@ def get_doc_object(obj, what=None, doc=None, config={}, builder=None):
             what = 'class'
         elif inspect.ismodule(obj):
             what = 'module'
-        elif isinstance(obj, collections.Callable):
+        elif isinstance(obj, Callable):
             what = 'function'
         else:
             what = 'object'
