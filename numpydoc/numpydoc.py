@@ -22,7 +22,10 @@ import sys
 import re
 import pydoc
 import inspect
-import collections
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 import hashlib
 
 from docutils.nodes import citation, Text
@@ -156,7 +159,7 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
             'initializes x; see ' in pydoc.getdoc(obj.__init__))):
         return '', ''
 
-    if not (isinstance(obj, collections.Callable) or
+    if not (isinstance(obj, Callable) or
             hasattr(obj, '__argspec_is_invalid_')):
         return
 
