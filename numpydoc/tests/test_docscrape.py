@@ -631,13 +631,13 @@ doc3 = NumpyDocString("""
 
 def test_escape_stars():
     signature = str(doc3).split('\n')[0]
-    assert signature == 'my_signature(\*params, \*\*kwds)'
+    assert signature == r'my_signature(\*params, \*\*kwds)'
 
     def my_func(a, b, **kwargs):
         pass
 
     fdoc = FunctionDoc(func=my_func)
-    assert fdoc['Signature'] == 'my_func(a, b, \*\*kwargs)'
+    assert fdoc['Signature'] == r'my_func(a, b, \*\*kwargs)'
 
 
 doc4 = NumpyDocString(
@@ -1238,7 +1238,7 @@ def test_args_and_kwargs():
     **kwargs : dict
         Keyword arguments
     """, config=cfg)
-    line_by_line_compare(str(doc), """
+    line_by_line_compare(str(doc), r"""
 :Parameters:
 
     **param1** : int

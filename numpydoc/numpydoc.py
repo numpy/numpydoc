@@ -53,7 +53,7 @@ def rename_references(app, what, name, obj, options, lines):
     references = set()
     for line in lines:
         line = line.strip()
-        m = re.match(sixu('^.. \\[(%s)\\]') % app.config.numpydoc_citation_re,
+        m = re.match(sixu(r'^.. \[(%s)\]') % app.config.numpydoc_citation_re,
                      line, re.I)
         if m:
             references.add(m.group(1))
