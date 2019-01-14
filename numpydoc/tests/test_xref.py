@@ -1,7 +1,6 @@
 # -*- encoding:utf-8 -*-
 from __future__ import division, absolute_import, print_function
 
-from nose.tools import assert_equal
 from numpydoc.xref import make_xref_param_type
 
 xref_aliases = {
@@ -19,7 +18,7 @@ xref_aliases = {
 }
 
 # Comes mainly from numpy
-data = """
+data = r"""
 (...) array_like, float, optional
 (...) :term:`numpy:array_like`, :xref_param_type:`float`, optional
 
@@ -125,4 +124,4 @@ def test_make_xref_param_type():
             xref_aliases,
             xref_ignore
         )
-        assert_equal(result, expected_result)
+        assert result == expected_result

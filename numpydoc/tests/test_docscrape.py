@@ -387,7 +387,9 @@ def line_by_line_compare(a, b):
     b = textwrap.dedent(b)
     a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
     b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
-    assert all(x == y for x, y in zip(a, b)), str([[x, y] for x, y in zip(a, b) if x != y])
+    assert len(a) == len(b)
+    for ii, (aa, bb) in enumerate(zip(a, b)):
+        assert aa == bb
 
 
 def test_str():
@@ -1450,33 +1452,33 @@ out : array
 """
 
 
-xref_doc_txt_expected = """
+xref_doc_txt_expected = r"""
 Test xref in Parameters, Other Parameters and Returns
 
 
 :Parameters:
 
-    p1 : :xref_param_type:`int`
+    **p1** : :xref_param_type:`int`
         Integer value
 
-    p2 : :xref_param_type:`float`, optional
+    **p2** : :xref_param_type:`float`, optional
         Integer value
 
 :Returns:
 
-    out : :xref_param_type:`array <numpy.ndarray>`
+    **out** : :xref_param_type:`array <numpy.ndarray>`
         Numerical return value
 
 
 :Other Parameters:
 
-    p3 : :xref_param_type:`list`\[:xref_param_type:`int`]
+    **p3** : :xref_param_type:`list`\[:xref_param_type:`int`]
         List of integers
 
-    p4 : :class:`pandas.DataFrame`
+    **p4** : :class:`pandas.DataFrame`
         A dataframe
 
-    p5 : :term:`python:sequence` of :xref_param_type:`int`
+    **p5** : :term:`python:sequence` of :xref_param_type:`int`
         A sequence
 """
 

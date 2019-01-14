@@ -66,8 +66,8 @@ CONTAINER_CHARS = set('[](){}')
 
 
 def make_xref_param_type(param_type, xref_aliases, xref_ignore):
-    """
-    Enclose str in a role that creates a cross-reference
+    """Enclose str in a role that creates a cross-reference.
+
     The role ``xref_param_type`` *may be* added to any token
     that looks like type information and no other. The
     function tries to be clever and catch type information
@@ -165,21 +165,25 @@ def xref_param_type_role(role, rawtext, text, lineno, inliner,
     Add a pending_xref for the param_type of a field list
     """
     has_title, title, target = split_explicit_title(text)
+    env = inliner.document.settings.env
     if has_title:
         target = target.lstrip('~')
     else:
         if target.startswith(('~', '.')):
             prefix, target = target[0], target[1:]
             if prefix == '.':
-                env = inliner.document.settings.env
                 modname = env.ref_context.get('py:module')
                 target = target[1:]
                 target = '%s.%s' % (modname, target)
             elif prefix == '~':
                 title = target.split('.')[-1]
 
-    contnode = nodes.Text(title, title)
-    node = addnodes.pending_xref('', refdomain='py', refexplicit=False,
-                                 reftype='class', reftarget=target)
-    node += contnode
-    return [node], []
+    domain = 'py'
+    contnode = nodes.literal(title, title)
+    refnode = addnodes.pending_xref('', refdomain=domain, refexplicit=False,
+                                    reftype='class', reftarget=target)
+    refnode += contnode
+    # attach information about the current scope
+    if env:
+        env.get_domain(domain).process_field_xref(refnode)
+    return [refnode], []

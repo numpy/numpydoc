@@ -225,14 +225,16 @@ class SphinxDocString(NumpyDocString):
                     parts.append(display_param)
                 param_type = param.type
                 if param_type:
+                    param_type = param.type
                     if self.xref_param_type:
                         param_type = make_xref_param_type(
                             param_type,
                             self.xref_aliases,
                             self.xref_ignore)
-                    parts.append(param_type)
-                out += self._str_indent([' : '.join(parts)])
-
+(??)                    out += self._str_indent(['%s : %s' % (display_param,
+(??)                                                          param.type)])
+(??)                else:
+(??)                    out += self._str_indent([display_param])
                 if desc and self.use_blockquotes:
                     out += ['']
                 elif not desc:

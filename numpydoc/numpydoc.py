@@ -236,7 +236,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_class_members_toctree', True, True)
     app.add_config_value('numpydoc_citation_re', '[a-z0-9_.-]+', True)
     app.add_config_value('numpydoc_attributes_as_param_list', True, True)
-    app.add_config_value('numpydoc_xref_param_type', True, True)
+    app.add_config_value('numpydoc_xref_param_type', False, True)
     app.add_config_value('numpydoc_xref_aliases', dict(), True)
     app.add_config_value('numpydoc_xref_ignore', set(), True)
 

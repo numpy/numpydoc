@@ -51,7 +51,13 @@ numpydoc_xref_param_type : bool
   Whether to create cross-references for the parameter types in the
   ``Parameters``, ``Other Parameters``, ``Returns`` and ``Yields``
   sections of the docstring.
-  ``True`` by default.
+  ``False`` by default.
+
+  .. note:: Depending on the link types, the CSS styles might be different.
+            consider overridding e.g. ``span.classifier a span.xref`` and
+            ``span.classifier a code.docutils.literal.notranslate``
+            CSS classes to achieve a uniform appearance.
+
 numpydoc_xref_aliases : dict
   Mappings to fully qualified paths (or correct ReST references) for the
   aliases/shortcuts used when specifying the types of parameters.
@@ -84,7 +90,6 @@ numpydoc_xref_aliases : dict
 
    This option depends on the ``numpydoc_xref_param_type`` option
    being ``True``.
-
 numpydoc_xref_ignore : set
     Words not to cross-reference. Most likely, these are common words
     used in parameter type descriptions that may be confused for
@@ -93,7 +98,6 @@ numpydoc_xref_ignore : set
         numpydoc_xref_ignore = {'type', 'optional', 'default'}
 
     The default is an empty set.
-
 numpydoc_edit_link : bool
   .. deprecated:: edit your HTML template instead
 
