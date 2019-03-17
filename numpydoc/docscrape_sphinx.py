@@ -147,7 +147,8 @@ class SphinxDocString(NumpyDocString):
         param_obj = getattr(self._obj, param, None)
         if not (callable(param_obj)
                 or isinstance(param_obj, property)
-                or inspect.isgetsetdescriptor(param_obj)):
+                or inspect.isgetsetdescriptor(param_obj)
+                or inspect.ismemberdescriptor(param_obj)):
             param_obj = None
         obj_doc = pydoc.getdoc(param_obj)
 
