@@ -22,7 +22,10 @@ import sys
 import re
 import pydoc
 import inspect
-import collections
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 import hashlib
 
 from docutils.nodes import citation, Text
@@ -32,7 +35,7 @@ from sphinx.addnodes import pending_xref, desc_content
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
 
-from .docscrape_sphinx import get_doc_object, SphinxDocString
+from .docscrape_sphinx import get_doc_object
 from . import __version__
 
 if sys.version_info[0] >= 3:
@@ -157,13 +160,13 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
             'initializes x; see ' in pydoc.getdoc(obj.__init__))):
         return '', ''
 
-    if not (isinstance(obj, collections.Callable) or
+    if not (isinstance(obj, Callable) or
             hasattr(obj, '__argspec_is_invalid_')):
         return
 
     if not hasattr(obj, '__doc__'):
         return
-    doc = SphinxDocString(pydoc.getdoc(obj))
+    doc = get_doc_object(obj)
     sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
     if sig:
         sig = re.sub(sixu("^[^(]*"), sixu(""), sig)
@@ -176,6 +179,8 @@ def setup(app, get_doc_object_=get_doc_object):
 
     global get_doc_object
     get_doc_object = get_doc_object_
+
+    app.setup_extension('sphinx.ext.autosummary')
 
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
@@ -191,8 +196,6 @@ def setup(app, get_doc_object_=get_doc_object):
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
     app.add_domain(NumpyCDomain)
-
-    app.setup_extension('sphinx.ext.autosummary')
 
     metadata = {'version': __version__,
                 'parallel_read_safe': True}
