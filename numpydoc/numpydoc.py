@@ -35,7 +35,7 @@ from sphinx.addnodes import pending_xref, desc_content
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
 
-from .docscrape_sphinx import get_doc_object, SphinxDocString
+from .docscrape_sphinx import get_doc_object
 from . import __version__
 
 if sys.version_info[0] >= 3:
@@ -165,7 +165,7 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
 
     if not hasattr(obj, '__doc__'):
         return
-    doc = SphinxDocString(pydoc.getdoc(obj))
+    doc = get_doc_object(obj)
     sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
     if sig:
         sig = re.sub(sixu("^[^(]*"), sixu(""), sig)
