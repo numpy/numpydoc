@@ -464,12 +464,20 @@ class NumpyDocString(Mapping):
     def _str_index(self):
         idx = self['index']
         out = []
-        out += ['.. index:: %s' % idx.get('default', '')]
+        output_index = False
+        default_index = idx.get('default', '')
+        if default_index:
+            output_index = True
+        out += ['.. index:: %s' % default_index]
         for section, references in idx.items():
             if section == 'default':
                 continue
+            output_index = True
             out += ['   :%s: %s' % (section, ', '.join(references))]
-        return out
+        if output_index:
+            return out
+        else:
+            return ''
 
     def __str__(self, func_role=''):
         out = []
