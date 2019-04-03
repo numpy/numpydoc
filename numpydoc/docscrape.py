@@ -243,16 +243,16 @@ class NumpyDocString(Mapping):
     _funcnamenext = _funcname.replace('role', 'rolenext').replace('name', 'namenext')
     _description = r"(?P<description>\s*:(\s+(?P<desc>\S+.*))?)?\s*$"
     _func_rgx = re.compile(r"^\s*" + _funcname + r"\s*", re.X)
-    # _funcs_rgx = re.compile(r"^\s*" + _funcname + r"(?P<morefuncs>([,\s]\s*" + _funcnamenext + r")*)" + r"\s*", re.X)
-    _line_rgx = re.compile(r"^\s*"
-                           + r"(?P<allfuncs>"            #  group for all function names
-                           + _funcname
-                           + r"(?P<morefuncs>([,]\s+"
-                           + _funcnamenext + r")*)"
-                           + r")"                        #  end of "allfuncs"
-                           + r"(\s*,)?"                  #  Some function lists have a trailing comma
-                           + _description,
-                           re.X)
+    _line_rgx = re.compile(
+        r"^\s*"
+        + r"(?P<allfuncs>"          # group for all function names
+        + _funcname
+        + r"(?P<morefuncs>([,]\s+"
+        + _funcnamenext + r")*)"
+        + r")"                      # end of "allfuncs"
+        + r"(\s*,)?"                # Some function lists have a trailing comma
+        + _description,
+        re.X)
 
     _name_rgx = re.compile(r"^\s*(:(?P<role>\w+):"
                            r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`|"
