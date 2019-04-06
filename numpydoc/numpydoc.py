@@ -22,18 +22,21 @@ import sys
 import re
 import pydoc
 import inspect
-import collections
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 import hashlib
 import itertools
 
-from docutils.nodes import citation, Text, section, comment
+from docutils.nodes import citation, Text, section, comment, reference
 import sphinx
-from sphinx.addnodes import pending_xref, desc_content
+from sphinx.addnodes import pending_xref, desc_content, only
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
 
-from .docscrape_sphinx import get_doc_object, SphinxDocString
+from .docscrape_sphinx import get_doc_object
 from . import __version__
 
 if sys.version_info[0] >= 3:
@@ -44,14 +47,14 @@ else:
 
 HASH_LEN = 12
 
-
 def rename_references(app, what, name, obj, options, lines):
     # decorate reference numbers so that there are no duplicates
     # these are later undecorated in the doctree, in relabel_references
     references = set()
     for line in lines:
         line = line.strip()
-        m = re.match(sixu('^.. \\[(%s)\\]') % app.config.numpydoc_citation_re,
+        m = re.match(sixu(r'^\.\. +\[(%s)\]') %
+                     app.config.numpydoc_citation_re,
                      line, re.I)
         if m:
             references.add(m.group(1))
@@ -111,8 +114,8 @@ def relabel_references(app, doc):
         new_text = Text(new_label)
         label_node.replace(label_node[0], new_text)
 
-        for id in citation_node['backrefs']:
-            ref = doc.ids[id]
+        for id_ in citation_node['backrefs']:
+            ref = doc.ids[id_]
             ref_text = ref[0]
 
             # Sphinx has created pending_xref nodes with [reftext] text.
@@ -123,6 +126,18 @@ def relabel_references(app, doc):
             for xref_node in ref.parent.traverse(matching_pending_xref):
                 xref_node.replace(xref_node[0], Text('[%s]' % new_text))
             ref.replace(ref_text, new_text.copy())
+
+
+def clean_backrefs(app, doc, docname):
+    # only::latex directive has resulted in citation backrefs without reference
+    known_ref_ids = set()
+    for ref in doc.traverse(reference, descend=True):
+        for id_ in ref['ids']:
+            known_ref_ids.add(id_)
+    for citation_node in doc.traverse(citation, descend=True):
+        # remove backrefs to non-existant refs
+        citation_node['backrefs'] = [id_ for id_ in citation_node['backrefs']
+                                     if id_ in known_ref_ids]
 
 
 DEDUPLICATION_TAG = '    !! processed by numpydoc !!'
@@ -178,13 +193,13 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
             'initializes x; see ' in pydoc.getdoc(obj.__init__))):
         return '', ''
 
-    if not (isinstance(obj, collections.Callable) or
+    if not (isinstance(obj, Callable) or
             hasattr(obj, '__argspec_is_invalid_')):
         return
 
     if not hasattr(obj, '__doc__'):
         return
-    doc = SphinxDocString(pydoc.getdoc(obj))
+    doc = get_doc_object(obj)
     sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
     if sig:
         sig = re.sub(sixu("^[^(]*"), sixu(""), sig)
@@ -198,9 +213,12 @@ def setup(app, get_doc_object_=get_doc_object):
     global get_doc_object
     get_doc_object = get_doc_object_
 
+    app.setup_extension('sphinx.ext.autosummary')
+
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
     app.connect('doctree-read', relabel_references)
+    app.connect('doctree-resolved', clean_backrefs)
     app.add_config_value('numpydoc_edit_link', None, False)
     app.add_config_value('numpydoc_use_plots', None, False)
     app.add_config_value('numpydoc_use_blockquotes', None, False)
@@ -212,8 +230,6 @@ def setup(app, get_doc_object_=get_doc_object):
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
     app.add_domain(NumpyCDomain)
-
-    app.setup_extension('sphinx.ext.autosummary')
 
     metadata = {'version': __version__,
                 'parallel_read_safe': True}
