@@ -236,28 +236,38 @@ class NumpyDocString(Mapping):
 
         return params
 
+    # See also supports the following formats.
+    #
+    # <FUNCNAME>
+    # <FUNCNAME> SPACE* COLON SPACE+ <DESC> SPACE*
+    # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE*
+    # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE* COLON SPACE+ <DESC> SPACE*
+
+    # <FUNCNAME> is:
+    # A legal function name, optionally enclosed in backticks.
+    # It may have an optional COLON <ROLE> COLON in front where
+    #   <ROLE> is any nonempty sequence of word characters.
+    # Examples: func_f1  :meth:`func_h1` :obj:`~baz.obj_r` :class:`class_j`
+    # <DESC> is a string describing the function.
+
     _role = r":(?P<role>\w+):"
     _funcbacktick = r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`"
     _funcplain = r"(?P<name2>[a-zA-Z0-9_.-]+)"
     _funcname = r"(" + _role + _funcbacktick + r"|" + _funcplain + r")"
-    _funcnamenext = _funcname.replace('role', 'rolenext').replace('name', 'namenext')
+    _funcnamenext = _funcname.replace('role', 'rolenext')
+    _funcnamenext = _funcnamenext.replace('name', 'namenext')
     _description = r"(?P<description>\s*:(\s+(?P<desc>\S+.*))?)?\s*$"
-    _func_rgx = re.compile(r"^\s*" + _funcname + r"\s*", re.X)
+    _func_rgx = re.compile(r"^\s*" + _funcname + r"\s*")
     _line_rgx = re.compile(
-        r"^\s*"
-        + r"(?P<allfuncs>"          # group for all function names
-        + _funcname
-        + r"(?P<morefuncs>([,]\s+"
-        + _funcnamenext + r")*)"
-        + r")"                      # end of "allfuncs"
-        + r"(\s*,)?"                # Some function lists have a trailing comma
-        + _description,
-        re.X)
+        r"^\s*" +
+        r"(?P<allfuncs>" +        # group for all function names
+        _funcname +
+        r"(?P<morefuncs>([,]\s+" + _funcnamenext + r")*)" +
+        r")" +                     # end of "allfuncs"
+        r"(?P<trailing>\s*,)?" +   # Some function lists have a trailing comma
+        _description)
 
-    _name_rgx = re.compile(r"^\s*(:(?P<role>\w+):"
-                           r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`|"
-                           r" (?P<name2>[a-zA-Z0-9_.-]+))\s*", re.X)
-
+    # Empty <DESC> elements are replaced with '..'
     empty_description = '..'
 
     def _parse_see_also(self, content):
@@ -268,63 +278,46 @@ class NumpyDocString(Mapping):
         func_name1, func_name2, :meth:`func_name`, func_name3
 
         """
+
         items = []
 
         def parse_item_name(text):
-            """Match ':role:`name`' or 'name'"""
+            """Match ':role:`name`' or 'name'."""
             m = self._func_rgx.match(text)
             if not m:
                 raise ParseError("%s is not a item name" % text)
-            role = m.groupdict().get('role')
-            if role:
-                name = m.group('name')
-            else:
-                name = m.group('name2')
-            return name, role, m
-
-        def push_item(name, rest):
-            if not name:
-                return
-            name, role, m2 = parse_item_name(name)
-            items.append((name, list(rest), role))
-            del rest[:]
+            role = m.group('role')
+            name = (m.group('name') if role else m.group('name2'))
+            return name, role, m.end()
 
         rest = []
-
         for line in content:
             if not line.strip():
                 continue
 
-            ml = self._line_rgx.match(line)
+            line_match = self._line_rgx.match(line)
             description = None
-            if ml:
-                if 'description' in ml.groupdict():
-                    description = ml.groupdict().get('desc')
+            if line_match:
+                description = line_match.group('desc')
+                if line_match.group('trailing'):
+                    self._error_location(
+                        'Unexpected comma after function list at index %d of '
+                        'line "%s"' % (line_match.end('trailing'), line),
+                        error=False)
             if not description and line.startswith(' '):
                 rest.append(line.strip())
-            elif ml:
+            elif line_match:
                 funcs = []
-                text = ml.group('allfuncs')
+                text = line_match.group('allfuncs')
                 while True:
                     if not text.strip():
                         break
-                    name, role, m2 = parse_item_name(text)
-                    # m2 = self._func_rgx.match(text)
-                    # if not m2:
-                    #     raise ParseError("%s is not a item name" % line)
-                    # role = m2.groupdict().get('role')
-                    # if role:
-                    #     name = m2.group('name')
-                    # else:
-                    #     name = m2.group('name2')
+                    name, role, match_end = parse_item_name(text)
                     funcs.append((name, role))
-                    text = text[m2.end():].strip()
+                    text = text[match_end:].strip()
                     if text and text[0] == ',':
                         text = text[1:].strip()
-                if description:
-                    rest = [description]
-                else:
-                    rest = []
+                rest = list(filter(None, [description]))
                 items.append((funcs, rest))
             else:
                 raise ParseError("%s is not a item name" % line)

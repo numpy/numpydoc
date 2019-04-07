@@ -331,14 +331,18 @@ def _strip_blank_lines(s):
 
 
 def line_by_line_compare(a, b):
-    empty_description = '..'
-    rgx = re.compile(r"^\s+" + re.escape(empty_description) + "$")
+    empty_description = NumpyDocString.empty_description  # '..'
+    empty_description_rgx = re.compile(
+        r"^\s+" + re.escape(empty_description) + "$")
 
     a = textwrap.dedent(a)
     b = textwrap.dedent(b)
-    a = [rgx.sub('', l.rstrip()) for l in _strip_blank_lines(a).split('\n')]
-    b = [rgx.sub('', l.rstrip()) for l in _strip_blank_lines(b).split('\n')]
+    a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
+    b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
+    a = [empty_description_rgx.sub('', l) for l in a]
+    b = [empty_description_rgx.sub('', l) for l in b]
     assert all(x == y for x, y in zip(a, b))
+
 
 def test_str():
     # doc_txt has the order of Notes and See Also sections flipped.
@@ -726,11 +730,11 @@ def test_see_also():
                         'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q',
                         'func_f1', 'func_g1', 'func_h1', 'func_j1',
                         '~baz.obj_r'):
-                assert (not desc), str([func, desc])
+                assert not desc, str([func, desc])
             elif func in ('func_f2', 'func_g2', 'func_h2', 'func_j2'):
-                    assert (desc), str([func, desc])
+                assert desc, str([func, desc])
             else:
-                assert(desc), str([func, desc])
+                assert desc, str([func, desc])
 
             if func == 'func_h':
                 assert role == 'meth'
