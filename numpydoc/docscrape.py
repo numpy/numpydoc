@@ -16,6 +16,7 @@ except ImportError:
 import copy
 import sys
 
+from sphinx.ext.autodoc import ALL
 
 def strip_blank_lines(l):
     "Remove leading and trailing blank lines from a list of lines"
@@ -593,18 +594,25 @@ class ClassDoc(NumpyDocString):
 
         NumpyDocString.__init__(self, doc)
 
-        if config.get('show_class_members', True):
+        _members = config.get('members', [])
+        if _members is ALL:
+            _members = None
+        _exclude = config.get('exclude-members', [])
+        
+        if config.get('show_class_members', True) and _exclude is not ALL:
             def splitlines_x(s):
                 if not s:
                     return []
                 else:
                     return s.splitlines()
-
             for field, items in [('Methods', self.methods),
                                  ('Attributes', self.properties)]:
                 if not self[field]:
                     doc_list = []
                     for name in sorted(items):
+                        if (name in _exclude or 
+                                (_members and name not in _members)):
+                            continue
                         try:
                             doc_item = pydoc.getdoc(getattr(self._cls, name))
                             doc_list.append(
