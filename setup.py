@@ -45,7 +45,7 @@ setup(
     keywords="sphinx numpy",
     author="Pauli Virtanen and others",
     author_email="pav@iki.fi",
-    url="https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt",
+    url="https://numpydoc.readthedocs.io",
     license="BSD",
     install_requires=["sphinx >= 1.2.3", 'Jinja2>=2.3'],
     package_data={'numpydoc': ['tests/test_*.py', 'templates/*.rst']},

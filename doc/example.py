@@ -62,6 +62,7 @@ def foo(var1, var2, long_var_name='hi'):
         Explanation of return value named `describe`.
     out : type
         Explanation of `out`.
+    type_without_description
 
     Other Parameters
     ----------------
@@ -92,7 +93,7 @@ def foo(var1, var2, long_var_name='hi'):
 
     .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
 
-    And even use a greek symbol like :math:`omega` inline.
+    And even use a Greek symbol like :math:`\omega` inline.
 
     References
     ----------

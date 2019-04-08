@@ -15,11 +15,9 @@ from numpydoc.docscrape import (
     ParseError
 )
 from numpydoc.docscrape_sphinx import (SphinxDocString, SphinxClassDoc,
-                                       SphinxFunctionDoc)
-from nose.tools import (assert_equal, assert_raises, assert_list_equal,
-                        assert_true)
+                                       SphinxFunctionDoc, get_doc_object)
+from pytest import raises as assert_raises
 
-assert_list_equal.__self__.maxDiff = None
 
 if sys.version_info[0] >= 3:
     sixu = lambda s: s
@@ -56,7 +54,7 @@ doc_txt = '''\
   -------
   out : ndarray
       The drawn samples, arranged according to `shape`.  If the
-      shape given is (m,n,...), then the shape of `out` is is
+      shape given is (m,n,...), then the shape of `out` is
       (m,n,...,N).
 
       In other words, each entry ``out[i,j,...,:]`` is an N-dimensional
@@ -64,6 +62,7 @@ doc_txt = '''\
   list of str
       This is not a real return value.  It exists to test
       anonymous return values.
+  no_description
 
   Other Parameters
   ----------------
@@ -185,47 +184,53 @@ def test_extended_summary():
 
 
 def test_parameters():
-    assert_equal(len(doc['Parameters']), 3)
-    assert_equal([n for n,_,_ in doc['Parameters']], ['mean','cov','shape'])
+    assert len(doc['Parameters']) == 3
+    names = [n for n, _, _ in doc['Parameters']]
+    assert all(a == b for a, b in zip(names, ['mean', 'cov', 'shape']))
 
     arg, arg_type, desc = doc['Parameters'][1]
-    assert_equal(arg_type, '(N, N) ndarray')
+    assert arg_type == '(N, N) ndarray'
     assert desc[0].startswith('Covariance matrix')
     assert doc['Parameters'][0][-1][-1] == '   (1+2+3)/3'
 
 
 def test_other_parameters():
-    assert_equal(len(doc['Other Parameters']), 1)
-    assert_equal([n for n,_,_ in doc['Other Parameters']], ['spam'])
+    assert len(doc['Other Parameters']) == 1
+    assert [n for n, _, _ in doc['Other Parameters']] == ['spam']
     arg, arg_type, desc = doc['Other Parameters'][0]
-    assert_equal(arg_type, 'parrot')
+    assert arg_type == 'parrot'
     assert desc[0].startswith('A parrot off its mortal coil')
 
 
 def test_returns():
-    assert_equal(len(doc['Returns']), 2)
+    assert len(doc['Returns']) == 3
     arg, arg_type, desc = doc['Returns'][0]
-    assert_equal(arg, 'out')
-    assert_equal(arg_type, 'ndarray')
+    assert arg == 'out'
+    assert arg_type == 'ndarray'
     assert desc[0].startswith('The drawn samples')
     assert desc[-1].endswith('distribution.')
 
     arg, arg_type, desc = doc['Returns'][1]
-    assert_equal(arg, 'list of str')
-    assert_equal(arg_type, '')
+    assert arg == 'list of str'
+    assert arg_type == ''
     assert desc[0].startswith('This is not a real')
     assert desc[-1].endswith('anonymous return values.')
+
+    arg, arg_type, desc = doc['Returns'][2]
+    assert arg == 'no_description'
+    assert arg_type == ''
+    assert not ''.join(desc).strip()
 
 
 def test_yields():
     section = doc_yields['Yields']
-    assert_equal(len(section), 3)
+    assert len(section) == 3
     truth = [('a', 'int', 'apples.'),
              ('b', 'int', 'bananas.'),
              ('int', '', 'unknowns.')]
     for (arg, arg_type, desc), (arg_, arg_type_, end) in zip(section, truth):
-        assert_equal(arg, arg_)
-        assert_equal(arg_type, arg_type_)
+        assert arg == arg_
+        assert arg_type == arg_type_
         assert desc[0].startswith('The number of')
         assert desc[0].endswith(end)
 
@@ -335,21 +340,21 @@ That should break...
         SphinxClassDoc(Dummy)
     except ValueError as e:
         # python 3 version or python 2 version
-        assert_true("test_section_twice.<locals>.Dummy" in str(e)
-                    or 'test_docscrape.Dummy' in str(e))
+        assert ("test_section_twice.<locals>.Dummy" in str(e)
+                or 'test_docscrape.Dummy' in str(e))
 
     try:
         SphinxFunctionDoc(dummy_func)
     except ValueError as e:
         # python 3 version or python 2 version
-        assert_true("test_section_twice.<locals>.dummy_func" in str(e)
-                    or 'function dummy_func' in str(e))
+        assert ("test_section_twice.<locals>.dummy_func" in str(e)
+                or 'function dummy_func' in str(e))
 
 
 def test_notes():
     assert doc['Notes'][0].startswith('Instead')
     assert doc['Notes'][-1].endswith('definite.')
-    assert_equal(len(doc['Notes']), 17)
+    assert len(doc['Notes']) == 17
 
 
 def test_references():
@@ -363,9 +368,9 @@ def test_examples():
 
 
 def test_index():
-    assert_equal(doc['index']['default'], 'random')
-    assert_equal(len(doc['index']), 2)
-    assert_equal(len(doc['index']['refguide']), 2)
+    assert doc['index']['default'] == 'random'
+    assert len(doc['index']) == 2
+    assert len(doc['index']['refguide']) == 2
 
 
 def _strip_blank_lines(s):
@@ -381,7 +386,7 @@ def line_by_line_compare(a, b):
     b = textwrap.dedent(b)
     a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
     b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
-    assert_list_equal(a, b)
+    assert all(x == y for x, y in zip(a, b))
 
 
 def test_str():
@@ -416,7 +421,7 @@ Returns
 -------
 out : ndarray
     The drawn samples, arranged according to `shape`.  If the
-    shape given is (m,n,...), then the shape of `out` is is
+    shape given is (m,n,...), then the shape of `out` is
     (m,n,...,N).
 
     In other words, each entry ``out[i,j,...,:]`` is an N-dimensional
@@ -424,6 +429,7 @@ out : ndarray
 list of str
     This is not a real return value.  It exists to test
     anonymous return values.
+no_description
 
 Other Parameters
 ----------------
@@ -513,7 +519,7 @@ int
 .. index:: """)
 
 
-def test_sent_str():
+def test_receives_str():
     line_by_line_compare(str(doc_sent),
 """Test generator
 
@@ -532,6 +538,22 @@ c : int
 .. index:: """)
 
 
+def test_no_index_in_str():
+    assert "index" not in str(NumpyDocString("""Test idx
+
+    """))
+
+    assert "index" in str(NumpyDocString("""Test idx
+
+    .. index :: random
+    """))
+
+    assert "index" in str(NumpyDocString("""Test idx
+
+    .. index ::
+        foo
+    """))
+
 def test_sphinx_str():
     sphinx_doc = SphinxDocString(doc_txt)
     line_by_line_compare(str(sphinx_doc),
@@ -547,48 +569,51 @@ of the one-dimensional normal distribution to higher dimensions.
 
 :Parameters:
 
-    mean : (N,) ndarray
+    **mean** : (N,) ndarray
         Mean of the N-dimensional distribution.
 
         .. math::
 
            (1+2+3)/3
 
-    cov : (N, N) ndarray
+    **cov** : (N, N) ndarray
         Covariance matrix of the distribution.
 
-    shape : tuple of ints
+    **shape** : tuple of ints
         Given a shape of, for example, (m,n,k), m*n*k samples are
         generated, and packed in an m-by-n-by-k arrangement.  Because
         each sample is N-dimensional, the output shape is (m,n,k,N).
 
 :Returns:
 
-    out : ndarray
+    **out** : ndarray
         The drawn samples, arranged according to `shape`.  If the
-        shape given is (m,n,...), then the shape of `out` is is
+        shape given is (m,n,...), then the shape of `out` is
         (m,n,...,N).
 
         In other words, each entry ``out[i,j,...,:]`` is an N-dimensional
         value drawn from the distribution.
 
-    list of str
+    **list of str**
         This is not a real return value.  It exists to test
         anonymous return values.
 
+    **no_description**
+        ..
+
 :Other Parameters:
 
-    spam : parrot
+    **spam** : parrot
         A parrot off its mortal coil.
 
 :Raises:
 
-    RuntimeError
+    **RuntimeError**
         Some error
 
 :Warns:
 
-    RuntimeWarning
+    **RuntimeWarning**
         Some warning
 
 .. warning::
@@ -656,13 +681,13 @@ def test_sphinx_yields_str():
 
 :Yields:
 
-    a : int
+    **a** : int
         The number of apples.
 
-    b : int
+    **b** : int
         The number of bananas.
 
-    int
+    **int**
         The number of unknowns.
 """)
 
@@ -680,7 +705,7 @@ doc2 = NumpyDocString("""
 
 
 def test_parameters_without_extended_description():
-    assert_equal(len(doc2['Parameters']), 2)
+    assert len(doc2['Parameters']) == 2
 
 
 doc3 = NumpyDocString("""
@@ -692,13 +717,13 @@ doc3 = NumpyDocString("""
 
 def test_escape_stars():
     signature = str(doc3).split('\n')[0]
-    assert_equal(signature, 'my_signature(\*params, \*\*kwds)')
+    assert signature == r'my_signature(\*params, \*\*kwds)'
 
     def my_func(a, b, **kwargs):
         pass
 
     fdoc = FunctionDoc(func=my_func)
-    assert_equal(fdoc['Signature'], 'my_func(a, b, \*\*kwargs)')
+    assert fdoc['Signature'] == r'my_func(a, b, \*\*kwargs)'
 
 
 doc4 = NumpyDocString(
@@ -708,7 +733,7 @@ doc4 = NumpyDocString(
 
 
 def test_empty_extended_summary():
-    assert_equal(doc4['Extended Summary'], [])
+    assert doc4['Extended Summary'] == []
 
 
 doc5 = NumpyDocString(
@@ -728,17 +753,17 @@ doc5 = NumpyDocString(
 
 
 def test_raises():
-    assert_equal(len(doc5['Raises']), 1)
-    name,_,desc = doc5['Raises'][0]
-    assert_equal(name,'LinAlgException')
-    assert_equal(desc,['If array is singular.'])
+    assert len(doc5['Raises']) == 1
+    name, _, desc = doc5['Raises'][0]
+    assert name == 'LinAlgException'
+    assert desc == ['If array is singular.']
 
 
 def test_warns():
-    assert_equal(len(doc5['Warns']), 1)
-    name,_,desc = doc5['Warns'][0]
-    assert_equal(name,'SomeWarning')
-    assert_equal(desc,['If needed'])
+    assert len(doc5['Warns']) == 1
+    name, _, desc = doc5['Warns'][0]
+    assert name == 'SomeWarning'
+    assert desc == ['If needed']
 
 
 def test_see_also():
@@ -797,10 +822,11 @@ def test_see_also_parse_error():
     """)
     with assert_raises(ParseError) as err:
         NumpyDocString(text)
-    assert_equal(
-        str(r":func:`~foo` is not a item name in '\n    z(x,theta)\n\n    See Also\n    --------\n    :func:`~foo`\n    '"),
-        str(err.exception)
-    )
+
+    s1 = str(r":func:`~foo` is not a item name in '\n    z(x,theta)\n\n    See Also\n    --------\n    :func:`~foo`\n    '")
+    s2 = str(err.value)
+    assert s1 == s2
+
 
 def test_see_also_print():
     class Dummy(object):
@@ -847,9 +873,9 @@ This should be ignored and warned about
     with warnings.catch_warnings(record=True) as w:
         SphinxClassDoc(BadSection)
         assert len(w) == 1
-        assert_true('test_docscrape.test_unknown_section.<locals>.BadSection'
-                    in str(w[0].message)
-                    or 'test_docscrape.BadSection' in str(w[0].message))
+        assert('test_docscrape.test_unknown_section.<locals>.BadSection'
+               in str(w[0].message)
+               or 'test_docscrape.BadSection' in str(w[0].message))
 
 
 doc7 = NumpyDocString("""
@@ -1189,10 +1215,10 @@ def test_class_members_doc_sphinx():
 
     :Parameters:
 
-        f : callable ``f(t, y, *f_args)``
+        **f** : callable ``f(t, y, *f_args)``
             Aaa.
 
-        jac : callable ``jac(t, y, *jac_args)``
+        **jac** : callable ``jac(t, y, *jac_args)``
             Bbb.
 
     .. rubric:: Examples
@@ -1201,10 +1227,10 @@ def test_class_members_doc_sphinx():
 
     :Attributes:
 
-        t : float
+        **t** : float
             Current time.
 
-        y : ndarray
+        **y** : ndarray
             Current variable values.
 
             * hello
@@ -1213,10 +1239,11 @@ def test_class_members_doc_sphinx():
         :obj:`an_attribute <an_attribute>` : float
             Test attribute
 
-        no_docstring : str
+        **no_docstring** : str
             But a description
 
-        no_docstring2 : str
+        **no_docstring2** : str
+            ..
 
         :obj:`multiline_sentence <multiline_sentence>`
             This is a sentence.
@@ -1249,15 +1276,68 @@ def test_templated_sections():
 
     :Parameters:
 
-        f : callable ``f(t, y, *f_args)``
+        **f** : callable ``f(t, y, *f_args)``
             Aaa.
 
-        jac : callable ``jac(t, y, *jac_args)``
+        **jac** : callable ``jac(t, y, *jac_args)``
             Bbb.
 
     """)
 
 
+def test_nonstandard_property():
+    # test discovery of a property that does not satisfy isinstace(.., property)
+
+    class SpecialProperty(object):
+
+        def __init__(self, axis=0, doc=""):
+            self.axis = axis
+            self.__doc__ = doc
+
+        def __get__(self, obj, type):
+            if obj is None:
+                # Only instances have actual _data, not classes
+                return self
+            else:
+                return obj._data.axes[self.axis]
+
+        def __set__(self, obj, value):
+            obj._set_axis(self.axis, value)
+
+    class Dummy:
+
+        attr = SpecialProperty(doc="test attribute")
+
+    doc = get_doc_object(Dummy)
+    assert "test attribute" in str(doc)
+
+
+def test_args_and_kwargs():
+    cfg = dict()
+    doc = SphinxDocString("""
+    Parameters
+    ----------
+    param1 : int
+        First parameter
+    *args : tuple
+        Arguments
+    **kwargs : dict
+        Keyword arguments
+    """, config=cfg)
+    line_by_line_compare(str(doc), r"""
+:Parameters:
+
+    **param1** : int
+        First parameter
+
+    **\*args** : tuple
+        Arguments
+
+    **\*\*kwargs** : dict
+        Keyword arguments
+    """)
+
+
 if __name__ == "__main__":
-    import nose
-    nose.run()
+    import pytest
+    pytest.main()

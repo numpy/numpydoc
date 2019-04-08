@@ -8,7 +8,11 @@ import textwrap
 import re
 import pydoc
 from warnings import warn
-import collections
+from collections import namedtuple
+try:
+    from collections.abc import Callable, Mapping
+except ImportError:
+    from collections import Callable, Mapping
 import copy
 import sys
 
@@ -106,7 +110,10 @@ class ParseError(Exception):
         return message
 
 
-class NumpyDocString(collections.Mapping):
+Parameter = namedtuple('Parameter', ['name', 'type', 'desc'])
+
+
+class NumpyDocString(Mapping):
     """Parses a numpydoc string to an abstract representation
 
     Instances define a mapping from section title to structured data.
@@ -226,7 +233,7 @@ class NumpyDocString(collections.Mapping):
             desc = dedent_lines(desc)
             desc = strip_blank_lines(desc)
 
-            params.append((arg_name, arg_type, desc))
+            params.append(Parameter(arg_name, arg_type, desc))
 
         return params
 
@@ -318,7 +325,8 @@ class NumpyDocString(collections.Mapping):
         while True:
             summary = self._doc.read_to_next_empty_line()
             summary_str = " ".join([s.strip() for s in summary]).strip()
-            if re.compile('^([\w., ]+=)?\s*[\w\.]+\(.*\)$').match(summary_str):
+            compiled = re.compile(r'^([\w., ]+=)?\s*[\w\.]+\(.*\)$')
+            if compiled.match(summary_str):
                 self['Signature'] = summary_str
                 if not self._is_at_section():
                     continue
@@ -393,7 +401,7 @@ class NumpyDocString(collections.Mapping):
 
     def _str_signature(self):
         if self['Signature']:
-            return [self['Signature'].replace('*', '\*')] + ['']
+            return [self['Signature'].replace('*', r'\*')] + ['']
         else:
             return ['']
 
@@ -413,13 +421,13 @@ class NumpyDocString(collections.Mapping):
         out = []
         if self[name]:
             out += self._str_header(name)
-            for param, param_type, desc in self[name]:
-                if param_type:
-                    out += ['%s : %s' % (param, param_type)]
+            for param in self[name]:
+                if param.type:
+                    out += ['%s : %s' % (param.name, param.type)]
                 else:
-                    out += [param]
-                if desc and ''.join(desc).strip():
-                    out += self._str_indent(desc)
+                    out += [param.name]
+                if param.desc and ''.join(param.desc).strip():
+                    out += self._str_indent(param.desc)
             out += ['']
         return out
 
@@ -460,12 +468,20 @@ class NumpyDocString(collections.Mapping):
     def _str_index(self):
         idx = self['index']
         out = []
-        out += ['.. index:: %s' % idx.get('default', '')]
+        output_index = False
+        default_index = idx.get('default', '')
+        if default_index:
+            output_index = True
+        out += ['.. index:: %s' % default_index]
         for section, references in idx.items():
             if section == 'default':
                 continue
+            output_index = True
             out += ['   :%s: %s' % (section, ', '.join(references))]
-        return out
+        if output_index:
+            return out
+        else:
+            return ''
 
     def __str__(self, func_role=''):
         out = []
@@ -525,7 +541,7 @@ class FunctionDoc(NumpyDocString):
                     else:
                         argspec = inspect.getargspec(func)
                     signature = inspect.formatargspec(*argspec)
-                signature = '%s%s' % (func_name, signature.replace('*', '\*'))
+                signature = '%s%s' % (func_name, signature.replace('*', r'\*'))
             except TypeError:
                 signature = '%s()' % func_name
             self['Signature'] = signature
@@ -542,7 +558,7 @@ class FunctionDoc(NumpyDocString):
         out = ''
 
         func, func_name = self.get_func()
-        signature = self['Signature'].replace('*', '\*')
+        signature = self['Signature'].replace('*', r'\*')
 
         roles = {'func': 'function',
                  'meth': 'method'}
@@ -595,7 +611,8 @@ class ClassDoc(NumpyDocString):
                     for name in sorted(items):
                         try:
                             doc_item = pydoc.getdoc(getattr(self._cls, name))
-                            doc_list.append((name, '', splitlines_x(doc_item)))
+                            doc_list.append(
+                                Parameter(name, '', splitlines_x(doc_item)))
                         except AttributeError:
                             pass  # method doesn't exist
                     self[field] = doc_list
@@ -607,7 +624,7 @@ class ClassDoc(NumpyDocString):
         return [name for name, func in inspect.getmembers(self._cls)
                 if ((not name.startswith('_')
                      or name in self.extra_public_methods)
-                    and isinstance(func, collections.Callable)
+                    and isinstance(func, Callable)
                     and self._is_show_member(name))]
 
     @property
@@ -617,7 +634,7 @@ class ClassDoc(NumpyDocString):
         return [name for name, func in inspect.getmembers(self._cls)
                 if (not name.startswith('_') and
                     (func is None or isinstance(func, property) or
-                     inspect.isgetsetdescriptor(func))
+                     inspect.isdatadescriptor(func))
                     and self._is_show_member(name))]
 
     def _is_show_member(self, name):
