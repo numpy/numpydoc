@@ -132,7 +132,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
            app.config.numpydoc_show_inherited_class_members,
            'class_members_toctree': app.config.numpydoc_class_members_toctree}
 
-    cfg.update(options)
+    cfg.update(options or {})
     u_NL = sixu('\n')
     if what == 'module':
         # Strip top title
