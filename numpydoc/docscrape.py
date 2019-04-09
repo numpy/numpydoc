@@ -243,9 +243,11 @@ class NumpyDocString(Mapping):
     # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE*
     # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE* COLON SPACE+ <DESC> SPACE*
 
-    # <FUNCNAME> is:
-    # A legal function name, optionally enclosed in backticks.
-    # It may have an optional COLON <ROLE> COLON in front where
+    # <FUNCNAME> is one of
+    #   <PLAIN_FUNCNAME>
+    #   COLON <ROLE> COLON BACKTICK <PLAIN_FUNCNAME> BACKTICK
+    # where
+    #   <PLAIN_FUNCNAME> is a legal function name, and
     #   <ROLE> is any nonempty sequence of word characters.
     # Examples: func_f1  :meth:`func_h1` :obj:`~baz.obj_r` :class:`class_j`
     # <DESC> is a string describing the function.
@@ -287,7 +289,7 @@ class NumpyDocString(Mapping):
             if not m:
                 raise ParseError("%s is not a item name" % text)
             role = m.group('role')
-            name = (m.group('name') if role else m.group('name2'))
+            name = m.group('name') if role else m.group('name2')
             return name, role, m.end()
 
         rest = []
@@ -470,7 +472,7 @@ class NumpyDocString(Mapping):
         out += ['']
         last_had_desc = True
         for funcs, desc in self['See Also']:
-            assert isinstance(funcs, (list, tuple))
+            assert isinstance(funcs, list)
             links = []
             for func, role in funcs:
                 if role:
