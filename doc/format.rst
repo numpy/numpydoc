@@ -252,13 +252,21 @@ The sections of a function's docstring are:
    Support for the **Yields** section was added in `numpydoc
    <https://github.com/numpy/numpydoc>`_ version 0.6.
 
-7. **Other Parameters**
+7. **Receives**
+
+   Explanation of parameters passed to a generator's ``.send()`` method,
+   formatted as for Parameters, above.  Since, like for Yields and Returns, a
+   single object is always passed to the method, this may describe either the
+   single parameter, or positional arguments passed as a tuple.  If a docstring
+   includes Receives it must also include Yields.
+
+8. **Other Parameters**
 
    An optional section used to describe infrequently used parameters.
    It should only be used if a function has a large number of keyword
    parameters, to prevent cluttering the **Parameters** section.
 
-8. **Raises**
+9. **Raises**
 
    An optional section detailing which errors get raised and under
    what conditions::
@@ -271,16 +279,16 @@ The sections of a function's docstring are:
    This section should be used judiciously, i.e., only for errors
    that are non-obvious or have a large chance of getting raised.
 
-9. **Warns**
+10. **Warns**
 
    An optional section detailing which warnings get raised and
    under what conditions, formatted similarly to Raises.
 
-10. **Warnings**
+11. **Warnings**
 
     An optional section with cautions to the user in free text/reST.
 
-11. **See Also**
+12. **See Also**
 
     An optional section used to refer to related code.  This section
     can be very useful, but should be used judiciously.  The goal is to
@@ -319,7 +327,7 @@ The sections of a function's docstring are:
       func_b, func_c_, func_d
       func_e
 
-12. **Notes**
+13. **Notes**
 
     An optional section that provides additional information about the
     code, possibly including a discussion of the algorithm. This
@@ -364,7 +372,7 @@ The sections of a function's docstring are:
     where filename is a path relative to the reference guide source
     directory.
 
-13. **References**
+14. **References**
 
     References cited in the **notes** section may be listed here,
     e.g. if you cited the article below using the text ``[1]_``,
@@ -397,7 +405,7 @@ The sections of a function's docstring are:
 
 .. highlight:: pycon
 
-14. **Examples**
+15. **Examples**
 
     An optional section for examples, using the `doctest
     <http://docs.python.org/library/doctest.html>`_ format.
