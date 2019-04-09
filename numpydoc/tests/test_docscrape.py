@@ -237,12 +237,12 @@ def test_yields():
 
 def test_sent():
     section = doc_sent['Receives']
-    assert_equal(len(section), 2)
+    assert len(section) == 2
     truth = [('b', 'int', 'bananas.'),
              ('c', 'int', 'oranges.')]
     for (arg, arg_type, desc), (arg_, arg_type_, end) in zip(section, truth):
-        assert_equal(arg, arg_)
-        assert_equal(arg_type, arg_type_)
+        assert arg == arg_
+        assert arg_type == arg_type_
         assert desc[0].startswith('The number of')
         assert desc[0].endswith(end)
 
