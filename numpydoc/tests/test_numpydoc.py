@@ -37,7 +37,7 @@ A top section before
     assert 'rpartition' in [x.strip() for x in lines]
 
     lines = s.split('\n')
-    doc = mangle_docstrings(MockApp(), 'class', 'str', str, {'members':['upper']}, lines)
+    doc = mangle_docstrings(MockApp(), 'class', 'str', str, {'members': ['upper']}, lines)
     assert 'rpartition' not in [x.strip() for x in lines]
     assert 'upper' in [x.strip() for x in lines]
     
@@ -47,7 +47,8 @@ A top section before
     assert 'upper' not in [x.strip() for x in lines]
 
     lines = s.split('\n')
-    doc = mangle_docstrings(MockApp(), 'class', 'str', str, {'exclude-members': 'upper'}, lines)
+    doc = mangle_docstrings(MockApp(), 'class', 'str', str,
+                            {'exclude-members': ['upper']}, lines)
     assert 'rpartition' in [x.strip() for x in lines]
     assert 'upper' not in [x.strip() for x in lines]
 
