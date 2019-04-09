@@ -154,6 +154,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
            app.config.numpydoc_show_inherited_class_members,
            'class_members_toctree': app.config.numpydoc_class_members_toctree}
 
+    cfg.update(options or {})
     u_NL = sixu('\n')
     if what == 'module':
         # Strip top title
@@ -199,7 +200,7 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
 
     if not hasattr(obj, '__doc__'):
         return
-    doc = get_doc_object(obj)
+    doc = get_doc_object(obj, config={'show_class_members': False})
     sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
     if sig:
         sig = re.sub(sixu("^[^(]*"), sixu(""), sig)

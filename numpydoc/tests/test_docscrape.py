@@ -866,11 +866,13 @@ This should be ignored and warned about
         pass
 
     with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
         NumpyDocString(doc_text)
         assert len(w) == 1
         assert "Unknown section Mope" == str(w[0].message)
 
     with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
         SphinxClassDoc(BadSection)
         assert len(w) == 1
         assert('test_docscrape.test_unknown_section.<locals>.BadSection'
@@ -1336,6 +1338,24 @@ def test_args_and_kwargs():
     **\*\*kwargs** : dict
         Keyword arguments
     """)
+
+def test_autoclass():
+    cfg=dict(show_class_members=True,
+             show_inherited_class_members=True)
+    doc = SphinxClassDoc(str, '''
+A top section before
+
+.. autoclass:: str
+    ''', config=cfg)
+    line_by_line_compare(str(doc), r'''
+A top section before
+
+.. autoclass:: str
+
+.. rubric:: Methods
+
+
+    ''')
 
 
 if __name__ == "__main__":
