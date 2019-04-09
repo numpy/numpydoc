@@ -331,17 +331,11 @@ def _strip_blank_lines(s):
 
 
 def line_by_line_compare(a, b):
-    empty_description = NumpyDocString.empty_description  # '..'
-    empty_description_rgx = re.compile(
-        r"^\s+" + re.escape(empty_description) + "$")
-
     a = textwrap.dedent(a)
     b = textwrap.dedent(b)
     a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
     b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
-    a = [empty_description_rgx.sub('', l) for l in a]
-    b = [empty_description_rgx.sub('', l) for l in b]
-    assert all(x == y for x, y in zip(a, b))
+    assert all(x == y for x, y in zip(a, b)), str([[x, y] for x, y in zip(a, b) if x != y])
 
 
 def test_str():
@@ -409,7 +403,7 @@ See Also
 --------
 
 `some`_, `other`_, `funcs`_
-
+    ..
 `otherfunc`_
     relationship
 
@@ -559,7 +553,7 @@ of the one-dimensional normal distribution to higher dimensions.
 .. seealso::
 
     :obj:`some`, :obj:`other`, :obj:`funcs`
-
+        ..
     :obj:`otherfunc`
         relationship
 
