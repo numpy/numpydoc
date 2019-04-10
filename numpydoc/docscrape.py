@@ -220,7 +220,7 @@ class NumpyDocString(Mapping):
             else:
                 yield name, self._strip(data[2:])
 
-    def _parse_param_list(self, content):
+    def _parse_param_list(self, content, single_element_is_type=False):
         r = Reader(content)
         params = []
         while not r.eof():
@@ -228,7 +228,10 @@ class NumpyDocString(Mapping):
             if ' : ' in header:
                 arg_name, arg_type = header.split(' : ')[:2]
             else:
-                arg_name, arg_type = header, ''
+                if single_element_is_type:
+                    arg_name, arg_type = '', header
+                else:
+                    arg_name, arg_type = header, ''
 
             desc = r.read_to_next_unindented_line()
             desc = dedent_lines(desc)
@@ -393,10 +396,12 @@ class NumpyDocString(Mapping):
                     self._error_location("The section %s appears twice"
                                          % section)
 
-            if section in ('Parameters', 'Returns', 'Yields', 'Receives',
-                           'Raises', 'Warns', 'Other Parameters', 'Attributes',
+            if section in ('Parameters', 'Other Parameters', 'Attributes',
                            'Methods'):
                 self[section] = self._parse_param_list(content)
+            elif section in ('Returns', 'Yields', 'Raises', 'Warns', 'Receives'):
+                self[section] = self._parse_param_list(
+                    content, single_element_is_type=True)
             elif section.startswith('.. index::'):
                 self['index'] = self._parse_index(section, content)
             elif section == 'See Also':
@@ -452,10 +457,12 @@ class NumpyDocString(Mapping):
         if self[name]:
             out += self._str_header(name)
             for param in self[name]:
+                parts = []
+                if param.name:
+                    parts.append(param.name)
                 if param.type:
-                    out += ['%s : %s' % (param.name, param.type)]
-                else:
-                    out += [param.name]
+                    parts.append(param.type)
+                out += [' : '.join(parts)]
                 if param.desc and ''.join(param.desc).strip():
                     out += self._str_indent(param.desc)
             out += ['']
@@ -637,7 +644,7 @@ class ClassDoc(NumpyDocString):
         if _members is ALL:
             _members = None
         _exclude = config.get('exclude-members', [])
-        
+
         if config.get('show_class_members', True) and _exclude is not ALL:
             def splitlines_x(s):
                 if not s:
@@ -649,7 +656,7 @@ class ClassDoc(NumpyDocString):
                 if not self[field]:
                     doc_list = []
                     for name in sorted(items):
-                        if (name in _exclude or 
+                        if (name in _exclude or
                                 (_members and name not in _members)):
                             continue
                         try:

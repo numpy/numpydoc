@@ -70,19 +70,19 @@ class SphinxDocString(NumpyDocString):
         return self['Extended Summary'] + ['']
 
     def _str_returns(self, name='Returns'):
-        typed_fmt = '**%s** : %s'
-        untyped_fmt = '**%s**'
+        named_fmt = '**%s** : %s'
+        unnamed_fmt = '%s'
 
         out = []
         if self[name]:
             out += self._str_field_list(name)
             out += ['']
             for param in self[name]:
-                if param.type:
-                    out += self._str_indent([typed_fmt % (param.name.strip(),
+                if param.name:
+                    out += self._str_indent([named_fmt % (param.name.strip(),
                                                           param.type)])
                 else:
-                    out += self._str_indent([untyped_fmt % param.name.strip()])
+                    out += self._str_indent([unnamed_fmt % param.type.strip()])
                 if not param.desc:
                     out += self._str_indent(['..'], 8)
                 else:
@@ -209,12 +209,13 @@ class SphinxDocString(NumpyDocString):
                 display_param, desc = self._process_param(param.name,
                                                           param.desc,
                                                           fake_autosummary)
-
+                parts = []
+                if display_param:
+                    parts.append(display_param)
                 if param.type:
-                    out += self._str_indent(['%s : %s' % (display_param,
-                                                          param.type)])
-                else:
-                    out += self._str_indent([display_param])
+                    parts.append(param.type)
+                out += self._str_indent([' : '.join(parts)])
+
                 if desc and self.use_blockquotes:
                     out += ['']
                 elif not desc:
@@ -376,8 +377,8 @@ class SphinxDocString(NumpyDocString):
             'yields': self._str_returns('Yields'),
             'receives': self._str_returns('Receives'),
             'other_parameters': self._str_param_list('Other Parameters'),
-            'raises': self._str_param_list('Raises'),
-            'warns': self._str_param_list('Warns'),
+            'raises': self._str_returns('Raises'),
+            'warns': self._str_returns('Warns'),
             'warnings': self._str_warnings(),
             'see_also': self._str_see_also(func_role),
             'notes': self._str_section('Notes'),
