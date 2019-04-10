@@ -386,7 +386,7 @@ def line_by_line_compare(a, b):
     b = textwrap.dedent(b)
     a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
     b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
-    assert all(x == y for x, y in zip(a, b))
+    assert all(x == y for x, y in zip(a, b)), str([[x, y] for x, y in zip(a, b) if x != y])
 
 
 def test_str():
@@ -454,7 +454,7 @@ See Also
 --------
 
 `some`_, `other`_, `funcs`_
-
+    ..
 `otherfunc`_
     relationship
 
@@ -623,7 +623,7 @@ of the one-dimensional normal distribution to higher dimensions.
 .. seealso::
 
     :obj:`some`, :obj:`other`, :obj:`funcs`
-
+        ..
     :obj:`otherfunc`
         relationship
 
@@ -779,36 +779,46 @@ def test_see_also():
              multiple lines
     func_f, func_g, :meth:`func_h`, func_j,
     func_k
+    func_f1, func_g1, :meth:`func_h1`, func_j1
+    func_f2, func_g2, :meth:`func_h2`, func_j2 : description of multiple
     :obj:`baz.obj_q`
     :obj:`~baz.obj_r`
     :class:`class_j`: fubar
         foobar
     """)
 
-    assert len(doc6['See Also']) == 13
-    for func, desc, role in doc6['See Also']:
-        if func in ('func_a', 'func_b', 'func_c', 'func_f',
-                    'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q',
-                    '~baz.obj_r'):
-            assert(not desc)
-        else:
-            assert(desc)
+    assert len(doc6['See Also']) == 10
+    for funcs, desc in doc6['See Also']:
+        for func, role in funcs:
+            if func in ('func_a', 'func_b', 'func_c', 'func_f',
+                        'func_g', 'func_h', 'func_j', 'func_k', 'baz.obj_q',
+                        'func_f1', 'func_g1', 'func_h1', 'func_j1',
+                        '~baz.obj_r'):
+                assert not desc, str([func, desc])
+            elif func in ('func_f2', 'func_g2', 'func_h2', 'func_j2'):
+                assert desc, str([func, desc])
+            else:
+                assert desc, str([func, desc])
 
-        if func == 'func_h':
-            assert role == 'meth'
-        elif func == 'baz.obj_q' or func == '~baz.obj_r':
-            assert role == 'obj'
-        elif func == 'class_j':
-            assert role == 'class'
-        else:
-            assert role is None
+            if func == 'func_h':
+                assert role == 'meth'
+            elif func == 'baz.obj_q' or func == '~baz.obj_r':
+                assert role == 'obj'
+            elif func == 'class_j':
+                assert role == 'class'
+            elif func in ['func_h1', 'func_h2']:
+                assert role == 'meth'
+            else:
+                assert role is None, str([func, role])
 
-        if func == 'func_d':
-            assert desc == ['some equivalent func']
-        elif func == 'foo.func_e':
-            assert desc == ['some other func over', 'multiple lines']
-        elif func == 'class_j':
-            assert desc == ['fubar', 'foobar']
+            if func == 'func_d':
+                assert desc == ['some equivalent func']
+            elif func == 'foo.func_e':
+                assert desc == ['some other func over', 'multiple lines']
+            elif func == 'class_j':
+                assert desc == ['fubar', 'foobar']
+            elif func in ['func_f2', 'func_g2', 'func_h2', 'func_j2']:
+                assert desc == ['description of multiple'], str([desc, ['description of multiple']])
 
 
 def test_see_also_parse_error():

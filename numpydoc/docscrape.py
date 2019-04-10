@@ -238,9 +238,41 @@ class NumpyDocString(Mapping):
 
         return params
 
-    _name_rgx = re.compile(r"^\s*(:(?P<role>\w+):"
-                           r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`|"
-                           r" (?P<name2>[a-zA-Z0-9_.-]+))\s*", re.X)
+    # See also supports the following formats.
+    #
+    # <FUNCNAME>
+    # <FUNCNAME> SPACE* COLON SPACE+ <DESC> SPACE*
+    # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE*
+    # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE* COLON SPACE+ <DESC> SPACE*
+
+    # <FUNCNAME> is one of
+    #   <PLAIN_FUNCNAME>
+    #   COLON <ROLE> COLON BACKTICK <PLAIN_FUNCNAME> BACKTICK
+    # where
+    #   <PLAIN_FUNCNAME> is a legal function name, and
+    #   <ROLE> is any nonempty sequence of word characters.
+    # Examples: func_f1  :meth:`func_h1` :obj:`~baz.obj_r` :class:`class_j`
+    # <DESC> is a string describing the function.
+
+    _role = r":(?P<role>\w+):"
+    _funcbacktick = r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`"
+    _funcplain = r"(?P<name2>[a-zA-Z0-9_.-]+)"
+    _funcname = r"(" + _role + _funcbacktick + r"|" + _funcplain + r")"
+    _funcnamenext = _funcname.replace('role', 'rolenext')
+    _funcnamenext = _funcnamenext.replace('name', 'namenext')
+    _description = r"(?P<description>\s*:(\s+(?P<desc>\S+.*))?)?\s*$"
+    _func_rgx = re.compile(r"^\s*" + _funcname + r"\s*")
+    _line_rgx = re.compile(
+        r"^\s*" +
+        r"(?P<allfuncs>" +        # group for all function names
+        _funcname +
+        r"(?P<morefuncs>([,]\s+" + _funcnamenext + r")*)" +
+        r")" +                     # end of "allfuncs"
+        r"(?P<trailing>\s*,)?" +   # Some function lists have a trailing comma
+        _description)
+
+    # Empty <DESC> elements are replaced with '..'
+    empty_description = '..'
 
     def _parse_see_also(self, content):
         """
@@ -250,52 +282,49 @@ class NumpyDocString(Mapping):
         func_name1, func_name2, :meth:`func_name`, func_name3
 
         """
+
         items = []
 
         def parse_item_name(text):
-            """Match ':role:`name`' or 'name'"""
-            m = self._name_rgx.match(text)
-            if m:
-                g = m.groups()
-                if g[1] is None:
-                    return g[3], None
-                else:
-                    return g[2], g[1]
-            raise ParseError("%s is not a item name" % text)
+            """Match ':role:`name`' or 'name'."""
+            m = self._func_rgx.match(text)
+            if not m:
+                raise ParseError("%s is not a item name" % text)
+            role = m.group('role')
+            name = m.group('name') if role else m.group('name2')
+            return name, role, m.end()
 
-        def push_item(name, rest):
-            if not name:
-                return
-            name, role = parse_item_name(name)
-            items.append((name, list(rest), role))
-            del rest[:]
-
-        current_func = None
         rest = []
-
         for line in content:
             if not line.strip():
                 continue
 
-            m = self._name_rgx.match(line)
-            if m and line[m.end():].strip().startswith(':'):
-                push_item(current_func, rest)
-                current_func, line = line[:m.end()], line[m.end():]
-                rest = [line.split(':', 1)[1].strip()]
-                if not rest[0]:
-                    rest = []
-            elif not line.startswith(' '):
-                push_item(current_func, rest)
-                current_func = None
-                if ',' in line:
-                    for func in line.split(','):
-                        if func.strip():
-                            push_item(func, [])
-                elif line.strip():
-                    current_func = line
-            elif current_func is not None:
+            line_match = self._line_rgx.match(line)
+            description = None
+            if line_match:
+                description = line_match.group('desc')
+                if line_match.group('trailing'):
+                    self._error_location(
+                        'Unexpected comma after function list at index %d of '
+                        'line "%s"' % (line_match.end('trailing'), line),
+                        error=False)
+            if not description and line.startswith(' '):
                 rest.append(line.strip())
-        push_item(current_func, rest)
+            elif line_match:
+                funcs = []
+                text = line_match.group('allfuncs')
+                while True:
+                    if not text.strip():
+                        break
+                    name, role, match_end = parse_item_name(text)
+                    funcs.append((name, role))
+                    text = text[match_end:].strip()
+                    if text and text[0] == ',':
+                        text = text[1:].strip()
+                rest = list(filter(None, [description]))
+                items.append((funcs, rest))
+            else:
+                raise ParseError("%s is not a item name" % line)
         return items
 
     def _parse_index(self, section, content):
@@ -445,24 +474,30 @@ class NumpyDocString(Mapping):
             return []
         out = []
         out += self._str_header("See Also")
+        out += ['']
         last_had_desc = True
-        for func, desc, role in self['See Also']:
-            if role:
-                link = ':%s:`%s`' % (role, func)
-            elif func_role:
-                link = ':%s:`%s`' % (func_role, func)
-            else:
-                link = "`%s`_" % func
-            if desc or last_had_desc:
-                out += ['']
-                out += [link]
-            else:
-                out[-1] += ", %s" % link
+        for funcs, desc in self['See Also']:
+            assert isinstance(funcs, list)
+            links = []
+            for func, role in funcs:
+                if role:
+                    link = ':%s:`%s`' % (role, func)
+                elif func_role:
+                    link = ':%s:`%s`' % (func_role, func)
+                else:
+                    link = "`%s`_" % func
+                links.append(link)
+            link = ', '.join(links)
+            out += [link]
             if desc:
                 out += self._str_indent([' '.join(desc)])
                 last_had_desc = True
             else:
                 last_had_desc = False
+                out += self._str_indent([self.empty_description])
+
+        if last_had_desc:
+            out += ['']
         out += ['']
         return out
 
