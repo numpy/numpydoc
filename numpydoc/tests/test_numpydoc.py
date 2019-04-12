@@ -13,6 +13,7 @@ class MockConfig():
     templates_path = []
     numpydoc_edit_link = False
     numpydoc_citation_re = '[a-z0-9_.-]+'
+    numpydoc_attributes_as_param_list = True
 
 class MockBuilder():
     config = MockConfig()
