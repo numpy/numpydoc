@@ -8,10 +8,15 @@ import textwrap
 import re
 import pydoc
 from warnings import warn
-import collections
+from collections import namedtuple
+try:
+    from collections.abc import Callable, Mapping
+except ImportError:
+    from collections import Callable, Mapping
 import copy
 import sys
 
+from sphinx.ext.autodoc import ALL
 
 def strip_blank_lines(l):
     "Remove leading and trailing blank lines from a list of lines"
@@ -106,7 +111,10 @@ class ParseError(Exception):
         return message
 
 
-class NumpyDocString(collections.Mapping):
+Parameter = namedtuple('Parameter', ['name', 'type', 'desc'])
+
+
+class NumpyDocString(Mapping):
     """Parses a numpydoc string to an abstract representation
 
     Instances define a mapping from section title to structured data.
@@ -120,6 +128,7 @@ class NumpyDocString(collections.Mapping):
         'Parameters': [],
         'Returns': [],
         'Yields': [],
+        'Receives': [],
         'Raises': [],
         'Warns': [],
         'Other Parameters': [],
@@ -211,7 +220,7 @@ class NumpyDocString(collections.Mapping):
             else:
                 yield name, self._strip(data[2:])
 
-    def _parse_param_list(self, content):
+    def _parse_param_list(self, content, single_element_is_type=False):
         r = Reader(content)
         params = []
         while not r.eof():
@@ -219,19 +228,54 @@ class NumpyDocString(collections.Mapping):
             if ' : ' in header:
                 arg_name, arg_type = header.split(' : ')[:2]
             else:
-                arg_name, arg_type = header, ''
+                if single_element_is_type:
+                    arg_name, arg_type = '', header
+                else:
+                    arg_name, arg_type = header, ''
 
             desc = r.read_to_next_unindented_line()
             desc = dedent_lines(desc)
             desc = strip_blank_lines(desc)
 
-            params.append((arg_name, arg_type, desc))
+            params.append(Parameter(arg_name, arg_type, desc))
 
         return params
 
-    _name_rgx = re.compile(r"^\s*(:(?P<role>\w+):"
-                           r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`|"
-                           r" (?P<name2>[a-zA-Z0-9_.-]+))\s*", re.X)
+    # See also supports the following formats.
+    #
+    # <FUNCNAME>
+    # <FUNCNAME> SPACE* COLON SPACE+ <DESC> SPACE*
+    # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE*
+    # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE* COLON SPACE+ <DESC> SPACE*
+
+    # <FUNCNAME> is one of
+    #   <PLAIN_FUNCNAME>
+    #   COLON <ROLE> COLON BACKTICK <PLAIN_FUNCNAME> BACKTICK
+    # where
+    #   <PLAIN_FUNCNAME> is a legal function name, and
+    #   <ROLE> is any nonempty sequence of word characters.
+    # Examples: func_f1  :meth:`func_h1` :obj:`~baz.obj_r` :class:`class_j`
+    # <DESC> is a string describing the function.
+
+    _role = r":(?P<role>\w+):"
+    _funcbacktick = r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`"
+    _funcplain = r"(?P<name2>[a-zA-Z0-9_.-]+)"
+    _funcname = r"(" + _role + _funcbacktick + r"|" + _funcplain + r")"
+    _funcnamenext = _funcname.replace('role', 'rolenext')
+    _funcnamenext = _funcnamenext.replace('name', 'namenext')
+    _description = r"(?P<description>\s*:(\s+(?P<desc>\S+.*))?)?\s*$"
+    _func_rgx = re.compile(r"^\s*" + _funcname + r"\s*")
+    _line_rgx = re.compile(
+        r"^\s*" +
+        r"(?P<allfuncs>" +        # group for all function names
+        _funcname +
+        r"(?P<morefuncs>([,]\s+" + _funcnamenext + r")*)" +
+        r")" +                     # end of "allfuncs"
+        r"(?P<trailing>\s*,)?" +   # Some function lists have a trailing comma
+        _description)
+
+    # Empty <DESC> elements are replaced with '..'
+    empty_description = '..'
 
     def _parse_see_also(self, content):
         """
@@ -241,52 +285,49 @@ class NumpyDocString(collections.Mapping):
         func_name1, func_name2, :meth:`func_name`, func_name3
 
         """
+
         items = []
 
         def parse_item_name(text):
-            """Match ':role:`name`' or 'name'"""
-            m = self._name_rgx.match(text)
-            if m:
-                g = m.groups()
-                if g[1] is None:
-                    return g[3], None
-                else:
-                    return g[2], g[1]
-            raise ParseError("%s is not a item name" % text)
+            """Match ':role:`name`' or 'name'."""
+            m = self._func_rgx.match(text)
+            if not m:
+                raise ParseError("%s is not a item name" % text)
+            role = m.group('role')
+            name = m.group('name') if role else m.group('name2')
+            return name, role, m.end()
 
-        def push_item(name, rest):
-            if not name:
-                return
-            name, role = parse_item_name(name)
-            items.append((name, list(rest), role))
-            del rest[:]
-
-        current_func = None
         rest = []
-
         for line in content:
             if not line.strip():
                 continue
 
-            m = self._name_rgx.match(line)
-            if m and line[m.end():].strip().startswith(':'):
-                push_item(current_func, rest)
-                current_func, line = line[:m.end()], line[m.end():]
-                rest = [line.split(':', 1)[1].strip()]
-                if not rest[0]:
-                    rest = []
-            elif not line.startswith(' '):
-                push_item(current_func, rest)
-                current_func = None
-                if ',' in line:
-                    for func in line.split(','):
-                        if func.strip():
-                            push_item(func, [])
-                elif line.strip():
-                    current_func = line
-            elif current_func is not None:
+            line_match = self._line_rgx.match(line)
+            description = None
+            if line_match:
+                description = line_match.group('desc')
+                if line_match.group('trailing'):
+                    self._error_location(
+                        'Unexpected comma after function list at index %d of '
+                        'line "%s"' % (line_match.end('trailing'), line),
+                        error=False)
+            if not description and line.startswith(' '):
                 rest.append(line.strip())
-        push_item(current_func, rest)
+            elif line_match:
+                funcs = []
+                text = line_match.group('allfuncs')
+                while True:
+                    if not text.strip():
+                        break
+                    name, role, match_end = parse_item_name(text)
+                    funcs.append((name, role))
+                    text = text[match_end:].strip()
+                    if text and text[0] == ',':
+                        text = text[1:].strip()
+                rest = list(filter(None, [description]))
+                items.append((funcs, rest))
+            else:
+                raise ParseError("%s is not a item name" % line)
         return items
 
     def _parse_index(self, section, content):
@@ -317,7 +358,8 @@ class NumpyDocString(collections.Mapping):
         while True:
             summary = self._doc.read_to_next_empty_line()
             summary_str = " ".join([s.strip() for s in summary]).strip()
-            if re.compile('^([\w., ]+=)?\s*[\w\.]+\(.*\)$').match(summary_str):
+            compiled = re.compile(r'^([\w., ]+=)?\s*[\w\.]+\(.*\)$')
+            if compiled.match(summary_str):
                 self['Signature'] = summary_str
                 if not self._is_at_section():
                     continue
@@ -342,6 +384,9 @@ class NumpyDocString(collections.Mapping):
         if has_returns and has_yields:
             msg = 'Docstring contains both a Returns and Yields section.'
             raise ValueError(msg)
+        if not has_yields and 'Receives' in section_names:
+            msg = 'Docstring contains a Receives section but not Yields.'
+            raise ValueError(msg)
 
         for (section, content) in sections:
             if not section.startswith('..'):
@@ -351,10 +396,12 @@ class NumpyDocString(collections.Mapping):
                     self._error_location("The section %s appears twice"
                                          % section)
 
-            if section in ('Parameters', 'Returns', 'Yields', 'Raises',
-                           'Warns', 'Other Parameters', 'Attributes',
+            if section in ('Parameters', 'Other Parameters', 'Attributes',
                            'Methods'):
                 self[section] = self._parse_param_list(content)
+            elif section in ('Returns', 'Yields', 'Raises', 'Warns', 'Receives'):
+                self[section] = self._parse_param_list(
+                    content, single_element_is_type=True)
             elif section.startswith('.. index::'):
                 self['index'] = self._parse_index(section, content)
             elif section == 'See Also':
@@ -389,7 +436,7 @@ class NumpyDocString(collections.Mapping):
 
     def _str_signature(self):
         if self['Signature']:
-            return [self['Signature'].replace('*', '\*')] + ['']
+            return [self['Signature'].replace('*', r'\*')] + ['']
         else:
             return ['']
 
@@ -409,13 +456,15 @@ class NumpyDocString(collections.Mapping):
         out = []
         if self[name]:
             out += self._str_header(name)
-            for param, param_type, desc in self[name]:
-                if param_type:
-                    out += ['%s : %s' % (param, param_type)]
-                else:
-                    out += [param]
-                if desc and ''.join(desc).strip():
-                    out += self._str_indent(desc)
+            for param in self[name]:
+                parts = []
+                if param.name:
+                    parts.append(param.name)
+                if param.type:
+                    parts.append(param.type)
+                out += [' : '.join(parts)]
+                if param.desc and ''.join(param.desc).strip():
+                    out += self._str_indent(param.desc)
             out += ['']
         return out
 
@@ -432,43 +481,57 @@ class NumpyDocString(collections.Mapping):
             return []
         out = []
         out += self._str_header("See Also")
+        out += ['']
         last_had_desc = True
-        for func, desc, role in self['See Also']:
-            if role:
-                link = ':%s:`%s`' % (role, func)
-            elif func_role:
-                link = ':%s:`%s`' % (func_role, func)
-            else:
-                link = "`%s`_" % func
-            if desc or last_had_desc:
-                out += ['']
-                out += [link]
-            else:
-                out[-1] += ", %s" % link
+        for funcs, desc in self['See Also']:
+            assert isinstance(funcs, list)
+            links = []
+            for func, role in funcs:
+                if role:
+                    link = ':%s:`%s`' % (role, func)
+                elif func_role:
+                    link = ':%s:`%s`' % (func_role, func)
+                else:
+                    link = "`%s`_" % func
+                links.append(link)
+            link = ', '.join(links)
+            out += [link]
             if desc:
                 out += self._str_indent([' '.join(desc)])
                 last_had_desc = True
             else:
                 last_had_desc = False
+                out += self._str_indent([self.empty_description])
+
+        if last_had_desc:
+            out += ['']
         out += ['']
         return out
 
     def _str_index(self):
         idx = self['index']
         out = []
-        out += ['.. index:: %s' % idx.get('default', '')]
+        output_index = False
+        default_index = idx.get('default', '')
+        if default_index:
+            output_index = True
+        out += ['.. index:: %s' % default_index]
         for section, references in idx.items():
             if section == 'default':
                 continue
+            output_index = True
             out += ['   :%s: %s' % (section, ', '.join(references))]
-        return out
+        if output_index:
+            return out
+        else:
+            return ''
 
     def __str__(self, func_role=''):
         out = []
         out += self._str_signature()
         out += self._str_summary()
         out += self._str_extended_summary()
-        for param_list in ('Parameters', 'Returns', 'Yields',
+        for param_list in ('Parameters', 'Returns', 'Yields', 'Receives',
                            'Other Parameters', 'Raises', 'Warns'):
             out += self._str_param_list(param_list)
         out += self._str_section('Warnings')
@@ -521,7 +584,7 @@ class FunctionDoc(NumpyDocString):
                     else:
                         argspec = inspect.getargspec(func)
                     signature = inspect.formatargspec(*argspec)
-                signature = '%s%s' % (func_name, signature.replace('*', '\*'))
+                signature = '%s%s' % (func_name, signature.replace('*', r'\*'))
             except TypeError:
                 signature = '%s()' % func_name
             self['Signature'] = signature
@@ -538,7 +601,7 @@ class FunctionDoc(NumpyDocString):
         out = ''
 
         func, func_name = self.get_func()
-        signature = self['Signature'].replace('*', '\*')
+        signature = self['Signature'].replace('*', r'\*')
 
         roles = {'func': 'function',
                  'meth': 'method'}
@@ -577,21 +640,29 @@ class ClassDoc(NumpyDocString):
 
         NumpyDocString.__init__(self, doc)
 
-        if config.get('show_class_members', True):
+        _members = config.get('members', [])
+        if _members is ALL:
+            _members = None
+        _exclude = config.get('exclude-members', [])
+
+        if config.get('show_class_members', True) and _exclude is not ALL:
             def splitlines_x(s):
                 if not s:
                     return []
                 else:
                     return s.splitlines()
-
             for field, items in [('Methods', self.methods),
                                  ('Attributes', self.properties)]:
                 if not self[field]:
                     doc_list = []
                     for name in sorted(items):
+                        if (name in _exclude or
+                                (_members and name not in _members)):
+                            continue
                         try:
                             doc_item = pydoc.getdoc(getattr(self._cls, name))
-                            doc_list.append((name, '', splitlines_x(doc_item)))
+                            doc_list.append(
+                                Parameter(name, '', splitlines_x(doc_item)))
                         except AttributeError:
                             pass  # method doesn't exist
                     self[field] = doc_list
@@ -603,7 +674,7 @@ class ClassDoc(NumpyDocString):
         return [name for name, func in inspect.getmembers(self._cls)
                 if ((not name.startswith('_')
                      or name in self.extra_public_methods)
-                    and isinstance(func, collections.Callable)
+                    and isinstance(func, Callable)
                     and self._is_show_member(name))]
 
     @property
@@ -613,7 +684,7 @@ class ClassDoc(NumpyDocString):
         return [name for name, func in inspect.getmembers(self._cls)
                 if (not name.startswith('_') and
                     (func is None or isinstance(func, property) or
-                     inspect.isgetsetdescriptor(func))
+                     inspect.isdatadescriptor(func))
                     and self._is_show_member(name))]
 
     def _is_show_member(self, name):

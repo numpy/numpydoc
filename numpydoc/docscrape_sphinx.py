@@ -5,7 +5,10 @@ import re
 import inspect
 import textwrap
 import pydoc
-import collections
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 import os
 
 from jinja2 import FileSystemLoader
@@ -68,30 +71,35 @@ class SphinxDocString(NumpyDocString):
         return self['Extended Summary'] + ['']
 
     def _str_returns(self, name='Returns'):
-        if self.use_blockquotes:
-            typed_fmt = '**%s** : %s'
-            untyped_fmt = '**%s**'
-        else:
-            typed_fmt = '%s : %s'
-            untyped_fmt = '%s'
+        named_fmt = '**%s** : %s'
+        unnamed_fmt = '%s'
 
         out = []
         if self[name]:
             out += self._str_field_list(name)
             out += ['']
-            for param, param_type, desc in self[name]:
-                if param_type:
-                    out += self._str_indent([typed_fmt % (param.strip(),
-                                                          param_type)])
+            for param in self[name]:
+                if param.name:
+                    out += self._str_indent([named_fmt % (param.name.strip(),
+                                                          param.type)])
                 else:
-                    out += self._str_indent([untyped_fmt % param.strip()])
-                if desc and self.use_blockquotes:
-                    out += ['']
-                elif not desc:
-                    desc = ['..']
-                out += self._str_indent(desc, 8)
+                    out += self._str_indent([unnamed_fmt % param.type.strip()])
+                if not param.desc:
+                    out += self._str_indent(['..'], 8)
+                else:
+                    if self.use_blockquotes:
+                        out += ['']
+                    out += self._str_indent(param.desc, 8)
                 out += ['']
         return out
+
+    def _escape_args_and_kwargs(self, name):
+        if name[:2] == '**':
+            return r'\*\*' + name[2:]
+        elif name[:1] == '*':
+            return r'\*' + name[1:]
+        else:
+            return name
 
     def _process_param(self, param, desc, fake_autosummary):
         """Determine how to display a parameter
@@ -127,8 +135,12 @@ class SphinxDocString(NumpyDocString):
         complicated to incorporate autosummary's signature mangling, as it
         relies on Sphinx's plugin mechanism.
         """
-        param = param.strip()
-        display_param = ('**%s**' if self.use_blockquotes else '%s') % param
+        param = self._escape_args_and_kwargs(param.strip())
+        # param = param.strip()
+        # XXX: If changing the following, please check the rendering when param
+        # ends with '_', e.g. 'word_'
+        # See https://github.com/numpy/numpydoc/pull/144
+        display_param = '**%s**' % param
 
         if not fake_autosummary:
             return display_param, desc
@@ -136,7 +148,8 @@ class SphinxDocString(NumpyDocString):
         param_obj = getattr(self._obj, param, None)
         if not (callable(param_obj)
                 or isinstance(param_obj, property)
-                or inspect.isgetsetdescriptor(param_obj)):
+                or inspect.isgetsetdescriptor(param_obj)
+                or inspect.ismemberdescriptor(param_obj)):
             param_obj = None
         obj_doc = pydoc.getdoc(param_obj)
 
@@ -157,7 +170,7 @@ class SphinxDocString(NumpyDocString):
                                               param)
         if obj_doc:
             # Overwrite desc. Take summary logic of autosummary
-            desc = re.split('\n\s*\n', obj_doc.strip(), 1)[0]
+            desc = re.split(r'\n\s*\n', obj_doc.strip(), 1)[0]
             # XXX: Should this have DOTALL?
             #      It does not in autosummary
             m = re.search(r"^([A-Z].*?\.)(?:\s|$)",
@@ -193,15 +206,17 @@ class SphinxDocString(NumpyDocString):
         if self[name]:
             out += self._str_field_list(name)
             out += ['']
-            for param, param_type, desc in self[name]:
-                display_param, desc = self._process_param(param, desc,
+            for param in self[name]:
+                display_param, desc = self._process_param(param.name,
+                                                          param.desc,
                                                           fake_autosummary)
+                parts = []
+                if display_param:
+                    parts.append(display_param)
+                if param.type:
+                    parts.append(param.type)
+                out += self._str_indent([' : '.join(parts)])
 
-                if param_type:
-                    out += self._str_indent(['%s : %s' % (display_param,
-                                                          param_type)])
-                else:
-                    out += self._str_indent([display_param])
                 if desc and self.use_blockquotes:
                     out += ['']
                 elif not desc:
@@ -236,21 +251,21 @@ class SphinxDocString(NumpyDocString):
 
             autosum = []
             others = []
-            for param, param_type, desc in self[name]:
-                param = param.strip()
+            for param in self[name]:
+                param = param._replace(name=param.name.strip())
 
                 # Check if the referenced member can have a docstring or not
-                param_obj = getattr(self._obj, param, None)
+                param_obj = getattr(self._obj, param.name, None)
                 if not (callable(param_obj)
                         or isinstance(param_obj, property)
-                        or inspect.isgetsetdescriptor(param_obj)):
+                        or inspect.isdatadescriptor(param_obj)):
                     param_obj = None
 
                 if param_obj and pydoc.getdoc(param_obj):
                     # Referenced object has a docstring
-                    autosum += ["   %s%s" % (prefix, param)]
+                    autosum += ["   %s%s" % (prefix, param.name)]
                 else:
-                    others.append((param, param_type, desc))
+                    others.append(param)
 
             if autosum:
                 out += ['.. autosummary::']
@@ -259,15 +274,17 @@ class SphinxDocString(NumpyDocString):
                 out += [''] + autosum
 
             if others:
-                maxlen_0 = max(3, max([len(x[0]) + 4 for x in others]))
+                maxlen_0 = max(3, max([len(p.name) + 4 for p in others]))
                 hdr = sixu("=") * maxlen_0 + sixu("  ") + sixu("=") * 10
                 fmt = sixu('%%%ds  %%s  ') % (maxlen_0,)
                 out += ['', '', hdr]
-                for param, param_type, desc in others:
-                    desc = sixu(" ").join(x.strip() for x in desc).strip()
-                    if param_type:
-                        desc = "(%s) %s" % (param_type, desc)
-                    out += [fmt % ("**" + param.strip() + "**", desc)]
+                for param in others:
+                    name = "**" + param.name.strip() + "**"
+                    desc = sixu(" ").join(x.strip()
+                                          for x in param.desc).strip()
+                    if param.type:
+                        desc = "(%s) %s" % (param.type, desc)
+                    out += [fmt % (name, desc)]
                 out += [hdr]
             out += ['']
         return out
@@ -359,9 +376,10 @@ class SphinxDocString(NumpyDocString):
             'parameters': self._str_param_list('Parameters'),
             'returns': self._str_returns('Returns'),
             'yields': self._str_returns('Yields'),
+            'receives': self._str_returns('Receives'),
             'other_parameters': self._str_param_list('Other Parameters'),
-            'raises': self._str_param_list('Raises'),
-            'warns': self._str_param_list('Warns'),
+            'raises': self._str_returns('Raises'),
+            'warns': self._str_returns('Warns'),
             'warnings': self._str_warnings(),
             'see_also': self._str_see_also(func_role),
             'notes': self._str_section('Notes'),
@@ -404,7 +422,7 @@ def get_doc_object(obj, what=None, doc=None, config={}, builder=None):
             what = 'class'
         elif inspect.ismodule(obj):
             what = 'module'
-        elif isinstance(obj, collections.Callable):
+        elif isinstance(obj, Callable):
             what = 'function'
         else:
             what = 'object'

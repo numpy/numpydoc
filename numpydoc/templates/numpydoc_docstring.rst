@@ -4,6 +4,7 @@
 {{parameters}}
 {{returns}}
 {{yields}}
+{{receives}}
 {{other_parameters}}
 {{raises}}
 {{warns}}
