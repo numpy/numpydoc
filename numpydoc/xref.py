@@ -1,9 +1,5 @@
 import re
 
-from docutils import nodes
-from sphinx import addnodes
-from sphinx.util.nodes import split_explicit_title
-
 # When sphinx (including the napoleon extension) parses the parameters
 # section of a docstring, it converts the information into field lists.
 # Some items in the list are for the parameter type. When the type fields
@@ -13,9 +9,7 @@ from sphinx.util.nodes import split_explicit_title
 # numpydoc does not create field lists, so the type information is
 # not placed into fields that can be processed to make links. Instead,
 # when parsing the type information we identify tokens that are link
-# worthy and wrap them around a special role (xref_param_type_role).
-# When the role is processed, we create pending_xref nodes which are
-# later turned into links.
+# worthy and wrap them around a :obj: role.
 
 # Note: we never split on commas that are not followed by a space
 # You risk creating bad rst markup if you do so.
@@ -64,14 +58,44 @@ TEXT_SPLIT_RE = re.compile(
 
 CONTAINER_CHARS = set('[](){}')
 
+# Save people some time and add some common standard aliases
+DEFAULT_LINKS = {
+    # Python
+    'None': ':data:`python:None`',
+    'bool': ':ref:`bool <python:bltin-boolean-values>`',
+    'boolean': ':ref:`bool <python:bltin-boolean-values>`',
+    'True': ':data:`python:True`',
+    'False': ':data:`python:False`',
+    'list': ':class:`python:list`',
+    'tuple': ':class:`python:tuple`',
+    'str': ':class:`python:str`',
+    'string': ':class:`python:str`',
+    'dict': ':class:`python:dict`',
+    'float': ':class:`python:float`',
+    'int': ':class:`python:int`',
+    'callable': ':func:`python:callable`',
+    'iterable': ':term:`python:iterable`',
+    'sequence': ':term:`python:sequence`',
+    'contextmanager': ':func:`python:contextlib.contextmanager`',
+    'namedtuple': ':func:`python:collections.namedtuple`',
+    'generator': ':term:`python:generator`',
+    # NumPy
+    'array': 'numpy.ndarray',
+    'ndarray': 'numpy.ndarray',
+    'np.ndarray': 'numpy.ndarray',
+    'array-like': ':term:`numpy:array_like`',
+    'array_like': ':term:`numpy:array_like`',
+    'scalar': ':ref:`scalar <numpy:arrays.scalars>`',
+    'RandomState': 'numpy.random.RandomState',
+    'np.random.RandomState': 'numpy.random.RandomState',
+    'np.inf': ':data:`numpy.inf`',
+    'np.nan': ':data:`numpy.nan`',
+    'numpy': ':mod:`numpy`',
+}
 
-def make_xref_param_type(param_type, xref_aliases, xref_ignore):
-    """Enclose str in a role that creates a cross-reference.
 
-    The role ``xref_param_type`` *may be* added to any token
-    that looks like type information and no other. The
-    function tries to be clever and catch type information
-    in different disguises.
+def make_xref(param_type, xref_aliases, xref_ignore):
+    """Enclose str in a :obj: role.
 
     Parameters
     ----------
@@ -87,7 +111,7 @@ def make_xref_param_type(param_type, xref_aliases, xref_ignore):
     -------
     out : str
         Text with parts that may be wrapped in a
-        ``xref_param_type`` role.
+        ``:obj:`` role.
     """
     if param_type in xref_aliases:
         link, title = xref_aliases[param_type], param_type
@@ -97,9 +121,9 @@ def make_xref_param_type(param_type, xref_aliases, xref_ignore):
 
     if QUALIFIED_NAME_RE.match(link) and link not in xref_ignore:
         if link != title:
-            return ':xref_param_type:`%s <%s>`' % (title, link)
+            return ':obj:`%s <%s>`' % (title, link)
         else:
-            return ':xref_param_type:`%s`' % link
+            return ':obj:`%s`' % link
 
     def _split_and_apply_re(s, pattern):
         """
@@ -115,7 +139,7 @@ def make_xref_param_type(param_type, xref_aliases, xref_ignore):
                 if pattern.match(tok):
                     results.append(tok)
                 else:
-                    res = make_xref_param_type(
+                    res = make_xref(
                         tok, xref_aliases, xref_ignore)
                     # Openning brackets immediated after a role is
                     # bad markup. Detect that and add backslash.
@@ -157,33 +181,3 @@ def make_xref_param_type(param_type, xref_aliases, xref_ignore):
 
     # Common splitter tokens
     return _split_and_apply_re(param_type, TEXT_SPLIT_RE)
-
-
-def xref_param_type_role(role, rawtext, text, lineno, inliner,
-                         options={}, content=[]):
-    """
-    Add a pending_xref for the param_type of a field list
-    """
-    has_title, title, target = split_explicit_title(text)
-    env = inliner.document.settings.env
-    if has_title:
-        target = target.lstrip('~')
-    else:
-        if target.startswith(('~', '.')):
-            prefix, target = target[0], target[1:]
-            if prefix == '.':
-                modname = env.ref_context.get('py:module')
-                target = target[1:]
-                target = '%s.%s' % (modname, target)
-            elif prefix == '~':
-                title = target.split('.')[-1]
-
-    domain = 'py'
-    contnode = nodes.literal(title, title)
-    refnode = addnodes.pending_xref('', refdomain=domain, refexplicit=False,
-                                    reftype='class', reftarget=target)
-    refnode += contnode
-    # attach information about the current scope
-    if env:
-        env.get_domain(domain).process_field_xref(refnode)
-    return [refnode], []

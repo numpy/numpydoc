@@ -1,6 +1,7 @@
 # -*- encoding:utf-8 -*-
 from __future__ import division, absolute_import, print_function
 
+from collections import namedtuple
 import re
 import sys
 import textwrap
@@ -8,6 +9,7 @@ import warnings
 
 import jinja2
 
+from numpydoc.numpydoc import update_config
 from numpydoc.docscrape import (
     NumpyDocString,
     FunctionDoc,
@@ -382,11 +384,11 @@ def _strip_blank_lines(s):
     return s
 
 
-def line_by_line_compare(a, b):
+def line_by_line_compare(a, b, n_lines=None):
     a = textwrap.dedent(a)
     b = textwrap.dedent(b)
-    a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')]
-    b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')]
+    a = [l.rstrip() for l in _strip_blank_lines(a).split('\n')][:n_lines]
+    b = [l.rstrip() for l in _strip_blank_lines(b).split('\n')][:n_lines]
     assert len(a) == len(b)
     for ii, (aa, bb) in enumerate(zip(a, b)):
         assert aa == bb
@@ -518,8 +520,7 @@ b : int
     The number of bananas.
 int
     The number of unknowns.
-
-.. index:: """)
+""")
 
 
 def test_receives_str():
@@ -537,8 +538,7 @@ b : int
     The number of bananas.
 c : int
     The number of oranges.
-
-.. index:: """)
+""")
 
 
 def test_no_index_in_str():
@@ -1200,8 +1200,6 @@ def test_class_members_doc():
     b
     c
 
-    .. index::
-
     """)
 
 
@@ -1422,7 +1420,7 @@ A top section before
 .. rubric:: Methods
 
 
-    ''')
+    ''', 5)
 
 
 xref_doc_txt = """
@@ -1442,7 +1440,7 @@ p3 : list[int]
     List of integers
 p4 : :class:`pandas.DataFrame`
     A dataframe
-p5 : sequence of int
+p5 : sequence of `int`
     A sequence
 
 Returns
@@ -1458,37 +1456,39 @@ Test xref in Parameters, Other Parameters and Returns
 
 :Parameters:
 
-    **p1** : :xref_param_type:`int`
+    **p1** : :class:`python:int`
         Integer value
 
-    **p2** : :xref_param_type:`float`, optional
+    **p2** : :class:`python:float`, optional
         Integer value
 
 :Returns:
 
-    **out** : :xref_param_type:`array <numpy.ndarray>`
+    **out** : :obj:`array <numpy.ndarray>`
         Numerical return value
 
 
 :Other Parameters:
 
-    **p3** : :xref_param_type:`list`\[:xref_param_type:`int`]
+    **p3** : :class:`python:list`\[:class:`python:int`]
         List of integers
 
     **p4** : :class:`pandas.DataFrame`
         A dataframe
 
-    **p5** : :term:`python:sequence` of :xref_param_type:`int`
+    **p5** : :obj:`python:sequence` of `int`
         A sequence
 """
 
 
 def test_xref():
     xref_aliases = {
-        'sequence': ':term:`python:sequence`',
-        'iterable': ':term:`python:iterable`',
-        'array': 'numpy.ndarray',
+        'sequence': ':obj:`python:sequence`',
     }
+    config = namedtuple('numpydoc_xref_aliases',
+                        'numpydoc_xref_aliases')(xref_aliases)
+    app = namedtuple('config', 'config')(config)
+    update_config(app)
 
     xref_ignore = {'of', 'default', 'optional'}
 

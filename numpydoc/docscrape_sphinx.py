@@ -17,7 +17,7 @@ import sphinx
 from sphinx.jinja2glue import BuiltinTemplateLoader
 
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
-from .xref import make_xref_param_type
+from .xref import make_xref
 
 if sys.version_info[0] >= 3:
     sixu = lambda s: s
@@ -85,7 +85,7 @@ class SphinxDocString(NumpyDocString):
             for param in self[name]:
                 param_type = param.type
                 if param_type and self.xref_param_type:
-                    param_type = make_xref_param_type(
+                    param_type = make_xref(
                         param_type,
                         self.xref_aliases,
                         self.xref_ignore)
@@ -93,7 +93,7 @@ class SphinxDocString(NumpyDocString):
                     out += self._str_indent([named_fmt % (param.name.strip(),
                                                           param_type)])
                 else:
-                   out += self._str_indent([unnamed_fmt % param_type.strip()])
+                    out += self._str_indent([unnamed_fmt % param_type.strip()])
                 if not param.desc:
                     out += self._str_indent(['..'], 8)
                 else:
@@ -168,10 +168,8 @@ class SphinxDocString(NumpyDocString):
 
         prefix = getattr(self, '_name', '')
         if prefix:
-            autosum_prefix = '~%s.' % prefix
             link_prefix = '%s.' % prefix
         else:
-            autosum_prefix = ''
             link_prefix = ''
 
         # Referenced object has a docstring
@@ -227,14 +225,13 @@ class SphinxDocString(NumpyDocString):
                 if param_type:
                     param_type = param.type
                     if self.xref_param_type:
-                        param_type = make_xref_param_type(
+                        param_type = make_xref(
                             param_type,
                             self.xref_aliases,
                             self.xref_ignore)
-(??)                    out += self._str_indent(['%s : %s' % (display_param,
-(??)                                                          param.type)])
-(??)                else:
-(??)                    out += self._str_indent([display_param])
+                    parts.append(param_type)
+                out += self._str_indent([' : '.join(parts)])
+
                 if desc and self.use_blockquotes:
                     out += ['']
                 elif not desc:

@@ -1,23 +1,21 @@
 # After changing this file, check it on:
 #   http://lint.travis-ci.org/
 language: python
+dist: xenial
 sudo: false
-env:
-  - SPHINX_SPEC="Sphinx==1.2.3"
-  - SPHINX_SPEC="Sphinx"
 matrix:
   include:
-    - python: 3.6
+    - python: 3.7
+      env: SPHINX_SPEC="==1.2.3" SPHINXOPTS=""
+    - python: 3.7
     - python: 2.7
-      env:
-        - SPHINXOPTS='-W'
 cache:
   directories:
     - $HOME/.cache/pip
 before_install:
   - sudo apt-get install texlive texlive-latex-extra latexmk
   - pip install --upgrade pip setuptools  # Upgrade pip and setuptools to get ones with `wheel` support
-  - pip install pytest numpy matplotlib ${SPHINX_SPEC}
+  - pip install pytest numpy matplotlib sphinx${SPHINX_SPEC}
 script:
   - |
     python setup.py sdist

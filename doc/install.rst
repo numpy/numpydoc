@@ -70,26 +70,21 @@ numpydoc_xref_aliases : dict
       intersphinx_mapping = {
           'python': ('https://docs.python.org/3/', None),
           'numpy': ('https://docs.scipy.org/doc/numpy', None),
+          ...
       }
 
-  A useful ``dict`` may look like the following::
+  The default ``numpydoc_xref_aliases`` will supply some common ``Python``
+  standard library and ``NumPy`` names for you. Then for your module, a useful
+  ``dict`` may look like the following (e.g., if you were documenting
+  :mod:`sklearn.model_selection`)::
 
       numpydoc_xref_aliases = {
-          # python
-          'sequence': ':term:`python:sequence`',
-          'iterable': ':term:`python:iterable`',
-          'string': 'str',
-          # numpy
-          'array': 'numpy.ndarray',
-          'dtype': 'numpy.dtype',
-          'ndarray': 'numpy.ndarray',
-          'matrix': 'numpy.matrix',
-          'array-like': ':term:`numpy:array_like`',
-          'array_like': ':term:`numpy:array_like`',
+          'LeaveOneOut': 'sklearn.model_selection.LeaveOneOut',
+          ...
       }
 
-   This option depends on the ``numpydoc_xref_param_type`` option
-   being ``True``.
+  This option depends on the ``numpydoc_xref_param_type`` option
+  being ``True``.
 numpydoc_xref_ignore : set
     Words not to cross-reference. Most likely, these are common words
     used in parameter type descriptions that may be confused for
