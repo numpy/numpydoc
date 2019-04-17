@@ -42,6 +42,11 @@ numpydoc_use_blockquotes : bool
   Until version 0.8, parameter definitions were shown as blockquotes, rather
   than in a definition list.  If your styling requires blockquotes, switch
   this config option to True.  This option will be removed in version 0.10.
+numpydoc_attributes_as_param_list : bool
+  Whether to format the Attributes section of a class page in the same way
+  as the Parameter section. If it's False, the Attributes section will be
+  formatted as the Methods section using an autosummary table.
+  ``True`` by default.
 numpydoc_edit_link : bool
   .. deprecated:: edit your HTML template instead
 
