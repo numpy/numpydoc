@@ -245,7 +245,7 @@ class NumpyDocString(Mapping):
     #
     # <FUNCNAME>
     # <FUNCNAME> SPACE* COLON SPACE+ <DESC> SPACE*
-    # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE*
+    # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)+ (COMMA | PERIOD)? SPACE*
     # <FUNCNAME> ( COMMA SPACE+ <FUNCNAME>)* SPACE* COLON SPACE+ <DESC> SPACE*
 
     # <FUNCNAME> is one of
@@ -258,8 +258,8 @@ class NumpyDocString(Mapping):
     # <DESC> is a string describing the function.
 
     _role = r":(?P<role>\w+):"
-    _funcbacktick = r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_.-]+)`"
-    _funcplain = r"(?P<name2>[a-zA-Z0-9_.-]+)"
+    _funcbacktick = r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_\.-]+)`"
+    _funcplain = r"(?P<name2>[a-zA-Z0-9_\.-]+)"
     _funcname = r"(" + _role + _funcbacktick + r"|" + _funcplain + r")"
     _funcnamenext = _funcname.replace('role', 'rolenext')
     _funcnamenext = _funcnamenext.replace('name', 'namenext')
@@ -271,7 +271,7 @@ class NumpyDocString(Mapping):
         _funcname +
         r"(?P<morefuncs>([,]\s+" + _funcnamenext + r")*)" +
         r")" +                     # end of "allfuncs"
-        r"(?P<trailing>\s*,)?" +   # Some function lists have a trailing comma
+        r"(?P<trailing>[,\.])?" +   # Some function lists have a trailing comma (or period)  '\s*'
         _description)
 
     # Empty <DESC> elements are replaced with '..'
@@ -306,9 +306,9 @@ class NumpyDocString(Mapping):
             description = None
             if line_match:
                 description = line_match.group('desc')
-                if line_match.group('trailing'):
+                if line_match.group('trailing') and description:
                     self._error_location(
-                        'Unexpected comma after function list at index %d of '
+                        'Unexpected comma or period after function list at index %d of '
                         'line "%s"' % (line_match.end('trailing'), line),
                         error=False)
             if not description and line.startswith(' '):

@@ -17,6 +17,7 @@ from numpydoc.docscrape import (
 from numpydoc.docscrape_sphinx import (SphinxDocString, SphinxClassDoc,
                                        SphinxFunctionDoc, get_doc_object)
 from pytest import raises as assert_raises
+from pytest import warns as assert_warns
 
 
 if sys.version_info[0] >= 3:
@@ -857,6 +858,21 @@ def test_see_also_print():
     assert(':func:`func_a`, :func:`func_b`' in s)
     assert('    some relationship' in s)
     assert(':func:`func_d`' in s)
+
+
+def test_see_also_trailing_comma_warning():
+    warnings.filterwarnings('error')
+    with assert_warns(Warning, match='Unexpected comma or period after function list at index 43 of line .*'):
+        doc6 = NumpyDocString(
+            """
+            z(x,theta)
+
+            See Also
+            --------
+            func_f2, func_g2, :meth:`func_h2`, func_j2, : description of multiple
+            :class:`class_j`: fubar
+                foobar
+            """)
 
 
 def test_unknown_section():
