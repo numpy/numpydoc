@@ -19,6 +19,8 @@ jobs:
               pip install --user -q --upgrade pip setuptools
               pip install --user -q --upgrade numpy matplotlib sphinx
               pip install --user -e .
+              git submodule init
+              git submodule update
         - save_cache:
             key: pip-cache
             paths:
