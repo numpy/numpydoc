@@ -6,6 +6,8 @@
 *.egg-info
 *.swp
 *.swo
+.pytest_cache
+doc/_build
 build
 dist
 doc/_build

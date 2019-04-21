@@ -1,0 +1,42 @@
+version: 2
+jobs:
+    build_docs:
+      docker:
+        - image: circleci/python:3.7-stretch
+      steps:
+        - checkout
+        - run:
+            name: Set BASH_ENV
+            command: |
+              echo "set -e" >> $BASH_ENV;
+              echo "export PATH=~/.local/bin:$PATH" >> $BASH_ENV;
+        - restore_cache:
+            keys:
+              - pip-cache
+        - run:
+            name: Get dependencies and install
+            command: |
+              pip install --user -q --upgrade pip setuptools
+              pip install --user -q --upgrade numpy matplotlib sphinx
+              pip install --user -e .
+              git submodule init
+              git submodule update
+        - save_cache:
+            key: pip-cache
+            paths:
+              - ~/.cache/pip
+        - run:
+            name: make html
+            command: |
+              cd doc
+              make html
+        - store_artifacts:
+            path: doc/_build/html/
+            destination: html
+
+workflows:
+  version: 2
+
+  default:
+    jobs:
+      - build_docs
