@@ -31,7 +31,8 @@ import itertools
 
 from docutils.nodes import citation, Text, section, comment, reference
 import sphinx
-from sphinx.addnodes import pending_xref, desc_content, only
+from sphinx.addnodes import pending_xref, desc_content
+from sphinx.util import logging
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
@@ -39,6 +40,8 @@ if sphinx.__version__ < '1.0.1':
 from .docscrape_sphinx import get_doc_object
 from .xref import DEFAULT_LINKS
 from . import __version__
+
+logger = logging.getLogger(__name__)
 
 if sys.version_info[0] >= 3:
     sixu = lambda s: s
@@ -169,13 +172,17 @@ def mangle_docstrings(app, what, name, obj, options, lines):
         title_re = re.compile(sixu(pattern), re.I | re.S)
         lines[:] = title_re.sub(sixu(''), u_NL.join(lines)).split(u_NL)
     else:
-        doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg,
-                             builder=app.builder)
-        if sys.version_info[0] >= 3:
-            doc = str(doc)
-        else:
-            doc = unicode(doc)
-        lines[:] = doc.split(u_NL)
+        try:
+            doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg,
+                                 builder=app.builder)
+            if sys.version_info[0] >= 3:
+                doc = str(doc)
+            else:
+                doc = unicode(doc)
+            lines[:] = doc.split(u_NL)
+        except:
+            logger.error('[numpydoc] While processing docstring for %r', name)
+            raise
 
     if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
             obj.__name__):
