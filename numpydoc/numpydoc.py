@@ -37,6 +37,7 @@ if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
 
 from .docscrape_sphinx import get_doc_object
+from .xref import DEFAULT_LINKS
 from . import __version__
 
 if sys.version_info[0] >= 3:
@@ -154,7 +155,11 @@ def mangle_docstrings(app, what, name, obj, options, lines):
            app.config.numpydoc_show_inherited_class_members,
            'class_members_toctree': app.config.numpydoc_class_members_toctree,
            'attributes_as_param_list':
-           app.config.numpydoc_attributes_as_param_list}
+           app.config.numpydoc_attributes_as_param_list,
+           'xref_param_type': app.config.numpydoc_xref_param_type,
+           'xref_aliases': app.config.numpydoc_xref_aliases,
+           'xref_ignore': app.config.numpydoc_xref_ignore,
+           }
 
     cfg.update(options or {})
     u_NL = sixu('\n')
@@ -218,6 +223,7 @@ def setup(app, get_doc_object_=get_doc_object):
 
     app.setup_extension('sphinx.ext.autosummary')
 
+    app.connect('builder-inited', update_config)
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
     app.connect('doctree-read', relabel_references)
@@ -230,6 +236,9 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_class_members_toctree', True, True)
     app.add_config_value('numpydoc_citation_re', '[a-z0-9_.-]+', True)
     app.add_config_value('numpydoc_attributes_as_param_list', True, True)
+    app.add_config_value('numpydoc_xref_param_type', False, True)
+    app.add_config_value('numpydoc_xref_aliases', dict(), True)
+    app.add_config_value('numpydoc_xref_ignore', set(), True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
@@ -238,6 +247,14 @@ def setup(app, get_doc_object_=get_doc_object):
     metadata = {'version': __version__,
                 'parallel_read_safe': True}
     return metadata
+
+
+def update_config(app):
+    """Update the configuration with default values."""
+    for key, value in DEFAULT_LINKS.items():
+        if key not in app.config.numpydoc_xref_aliases:
+            app.config.numpydoc_xref_aliases[key] = value
+
 
 # ------------------------------------------------------------------------------
 # Docstring-mangling domains

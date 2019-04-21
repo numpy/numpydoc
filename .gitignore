@@ -8,3 +8,4 @@
 *.swo
 build
 dist
+doc/_build

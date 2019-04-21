@@ -17,6 +17,7 @@ import sphinx
 from sphinx.jinja2glue import BuiltinTemplateLoader
 
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
+from .xref import make_xref
 
 if sys.version_info[0] >= 3:
     sixu = lambda s: s
@@ -37,6 +38,9 @@ class SphinxDocString(NumpyDocString):
         self.use_blockquotes = config.get('use_blockquotes', False)
         self.class_members_toctree = config.get('class_members_toctree', True)
         self.attributes_as_param_list = config.get('attributes_as_param_list', True)
+        self.xref_param_type = config.get('xref_param_type', False)
+        self.xref_aliases = config.get('xref_aliases', dict())
+        self.xref_ignore = config.get('xref_ignore', set())
         self.template = config.get('template', None)
         if self.template is None:
             template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
@@ -79,11 +83,17 @@ class SphinxDocString(NumpyDocString):
             out += self._str_field_list(name)
             out += ['']
             for param in self[name]:
+                param_type = param.type
+                if param_type and self.xref_param_type:
+                    param_type = make_xref(
+                        param_type,
+                        self.xref_aliases,
+                        self.xref_ignore)
                 if param.name:
                     out += self._str_indent([named_fmt % (param.name.strip(),
-                                                          param.type)])
+                                                          param_type)])
                 else:
-                    out += self._str_indent([unnamed_fmt % param.type.strip()])
+                    out += self._str_indent([unnamed_fmt % param_type.strip()])
                 if not param.desc:
                     out += self._str_indent(['..'], 8)
                 else:
@@ -158,10 +168,8 @@ class SphinxDocString(NumpyDocString):
 
         prefix = getattr(self, '_name', '')
         if prefix:
-            autosum_prefix = '~%s.' % prefix
             link_prefix = '%s.' % prefix
         else:
-            autosum_prefix = ''
             link_prefix = ''
 
         # Referenced object has a docstring
@@ -213,8 +221,15 @@ class SphinxDocString(NumpyDocString):
                 parts = []
                 if display_param:
                     parts.append(display_param)
-                if param.type:
-                    parts.append(param.type)
+                param_type = param.type
+                if param_type:
+                    param_type = param.type
+                    if self.xref_param_type:
+                        param_type = make_xref(
+                            param_type,
+                            self.xref_aliases,
+                            self.xref_ignore)
+                    parts.append(param_type)
                 out += self._str_indent([' : '.join(parts)])
 
                 if desc and self.use_blockquotes:

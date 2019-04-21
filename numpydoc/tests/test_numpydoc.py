@@ -10,6 +10,9 @@ class MockConfig():
     numpydoc_show_class_members = True
     numpydoc_show_inherited_class_members = True
     numpydoc_class_members_toctree = True
+    numpydoc_xref_param_type = False
+    numpydoc_xref_aliases = {}
+    numpydoc_xref_ignore = set()
     templates_path = []
     numpydoc_edit_link = False
     numpydoc_citation_re = '[a-z0-9_.-]+'
@@ -41,7 +44,7 @@ A top section before
     doc = mangle_docstrings(MockApp(), 'class', 'str', str, {'members': ['upper']}, lines)
     assert 'rpartition' not in [x.strip() for x in lines]
     assert 'upper' in [x.strip() for x in lines]
-    
+
     lines = s.split('\n')
     doc = mangle_docstrings(MockApp(), 'class', 'str', str, {'exclude-members': ALL}, lines)
     assert 'rpartition' not in [x.strip() for x in lines]
