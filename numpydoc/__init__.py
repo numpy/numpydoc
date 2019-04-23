@@ -1,6 +1,6 @@
 from __future__ import division, absolute_import, print_function
 
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 
 
 def setup(app, *args, **kwargs):
