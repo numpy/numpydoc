@@ -47,7 +47,7 @@ setup(
     author_email="pav@iki.fi",
     url="https://numpydoc.readthedocs.io",
     license="BSD",
-    install_requires=["sphinx >= 1.2.3", 'Jinja2>=2.3'],
+    install_requires=["sphinx >= 1.6.5", 'Jinja2>=2.3'],
     package_data={'numpydoc': ['tests/test_*.py', 'templates/*.rst']},
     test_suite = 'nose.collector',
     cmdclass={"sdist": sdist},
