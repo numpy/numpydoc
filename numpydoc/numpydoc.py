@@ -139,7 +139,7 @@ def clean_backrefs(app, doc, docname):
         for id_ in ref['ids']:
             known_ref_ids.add(id_)
     for citation_node in doc.traverse(citation, descend=True):
-        # remove backrefs to non-existant refs
+        # remove backrefs to non-existent refs
         citation_node['backrefs'] = [id_ for id_ in citation_node['backrefs']
                                      if id_ in known_ref_ids]
 

@@ -141,7 +141,7 @@ def make_xref(param_type, xref_aliases, xref_ignore):
                 else:
                     res = make_xref(
                         tok, xref_aliases, xref_ignore)
-                    # Openning brackets immediated after a role is
+                    # Opening brackets immediately after a role is
                     # bad markup. Detect that and add backslash.
                     # :role:`type`( to :role:`type`\(
                     if res and res[-1] == '`' and i < n-1:

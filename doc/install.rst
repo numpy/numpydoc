@@ -54,7 +54,7 @@ numpydoc_xref_param_type : bool
   ``False`` by default.
 
   .. note:: Depending on the link types, the CSS styles might be different.
-            consider overridding e.g. ``span.classifier a span.xref`` and
+            consider overriding e.g. ``span.classifier a span.xref`` and
             ``span.classifier a code.docutils.literal.notranslate``
             CSS classes to achieve a uniform appearance.
 
