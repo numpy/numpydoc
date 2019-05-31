@@ -6,6 +6,8 @@
 *.egg-info
 *.swp
 *.swo
+.coverage*
+junit-results.xml
 .pytest_cache
 doc/_build
 build
