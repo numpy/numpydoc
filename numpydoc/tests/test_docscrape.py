@@ -2,6 +2,7 @@
 from __future__ import division, absolute_import, print_function
 
 from collections import namedtuple
+from copy import deepcopy
 import re
 import sys
 import textwrap
@@ -10,6 +11,7 @@ import warnings
 import jinja2
 
 from numpydoc.numpydoc import update_config
+from numpydoc.xref import DEFAULT_LINKS
 from numpydoc.docscrape import (
     NumpyDocString,
     FunctionDoc,
@@ -1485,8 +1487,16 @@ def test_xref():
     xref_aliases = {
         'sequence': ':obj:`python:sequence`',
     }
-    config = namedtuple('numpydoc_xref_aliases',
-                        'numpydoc_xref_aliases')(xref_aliases)
+
+    class Config():
+        def __init__(self, a, b):
+            self.numpydoc_xref_aliases = a
+            self.numpydoc_xref_aliases_complete = b
+
+    xref_aliases_complete = deepcopy(DEFAULT_LINKS)
+    for key in xref_aliases:
+        xref_aliases_complete[key] = xref_aliases[key]
+    config = Config(xref_aliases, xref_aliases_complete)
     app = namedtuple('config', 'config')(config)
     update_config(app)
 
@@ -1496,7 +1506,7 @@ def test_xref():
         xref_doc_txt,
         config=dict(
             xref_param_type=True,
-            xref_aliases=xref_aliases,
+            xref_aliases=xref_aliases_complete,
             xref_ignore=xref_ignore
         )
     )
