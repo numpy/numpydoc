@@ -1508,9 +1508,18 @@ def test_signature_inspect():
 
     assert get_doc_object(func1)['Signature'] == 'func1(a)'
     assert get_doc_object(func2)['Signature'] == 'func2(a, b)'
-    assert get_doc_object(klass.meth1)['Signature'] == 'meth1(a, b)'
-    assert get_doc_object(klass.meth2)['Signature'] == 'meth2(b)'
-    assert get_doc_object(klass.meth3)['Signature'] == 'meth3(a, b)'
+    assert get_doc_object(klass.meth1)['Signature'] == 'meth1(self, a, b)'
+    assert get_doc_object(klass.meth2)['Signature'] == 'meth2(a, b)'
+    assert get_doc_object(klass.meth3)['Signature'] == 'meth3(b)'
+
+    assert get_doc_object(func1, 'use_autodoc_signature')['Signature'] == ''
+    assert get_doc_object(func2, 'use_autodoc_signature')['Signature'] == ''
+    assert get_doc_object(klass.meth1,
+                          'use_autodoc_signature')['Signature'] == ''
+    assert get_doc_object(klass.meth2,
+                          'use_autodoc_signature')['Signature'] == ''
+    assert get_doc_object(klass.meth3,
+                          'use_autodoc_signature')['Signature'] == ''
 
 
 if __name__ == "__main__":

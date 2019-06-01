@@ -93,6 +93,10 @@ numpydoc_xref_ignore : set
         numpydoc_xref_ignore = {'type', 'optional', 'default'}
 
     The default is an empty set.
+numpydoc_use_autodoc_signature : bool
+    Should numpydoc attempt to create signatures for functions or defer to
+    sphinx autodoc?
+    ``False`` by default. 
 numpydoc_edit_link : bool
   .. deprecated:: edit your HTML template instead
 

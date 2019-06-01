@@ -566,7 +566,10 @@ class FunctionDoc(NumpyDocString):
             doc = inspect.getdoc(func) or ''
         NumpyDocString.__init__(self, doc, config)
 
-        if not self['Signature'] and func is not None:
+        use_autodoc_signature = config.get('use_autodoc_signature', False)
+
+        if (not self['Signature'] and func is not None
+                and not use_autodoc_signature):
             func, func_name = self.get_func()
             try:
                 try:

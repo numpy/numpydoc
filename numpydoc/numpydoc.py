@@ -202,7 +202,11 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
 
     if not hasattr(obj, '__doc__'):
         return
-    doc = get_doc_object(obj, config={'show_class_members': False})
+
+    cfg = {'use_autodoc_signature': app.config.numpydoc_use_autodoc_signature,
+           'show_class_members': False}
+
+    doc = get_doc_object(obj, config=cfg)
     sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
     if sig:
         sig = re.sub("^[^(]*", "", sig)
@@ -226,6 +230,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_edit_link', None, False)
     app.add_config_value('numpydoc_use_plots', None, False)
     app.add_config_value('numpydoc_use_blockquotes', None, False)
+    app.add_config_value('numpydoc_use_autodoc_signature', False, False)
     app.add_config_value('numpydoc_show_class_members', True, True)
     app.add_config_value('numpydoc_show_inherited_class_members', True, True)
     app.add_config_value('numpydoc_class_members_toctree', True, True)
