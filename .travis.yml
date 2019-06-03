@@ -15,7 +15,7 @@ cache:
 before_install:
   - sudo apt-get install texlive texlive-latex-extra latexmk
   - pip install --upgrade pip setuptools  # Upgrade pip and setuptools to get ones with `wheel` support
-  - pip install pytest numpy matplotlib sphinx${SPHINX_SPEC}
+  - pip install pytest pytest-cov numpy matplotlib sphinx${SPHINX_SPEC}
 script:
   - |
     python setup.py sdist

@@ -114,7 +114,7 @@ def foo(var1, var2, long_var_name='hi'):
     >>> a = [1, 2, 3]
     >>> print([x + 3 for x in a])
     [4, 5, 6]
-    >>> print("a\n\nb")
+    >>> print("a\nb")
     a
     b
 
