@@ -18,6 +18,7 @@ It will:
 """
 from __future__ import division, absolute_import, print_function
 
+from copy import deepcopy
 import sys
 import re
 import pydoc
@@ -160,7 +161,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
            'attributes_as_param_list':
            app.config.numpydoc_attributes_as_param_list,
            'xref_param_type': app.config.numpydoc_xref_param_type,
-           'xref_aliases': app.config.numpydoc_xref_aliases,
+           'xref_aliases': app.config.numpydoc_xref_aliases_complete,
            'xref_ignore': app.config.numpydoc_xref_ignore,
            }
 
@@ -258,9 +259,15 @@ def setup(app, get_doc_object_=get_doc_object):
 
 def update_config(app):
     """Update the configuration with default values."""
+    # Do not simply overwrite the `app.config.numpydoc_xref_aliases`
+    # otherwise the next sphinx-build will compare the incoming values (without
+    # our additions) to the old values (with our additions) and trigger
+    # a full rebuild!
+    numpydoc_xref_aliases_complete = deepcopy(app.config.numpydoc_xref_aliases)
     for key, value in DEFAULT_LINKS.items():
-        if key not in app.config.numpydoc_xref_aliases:
-            app.config.numpydoc_xref_aliases[key] = value
+        if key not in numpydoc_xref_aliases_complete:
+            numpydoc_xref_aliases_complete[key] = value
+    app.config.numpydoc_xref_aliases_complete = numpydoc_xref_aliases_complete
 
 
 # ------------------------------------------------------------------------------
