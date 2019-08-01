@@ -566,25 +566,6 @@ class FunctionDoc(NumpyDocString):
             doc = inspect.getdoc(func) or ''
         NumpyDocString.__init__(self, doc, config)
 
-        use_autodoc_signature = config.get('use_autodoc_signature', False)
-
-        if (not self['Signature'] and func is not None
-                and not use_autodoc_signature):
-            func, func_name = self.get_func()
-            try:
-                try:
-                    signature = str(inspect.signature(func))
-                except (AttributeError, ValueError):
-                    # try to read signature, backward compat for older Python
-                    if sys.version_info[0] >= 3:
-                        argspec = inspect.getfullargspec(func)
-                    else:
-                        argspec = inspect.getargspec(func)
-                    signature = inspect.formatargspec(*argspec)
-                signature = '%s%s' % (func_name, signature)
-            except TypeError:
-                signature = '%s()' % func_name
-            self['Signature'] = signature
 
     def get_func(self):
         func_name = getattr(self._f, '__name__', self.__class__.__name__)
