@@ -8,7 +8,7 @@ numpydoc docstring guide
 .. Contents::
 
 This document describes the syntax and best practices for docstrings used with
-the numpydoc extension for `Sphinx <http://sphinx-doc.org/>`__.
+the numpydoc extension for Sphinx_.
 
 .. Note::
 
@@ -21,21 +21,23 @@ the numpydoc extension for `Sphinx <http://sphinx-doc.org/>`__.
 Overview
 --------
 We mostly follow the standard Python style conventions as described here:
- * `Style Guide for C Code <http://python.org/dev/peps/pep-0007/>`_
- * `Style Guide for Python Code <http://python.org/dev/peps/pep-0008/>`_
- * `Docstring Conventions <http://python.org/dev/peps/pep-0257/>`_
+ * `Style Guide for C Code <https://www.python.org/dev/peps/pep-0007/>`_
+ * `Style Guide for Python Code <https://www.python.org/dev/peps/pep-0008/>`_
+ * `Docstring Conventions <https://www.python.org/dev/peps/pep-0257/>`_
 
 Additional PEPs of interest regarding documentation of code:
- * `Docstring Processing Framework <http://python.org/dev/peps/pep-0256/>`_
- * `Docutils Design Specification <http://python.org/dev/peps/pep-0258/>`_
+ * `Docstring Processing Framework <https://www.python.org/dev/peps/pep-0256/>`_
+ * `Docutils Design Specification <https://www.python.org/dev/peps/pep-0258/>`_
 
 Use a code checker:
- * `pylint <http://www.logilab.org/857>`_
- * `pyflakes <https://pypi.python.org/pypi/pyflakes>`_
- * `pep8.py <http://svn.browsershots.org/trunk/devtools/pep8/pep8.py>`_
- * `flake8 <https://pypi.python.org/pypi/flake8>`_
- * `vim-flake8 <https://github.com/nvie/vim-flake8>`_ plugin for
-   automatically checking syntax and style with flake8
+ * pylint_: a Python static code analysis tool.
+ * pyflakes_: a tool to check Python code for errors by parsing
+   the source file instead of importing it.
+ * pycodestyle_: (formerly ``pep8``) a tool to check Python code against
+   some of the style conventions in PEP 8.
+ * flake8_: a tool that glues together ``pycodestyle``, ``pyflakes``,
+   ``mccabe`` to check the style and quality of Python code.
+ * vim-flake8_: a ``flake8`` plugin for Vim.
 
 Import conventions
 ------------------
@@ -332,7 +334,7 @@ The sections of a function's docstring are:
     An optional section that provides additional information about the
     code, possibly including a discussion of the algorithm. This
     section may include mathematical equations, written in
-    `LaTeX <http://www.latex-project.org/>`_ format::
+    `LaTeX <https://www.latex-project.org/>`_ format::
 
       The FFT is a fast implementation of the discrete Fourier transform:
 
@@ -686,6 +688,11 @@ Conclusion
 This document itself was written in ReStructuredText.
 :ref:`An example <example>` of the format shown here is available.
 
-.. _SciPy: http://www.scipy.org
-.. _numpy-discussion list: http://scipy.org/scipylib/mailing-lists.html
-.. _Sphinx: http://sphinx.pocoo.org
+.. _Sphinx: https://www.sphinx-doc.org/
+.. _pylint: https://pypi.org/project/pylint/
+.. _pyflakes: https://pypi.python.org/pypi/pyflakes/
+.. _pycodestyle: https://pypi.org/project/pycodestyle/
+.. _flake8: https://pypi.python.org/pypi/flake8/
+.. _vim-flake8: https://github.com/nvie/vim-flake8
+.. _SciPy: https://www.scipy.org
+.. _numpy-discussion list: https://scipy.org/scipylib/mailing-lists.html
