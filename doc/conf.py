@@ -68,7 +68,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'numpydoc'
-copyright = u'2017, numpydoc maintainers'
+copyright = u'2019, numpydoc maintainers'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -143,8 +143,8 @@ if 'scipyorg' in tags:
         "edit_link": True,
         "sidebar": "right",
         "scipy_org_logo": True,
-        "rootlinks": [("http://scipy.org/", "Scipy.org"),
-                      ("http://docs.scipy.org/", "Docs")]
+        "rootlinks": [("https://scipy.org/", "Scipy.org"),
+                      ("https://docs.scipy.org/", "Docs")]
     }
 else:
     # Default build
@@ -270,7 +270,7 @@ latex_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'python': ('http://docs.python.org/', None),
-    'numpy': ('https://www.numpy.org/devdocs', None),
-    'sklearn': ('http://scikit-learn.org/stable/', None),
+    'python': ('https://docs.python.org/3/', None),
+    'numpy': ('https://numpy.org/devdocs/', None),
+    'sklearn': ('https://scikit-learn.org/stable/', None),
 }
