@@ -13,3 +13,5 @@ doc/_build
 build
 dist
 doc/_build
+numpydoc/tests/tinybuild/_build
+numpydoc/tests/tinybuild/generated

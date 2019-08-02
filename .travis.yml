@@ -15,7 +15,7 @@ cache:
 before_install:
   - sudo apt-get install texlive texlive-latex-extra latexmk
   - pip install --upgrade pip setuptools  # Upgrade pip and setuptools to get ones with `wheel` support
-  - pip install pytest pytest-cov numpy matplotlib sphinx${SPHINX_SPEC}
+  - pip install pytest pytest-cov pytest-sugar numpy matplotlib sphinx${SPHINX_SPEC} codecov
 script:
   - |
     python setup.py sdist
@@ -26,3 +26,7 @@ script:
     cd ../doc
     make SPHINXOPTS=$SPHINXOPTS html
     make SPHINXOPTS=$SPHINXOPTS latexpdf
+after_script:
+  - |
+    cd ../dist
+    codecov
