@@ -1,3 +1,4 @@
+from io import StringIO
 import os.path as op
 import shutil
 
@@ -26,7 +27,7 @@ def sphinx_app(tmpdir_factory):
     # https://github.com/sphinx-doc/sphinx/issues/5038
     with docutils_namespace():
         app = Sphinx(src_dir, conf_dir, out_dir, toctrees_dir,
-                     buildername='html')
+                     buildername='html', status=StringIO(u''))
         # need to build within the context manager
         # for automodule and backrefs to work
         app.build(False, [])

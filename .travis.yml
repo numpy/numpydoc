@@ -3,13 +3,6 @@
 language: python
 dist: xenial
 sudo: false
-addons:
-  apt:
-    packages:
-    - dvipng
-    - texlive
-    - texlive-latex-extra
-    - latexmk
 matrix:
   include:
     - python: 3.7
@@ -19,7 +12,8 @@ matrix:
 cache:
   directories:
     - $HOME/.cache/pip
-install:
+before_install:
+  - sudo apt-get install texlive texlive-latex-extra latexmk dvipng
   - pip install --upgrade pip setuptools  # Upgrade pip and setuptools to get ones with `wheel` support
   - pip install pytest pytest-cov numpy matplotlib sphinx${SPHINX_SPEC} codecov
 script:
