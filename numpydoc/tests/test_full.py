@@ -46,6 +46,8 @@ def test_class(sphinx_app):
     # escaped * chars should no longer be preceded by \'s
     assert r'\*' in html  # XXX should be "not in", bug!
     assert 'self,' in html   # XXX should be "not in", bug!
+    # check xref
+    assert 'stdtypes.html#dict' in html
 
 
 def test_function(sphinx_app):
@@ -57,3 +59,5 @@ def test_function(sphinx_app):
         html = fid.read()
     assert r'\*args' not in html
     assert '*args' in html
+    # check xref
+    assert 'glossary.html#term-iterable' in html
