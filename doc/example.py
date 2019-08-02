@@ -119,5 +119,8 @@ def foo(var1, var2, long_var_name='hi'):
     b
 
     """
-
+    # After closing class docstring, there should be one blank line to
+    # separate following codes (according to PEP257).
+    # But for function, method and module, there should be no blank lines
+    # after closing the docstring.
     pass
