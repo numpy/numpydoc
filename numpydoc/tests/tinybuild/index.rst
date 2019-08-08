@@ -1,4 +1,4 @@
-nd_test_mod
-===========
+numpydoc_test_module
+====================
 
-.. automodule:: nd_test_mod
+.. automodule:: numpydoc_test_module

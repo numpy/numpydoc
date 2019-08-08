@@ -6,7 +6,7 @@ from sphinx.application import Sphinx
 from sphinx.util.docutils import docutils_namespace
 
 
-# Test framework adapted from sphinx-gallery
+# Test framework adapted from sphinx-gallery (BSD 3-clause)
 @pytest.fixture(scope='module')
 def sphinx_app(tmpdir_factory):
     temp_dir = (tmpdir_factory.getbasetemp() / 'root').strpath
@@ -33,31 +33,35 @@ def sphinx_app(tmpdir_factory):
     return app
 
 
-def test_class(sphinx_app):
+def test_MyClass(sphinx_app):
     """Test that class documentation is reasonable."""
     src_dir, out_dir = sphinx_app.srcdir, sphinx_app.outdir
-    class_rst = op.join(src_dir, 'generated', 'nd_test_mod.MyClass.rst')
+    class_rst = op.join(src_dir, 'generated',
+                        'numpydoc_test_module.MyClass.rst')
     with open(class_rst, 'r') as fid:
         rst = fid.read()
-    assert r'nd\_test\_mod' in rst  # properly escaped
-    class_html = op.join(out_dir, 'generated', 'nd_test_mod.MyClass.html')
+    assert r'numpydoc\_test\_module' in rst  # properly escaped
+    class_html = op.join(out_dir, 'generated',
+                         'numpydoc_test_module.MyClass.html')
     with open(class_html, 'r') as fid:
         html = fid.read()
-    # escaped * chars should no longer be preceded by \'s
+    # escaped * chars should no longer be preceded by \'s,
+    # if we see a \* in the output we know it's incorrect:
     assert r'\*' in html  # XXX should be "not in", bug!
+    # "self" should not be in the parameter list for the class:
     assert 'self,' in html   # XXX should be "not in", bug!
-    # check xref
+    # check xref was embedded properly (dict should link using xref):
     assert 'stdtypes.html#dict' in html
 
 
-def test_function(sphinx_app):
+def test_my_function(sphinx_app):
     """Test that a timings page is created."""
     out_dir = sphinx_app.outdir
     function_html = op.join(out_dir, 'generated',
-                            'nd_test_mod.my_function.html')
+                            'numpydoc_test_module.my_function.html')
     with open(function_html, 'r') as fid:
         html = fid.read()
     assert r'\*args' not in html
     assert '*args' in html
-    # check xref
+    # check xref (iterable should link using xref):
     assert 'glossary.html#term-iterable' in html

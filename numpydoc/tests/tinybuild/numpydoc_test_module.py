@@ -1,6 +1,6 @@
-"""Numpdoc test module.
+"""Numpydoc test module.
 
-.. currentmodule:: nd_test_mod
+.. currentmodule:: numpydoc_test_module
 
 .. autosummary::
    :toctree: generated/

@@ -3,13 +3,13 @@ import sys
 path = os.path.dirname(__file__)
 if path not in sys.path:
     sys.path.insert(0, path)
-import nd_test_mod  # noqa
+import numpydoc_test_module  # noqa
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'numpydoc',
 ]
-project = 'nd_test_mod'
+project = 'numpydoc_test_module'
 autosummary_generate = True
 source_suffix = '.rst'
 master_doc = 'index'
