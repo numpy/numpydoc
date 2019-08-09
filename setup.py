@@ -48,7 +48,12 @@ setup(
     url="https://numpydoc.readthedocs.io",
     license="BSD",
     install_requires=["sphinx >= 1.6.5", 'Jinja2>=2.3'],
-    package_data={'numpydoc': ['tests/test_*.py', 'templates/*.rst']},
-    test_suite = 'nose.collector',
+    package_data={'numpydoc': [
+        'tests/test_*.py',
+        'tests/tinybuild/Makefile',
+        'tests/tinybuild/index.rst',
+        'tests/tinybuild/*.py',
+        'templates/*.rst',
+        ]},
     cmdclass={"sdist": sdist},
 )
