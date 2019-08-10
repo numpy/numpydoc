@@ -58,7 +58,7 @@ def test_MyClass(sphinx_app):
     # if we see a \* in the output we know it's incorrect:
     assert r'\*' not in html
     # "self" should not be in the parameter list for the class:
-    assert 'self,' in html   # XXX should be "not in", bug!
+    assert 'self,' not in html
     # check xref was embedded properly (dict should link using xref):
     assert 'stdtypes.html#dict' in html
 
