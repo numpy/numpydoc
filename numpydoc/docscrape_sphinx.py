@@ -1,14 +1,8 @@
-from __future__ import division, absolute_import, print_function
-
-import sys
 import re
 import inspect
 import textwrap
 import pydoc
-try:
-    from collections.abc import Callable
-except ImportError:
-    from collections import Callable
+from collections.abc import Callable
 import os
 
 from jinja2 import FileSystemLoader
@@ -18,11 +12,6 @@ from sphinx.jinja2glue import BuiltinTemplateLoader
 
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
 from .xref import make_xref
-
-if sys.version_info[0] >= 3:
-    sixu = lambda s: s
-else:
-    sixu = lambda s: unicode(s, 'unicode_escape')
 
 
 IMPORT_MATPLOTLIB_RE = r'\b(import +matplotlib|from +matplotlib +import)\b'
@@ -290,12 +279,12 @@ class SphinxDocString(NumpyDocString):
 
             if others:
                 maxlen_0 = max(3, max([len(p.name) + 4 for p in others]))
-                hdr = sixu("=") * maxlen_0 + sixu("  ") + sixu("=") * 10
-                fmt = sixu('%%%ds  %%s  ') % (maxlen_0,)
+                hdr = "=" * maxlen_0 + "  " + "=" * 10
+                fmt = '%%%ds  %%s  ' % (maxlen_0,)
                 out += ['', '', hdr]
                 for param in others:
                     name = "**" + param.name.strip() + "**"
-                    desc = sixu(" ").join(x.strip()
+                    desc = " ".join(x.strip()
                                           for x in param.desc).strip()
                     if param.type:
                         desc = "(%s) %s" % (param.type, desc)

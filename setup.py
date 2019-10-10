@@ -1,5 +1,3 @@
-from __future__ import division, print_function
-
 import sys
 import os
 
@@ -9,8 +7,8 @@ from distutils.core import setup
 
 from numpydoc import __version__ as version
 
-if sys.version_info[:2] < (2, 7) or (3, 0) <= sys.version_info[0:2] < (3, 4):
-    raise RuntimeError("Python version 2.7 or >= 3.4 required.")
+if sys.version_info < (3, 5):
+    raise RuntimeError("Python version >= 3.5 required.")
 
 
 def read(fname):
@@ -36,18 +34,18 @@ setup(
                  "License :: OSI Approved :: BSD License",
                  "Topic :: Documentation",
                  "Programming Language :: Python",
-                 "Programming Language :: Python :: 2",
-                 "Programming Language :: Python :: 2.7",
                  "Programming Language :: Python :: 3",
-                 "Programming Language :: Python :: 3.4",
                  "Programming Language :: Python :: 3.5",
-                 "Programming Language :: Python :: 3.6"],
+                 "Programming Language :: Python :: 3.6",
+                 "Programming Language :: Python :: 3.7",
+                 ],
     keywords="sphinx numpy",
     author="Pauli Virtanen and others",
     author_email="pav@iki.fi",
     url="https://numpydoc.readthedocs.io",
     license="BSD",
     install_requires=["sphinx >= 1.6.5", 'Jinja2>=2.3'],
+    python_requires=">=3.5",
     package_data={'numpydoc': [
         'tests/test_*.py',
         'tests/tinybuild/Makefile',

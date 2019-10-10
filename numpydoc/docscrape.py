@@ -1,18 +1,13 @@
 """Extract reference documentation from the NumPy source tree.
 
 """
-from __future__ import division, absolute_import, print_function
-
 import inspect
 import textwrap
 import re
 import pydoc
 from warnings import warn
 from collections import namedtuple
-try:
-    from collections.abc import Callable, Mapping
-except ImportError:
-    from collections import Callable, Mapping
+from collections.abc import Callable, Mapping
 import copy
 import sys
 
