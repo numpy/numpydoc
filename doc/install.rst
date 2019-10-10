@@ -3,7 +3,7 @@
 Installation
 ============
 
-The extension is available from:
+This extension requires Python 3.5+, sphinx 1.6.5+ and is available from:
 
 * `numpydoc on PyPI <http://pypi.python.org/pypi/numpydoc>`_
 * `numpydoc on GitHub <https://github.com/numpy/numpydoc/>`_

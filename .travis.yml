@@ -6,9 +6,10 @@ sudo: false
 matrix:
   include:
     - python: 3.7
+    - python: 3.6
+      env: SPHINX_SPEC="==2.1.0" SPHINXOPTS=""
+    - python: 3.5
       env: SPHINX_SPEC="==1.6.5" SPHINXOPTS=""
-    - python: 3.7
-    - python: 2.7
 cache:
   directories:
     - $HOME/.cache/pip

@@ -1,6 +1,4 @@
 # -*- encoding:utf-8 -*-
-from __future__ import division, absolute_import, print_function
-
 from collections import namedtuple
 from copy import deepcopy
 import re
@@ -22,12 +20,6 @@ from numpydoc.docscrape_sphinx import (SphinxDocString, SphinxClassDoc,
                                        SphinxFunctionDoc, get_doc_object)
 from pytest import raises as assert_raises
 from pytest import warns as assert_warns
-
-
-if sys.version_info[0] >= 3:
-    sixu = lambda s: s
-else:
-    sixu = lambda s: unicode(s, 'unicode_escape')
 
 
 doc_txt = '''\

@@ -1,6 +1,4 @@
 # -*- encoding:utf-8 -*-
-from __future__ import division, absolute_import, print_function
-
 from copy import deepcopy
 from numpydoc.numpydoc import mangle_docstrings
 from numpydoc.xref import DEFAULT_LINKS

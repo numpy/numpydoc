@@ -1,6 +1,4 @@
 # -*- encoding:utf-8 -*-
-from __future__ import division, absolute_import, print_function
-
 from numpydoc.xref import make_xref
 
 xref_aliases = {
