@@ -4,7 +4,7 @@ import pytest
 import numpydoc.validate
 
 
-validate_one = numpydoc.validate.validate_one
+validate_one = numpydoc.validate.validate
 
 
 class GoodDocStrings:
@@ -13,6 +13,14 @@ class GoodDocStrings:
 
     This class contains a lot of docstrings that should pass the validation
     script without any errors.
+
+    See Also
+    --------
+    AnotherClass : With its description.
+
+    Examples
+    --------
+    >>> result = 1 + 1
     """
 
     def plot(self, kind, color="blue", **kwargs):
@@ -31,12 +39,23 @@ class GoodDocStrings:
         **kwargs
             These parameters will be passed to the matplotlib plotting
             function.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
         """
         pass
 
     def swap(self, arr, i, j, *args, **kwargs):
         """
         Swap two indicies on an array.
+
+        The extended summary can be multiple paragraphs, but just one
+        is enough to pass the validation.
 
         Parameters
         ----------
@@ -46,6 +65,14 @@ class GoodDocStrings:
             The indexes being swapped.
         *args, **kwargs
             Extraneous parameters are being permitted.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
         """
         pass
 
@@ -60,8 +87,16 @@ class GoodDocStrings:
         -------
         float
             Random number generated.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
         """
-        return random.random()
+        pass
 
     def random_letters(self):
         """
@@ -76,10 +111,16 @@ class GoodDocStrings:
             Length of the returned string.
         letters : str
             String of random letters.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
         """
-        length = random.randint(1, 10)
-        letters = "".join(random.sample(string.ascii_lowercase, length))
-        return length, letters
+        pass
 
     def sample_values(self):
         """
@@ -92,9 +133,16 @@ class GoodDocStrings:
         ------
         float
             Random number generated.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
         """
-        while True:
-            yield random.random()
+        pass
 
     def head(self):
         """
@@ -105,7 +153,7 @@ class GoodDocStrings:
 
         Returns
         -------
-        Series
+        int
             Subset of the original series with the 5 first values.
 
         See Also
@@ -113,8 +161,13 @@ class GoodDocStrings:
         Series.tail : Return the last 5 elements of the Series.
         Series.iloc : Return a slice of the elements in the Series,
             which can also be used to return the first or last n.
+
+        Examples
+        --------
+        >>> 1 + 1
+        2
         """
-        return self.iloc[:5]
+        return 1
 
     def head1(self, n=5):
         """
@@ -130,7 +183,7 @@ class GoodDocStrings:
 
         Returns
         -------
-        Series
+        int
             Subset of the original series with the n first values.
 
         See Also
@@ -148,7 +201,7 @@ class GoodDocStrings:
         >>> s + 1
         11
         """
-        return self.iloc[:n]
+        return 1
 
     def contains(self, pat, case=True, na=float('NaN')):
         """
@@ -165,6 +218,10 @@ class GoodDocStrings:
             Whether check should be done with case sensitivity.
         na : object, default np.nan
             Fill value for missing data.
+
+        See Also
+        --------
+        related : Something related.
 
         Examples
         --------
@@ -193,6 +250,9 @@ class GoodDocStrings:
         """
         Ensure reST directives don't affect checks for leading periods.
 
+        The extended summary can be multiple paragraphs, but just one
+        is enough to pass the validation.
+
         Parameters
         ----------
         axis : str
@@ -207,12 +267,27 @@ class GoodDocStrings:
             .. deprecated:: 0.00.0
                 A multiline description,
                 which spans another line.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
         """
         pass
 
     def good_imports(self):
         """
         Ensure import other than numpy and pandas are fine.
+
+        The extended summary can be multiple paragraphs, but just one
+        is enough to pass the validation.
+
+        See Also
+        --------
+        related : Something related.
 
         Examples
         --------
@@ -226,6 +301,17 @@ class GoodDocStrings:
     def no_returns(self):
         """
         Say hello and have no returns.
+
+        The extended summary can be multiple paragraphs, but just one
+        is enough to pass the validation.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
         """
         pass
 
@@ -235,6 +321,14 @@ class GoodDocStrings:
 
         Since this function never returns a value, this
         docstring doesn't need a return section.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
         """
 
         def say_hello():
@@ -250,6 +344,9 @@ class GoodDocStrings:
         """
         Swap two values in a matrix.
 
+        The extended summary can be multiple paragraphs, but just one
+        is enough to pass the validation.
+
         Parameters
         ----------
         matrix : list of list
@@ -258,6 +355,14 @@ class GoodDocStrings:
             The indicies of the first value.
         i, j : int
             The indicies of the second value.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
         """
         pass
 
@@ -1009,15 +1114,6 @@ class TestValidator:
                 "method_wo_docstrings",
                 ("The object does not have a docstring",),
             ),
-            # See Also tests
-            (
-                "BadSeeAlso",
-                "prefix_pandas",
-                (
-                    "pandas.Series.rename in `See Also` section "
-                    "does not need `pandas` prefix",
-                ),
-            ),
             # Examples tests
             (
                 "BadGenericDocStrings",
@@ -1043,25 +1139,6 @@ class TestValidator:
         result = validate_one(self._import_path(klass=klass, func=func))
         for msg in msgs:
             assert msg in " ".join(err[1] for err in result["errors"])
-
-    def test_validate_all_ignore_deprecated(self, monkeypatch):
-        monkeypatch.setattr(
-            numpydoc.validate,
-            "validate_one",
-            lambda func_name: {
-                "docstring": "docstring1",
-                "errors": [
-                    ("ER01", "err desc"),
-                    ("ER02", "err desc"),
-                    ("ER03", "err desc"),
-                ],
-                "warnings": [],
-                "examples_errors": "",
-                "deprecated": True,
-            },
-        )
-        result = numpydoc.validate.validate_all('api.rst', prefix=None, ignore_deprecated=True)
-        assert len(result) == 0
 
 
 class TestDocstringClass:

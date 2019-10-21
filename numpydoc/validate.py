@@ -2,7 +2,7 @@
 """
 Analyze docstrings to detect errors.
 
-Call ``validate_all(list_of_object_names_to_validate)`` to get a dictionary
+Call ``validate(object_name_to_validate)`` to get a dictionary
 with all the detected errors.
 """
 import ast
@@ -92,8 +92,6 @@ ERROR_MSGS = {
     "SA03": "Description should be capitalized for See Also "
     '"{reference_name}" reference',
     "SA04": 'Missing description for See Also "{reference_name}" reference',
-    "SA05": "{reference_name} in `See Also` section does not need `pandas` "
-    "prefix, use {right_reference} instead.",
     "EX01": "No examples section found",
     "EX02": "Examples do not pass tests:\n{doctest_log}",
 }
@@ -444,24 +442,20 @@ class Docstring:
         return [line.source for line in lines]
 
 
-def get_validation_data(doc):
+def validate(func_name):
     """
     Validate the docstring.
 
     Parameters
     ----------
-    doc : Docstring
-        A Docstring object with the given function name.
+    func_name : function
+        Function whose docstring will be evaluated (e.g. pandas.read_csv).
 
     Returns
     -------
-    tuple
-        errors : list of tuple
-            Errors occurred during validation.
-        warnings : list of tuple
-            Warnings occurred during validation.
-        examples_errs : str
-            Examples usage displayed along the error, otherwise empty string.
+    dict
+        A dictionary containing all the information obtained from validating
+        the docstring.
 
     Notes
     -----
@@ -488,12 +482,20 @@ def get_validation_data(doc):
     they are validated, are not documented more than in the source code of this
     function.
     """
+    doc = Docstring(func_name)
 
     errs = []
-    wrns = []
     if not doc.raw_doc:
         errs.append(error("GL08"))
-        return errs, wrns, ""
+        return {
+            "type": doc.type,
+            "docstring": doc.clean_doc,
+            "deprecated": doc.deprecated,
+            "file": doc.source_file_name,
+            "file_line": doc.source_file_def_line,
+            "errors": errs,
+            "examples_errors": "",
+        }
 
     if doc.start_blank_lines != 1:
         errs.append(error("GL01"))
@@ -541,7 +543,7 @@ def get_validation_data(doc):
             errs.append(error("SS06"))
 
     if not doc.extended_summary:
-        wrns.append(("ES01", "No extended summary found"))
+        errs.append(("ES01", "No extended summary found"))
 
     # PR01: Parameters not documented
     # PR02: Unknown parameters
@@ -602,7 +604,7 @@ def get_validation_data(doc):
             errs.append(error("YD01"))
 
     if not doc.see_also:
-        wrns.append(error("SA01"))
+        errs.append(error("SA01"))
     else:
         for rel_name, rel_desc in doc.see_also.items():
             if rel_desc:
@@ -612,42 +614,14 @@ def get_validation_data(doc):
                     errs.append(error("SA03", reference_name=rel_name))
             else:
                 errs.append(error("SA04", reference_name=rel_name))
-            if rel_name.startswith("pandas."):
-                errs.append(
-                    error(
-                        "SA05",
-                        reference_name=rel_name,
-                        right_reference=rel_name[len("pandas.") :],
-                    )
-                )
 
     examples_errs = ""
     if not doc.examples:
-        wrns.append(error("EX01"))
+        errs.append(error("EX01"))
     else:
         examples_errs = doc.examples_errors
         if examples_errs:
             errs.append(error("EX02", doctest_log=examples_errs))
-    return errs, wrns, examples_errs
-
-
-def validate_one(func_name):
-    """
-    Validate the docstring for the given func_name
-
-    Parameters
-    ----------
-    func_name : function
-        Function whose docstring will be evaluated (e.g. pandas.read_csv).
-
-    Returns
-    -------
-    dict
-        A dictionary containing all the information obtained from validating
-        the docstring.
-    """
-    doc = Docstring(func_name)
-    errs, wrns, examples_errs = get_validation_data(doc)
     return {
         "type": doc.type,
         "docstring": doc.clean_doc,
@@ -655,46 +629,5 @@ def validate_one(func_name):
         "file": doc.source_file_name,
         "file_line": doc.source_file_def_line,
         "errors": errs,
-        "warnings": wrns,
         "examples_errors": examples_errs,
     }
-
-
-def validate_all(api_items, prefix=None, ignore_deprecated=False):
-    """
-    Execute the validation of all docstrings, and return a dict with the
-    results.
-
-    Parameters
-    ----------
-    api_items : iterable of str
-        List or iterable returning the object names in the public API to validate.
-        (e.g. ['pandas.DataFrame.head', 'pandas.DataFrame.tail'])
-    prefix : str or None
-        If provided, only the docstrings that start with this pattern will be
-        validated. If None, all docstrings will be validated.
-    ignore_deprecated: bool, default False
-        If True, deprecated objects are ignored when validating docstrings.
-
-    Returns
-    -------
-    dict
-        A dictionary with an item for every function/method... containing
-        all the validation information.
-    """
-    result = {}
-    seen = {}
-    for func_name in api_items:
-        if prefix and not func_name.startswith(prefix):
-            continue
-        doc_info = validate_one(func_name)
-        if ignore_deprecated and doc_info["deprecated"]:
-            continue
-        result[func_name] = doc_info
-
-        shared_code_key = doc_info["file"], doc_info["file_line"]
-        shared_code = seen.get(shared_code_key, "")
-        result[func_name]["shared_code_with"] = shared_code
-        seen[shared_code_key] = func_name
-
-    return result
