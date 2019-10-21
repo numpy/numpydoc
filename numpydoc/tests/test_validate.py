@@ -1065,14 +1065,14 @@ class TestValidator:
 
 
 class TestDocstringClass:
-    @pytest.mark.parametrize("invalid_name", ["panda", "panda.DataFrame"])
+    @pytest.mark.parametrize("invalid_name", ["unknown_mod", "unknown_mod.MyClass"])
     def test_raises_for_invalid_module_name(self, invalid_name):
         msg = 'No module can be imported from "{}"'.format(invalid_name)
         with pytest.raises(ImportError, match=msg):
             numpydoc.validate.Docstring(invalid_name)
 
     @pytest.mark.parametrize(
-        "invalid_name", ["pandas.BadClassName", "pandas.Series.bad_method_name"]
+        "invalid_name", ["datetime.BadClassName", "datetime.bad_method_name"]
     )
     def test_raises_for_invalid_attribute_name(self, invalid_name):
         name_components = invalid_name.split(".")
