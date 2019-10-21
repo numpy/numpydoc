@@ -430,7 +430,7 @@ class Docstring:
     def examples_errors(self):
         flags = doctest.NORMALIZE_WHITESPACE | doctest.IGNORE_EXCEPTION_DETAIL
         finder = doctest.DocTestFinder()
-        runner = doctest.DocTestRunner(optionflags=flags)
+        runner = doctest.DocTestRunner(verbose=False, optionflags=flags)
         error_msgs = ""
         for test in finder.find(self.raw_doc, self.name):
             f = StringIO()
