@@ -21,7 +21,7 @@ import numpydoc.docscrape
 
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
-DIRECTIVE_PATTERN = re.compile(rf"^\s*\.\. ({'|'.join(DIRECTIVES)})(?!::)",
+DIRECTIVE_PATTERN = re.compile(r"^\s*\.\. ({})(?!::)".format('|'.join(DIRECTIVES)),
                                re.I | re.M)
 ALLOWED_SECTIONS = [
     "Parameters",
