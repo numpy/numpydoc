@@ -1,7 +1,5 @@
-import io
 import random
 import string
-import textwrap
 import pytest
 import numpydoc.validate
 
@@ -735,15 +733,6 @@ class BadSeeAlso:
 
 
 class BadExamples:
-    def unused_import(self):
-        """
-        Examples
-        --------
-        >>> import pandas as pdf
-        >>> df = pd.DataFrame(np.ones((3, 3)), columns=('a', 'b', 'c'))
-        """
-        pass
-
     def missing_whitespace_around_arithmetic_operator(self):
         """
         Examples
@@ -766,7 +755,8 @@ class BadExamples:
         """
         Examples
         --------
-        >>> df = pd.DataFrame(np.ones((3,3)),columns=('a','b', 'c'))
+        >>> import datetime
+        >>> value = datetime.date(2019,1,1)
         """
         pass
 
@@ -1074,94 +1064,6 @@ class TestValidator:
         assert len(result) == 0
 
 
-class TestApiItems:
-    @property
-    def api_doc(self):
-        return io.StringIO(
-            textwrap.dedent(
-                """
-            .. currentmodule:: itertools
-
-            Itertools
-            ---------
-
-            Infinite
-            ~~~~~~~~
-
-            .. autosummary::
-
-                cycle
-                count
-
-            Finite
-            ~~~~~~
-
-            .. autosummary::
-
-                chain
-
-            .. currentmodule:: random
-
-            Random
-            ------
-
-            All
-            ~~~
-
-            .. autosummary::
-
-                seed
-                randint
-            """
-            )
-        )
-
-    @pytest.mark.parametrize(
-        "idx,name",
-        [
-            (0, "itertools.cycle"),
-            (1, "itertools.count"),
-            (2, "itertools.chain"),
-            (3, "random.seed"),
-            (4, "random.randint"),
-        ],
-    )
-    def test_item_name(self, idx, name):
-        result = list(numpydoc.validate.get_api_items(self.api_doc))
-        assert result[idx][0] == name
-
-    @pytest.mark.parametrize(
-        "idx,func",
-        [(0, "cycle"), (1, "count"), (2, "chain"), (3, "seed"), (4, "randint")],
-    )
-    def test_item_function(self, idx, func):
-        result = list(numpydoc.validate.get_api_items(self.api_doc))
-        assert callable(result[idx][1])
-        assert result[idx][1].__name__ == func
-
-    @pytest.mark.parametrize(
-        "idx,section",
-        [
-            (0, "Itertools"),
-            (1, "Itertools"),
-            (2, "Itertools"),
-            (3, "Random"),
-            (4, "Random"),
-        ],
-    )
-    def test_item_section(self, idx, section):
-        result = list(numpydoc.validate.get_api_items(self.api_doc))
-        assert result[idx][2] == section
-
-    @pytest.mark.parametrize(
-        "idx,subsection",
-        [(0, "Infinite"), (1, "Infinite"), (2, "Finite"), (3, "All"), (4, "All")],
-    )
-    def test_item_subsection(self, idx, subsection):
-        result = list(numpydoc.validate.get_api_items(self.api_doc))
-        assert result[idx][3] == subsection
-
-
 class TestDocstringClass:
     @pytest.mark.parametrize("invalid_name", ["panda", "panda.DataFrame"])
     def test_raises_for_invalid_module_name(self, invalid_name):
@@ -1178,146 +1080,3 @@ class TestDocstringClass:
         msg = "'{}' has no attribute '{}'".format(obj_name, invalid_attr_name)
         with pytest.raises(AttributeError, match=msg):
             numpydoc.validate.Docstring(invalid_name)
-
-
-class TestMainFunction:
-    def test_exit_status_for_validate_one(self, monkeypatch):
-        monkeypatch.setattr(
-            numpydoc.validate,
-            "validate_one",
-            lambda func_name: {
-                "docstring": "docstring1",
-                "errors": [
-                    ("ER01", "err desc"),
-                    ("ER02", "err desc"),
-                    ("ER03", "err desc"),
-                ],
-                "warnings": [],
-                "examples_errors": "",
-            },
-        )
-        exit_status = numpydoc.validate.main(
-            func_name="docstring1",
-            prefix=None,
-            errors=[],
-            output_format="default",
-            ignore_deprecated=False,
-        )
-        assert exit_status == 0
-
-    def test_exit_status_errors_for_validate_all(self, monkeypatch):
-        monkeypatch.setattr(
-            numpydoc.validate,
-            "validate_all",
-            lambda api_path, prefix, ignore_deprecated=False: {
-                "docstring1": {
-                    "errors": [
-                        ("ER01", "err desc"),
-                        ("ER02", "err desc"),
-                        ("ER03", "err desc"),
-                    ],
-                    "file": "module1.py",
-                    "file_line": 23,
-                },
-                "docstring2": {
-                    "errors": [("ER04", "err desc"), ("ER05", "err desc")],
-                    "file": "module2.py",
-                    "file_line": 925,
-                },
-            },
-        )
-        exit_status = numpydoc.validate.main(
-            func_name='api.rst',
-            prefix=None,
-            errors=[],
-            output_format="default",
-            ignore_deprecated=False,
-        )
-        assert exit_status == 5
-
-    def test_no_exit_status_noerrors_for_validate_all(self, monkeypatch):
-        monkeypatch.setattr(
-            numpydoc.validate,
-            "validate_all",
-            lambda api_path, prefix, ignore_deprecated=False: {
-                "docstring1": {"errors": [], "warnings": [("WN01", "warn desc")]},
-                "docstring2": {"errors": []},
-            },
-        )
-        exit_status = numpydoc.validate.main(
-            func_name='api.rst',
-            prefix=None,
-            errors=[],
-            output_format="default",
-            ignore_deprecated=False,
-        )
-        assert exit_status == 0
-
-    def test_exit_status_for_validate_all_json(self, monkeypatch):
-        print("EXECUTED")
-        monkeypatch.setattr(
-            numpydoc.validate,
-            "validate_all",
-            lambda api_path, prefix, ignore_deprecated=False: {
-                "docstring1": {
-                    "errors": [
-                        ("ER01", "err desc"),
-                        ("ER02", "err desc"),
-                        ("ER03", "err desc"),
-                    ]
-                },
-                "docstring2": {"errors": [("ER04", "err desc"), ("ER05", "err desc")]},
-            },
-        )
-        exit_status = numpydoc.validate.main(
-            func_name='api.rst',
-            prefix=None,
-            errors=[],
-            output_format="json",
-            ignore_deprecated=False,
-        )
-        assert exit_status == 0
-
-    def test_errors_param_filters_errors(self, monkeypatch):
-        monkeypatch.setattr(
-            numpydoc.validate,
-            "validate_all",
-            lambda api_path, prefix, ignore_deprecated=False: {
-                "Series.foo": {
-                    "errors": [
-                        ("ER01", "err desc"),
-                        ("ER02", "err desc"),
-                        ("ER03", "err desc"),
-                    ],
-                    "file": "series.py",
-                    "file_line": 142,
-                },
-                "DataFrame.bar": {
-                    "errors": [("ER01", "err desc"), ("ER02", "err desc")],
-                    "file": "frame.py",
-                    "file_line": 598,
-                },
-                "Series.foobar": {
-                    "errors": [("ER01", "err desc")],
-                    "file": "series.py",
-                    "file_line": 279,
-                },
-            },
-        )
-        exit_status = numpydoc.validate.main(
-            func_name='api.rst',
-            prefix=None,
-            errors=["ER01"],
-            output_format="default",
-            ignore_deprecated=False,
-        )
-        assert exit_status == 3
-
-        exit_status = numpydoc.validate.main(
-            func_name='api.rst',
-            prefix=None,
-            errors=["ER03"],
-            output_format="default",
-            ignore_deprecated=False,
-        )
-        assert exit_status == 1
