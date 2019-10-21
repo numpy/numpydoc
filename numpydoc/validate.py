@@ -2,29 +2,16 @@
 """
 Analyze docstrings to detect errors.
 
-If no argument is provided, it does a quick check of docstrings and returns
-a csv with all API functions and results of basic checks.
-
-If a function or method is provided in the form "pandas.function",
-"pandas.module.class.method", etc. a list of all errors in the docstring for
-the specified function or method.
-
-Usage::
-    $ ./validate_docstrings.py
-    $ ./validate_docstrings.py pandas.DataFrame.head
+Call ``validate_all(list_of_object_names_to_validate)`` to get a dictionary
+with all the detected errors.
 """
-import argparse
 import ast
 import collections
 import doctest
-import functools
-import glob
 import importlib
 import inspect
-import json
 import pydoc
 import re
-import sys
 import textwrap
 try:
     from io import StringIO
@@ -34,7 +21,8 @@ import numpydoc.docscrape
 
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
-DIRECTIVE_PATTERN = re.compile(rf"^\s*\.\. ({'|'.join(DIRECTIVES)})(?!::)", re.I | re.M)
+DIRECTIVE_PATTERN = re.compile(rf"^\s*\.\. ({'|'.join(DIRECTIVES)})(?!::)",
+                               re.I | re.M)
 ALLOWED_SECTIONS = [
     "Parameters",
     "Attributes",
@@ -138,84 +126,13 @@ def error(code, **kwargs):
     return (code, ERROR_MSGS[code].format(**kwargs))
 
 
-def get_api_items(api_doc_fd):
-    """
-    Yield information about all public API items.
-
-    Parse api.rst file from the documentation, and extract all the functions,
-    methods, classes, attributes... This should include all pandas public API.
-
-    Parameters
-    ----------
-    api_doc_fd : file descriptor
-        A file descriptor of the API documentation page, containing the table
-        of contents with all the public API.
-
-    Yields
-    ------
-    name : str
-        The name of the object (e.g. 'pandas.Series.str.upper).
-    func : function
-        The object itself. In most cases this will be a function or method,
-        but it can also be classes, properties, cython objects...
-    section : str
-        The name of the section in the API page where the object item is
-        located.
-    subsection : str
-        The name of the subsection in the API page where the object item is
-        located.
-    """
-    current_module = ""  # Use to be pandas, not sure if this will fail now
-    previous_line = current_section = current_subsection = ""
-    position = None
-    for line in api_doc_fd:
-        line = line.strip()
-        if len(line) == len(previous_line):
-            if set(line) == set("-"):
-                current_section = previous_line
-                continue
-            if set(line) == set("~"):
-                current_subsection = previous_line
-                continue
-
-        if line.startswith(".. currentmodule::"):
-            current_module = line.replace(".. currentmodule::", "").strip()
-            continue
-
-        if line == ".. autosummary::":
-            position = "autosummary"
-            continue
-
-        if position == "autosummary":
-            if line == "":
-                position = "items"
-                continue
-
-        if position == "items":
-            if line == "":
-                position = None
-                continue
-            item = line.strip()
-            func = importlib.import_module(current_module)
-            for part in item.split("."):
-                func = getattr(func, part)
-
-            yield (
-                ".".join([current_module, item]),
-                func,
-                current_section,
-                current_subsection,
-            )
-
-        previous_line = line
-
-
 class Docstring:
+    # TODO Can all this class be merged into NumpyDocString?
     def __init__(self, name):
         self.name = name
         obj = self._load_obj(name)
         self.obj = obj
-        self.code_obj = self._to_original_callable(obj)
+        self.code_obj = inspect.unwrap(obj)
         self.raw_doc = obj.__doc__ or ""
         self.clean_doc = pydoc.getdoc(obj)
         self.doc = numpydoc.docscrape.NumpyDocString(self.clean_doc)
@@ -240,8 +157,8 @@ class Docstring:
 
         Examples
         --------
-        >>> Docstring._load_obj('pandas.Series')
-        <class 'pandas.core.series.Series'>
+        >>> Docstring._load_obj('datetime.datetime')
+        <class 'datetime.datetime'>
         """
         for maxsplit in range(1, name.count(".") + 1):
             # TODO when py3 only replace by: module, *func_parts = ...
@@ -261,30 +178,6 @@ class Docstring:
         for part in func_parts:
             obj = getattr(obj, part)
         return obj
-
-    @staticmethod
-    def _to_original_callable(obj):
-        """
-        Find the Python object that contains the source code of the object.
-
-        This is useful to find the place in the source code (file and line
-        number) where a docstring is defined. It does not currently work for
-        all cases, but it should help find some (properties...).
-        """
-        while True:
-            if inspect.isfunction(obj) or inspect.isclass(obj):
-                f = inspect.getfile(obj)
-                if f.startswith("<") and f.endswith(">"):
-                    return None
-                return obj
-            if inspect.ismethod(obj):
-                obj = obj.__func__
-            elif isinstance(obj, functools.partial):
-                obj = obj.func
-            elif isinstance(obj, property):
-                obj = obj.fget
-            else:
-                return None
 
     @property
     def type(self):
@@ -767,17 +660,16 @@ def validate_one(func_name):
     }
 
 
-def validate_all(api_path, prefix, ignore_deprecated=False):
+def validate_all(api_items, prefix=None, ignore_deprecated=False):
     """
     Execute the validation of all docstrings, and return a dict with the
     results.
 
     Parameters
     ----------
-    api_path : str
-        Path where the public API is defined. For example ``doc/source/api.rst``
-        or ``doc/source/reference/*.rst``. The docstrings to analyze will be
-        obtained from the autosummary sections.
+    api_items : iterable of str
+        List or iterable returning the object names in the public API to validate.
+        (e.g. ['pandas.DataFrame.head', 'pandas.DataFrame.tail'])
     prefix : str or None
         If provided, only the docstrings that start with this pattern will be
         validated. If None, all docstrings will be validated.
@@ -792,13 +684,7 @@ def validate_all(api_path, prefix, ignore_deprecated=False):
     """
     result = {}
     seen = {}
-
-    # functions from the API docs
-    api_items = []
-    for api_doc_fname in glob.glob(api_path):
-        with open(api_doc_fname) as f:
-            api_items += list(get_api_items(f))
-    for func_name, func_obj, section, subsection in api_items:
+    for func_name in api_items:
         if prefix and not func_name.startswith(prefix):
             continue
         doc_info = validate_one(func_name)
@@ -808,151 +694,7 @@ def validate_all(api_path, prefix, ignore_deprecated=False):
 
         shared_code_key = doc_info["file"], doc_info["file_line"]
         shared_code = seen.get(shared_code_key, "")
-        result[func_name].update(
-            {
-                "in_api": True,
-                "section": section,
-                "subsection": subsection,
-                "shared_code_with": shared_code,
-            }
-        )
-
+        result[func_name]["shared_code_with"] = shared_code
         seen[shared_code_key] = func_name
 
     return result
-
-
-def main(func_name, prefix, errors, output_format, ignore_deprecated):
-    def header(title, width=80, char="#"):
-        full_line = char * width
-        side_len = (width - len(title) - 2) // 2
-        adj = "" if len(title) % 2 == 0 else " "
-        title_line = "{side} {title}{adj} {side}".format(
-            side=char * side_len, title=title, adj=adj
-        )
-
-        return "\n{full_line}\n{title_line}\n{full_line}\n\n".format(
-            full_line=full_line, title_line=title_line
-        )
-
-    exit_status = 0
-    if func_name.endswith('.rst'):
-        result = validate_all(func_name, prefix, ignore_deprecated)
-
-        if output_format == "json":
-            output = json.dumps(result)
-        else:
-            if output_format == "default":
-                output_format = "{text}\n"
-            elif output_format == "azure":
-                output_format = (
-                    "##vso[task.logissue type=error;"
-                    "sourcepath={path};"
-                    "linenumber={row};"
-                    "code={code};"
-                    "]{text}\n"
-                )
-            else:
-                raise ValueError('Unknown output_format "{}"'.format(output_format))
-
-            output = ""
-            for name, res in result.items():
-                for err_code, err_desc in res["errors"]:
-                    # The script would be faster if instead of filtering the
-                    # errors after validating them, it didn't validate them
-                    # initially. But that would complicate the code too much
-                    if errors and err_code not in errors:
-                        continue
-                    exit_status += 1
-                    output += output_format.format(
-                        name=name,
-                        path=res["file"],
-                        row=res["file_line"],
-                        code=err_code,
-                        text="{}: {}".format(name, err_desc),
-                    )
-
-        sys.stdout.write(output)
-
-    else:
-        result = validate_one(func_name)
-        sys.stderr.write(header("Docstring ({})".format(func_name)))
-        sys.stderr.write("{}\n".format(result["docstring"]))
-        sys.stderr.write(header("Validation"))
-        if result["errors"]:
-            sys.stderr.write("{} Errors found:\n".format(len(result["errors"])))
-            for err_code, err_desc in result["errors"]:
-                # Failing examples are printed at the end
-                if err_code == "EX02":
-                    sys.stderr.write("\tExamples do not pass tests\n")
-                    continue
-                sys.stderr.write("\t{}\n".format(err_desc))
-        if result["warnings"]:
-            sys.stderr.write("{} Warnings found:\n".format(len(result["warnings"])))
-            for wrn_code, wrn_desc in result["warnings"]:
-                sys.stderr.write("\t{}\n".format(wrn_desc))
-
-        if not result["errors"]:
-            sys.stderr.write('Docstring for "{}" correct. :)\n'.format(func_name))
-
-        if result["examples_errors"]:
-            sys.stderr.write(header("Doctests"))
-            sys.stderr.write(result["examples_errors"])
-
-    return exit_status
-
-
-if __name__ == "__main__":
-    format_opts = "default", "json", "azure"
-    func_help = (
-        "function or method to validate (e.g. pandas.DataFrame.head) "
-        "or rst file(s) with the public API autosummaries "
-        "(e.g. pandas/doc/source/reference/*.rst)"
-    )
-    argparser = argparse.ArgumentParser(description="validate pandas docstrings")
-    argparser.add_argument("function", help=func_help)
-    argparser.add_argument(
-        "--format",
-        default="default",
-        choices=format_opts,
-        help="format of the output when validating "
-        "multiple docstrings (ignored when validating one)."
-        "It can be {}".format(str(format_opts)[1:-1]),
-    )
-    argparser.add_argument(
-        "--prefix",
-        default=None,
-        help="pattern for the "
-        "docstring names, in order to decide which ones "
-        'will be validated. A prefix "pandas.Series.str.'
-        "will make the script validate all the docstrings"
-        "of methods starting by this pattern. It is "
-        "ignored if parameter function is provided",
-    )
-    argparser.add_argument(
-        "--errors",
-        default=None,
-        help="comma separated "
-        "list of error codes to validate. By default it "
-        "validates all errors (ignored when validating "
-        "a single docstring)",
-    )
-    argparser.add_argument(
-        "--ignore_deprecated",
-        default=False,
-        action="store_true",
-        help="if this flag is set, "
-        "deprecated objects are ignored when validating "
-        "all docstrings",
-    )
-
-    args = argparser.parse_args()
-    sys.exit(
-        main(
-            args.function,
-            args.prefix,
-            args.errors.split(",") if args.errors else None,
-            args.format,
-            args.ignore_deprecated,
-        )
-    )
