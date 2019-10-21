@@ -2,14 +2,11 @@ import io
 import random
 import string
 import textwrap
-
-import numpy as np
 import pytest
-import validate_docstrings
+import numpydoc.validate
 
-import pandas as pd
 
-validate_one = validate_docstrings.validate_one
+validate_one = numpydoc.validate.validate_one
 
 
 class GoodDocStrings:
@@ -144,26 +141,18 @@ class GoodDocStrings:
 
         Examples
         --------
-        >>> s = pd.Series(['Ant', 'Bear', 'Cow', 'Dog', 'Falcon'])
-        >>> s.head()
-        0   Ant
-        1   Bear
-        2   Cow
-        3   Dog
-        4   Falcon
-        dtype: object
+        >>> s = 10
+        >>> s
+        10
 
         With the `n` parameter, we can change the number of returned rows:
 
-        >>> s.head(n=3)
-        0   Ant
-        1   Bear
-        2   Cow
-        dtype: object
+        >>> s + 1
+        11
         """
         return self.iloc[:n]
 
-    def contains(self, pat, case=True, na=np.nan):
+    def contains(self, pat, case=True, na=float('NaN')):
         """
         Return whether each value contains `pat`.
 
@@ -181,36 +170,24 @@ class GoodDocStrings:
 
         Examples
         --------
-        >>> s = pd.Series(['Antelope', 'Lion', 'Zebra', np.nan])
-        >>> s.str.contains(pat='a')
-        0    False
-        1    False
-        2     True
-        3      NaN
-        dtype: object
+        >>> s = 25
+        >>> s
+        25
 
         **Case sensitivity**
 
         With `case_sensitive` set to `False` we can match `a` with both
         `a` and `A`:
 
-        >>> s.str.contains(pat='a', case=False)
-        0     True
-        1    False
-        2     True
-        3      NaN
-        dtype: object
+        >>> s + 1
+        26
 
         **Missing values**
 
         We can fill missing values in the output using the `na` parameter:
 
-        >>> s.str.contains(pat='a', na=False)
-        0    False
-        1    False
-        2     True
-        3    False
-        dtype: bool
+        >>> s * 2
+        50
         """
         pass
 
@@ -395,44 +372,6 @@ class BadGenericDocStrings:
             kind of matplotlib plot
         """
         pass
-
-    def method(self, foo=None, bar=None):
-        """
-        A sample DataFrame method.
-
-        Do not import numpy and pandas.
-
-        Try to use meaningful data, when it makes the example easier
-        to understand.
-
-        Try to avoid positional arguments like in `df.method(1)`. They
-        can be alright if previously defined with a meaningful name,
-        like in `present_value(interest_rate)`, but avoid them otherwise.
-
-        When presenting the behavior with different parameters, do not place
-        all the calls one next to the other. Instead, add a short sentence
-        explaining what the example shows.
-
-        Examples
-        --------
-        >>> import numpy as np
-        >>> import pandas as pd
-        >>> df = pd.DataFrame(np.ones((3, 3)),
-        ...                   columns=('a', 'b', 'c'))
-        >>> df.all(1)
-        0    True
-        1    True
-        2    True
-        dtype: bool
-        >>> df.all(bool_only=True)
-        Series([], dtype: bool)
-        """
-        pass
-
-    def private_classes(self):
-        """
-        This mentions NDFrame, which is not correct.
-        """
 
     def unknown_section(self):
         """
@@ -849,7 +788,7 @@ class TestValidator:
         str
             Import path of specified object in this module
         """
-        base_path = "scripts.tests.test_validate_docstrings"
+        base_path = "numpydoc.tests.test_validate"
 
         if klass:
             base_path = ".".join([base_path, klass])
@@ -903,8 +842,6 @@ class TestValidator:
             "astype2",
             "astype3",
             "plot",
-            "method",
-            "private_classes",
             "directives_without_two_colons",
         ],
     )
@@ -919,14 +856,6 @@ class TestValidator:
         "klass,func,msgs",
         [
             # See Also tests
-            (
-                "BadGenericDocStrings",
-                "private_classes",
-                (
-                    "Private classes (NDFrame) should not be mentioned in public "
-                    "docstrings",
-                ),
-            ),
             (
                 "BadGenericDocStrings",
                 "unknown_section",
@@ -990,7 +919,7 @@ class TestValidator:
             (
                 "BadParameters",
                 "missing_params",
-                ("Parameters {**kwargs} not documented",),
+                ("Parameters {'**kwargs'} not documented",),
             ),
             (
                 "BadParameters",
@@ -1048,7 +977,7 @@ class TestValidator:
             (
                 "BadParameters",
                 "bad_parameter_spacing",
-                ("Parameters {b} not documented", "Unknown parameters { b}"),
+                ("Parameters {'b'} not documented", "Unknown parameters {' b'}"),
             ),
             pytest.param(
                 "BadParameters",
@@ -1087,16 +1016,6 @@ class TestValidator:
             # Examples tests
             (
                 "BadGenericDocStrings",
-                "method",
-                ("Do not import numpy, as it is imported automatically",),
-            ),
-            (
-                "BadGenericDocStrings",
-                "method",
-                ("Do not import pandas, as it is imported automatically",),
-            ),
-            (
-                "BadGenericDocStrings",
                 "method_wo_docstrings",
                 ("The object does not have a docstring",),
             ),
@@ -1110,29 +1029,6 @@ class TestValidator:
                 ),
             ),
             # Examples tests
-            (
-                "BadExamples",
-                "unused_import",
-                ("flake8 error: F401 'pandas as pdf' imported but unused",),
-            ),
-            (
-                "BadExamples",
-                "indentation_is_not_a_multiple_of_four",
-                ("flake8 error: E111 indentation is not a multiple of four",),
-            ),
-            (
-                "BadExamples",
-                "missing_whitespace_around_arithmetic_operator",
-                (
-                    "flake8 error: "
-                    "E226 missing whitespace around arithmetic operator",
-                ),
-            ),
-            (
-                "BadExamples",
-                "missing_whitespace_after_comma",
-                ("flake8 error: E231 missing whitespace after ',' (3 times)",),
-            ),
             (
                 "BadGenericDocStrings",
                 "two_linebreaks_between_sections",
@@ -1160,7 +1056,7 @@ class TestValidator:
 
     def test_validate_all_ignore_deprecated(self, monkeypatch):
         monkeypatch.setattr(
-            validate_docstrings,
+            numpydoc.validate,
             "validate_one",
             lambda func_name: {
                 "docstring": "docstring1",
@@ -1174,7 +1070,7 @@ class TestValidator:
                 "deprecated": True,
             },
         )
-        result = validate_docstrings.validate_all(prefix=None, ignore_deprecated=True)
+        result = numpydoc.validate.validate_all('api.rst', prefix=None, ignore_deprecated=True)
         assert len(result) == 0
 
 
@@ -1231,7 +1127,7 @@ class TestApiItems:
         ],
     )
     def test_item_name(self, idx, name):
-        result = list(validate_docstrings.get_api_items(self.api_doc))
+        result = list(numpydoc.validate.get_api_items(self.api_doc))
         assert result[idx][0] == name
 
     @pytest.mark.parametrize(
@@ -1239,7 +1135,7 @@ class TestApiItems:
         [(0, "cycle"), (1, "count"), (2, "chain"), (3, "seed"), (4, "randint")],
     )
     def test_item_function(self, idx, func):
-        result = list(validate_docstrings.get_api_items(self.api_doc))
+        result = list(numpydoc.validate.get_api_items(self.api_doc))
         assert callable(result[idx][1])
         assert result[idx][1].__name__ == func
 
@@ -1254,7 +1150,7 @@ class TestApiItems:
         ],
     )
     def test_item_section(self, idx, section):
-        result = list(validate_docstrings.get_api_items(self.api_doc))
+        result = list(numpydoc.validate.get_api_items(self.api_doc))
         assert result[idx][2] == section
 
     @pytest.mark.parametrize(
@@ -1262,28 +1158,16 @@ class TestApiItems:
         [(0, "Infinite"), (1, "Infinite"), (2, "Finite"), (3, "All"), (4, "All")],
     )
     def test_item_subsection(self, idx, subsection):
-        result = list(validate_docstrings.get_api_items(self.api_doc))
+        result = list(numpydoc.validate.get_api_items(self.api_doc))
         assert result[idx][3] == subsection
 
 
 class TestDocstringClass:
-    @pytest.mark.parametrize(
-        "name, expected_obj",
-        [
-            ("pandas.isnull", pd.isnull),
-            ("pandas.DataFrame", pd.DataFrame),
-            ("pandas.Series.sum", pd.Series.sum),
-        ],
-    )
-    def test_resolves_class_name(self, name, expected_obj):
-        d = validate_docstrings.Docstring(name)
-        assert d.obj is expected_obj
-
     @pytest.mark.parametrize("invalid_name", ["panda", "panda.DataFrame"])
     def test_raises_for_invalid_module_name(self, invalid_name):
         msg = 'No module can be imported from "{}"'.format(invalid_name)
         with pytest.raises(ImportError, match=msg):
-            validate_docstrings.Docstring(invalid_name)
+            numpydoc.validate.Docstring(invalid_name)
 
     @pytest.mark.parametrize(
         "invalid_name", ["pandas.BadClassName", "pandas.Series.bad_method_name"]
@@ -1293,22 +1177,13 @@ class TestDocstringClass:
         obj_name, invalid_attr_name = name_components[-2], name_components[-1]
         msg = "'{}' has no attribute '{}'".format(obj_name, invalid_attr_name)
         with pytest.raises(AttributeError, match=msg):
-            validate_docstrings.Docstring(invalid_name)
-
-    @pytest.mark.parametrize(
-        "name", ["pandas.Series.str.isdecimal", "pandas.Series.str.islower"]
-    )
-    def test_encode_content_write_to_file(self, name):
-        # GH25466
-        docstr = validate_docstrings.Docstring(name).validate_pep8()
-        # the list of pep8 errors should be empty
-        assert not list(docstr)
+            numpydoc.validate.Docstring(invalid_name)
 
 
 class TestMainFunction:
     def test_exit_status_for_validate_one(self, monkeypatch):
         monkeypatch.setattr(
-            validate_docstrings,
+            numpydoc.validate,
             "validate_one",
             lambda func_name: {
                 "docstring": "docstring1",
@@ -1321,7 +1196,7 @@ class TestMainFunction:
                 "examples_errors": "",
             },
         )
-        exit_status = validate_docstrings.main(
+        exit_status = numpydoc.validate.main(
             func_name="docstring1",
             prefix=None,
             errors=[],
@@ -1332,9 +1207,9 @@ class TestMainFunction:
 
     def test_exit_status_errors_for_validate_all(self, monkeypatch):
         monkeypatch.setattr(
-            validate_docstrings,
+            numpydoc.validate,
             "validate_all",
-            lambda prefix, ignore_deprecated=False: {
+            lambda api_path, prefix, ignore_deprecated=False: {
                 "docstring1": {
                     "errors": [
                         ("ER01", "err desc"),
@@ -1351,8 +1226,8 @@ class TestMainFunction:
                 },
             },
         )
-        exit_status = validate_docstrings.main(
-            func_name=None,
+        exit_status = numpydoc.validate.main(
+            func_name='api.rst',
             prefix=None,
             errors=[],
             output_format="default",
@@ -1362,15 +1237,15 @@ class TestMainFunction:
 
     def test_no_exit_status_noerrors_for_validate_all(self, monkeypatch):
         monkeypatch.setattr(
-            validate_docstrings,
+            numpydoc.validate,
             "validate_all",
-            lambda prefix, ignore_deprecated=False: {
+            lambda api_path, prefix, ignore_deprecated=False: {
                 "docstring1": {"errors": [], "warnings": [("WN01", "warn desc")]},
                 "docstring2": {"errors": []},
             },
         )
-        exit_status = validate_docstrings.main(
-            func_name=None,
+        exit_status = numpydoc.validate.main(
+            func_name='api.rst',
             prefix=None,
             errors=[],
             output_format="default",
@@ -1381,9 +1256,9 @@ class TestMainFunction:
     def test_exit_status_for_validate_all_json(self, monkeypatch):
         print("EXECUTED")
         monkeypatch.setattr(
-            validate_docstrings,
+            numpydoc.validate,
             "validate_all",
-            lambda prefix, ignore_deprecated=False: {
+            lambda api_path, prefix, ignore_deprecated=False: {
                 "docstring1": {
                     "errors": [
                         ("ER01", "err desc"),
@@ -1394,8 +1269,8 @@ class TestMainFunction:
                 "docstring2": {"errors": [("ER04", "err desc"), ("ER05", "err desc")]},
             },
         )
-        exit_status = validate_docstrings.main(
-            func_name=None,
+        exit_status = numpydoc.validate.main(
+            func_name='api.rst',
             prefix=None,
             errors=[],
             output_format="json",
@@ -1405,9 +1280,9 @@ class TestMainFunction:
 
     def test_errors_param_filters_errors(self, monkeypatch):
         monkeypatch.setattr(
-            validate_docstrings,
+            numpydoc.validate,
             "validate_all",
-            lambda prefix, ignore_deprecated=False: {
+            lambda api_path, prefix, ignore_deprecated=False: {
                 "Series.foo": {
                     "errors": [
                         ("ER01", "err desc"),
@@ -1429,8 +1304,8 @@ class TestMainFunction:
                 },
             },
         )
-        exit_status = validate_docstrings.main(
-            func_name=None,
+        exit_status = numpydoc.validate.main(
+            func_name='api.rst',
             prefix=None,
             errors=["ER01"],
             output_format="default",
@@ -1438,8 +1313,8 @@ class TestMainFunction:
         )
         assert exit_status == 3
 
-        exit_status = validate_docstrings.main(
-            func_name=None,
+        exit_status = numpydoc.validate.main(
+            func_name='api.rst',
             prefix=None,
             errors=["ER03"],
             output_format="default",

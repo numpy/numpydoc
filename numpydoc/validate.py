@@ -836,8 +836,8 @@ def main(func_name, prefix, errors, output_format, ignore_deprecated):
         )
 
     exit_status = 0
-    if func_name is None:
-        result = validate_all(prefix, ignore_deprecated)
+    if func_name.endswith('.rst'):
+        result = validate_all(func_name, prefix, ignore_deprecated)
 
         if output_format == "json":
             output = json.dumps(result)
@@ -906,11 +906,11 @@ if __name__ == "__main__":
     format_opts = "default", "json", "azure"
     func_help = (
         "function or method to validate (e.g. pandas.DataFrame.head) "
-        "if not provided, all docstrings are validated and returned "
-        "as JSON"
+        "or rst file(s) with the public API autosummaries "
+        "(e.g. pandas/doc/source/reference/*.rst)"
     )
     argparser = argparse.ArgumentParser(description="validate pandas docstrings")
-    argparser.add_argument("function", nargs="?", default=None, help=func_help)
+    argparser.add_argument("function", help=func_help)
     argparser.add_argument(
         "--format",
         default="default",
