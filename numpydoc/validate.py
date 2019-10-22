@@ -17,7 +17,7 @@ try:
     from io import StringIO
 except ImportError:
     from cStringIO import StringIO
-import numpydoc.docscrape
+from .docscrape import NumpyDocString
 
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
@@ -133,7 +133,7 @@ class Docstring:
         self.code_obj = inspect.unwrap(obj)
         self.raw_doc = obj.__doc__ or ""
         self.clean_doc = pydoc.getdoc(obj)
-        self.doc = numpydoc.docscrape.NumpyDocString(self.clean_doc)
+        self.doc = NumpyDocString(self.clean_doc)
 
     def __len__(self):
         return len(self.raw_doc)
