@@ -1,11 +1,9 @@
 # -*- encoding:utf-8 -*-
-from __future__ import absolute_import
-
 import pytest
-import numpydoc.validate
+from .. import validate
 
 
-validate_one = numpydoc.validate.validate
+validate_one = validate.validate
 
 
 class GoodDocStrings:
@@ -1147,7 +1145,7 @@ class TestDocstringClass:
     def test_raises_for_invalid_module_name(self, invalid_name):
         msg = 'No module can be imported from "{}"'.format(invalid_name)
         with pytest.raises(ImportError, match=msg):
-            numpydoc.validate.Docstring(invalid_name)
+            validate.Docstring(invalid_name)
 
     @pytest.mark.parametrize(
         "invalid_name", ["datetime.BadClassName", "datetime.bad_method_name"]
@@ -1157,4 +1155,4 @@ class TestDocstringClass:
         obj_name, invalid_attr_name = name_components[-2], name_components[-1]
         msg = "'{}' has no attribute '{}'".format(obj_name, invalid_attr_name)
         with pytest.raises(AttributeError, match=msg):
-            numpydoc.validate.Docstring(invalid_name)
+            validate.Docstring(invalid_name)
