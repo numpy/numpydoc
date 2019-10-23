@@ -1,6 +1,6 @@
-# -*- encoding:utf-8 -*-
 import pytest
 import numpydoc.validate
+import numpydoc.tests
 
 
 validate_one = numpydoc.validate.validate

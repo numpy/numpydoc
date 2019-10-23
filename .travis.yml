@@ -21,7 +21,7 @@ script:
     python setup.py sdist
     cd dist
     pip install numpydoc* -v
-  - python -m pytest -v --pyargs numpydoc
+  - pytest -v --pyargs numpydoc
   - |
     cd ../doc
     make SPHINXOPTS=$SPHINXOPTS html
