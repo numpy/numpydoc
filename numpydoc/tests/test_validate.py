@@ -542,6 +542,24 @@ class BadGenericDocStrings:
 
 
 class BadSummaries:
+    def no_summary(self):
+        """
+        Returns
+        -------
+        int
+            Always one.
+        """
+
+    def heading_whitespaces(self):
+        """
+           Summary with heading whitespaces.
+
+        Returns
+        -------
+        int
+            Always one.
+        """
+
     def wrong_line(self):
         """Exists on the wrong line"""
         pass
@@ -583,6 +601,34 @@ class BadParameters:
     """
     Everything here has a problem with its Parameters section.
     """
+    def no_type(self, value):
+        """
+        Lacks the type.
+
+        Parameters
+        ----------
+        value
+            A parameter without type.
+        """
+
+    def type_with_period(self, value):
+        """
+        Has period after type.
+
+        Parameters
+        ----------
+        value : str.
+            A parameter type should not finish with period.
+        """
+
+    def no_description(self, value):
+        """
+        Lacks the description.
+
+        Parameters
+        ----------
+        value : str
+        """
 
     def missing_params(self, kind, **kwargs):
         """
@@ -800,6 +846,16 @@ class BadReturns:
 
 
 class BadSeeAlso:
+    def no_desc(self):
+        """
+        Return the first 5 elements of the Series.
+
+        See Also
+        --------
+        Series.tail
+        """
+        pass
+
     def desc_no_period(self):
         """
         Return the first 5 elements of the Series.
@@ -978,6 +1034,11 @@ class TestValidator:
             ),
             (
                 "BadSeeAlso",
+                "no_desc",
+                ('Missing description for See Also "Series.tail" reference',),
+            ),
+            (
+                "BadSeeAlso",
                 "desc_no_period",
                 ('Missing period at end of description for See Also "Series.iloc"',),
             ),
@@ -987,6 +1048,16 @@ class TestValidator:
                 ('should be capitalized for See Also "Series.tail"',),
             ),
             # Summary tests
+            (
+                "BadSummaries",
+                "no_summary",
+                ("No summary found",),
+            ),
+            (
+                "BadSummaries",
+                "heading_whitespaces",
+                ("Summary contains heading whitespaces",),
+            ),
             (
                 "BadSummaries",
                 "wrong_line",
@@ -1010,6 +1081,21 @@ class TestValidator:
                 ("Summary should fit in a single line",),
             ),
             # Parameters tests
+            (
+                "BadParameters",
+                "no_type",
+                ('Parameter "value" has no type',),
+            ),
+            (
+                "BadParameters",
+                "type_with_period",
+                ('Parameter "value" type should not finish with "."',),
+            ),
+            (
+                "BadParameters",
+                "no_description",
+                ('Parameter "value" has no description',),
+            ),
             (
                 "BadParameters",
                 "missing_params",
@@ -1107,13 +1193,11 @@ class TestValidator:
                 "no_period_multi",
                 ('Return value description should finish with "."',),
             ),
-            # Examples tests
             (
                 "BadGenericDocStrings",
                 "method_wo_docstrings",
                 ("The object does not have a docstring",),
             ),
-            # Examples tests
             (
                 "BadGenericDocStrings",
                 "two_linebreaks_between_sections",

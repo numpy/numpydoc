@@ -13,10 +13,7 @@ import inspect
 import pydoc
 import re
 import textwrap
-try:
-    from io import StringIO
-except ImportError:
-    from cStringIO import StringIO
+import io
 from .docscrape import NumpyDocString
 
 
@@ -134,9 +131,6 @@ class Docstring:
         self.raw_doc = obj.__doc__ or ""
         self.clean_doc = pydoc.getdoc(obj)
         self.doc = NumpyDocString(self.clean_doc)
-
-    def __len__(self):
-        return len(self.raw_doc)
 
     @staticmethod
     def _load_obj(name):
@@ -266,10 +260,6 @@ class Docstring:
         return " ".join(self.doc["Extended Summary"])
 
     @property
-    def needs_summary(self):
-        return not (bool(self.summary) and bool(self.extended_summary))
-
-    @property
     def doc_parameters(self):
         parameters = collections.OrderedDict()
         for names, type_, desc in self.doc["Parameters"]:
@@ -335,10 +325,6 @@ class Docstring:
             )
 
         return errs
-
-    @property
-    def correct_parameters(self):
-        return not bool(self.parameter_mismatches)
 
     @property
     def directives_without_two_colons(self):
@@ -422,11 +408,6 @@ class Docstring:
             return False
 
     @property
-    def first_line_ends_in_dot(self):
-        if self.doc:
-            return self.doc.split("\n")[0][-1] == "."
-
-    @property
     def deprecated(self):
         return ".. deprecated:: " in (self.summary + self.extended_summary)
 
@@ -437,15 +418,10 @@ class Docstring:
         runner = doctest.DocTestRunner(verbose=False, optionflags=flags)
         error_msgs = ""
         for test in finder.find(self.raw_doc, self.name):
-            f = StringIO()
+            f = io.StringIO()
             runner.run(test, out=f.write)
             error_msgs += f.getvalue()
         return error_msgs
-
-    @property
-    def examples_source_code(self):
-        lines = doctest.DocTestParser().get_examples(self.raw_doc)
-        return [line.source for line in lines]
 
 
 def validate(func_name):
