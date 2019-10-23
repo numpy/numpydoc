@@ -159,9 +159,8 @@ class Docstring:
             except ImportError:
                 pass
             else:
-                continue
-
-        if "obj" not in locals():
+                break
+        else:
             raise ImportError("No module can be imported " 'from "{}"'.format(name))
 
         for part in func_parts:
