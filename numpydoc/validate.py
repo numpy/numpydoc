@@ -159,10 +159,7 @@ class Docstring:
         <class 'datetime.datetime'>
         """
         for maxsplit in range(1, name.count(".") + 1):
-            # TODO when py3 only replace by: module, *func_parts = ...
-            func_name_split = name.rsplit(".", maxsplit)
-            module = func_name_split[0]
-            func_parts = func_name_split[1:]
+            module, *func_parts = name.rsplit(".", maxsplit)
             try:
                 obj = importlib.import_module(module)
             except ImportError:
@@ -183,8 +180,7 @@ class Docstring:
 
     @property
     def is_function_or_method(self):
-        # TODO(py27): remove ismethod
-        return inspect.isfunction(self.obj) or inspect.ismethod(self.obj)
+        return inspect.isfunction(self.obj)
 
     @property
     def source_file_name(self):
@@ -283,6 +279,17 @@ class Docstring:
 
     @property
     def signature_parameters(self):
+        def add_stars(param_name, info):
+            """
+            Add stars to *args and **kwargs parameters
+            """
+            if info.kind == inspect.Parameter.VAR_POSITIONAL:
+                return "*{}".format(param_name)
+            elif info.kind == inspect.Parameter.VAR_KEYWORD:
+                return "**{}".format(param_name)
+            else:
+                return param_name
+
         if inspect.isclass(self.obj):
             if hasattr(self.obj, "_accessors") and (
                 self.name.split(".")[-1] in self.obj._accessors
@@ -290,17 +297,16 @@ class Docstring:
                 # accessor classes have a signature but don't want to show this
                 return tuple()
         try:
-            sig = inspect.getfullargspec(self.obj)
+            sig = inspect.signature(self.obj)
         except (TypeError, ValueError):
             # Some objects, mainly in C extensions do not support introspection
             # of the signature
             return tuple()
-        params = sig.args
-        if sig.varargs:
-            params.append("*" + sig.varargs)
-        if sig.varkw:
-            params.append("**" + sig.varkw)
-        params = tuple(params)
+
+        params = tuple(
+            add_stars(parameter, sig.parameters[parameter])
+            for parameter in sig.parameters
+        )
         if params and params[0] in ("self", "cls"):
             return params[1:]
         return params
