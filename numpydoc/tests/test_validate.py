@@ -202,6 +202,40 @@ class GoodDocStrings:
         """
         return 1
 
+    def summary_starts_with_number(self, n=5):
+        """
+        2nd rule of summaries should allow this.
+
+        3 Starting the summary with a number instead of a capital letter.
+        Also in parameters, returns, see also...
+
+        Parameters
+        ----------
+        n : int
+            4 Number of values to return.
+
+        Returns
+        -------
+        int
+            5 Subset of the original series with the n first values.
+
+        See Also
+        --------
+        tail : 6 Return the last n elements of the Series.
+
+        Examples
+        --------
+        >>> s = 10
+        >>> s
+        10
+
+        7 With the `n` parameter, we can change the number of returned rows:
+
+        >>> s + 1
+        11
+        """
+        return 1
+
     def contains(self, pat, case=True, na=float('NaN')):
         """
         Return whether each value contains `pat`.
@@ -963,6 +997,7 @@ class TestValidator:
             "sample_values",
             "head",
             "head1",
+            "summary_starts_with_number",
             "contains",
             "mode",
             "good_imports",

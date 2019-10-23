@@ -497,7 +497,7 @@ def validate(func_name):
     if not doc.summary:
         errs.append(error("SS01"))
     else:
-        if not doc.summary[0].isupper():
+        if doc.summary[0].isalpha() and not doc.summary[0].isupper():
             errs.append(error("SS02"))
         if doc.summary[-1] != ".":
             errs.append(error("SS03"))
@@ -544,7 +544,7 @@ def validate(func_name):
         if not doc.parameter_desc(param):
             errs.append(error("PR07", param_name=param))
         else:
-            if not doc.parameter_desc(param)[0].isupper():
+            if doc.parameter_desc(param)[0].isalpha() and not doc.parameter_desc(param)[0].isupper():
                 errs.append(error("PR08", param_name=param))
             if doc.parameter_desc(param)[-1] != ".":
                 errs.append(error("PR09", param_name=param))
@@ -561,7 +561,7 @@ def validate(func_name):
                     errs.append(error("RT03"))
                 else:
                     desc = " ".join(desc)
-                    if not desc[0].isupper():
+                    if desc[0].isalpha() and not desc[0].isupper():
                         errs.append(error("RT04"))
                     if not desc.endswith("."):
                         errs.append(error("RT05"))
@@ -576,7 +576,7 @@ def validate(func_name):
             if rel_desc:
                 if not rel_desc.endswith("."):
                     errs.append(error("SA02", reference_name=rel_name))
-                if not rel_desc[0].isupper():
+                if rel_desc[0].isalpha() and not rel_desc[0].isupper():
                     errs.append(error("SA03", reference_name=rel_name))
             else:
                 errs.append(error("SA04", reference_name=rel_name))
