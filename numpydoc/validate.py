@@ -7,13 +7,11 @@ with all the detected errors.
 """
 import ast
 import collections
-import doctest
 import importlib
 import inspect
 import pydoc
 import re
 import textwrap
-import io
 from .docscrape import NumpyDocString
 
 
@@ -90,7 +88,6 @@ ERROR_MSGS = {
     '"{reference_name}" reference',
     "SA04": 'Missing description for See Also "{reference_name}" reference',
     "EX01": "No examples section found",
-    "EX02": "Examples do not pass tests:\n{doctest_log}",
 }
 
 
@@ -99,10 +96,10 @@ def error(code, **kwargs):
     Return a tuple with the error code and the message with variables replaced.
 
     This is syntactic sugar so instead of:
-    - `('EX02', ERROR_MSGS['EX02'].format(doctest_log=log))`
+    - `('PR02', ERROR_MSGS['PR02'].format(doctest_log=log))`
 
     We can simply use:
-    - `error('EX02', doctest_log=log)`
+    - `error('PR02', doctest_log=log)`
 
     Parameters
     ----------
@@ -410,18 +407,6 @@ class Docstring:
     def deprecated(self):
         return ".. deprecated:: " in (self.summary + self.extended_summary)
 
-    @property
-    def examples_errors(self):
-        flags = doctest.NORMALIZE_WHITESPACE | doctest.IGNORE_EXCEPTION_DETAIL
-        finder = doctest.DocTestFinder()
-        runner = doctest.DocTestRunner(verbose=False, optionflags=flags)
-        error_msgs = ""
-        for test in finder.find(self.raw_doc, self.name):
-            f = io.StringIO()
-            runner.run(test, out=f.write)
-            error_msgs += f.getvalue()
-        return error_msgs
-
 
 def validate(func_name):
     """
@@ -456,8 +441,8 @@ def validate(func_name):
        * EX: Examples
     - Last two characters: Numeric error code inside the section
 
-    For example, EX02 is the second codified error in the Examples section
-    (which in this case is assigned to examples that do not pass the tests).
+    For example, PR02 is the second codified error in the Parameters section
+    (which in this case is assigned to the error when unknown parameters are documented).
 
     The error codes, their corresponding error messages, and the details on how
     they are validated, are not documented more than in the source code of this
@@ -596,13 +581,8 @@ def validate(func_name):
             else:
                 errs.append(error("SA04", reference_name=rel_name))
 
-    examples_errs = ""
     if not doc.examples:
         errs.append(error("EX01"))
-    else:
-        examples_errs = doc.examples_errors
-        if examples_errs:
-            errs.append(error("EX02", doctest_log=examples_errs))
     return {
         "type": doc.type,
         "docstring": doc.clean_doc,
@@ -610,5 +590,4 @@ def validate(func_name):
         "file": doc.source_file_name,
         "file_line": doc.source_file_def_line,
         "errors": errs,
-        "examples_errors": examples_errs,
     }
