@@ -463,9 +463,9 @@ def validate(func_name):
             "examples_errors": "",
         }
 
-    if doc.start_blank_lines != 1:
+    if doc.start_blank_lines != 1 and "\n" in doc.raw_doc:
         errs.append(error("GL01"))
-    if doc.end_blank_lines != 1:
+    if doc.end_blank_lines != 1 and "\n" in doc.raw_doc:
         errs.append(error("GL02"))
     if doc.double_blank_lines:
         errs.append(error("GL03"))

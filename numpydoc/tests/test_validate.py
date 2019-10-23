@@ -21,6 +21,10 @@ class GoodDocStrings:
     --------
     >>> result = 1 + 1
     """
+    def one_liner(self):
+        """Allow one liner docstrings (including quotes)."""
+        # This should fail, but not because of the position of the quotes
+        pass
 
     def plot(self, kind, color="blue", **kwargs):
         """
@@ -595,7 +599,9 @@ class BadSummaries:
         """
 
     def wrong_line(self):
-        """Exists on the wrong line"""
+        """Quotes are on the wrong line.
+
+        Both opening and closing."""
         pass
 
     def no_punctuation(self):
@@ -982,6 +988,12 @@ class TestValidator:
 
         return base_path
 
+    def test_one_liner(self, capsys):
+        result = validate_one(self._import_path(klass="GoodDocStrings", func='one_liner'))
+        errors = " ".join(err[1] for err in result["errors"])
+        assert 'should start in the line immediately after the opening quotes' not in errors
+        assert 'should be placed in the line after the last text' not in errors
+
     def test_good_class(self, capsys):
         errors = validate_one(self._import_path(klass="GoodDocStrings"))["errors"]
         assert isinstance(errors, list)
@@ -1096,7 +1108,8 @@ class TestValidator:
             (
                 "BadSummaries",
                 "wrong_line",
-                ("should start in the line immediately after the opening quotes",),
+                ("should start in the line immediately after the opening quotes",
+                 "should be placed in the line after the last text"),
             ),
             ("BadSummaries", "no_punctuation", ("Summary does not end with a period",)),
             (
