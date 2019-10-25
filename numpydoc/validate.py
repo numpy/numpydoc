@@ -90,6 +90,9 @@ ERROR_MSGS = {
     "EX01": "No examples section found",
 }
 
+# Ignore these when evaluating end-of-line-"." checks
+IGNORE_STARTS = (" ", "* ", "- ")
+
 
 def error(code, **kwargs):
     """
@@ -257,13 +260,10 @@ class Docstring:
 
     @property
     def doc_parameters(self):
-        return self._get_doc_parameters()
-
-    def _get_doc_parameters(self, joiner=""):
         parameters = collections.OrderedDict()
         for names, type_, desc in self.doc["Parameters"]:
             for name in names.split(", "):
-                parameters[name] = (type_, joiner.join(desc))
+                parameters[name] = (type_, desc)
         return parameters
 
     @property
@@ -332,14 +332,15 @@ class Docstring:
     def parameter_type(self, param):
         return self.doc_parameters[param][0]
 
-    def parameter_desc(self, param, joiner=""):
-        desc = self._get_doc_parameters(joiner)[param][1]
+    def parameter_desc(self, param):
+        desc = "\n".join(self.doc_parameters[param][1])
         # Find and strip out any sphinx directives
         for directive in DIRECTIVES:
             full_directive = ".. {}".format(directive)
             if full_directive in desc:
                 # Only retain any description before the directive
-                desc = desc[: desc.index(full_directive)]
+                desc = desc[: desc.index(full_directive)].rstrip("\n")
+        desc = desc.split("\n")
         return desc
 
     @property
@@ -544,17 +545,19 @@ def validate(func_name):
                                 wrong_type=wrong_type,
                             )
                         )
-        this_desc = doc.parameter_desc(param, "\n").rstrip("\n")
-        if not this_desc:
+        this_desc = doc.parameter_desc(param)
+        if not ''.join(this_desc):
             errs.append(error("PR07", param_name=param))
         else:
-            if this_desc[0].isalpha() and not this_desc[0].isupper():
+            if this_desc[0][0].isalpha() and not this_desc[0][0].isupper():
                 errs.append(error("PR08", param_name=param))
             # Not ending in "." is only an error if the last bit is not
             # indented (e.g., quote or code block)
-            if this_desc[-1] != "." and \
-                    not this_desc.split("\n")[-1].startswith(" "):
+            if this_desc[-1][-1] != "." and \
+                    not this_desc[-1].startswith(IGNORE_STARTS):
                 errs.append(error("PR09", param_name=param))
+                if param == 'axis':
+                    raise RuntimeError
 
     if doc.is_function_or_method:
         if not doc.returns:
@@ -571,7 +574,7 @@ def validate(func_name):
                     if desc[0].isalpha() and not desc[0].isupper():
                         errs.append(error("RT04"))
                     if not desc.endswith(".") and \
-                            not desc.split("\n")[-1].startswith(" "):
+                            not desc.split("\n")[-1].startswith(IGNORE_STARTS):
                         errs.append(error("RT05"))
 
         if not doc.yields and "yield" in doc.method_source:

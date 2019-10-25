@@ -92,9 +92,9 @@ class GoodDocStrings:
         Returns
         -------
         float
-            Random number generated, e.g.::
+            Random number generated.
 
-                1.0
+            - Make sure you set a seed for reproducibility
 
         See Also
         --------
