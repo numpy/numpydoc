@@ -558,8 +558,8 @@ def validate(func_name):
                                 wrong_type=wrong_type,
                             )
                         )
-        errs += _check_desc(
-            kind_desc[1], "PR07", "PR08", "PR09", param_name=param)
+        errs.extend(_check_desc(
+            kind_desc[1], "PR07", "PR08", "PR09", param_name=param))
 
     if doc.is_function_or_method:
         if not doc.returns:
@@ -569,7 +569,7 @@ def validate(func_name):
             if len(doc.returns) == 1 and doc.returns[0].name:
                 errs.append(error("RT02"))
             for name_or_type, type_, desc in doc.returns:
-                errs += _check_desc(desc, "RT03", "RT04", "RT05")
+                errs.extend(_check_desc(desc, "RT03", "RT04", "RT05"))
 
         if not doc.yields and "yield" in doc.method_source:
             errs.append(error("YD01"))
