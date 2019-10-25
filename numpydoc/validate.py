@@ -546,7 +546,7 @@ def validate(func_name):
                             )
                         )
         this_desc = doc.parameter_desc(param)
-        if not ''.join(this_desc):
+        if not "".join(this_desc):
             errs.append(error("PR07", param_name=param))
         else:
             if this_desc[0][0].isalpha() and not this_desc[0][0].isupper():
@@ -556,8 +556,6 @@ def validate(func_name):
             if this_desc[-1][-1] != "." and \
                     not this_desc[-1].startswith(IGNORE_STARTS):
                 errs.append(error("PR09", param_name=param))
-                if param == 'axis':
-                    raise RuntimeError
 
     if doc.is_function_or_method:
         if not doc.returns:
