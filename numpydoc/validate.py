@@ -545,16 +545,16 @@ def validate(func_name):
                                 wrong_type=wrong_type,
                             )
                         )
-        this_desc = doc.parameter_desc(param)
-        if not "".join(this_desc):
+        desc = doc.parameter_desc(param)
+        if not "".join(desc):
             errs.append(error("PR07", param_name=param))
         else:
-            if this_desc[0][0].isalpha() and not this_desc[0][0].isupper():
+            if desc[0][0].isalpha() and not desc[0][0].isupper():
                 errs.append(error("PR08", param_name=param))
             # Not ending in "." is only an error if the last bit is not
             # indented (e.g., quote or code block)
-            if this_desc[-1][-1] != "." and \
-                    not this_desc[-1].startswith(IGNORE_STARTS):
+            if not desc[-1].endswith(".") and \
+                    not desc[-1].startswith(IGNORE_STARTS):
                 errs.append(error("PR09", param_name=param))
 
     if doc.is_function_or_method:
