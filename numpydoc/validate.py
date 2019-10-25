@@ -332,17 +332,6 @@ class Docstring:
     def parameter_type(self, param):
         return self.doc_parameters[param][0]
 
-    def parameter_desc(self, param):
-        desc = "\n".join(self.doc_parameters[param][1])
-        # Find and strip out any sphinx directives
-        for directive in DIRECTIVES:
-            full_directive = ".. {}".format(directive)
-            if full_directive in desc:
-                # Only retain any description before the directive
-                desc = desc[: desc.index(full_directive)].rstrip("\n")
-        desc = desc.split("\n")
-        return desc
-
     @property
     def see_also(self):
         result = collections.OrderedDict()
@@ -410,6 +399,29 @@ class Docstring:
     @property
     def deprecated(self):
         return ".. deprecated:: " in (self.summary + self.extended_summary)
+
+
+def _check_desc(desc, errs, kinds, **kwargs):
+    assert len(kinds) == 3
+    # Find and strip out any sphinx directives
+    desc = "\n".join(desc)
+    for directive in DIRECTIVES:
+        full_directive = ".. {}".format(directive)
+        if full_directive in desc:
+            # Only retain any description before the directive
+            desc = desc[: desc.index(full_directive)].rstrip("\n")
+    desc = desc.split("\n")
+
+    if not "".join(desc):
+        errs.append(error(kinds[0], **kwargs))
+    else:
+        if desc[0][0].isalpha() and not desc[0][0].isupper():
+            errs.append(error(kinds[1], **kwargs))
+        # Not ending in "." is only an error if the last bit is not
+        # indented (e.g., quote or code block)
+        if not desc[-1].endswith(".") and \
+                not desc[-1].startswith(IGNORE_STARTS):
+            errs.append(error(kinds[2], **kwargs))
 
 
 def validate(func_name):
@@ -520,7 +532,7 @@ def validate(func_name):
     # PR03: Wrong parameters order
     errs += doc.parameter_mismatches
 
-    for param in doc.doc_parameters:
+    for param, kind_desc in doc.doc_parameters.items():
         if not param.startswith("*"):  # Check can ignore var / kwargs
             if not doc.parameter_type(param):
                 if ":" in param:
@@ -545,17 +557,8 @@ def validate(func_name):
                                 wrong_type=wrong_type,
                             )
                         )
-        desc = doc.parameter_desc(param)
-        if not "".join(desc):
-            errs.append(error("PR07", param_name=param))
-        else:
-            if desc[0][0].isalpha() and not desc[0][0].isupper():
-                errs.append(error("PR08", param_name=param))
-            # Not ending in "." is only an error if the last bit is not
-            # indented (e.g., quote or code block)
-            if not desc[-1].endswith(".") and \
-                    not desc[-1].startswith(IGNORE_STARTS):
-                errs.append(error("PR09", param_name=param))
+        _check_desc(kind_desc[1], errs,
+                    ("PR07", "PR08", "PR09"), param_name=param)
 
     if doc.is_function_or_method:
         if not doc.returns:
@@ -565,14 +568,7 @@ def validate(func_name):
             if len(doc.returns) == 1 and doc.returns[0].name:
                 errs.append(error("RT02"))
             for name_or_type, type_, desc in doc.returns:
-                if not desc:
-                    errs.append(error("RT03"))
-                else:
-                    if desc[0][0].isalpha() and not desc[0][0].isupper():
-                        errs.append(error("RT04"))
-                    if not desc[-1].endswith(".") and \
-                            not desc[-1].startswith(IGNORE_STARTS):
-                        errs.append(error("RT05"))
+                _check_desc(desc, errs, ("RT03", "RT04", "RT05"))
 
         if not doc.yields and "yield" in doc.method_source:
             errs.append(error("YD01"))

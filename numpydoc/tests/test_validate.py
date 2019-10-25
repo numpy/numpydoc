@@ -120,6 +120,8 @@ class GoodDocStrings:
         letters : str
             String of random letters.
 
+            .. versionadded:: 0.1
+
         See Also
         --------
         related : Something related.
