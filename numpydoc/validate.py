@@ -401,8 +401,7 @@ class Docstring:
         return ".. deprecated:: " in (self.summary + self.extended_summary)
 
 
-def _check_desc(desc, errs, kinds, **kwargs):
-    assert len(kinds) == 3
+def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
     # Find and strip out any sphinx directives
     desc = "\n".join(desc)
     for directive in DIRECTIVES:
@@ -412,16 +411,18 @@ def _check_desc(desc, errs, kinds, **kwargs):
             desc = desc[: desc.index(full_directive)].rstrip("\n")
     desc = desc.split("\n")
 
+    errs = list()
     if not "".join(desc):
-        errs.append(error(kinds[0], **kwargs))
+        errs.append(error(code_no_desc, **kwargs))
     else:
         if desc[0][0].isalpha() and not desc[0][0].isupper():
-            errs.append(error(kinds[1], **kwargs))
+            errs.append(error(code_no_upper, **kwargs))
         # Not ending in "." is only an error if the last bit is not
         # indented (e.g., quote or code block)
         if not desc[-1].endswith(".") and \
                 not desc[-1].startswith(IGNORE_STARTS):
-            errs.append(error(kinds[2], **kwargs))
+            errs.append(error(code_no_period, **kwargs))
+    return errs
 
 
 def validate(func_name):
@@ -557,8 +558,8 @@ def validate(func_name):
                                 wrong_type=wrong_type,
                             )
                         )
-        _check_desc(kind_desc[1], errs,
-                    ("PR07", "PR08", "PR09"), param_name=param)
+        errs += _check_desc(
+            kind_desc[1], "PR07", "PR08", "PR09", param_name=param)
 
     if doc.is_function_or_method:
         if not doc.returns:
@@ -568,7 +569,7 @@ def validate(func_name):
             if len(doc.returns) == 1 and doc.returns[0].name:
                 errs.append(error("RT02"))
             for name_or_type, type_, desc in doc.returns:
-                _check_desc(desc, errs, ("RT03", "RT04", "RT05"))
+                errs += _check_desc(desc, "RT03", "RT04", "RT05")
 
         if not doc.yields and "yield" in doc.method_source:
             errs.append(error("YD01"))
