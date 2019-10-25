@@ -567,10 +567,11 @@ def validate(func_name):
                 if not desc:
                     errs.append(error("RT03"))
                 else:
-                    desc = " ".join(desc)
+                    desc = "\n".join(desc)
                     if desc[0].isalpha() and not desc[0].isupper():
                         errs.append(error("RT04"))
-                    if not desc.endswith("."):
+                    if not desc.endswith(".") and \
+                            not desc.split("\n")[-1].startswith(" "):
                         errs.append(error("RT05"))
 
         if not doc.yields and "yield" in doc.method_source:

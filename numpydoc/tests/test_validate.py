@@ -92,7 +92,9 @@ class GoodDocStrings:
         Returns
         -------
         float
-            Random number generated.
+            Random number generated, e.g.::
+
+                1.0
 
         See Also
         --------
