@@ -36,7 +36,10 @@ class GoodDocStrings:
         Parameters
         ----------
         kind : str
-            Kind of matplotlib plot.
+            Kind of matplotlib plot, e.g.::
+
+                'foo'
+
         color : str, default 'blue'
             Color name or rgb code.
         **kwargs

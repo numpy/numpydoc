@@ -257,10 +257,13 @@ class Docstring:
 
     @property
     def doc_parameters(self):
+        return self._get_doc_parameters()
+
+    def _get_doc_parameters(self, joiner=""):
         parameters = collections.OrderedDict()
         for names, type_, desc in self.doc["Parameters"]:
             for name in names.split(", "):
-                parameters[name] = (type_, "".join(desc))
+                parameters[name] = (type_, joiner.join(desc))
         return parameters
 
     @property
@@ -329,8 +332,8 @@ class Docstring:
     def parameter_type(self, param):
         return self.doc_parameters[param][0]
 
-    def parameter_desc(self, param):
-        desc = self.doc_parameters[param][1]
+    def parameter_desc(self, param, joiner=""):
+        desc = self._get_doc_parameters(joiner)[param][1]
         # Find and strip out any sphinx directives
         for directive in DIRECTIVES:
             full_directive = ".. {}".format(directive)
@@ -541,12 +544,16 @@ def validate(func_name):
                                 wrong_type=wrong_type,
                             )
                         )
-        if not doc.parameter_desc(param):
+        this_desc = doc.parameter_desc(param, "\n").rstrip("\n")
+        if not this_desc:
             errs.append(error("PR07", param_name=param))
         else:
-            if doc.parameter_desc(param)[0].isalpha() and not doc.parameter_desc(param)[0].isupper():
+            if this_desc[0].isalpha() and not this_desc[0].isupper():
                 errs.append(error("PR08", param_name=param))
-            if doc.parameter_desc(param)[-1] != ".":
+            # Not ending in "." is only an error if the last bit is not
+            # indented (e.g., quote or code block)
+            if this_desc[-1] != "." and \
+                    not this_desc.split("\n")[-1].startswith(" "):
                 errs.append(error("PR09", param_name=param))
 
     if doc.is_function_or_method:
