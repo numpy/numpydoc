@@ -35,8 +35,7 @@ import matplotlib.pyplot as plt
 
 
 def foo(var1, var2, long_var_name='hi'):
-    r"""A one-line summary that does not use variable names or the
-    function name.
+    r"""A one-line summary that does not use variable names.
 
     Several sentences providing an extended description. Refer to
     variables using back-ticks, e.g. `var`.
@@ -78,7 +77,7 @@ def foo(var1, var2, long_var_name='hi'):
 
     See Also
     --------
-    numpy.array : relationship (optional)
+    numpy.array : Relationship (optional).
     numpy.ndarray : Relationship (optional), which could be fairly long, in
                     which case the line wraps here.
     numpy.dot, numpy.linalg.norm, numpy.eye
@@ -117,7 +116,6 @@ def foo(var1, var2, long_var_name='hi'):
     >>> print("a\nb")
     a
     b
-
     """
     # After closing class docstring, there should be one blank line to
     # separate following codes (according to PEP257).
