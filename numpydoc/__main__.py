@@ -1,32 +1,19 @@
+"""
+Implementing `python -m numpydoc` functionality.
+"""
 import sys
 import argparse
-import importlib
 import ast
 
 from .docscrape_sphinx import get_doc_object
-from .validate import validate
+from .validate import validate, Docstring
 
 
-def render_object(import_path, config):
+def render_object(import_path, config=None):
     """Test numpydoc docstring generation for a given object"""
-    parts = import_path.split('.')
-
-    for split_point in range(len(parts), 0, -1):
-        try:
-            path = '.'.join(parts[:split_point])
-            obj = importlib.import_module(path)
-        except ImportError:
-            continue
-        break
-    else:
-        raise ImportError('Could not resolve {!r} to an importable object'
-                          ''.format(import_path))
-
-    for part in parts[split_point:]:
-        obj = getattr(obj, part)
-
-    print(get_doc_object(obj, config=dict(config or [])))
-
+    # TODO: Move Docstring._load_obj to a better place than validate
+    print(get_doc_object(Docstring(import_path).obj,
+                         config=dict(config or [])))
     return 0
 
 

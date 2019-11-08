@@ -1,80 +1,113 @@
-from __future__ import print_function
-
-from contextlib import contextmanager
-import os
 import sys
-import tempfile
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
-
-from numpydoc.__main__ import main
+import io
+import pytest
+import numpydoc
+import numpydoc.__main__
 
 
-PACKAGE_CODE = """
-'''This package has test stuff'''
-"""
+def _capture_stdout(func_name, *args, **kwargs):
+    """
+    Return stdout of calling `func_name`.
 
-MODULE_CODE = """
-'''This module has test stuff'''
-
-def foo(a, b=5):
-    '''Hello world
+    This docstring should be perfect, as it is used to test the
+    validation with a docstring without errors.
 
     Parameters
     ----------
-    something : foo
-        bar
-    something_else
-        bar
-    '''
-"""
+    func_name : callable
+        Function to be called.
+    *args, **kwargs
+        Will be passed to `func_name`.
 
+    Returns
+    -------
+    str
+        The content that the function printed.
 
-@contextmanager
-def _mock_module(pkg_name):
-    try:
-        tempdir = tempfile.mkdtemp()
-        os.mkdir(os.path.join(tempdir, pkg_name))
-        with open(os.path.join(tempdir, pkg_name, '__init__.py'), 'w') as f:
-            print(PACKAGE_CODE, file=f)
-        with open(os.path.join(tempdir, pkg_name, 'module.py'), 'w') as f:
-            print(MODULE_CODE, file=f)
+    See Also
+    --------
+    sys.stdout : Python's file handler for stdout.
 
-        sys.path.insert(0, tempdir)
-        yield tempdir
-    finally:
-        try:
-            os.path.rmdir(tempdir)
-            sys.path.remove(tempdir)
-        except:
-            pass
-
-
-def _capture_main(*args):
-    f = StringIO()
+    Examples
+    --------
+    >>> _capture_stdout(print, 'hello world')
+    'hello world'
+    """
+    f = io.StringIO()
     sys.stdout, old_stdout = f, sys.stdout
     try:
-        main(args)
+        func_name(*args, **kwargs)
         return f.getvalue().strip('\n\r')
     finally:
         sys.stdout = old_stdout
 
 
-def test_main():
-    # TODO: does not currently check that numpydoc transformations are applied
+def _docstring_with_errors():
+    """
+    this docstring should report some errors
 
-    assert (_capture_main('numpydoc.__main__.main') ==
-            main.__doc__.strip())
+    Parameters
+    ----------
+    made_up_param : str
+    """
+    pass
 
-    # check it works with modules not imported from __init__
-    with _mock_module('somepackage1'):
-        out = _capture_main('somepackage1.module.foo')
-    assert out.startswith('Hello world\n')
-    with _mock_module('somepackage2'):
-        out = _capture_main('somepackage2.module')
-    assert out.startswith('This module has test')
-    with _mock_module('somepackage3'):
-        out = _capture_main('somepackage3')
-    assert out.startswith('This package has test')
+
+def _invalid_docstring():
+    """
+    This docstring should break the parsing.
+
+    See Also
+    --------
+    : this is invalid
+    """
+    pass
+
+
+def test_renders_package_docstring():
+    out = _capture_stdout(numpydoc.__main__.render_object,
+                          'numpydoc')
+    assert out.startswith('This package provides the numpydoc Sphinx')
+
+
+def test_renders_module_docstring():
+    out = _capture_stdout(numpydoc.__main__.render_object,
+                          'numpydoc.__main__')
+    assert out.startswith('Implementing `python -m numpydoc` functionality.')
+
+
+def test_renders_function_docstring():
+    out = _capture_stdout(numpydoc.__main__.render_object,
+                          'numpydoc.tests.test_main._capture_stdout')
+    assert out.startswith('Return stdout of calling')
+
+
+def test_render_object_returns_correct_exit_status():
+    exit_status = numpydoc.__main__.render_object(
+        'numpydoc.tests.test_main._capture_stdout')
+    assert exit_status == 0
+
+    with pytest.raises(numpydoc.docscrape.ParseError):
+        numpydoc.__main__.render_object(
+            'numpydoc.tests.test_main._invalid_docstring')
+
+
+def test_validate_detects_errors():
+    out = _capture_stdout(numpydoc.__main__.validate_object,
+                          'numpydoc.tests.test_main._docstring_with_errors')
+    assert 'SS02' in out
+    assert 'Summary does not start with a capital letter' in out
+
+    exit_status = numpydoc.__main__.validate_object(
+        'numpydoc.tests.test_main._docstring_with_errors')
+    assert exit_status > 0
+
+
+def test_validate_perfect_docstring():
+    out = _capture_stdout(numpydoc.__main__.validate_object,
+                          'numpydoc.tests.test_main._capture_stdout')
+    assert out == ''
+
+    exit_status = numpydoc.__main__.validate_object(
+        'numpydoc.tests.test_main._capture_stdout')
+    assert exit_status == 0
