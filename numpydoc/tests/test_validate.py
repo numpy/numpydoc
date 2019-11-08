@@ -36,7 +36,10 @@ class GoodDocStrings:
         Parameters
         ----------
         kind : str
-            Kind of matplotlib plot.
+            Kind of matplotlib plot, e.g.::
+
+                'foo'
+
         color : str, default 'blue'
             Color name or rgb code.
         **kwargs
@@ -91,6 +94,8 @@ class GoodDocStrings:
         float
             Random number generated.
 
+            - Make sure you set a seed for reproducibility
+
         See Also
         --------
         related : Something related.
@@ -114,6 +119,8 @@ class GoodDocStrings:
             Length of the returned string.
         letters : str
             String of random letters.
+
+            .. versionadded:: 0.1
 
         See Also
         --------
