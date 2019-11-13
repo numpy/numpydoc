@@ -2,11 +2,16 @@
 Validating NumpyDoc docstrings
 ==============================
 
-One tool for validating docstrings is to see how an object's dosctring
-translates to Restructured Text.  Using numpydoc as a command-line tool
-facilitates this. For example to see the Restructured Text generated
-for ``numpy.ndarray``, use:
+To see the Restructured Text generated for an object, the ``numpydoc`` module
+can be called. For example, to do it for ``numpy.ndarray``, use:
 
 .. code-block:: bash
 
     $ python -m numpydoc numpy.ndarray
+
+This will validate that the docstring can be built.
+
+For an exhaustive validation of the formatting of the docstring, use the
+``--validate`` parameter. This will report the errors detected, such as
+incorrect capitalization, wrong order of the sections, and many other
+issues.

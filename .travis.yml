@@ -23,6 +23,12 @@ script:
     cd dist
     pip install numpydoc* -v
   - pytest -v --pyargs numpydoc
+  # Making sure the command line options work
+  - python -m numpydoc numpydoc.tests.test_main._capture_stdout
+  - echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
+  - python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
+  - echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
+  # Build documentation
   - |
     cd ../doc
     make SPHINXOPTS=$SPHINXOPTS html

@@ -152,7 +152,7 @@ class Docstring:
         >>> Docstring._load_obj('datetime.datetime')
         <class 'datetime.datetime'>
         """
-        for maxsplit in range(1, name.count(".") + 1):
+        for maxsplit in range(0, name.count(".") + 1):
             module, *func_parts = name.rsplit(".", maxsplit)
             try:
                 obj = importlib.import_module(module)
