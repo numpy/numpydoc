@@ -283,8 +283,8 @@ The sections of a function's docstring are:
 
 10. **Warns**
 
-   An optional section detailing which warnings get raised and
-   under what conditions, formatted similarly to Raises.
+    An optional section detailing which warnings get raised and
+    under what conditions, formatted similarly to Raises.
 
 11. **Warnings**
 
@@ -472,7 +472,7 @@ The sections of a function's docstring are:
     demonstrated function, must be explicit.
 
     When matplotlib is imported in the example, the Example code will be
-    wrapped in `matplotlib's Sphinx `plot` directive
+    wrapped in `matplotlib's Sphinx \`plot\` directive
     <http://matplotlib.org/sampledoc/extensions.html>`_.  When matplotlib is
     not explicitly imported, `.. plot::` can be used directly if
     `matplotlib.sphinxext.plot_directive` is loaded as a Sphinx extension in
@@ -560,7 +560,7 @@ as appropriate.
 Documenting class instances
 ---------------------------
 Instances of classes that are part of the NumPy API (for example `np.r_`
-`np,c_`, `np.index_exp`, etc.) may require some care. To give these
+`np.c_`, `np.index_exp`, etc.) may require some care. To give these
 instances a useful docstring, we do the following:
 
 * Single instance: If only a single instance of a class is exposed,
