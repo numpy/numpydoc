@@ -1,6 +1,7 @@
-"""This is the docstring for the example.py module.  Modules names should
-have short, all-lowercase names.  The module name may have underscores if
-this improves readability.
+"""Docstring for the example.py module.
+
+Modules names should have short, all-lowercase names.  The module name may
+have underscores if this improves readability.
 
 Every module should have a docstring at the very top of the file.  The
 module's docstring may extend over multiple lines.  If your docstring does
@@ -35,7 +36,7 @@ import matplotlib.pyplot as plt
 
 
 def foo(var1, var2, long_var_name='hi'):
-    r"""A one-line summary that does not use variable names.
+    r"""Summarize the function in one line.
 
     Several sentences providing an extended description. Refer to
     variables using back-ticks, e.g. `var`.
