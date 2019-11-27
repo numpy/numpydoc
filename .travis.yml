@@ -16,7 +16,7 @@ cache:
 before_install:
   - sudo apt-get install texlive texlive-latex-extra latexmk dvipng
   - pip install --upgrade pip setuptools  # Upgrade pip and setuptools to get ones with `wheel` support
-  - pip install pytest pytest-cov numpy matplotlib sphinx${SPHINX_SPEC} codecov
+  - pip install pytest pytest-cov pydocstyle numpy matplotlib sphinx${SPHINX_SPEC} codecov
 script:
   - |
     python setup.py sdist
@@ -28,6 +28,7 @@ script:
   - echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
   - python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
   - echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
+  - pydocstyle --convention numpy ../doc/example.py
   # Build documentation
   - |
     cd ../doc
