@@ -11,7 +11,6 @@ from collections.abc import Callable, Mapping
 import copy
 import sys
 
-from sphinx.ext.autodoc import ALL
 
 def strip_blank_lines(l):
     "Remove leading and trailing blank lines from a list of lines"
@@ -617,6 +616,8 @@ class ClassDoc(NumpyDocString):
 
     def __init__(self, cls, doc=None, modulename='', func_doc=FunctionDoc,
                  config={}):
+        from sphinx.ext.autodoc import ALL
+
         if not inspect.isclass(cls) and cls is not None:
             raise ValueError("Expected a class or None, but got %r" % cls)
         self._cls = cls
