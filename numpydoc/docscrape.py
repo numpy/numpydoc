@@ -16,7 +16,6 @@ except ImportError:
 import copy
 import sys
 
-from sphinx.ext.autodoc import ALL
 
 def strip_blank_lines(l):
     "Remove leading and trailing blank lines from a list of lines"
@@ -625,6 +624,11 @@ class ClassDoc(NumpyDocString):
         if not inspect.isclass(cls) and cls is not None:
             raise ValueError("Expected a class or None, but got %r" % cls)
         self._cls = cls
+
+        if 'sphinx' in sys.modules:
+            from sphinx.ext.autodoc import ALL
+        else:
+            ALL = object()
 
         self.show_inherited_members = config.get(
                     'show_inherited_class_members', True)
