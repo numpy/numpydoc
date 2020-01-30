@@ -338,7 +338,6 @@ The sections of a function's docstring are:
     
       Notes
       -----
-
       The FFT is a fast implementation of the discrete Fourier transform:
 
       .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
