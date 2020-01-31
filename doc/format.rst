@@ -335,7 +335,9 @@ The sections of a function's docstring are:
     code, possibly including a discussion of the algorithm. This
     section may include mathematical equations, written in
     `LaTeX <https://www.latex-project.org/>`_ format::
-
+    
+      Notes
+      -----
       The FFT is a fast implementation of the discrete Fourier transform:
 
       .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
@@ -419,6 +421,8 @@ The sections of a function's docstring are:
     blank lines. Comments explaining the examples should have blank
     lines both above and below them::
 
+      Examples
+      --------
       >>> np.add(1, 2)
       3
 
