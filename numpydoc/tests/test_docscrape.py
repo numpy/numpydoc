@@ -2,7 +2,6 @@
 from collections import namedtuple
 from copy import deepcopy
 import re
-import sys
 import textwrap
 import warnings
 
@@ -242,26 +241,6 @@ def test_sent():
         assert arg_type == arg_type_
         assert desc[0].startswith('The number of')
         assert desc[0].endswith(end)
-
-
-def test_returnyield():
-    doc_text = """
-Test having returns and yields.
-
-Returns
--------
-int
-    The number of apples.
-
-Yields
-------
-a : int
-    The number of apples.
-b : int
-    The number of bananas.
-
-"""
-    assert_raises(ValueError, NumpyDocString, doc_text)
 
 
 def test_returnyield():
@@ -859,7 +838,7 @@ def test_see_also_print():
 def test_see_also_trailing_comma_warning():
     warnings.filterwarnings('error')
     with assert_warns(Warning, match='Unexpected comma or period after function list at index 43 of line .*'):
-        doc6 = NumpyDocString(
+        NumpyDocString(
             """
             z(x,theta)
 
