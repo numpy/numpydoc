@@ -720,7 +720,7 @@ def test_escape_stars():
         pass
 
     fdoc = FunctionDoc(func=my_func)
-    assert fdoc['Signature'] == r'my_func(a, b, \*\*kwargs)'
+    assert fdoc['Signature'] == 'my_func(a, b, **kwargs)'
 
 
 doc4 = NumpyDocString(
