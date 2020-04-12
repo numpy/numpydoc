@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 # numpy module itself, unabbreviated.
 
 
-def foo(var1, var2, long_var_name='hi'):
+def foo(var1, var2, *args, long_var_name='hi', **kwargs):
     r"""Summarize the function in one line.
 
     Several sentences providing an extended description. Refer to
@@ -51,8 +51,12 @@ def foo(var1, var2, long_var_name='hi'):
         The type above can either refer to an actual Python type
         (e.g. ``int``), or describe the type of the variable in more
         detail, e.g. ``(N,) ndarray`` or ``array_like``.
+    *args : iterable
+        Other arguments.
     long_var_name : {'hi', 'ho'}, optional
         Choices in brackets, default first when optional.
+    **kwargs : dict
+        Keyword arguments.
 
     Returns
     -------
