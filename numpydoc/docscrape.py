@@ -564,7 +564,7 @@ class FunctionDoc(NumpyDocString):
             if func is None:
                 raise ValueError("No function or docstring given")
             doc = inspect.getdoc(func) or ''
-        NumpyDocString.__init__(self, doc)
+        NumpyDocString.__init__(self, doc, config)
 
         if not self['Signature'] and func is not None:
             func, func_name = self.get_func()
@@ -578,7 +578,7 @@ class FunctionDoc(NumpyDocString):
                     else:
                         argspec = inspect.getargspec(func)
                     signature = inspect.formatargspec(*argspec)
-                signature = '%s%s' % (func_name, signature.replace('*', r'\*'))
+                signature = '%s%s' % (func_name, signature)
             except TypeError:
                 signature = '%s()' % func_name
             self['Signature'] = signature

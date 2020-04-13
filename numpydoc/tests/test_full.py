@@ -47,7 +47,7 @@ def test_MyClass(sphinx_app):
         html = fid.read()
     # escaped * chars should no longer be preceded by \'s,
     # if we see a \* in the output we know it's incorrect:
-    assert r'\*' in html  # XXX should be "not in", bug!
+    assert r'\*' not in html
     # "self" should not be in the parameter list for the class:
     assert 'self,' in html   # XXX should be "not in", bug!
     # check xref was embedded properly (dict should link using xref):
