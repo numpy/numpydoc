@@ -137,7 +137,7 @@ if not os.path.isdir(themedir):
 html_theme = 'scipy'
 html_theme_path = [themedir]
 
-if 'scipyorg' in tags:
+if 'scipyorg' in tags:  # noqa: F821
     # Build for the scipy.org website
     html_theme_options = {
         "edit_link": True,

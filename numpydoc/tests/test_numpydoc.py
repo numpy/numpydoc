@@ -42,25 +42,28 @@ A top section before
 .. autoclass:: str
     '''
     lines = s.split('\n')
-    doc = mangle_docstrings(MockApp(), 'class', 'str', str, {}, lines)
+    mangle_docstrings(MockApp(), 'class', 'str', str, {}, lines)
     assert 'rpartition' in [x.strip() for x in lines]
 
     lines = s.split('\n')
-    doc = mangle_docstrings(MockApp(), 'class', 'str', str, {'members': ['upper']}, lines)
+    mangle_docstrings(
+        MockApp(), 'class', 'str', str, {'members': ['upper']}, lines)
     assert 'rpartition' not in [x.strip() for x in lines]
     assert 'upper' in [x.strip() for x in lines]
 
     lines = s.split('\n')
-    doc = mangle_docstrings(MockApp(), 'class', 'str', str, {'exclude-members': ALL}, lines)
+    mangle_docstrings(
+        MockApp(), 'class', 'str', str, {'exclude-members': ALL}, lines)
     assert 'rpartition' not in [x.strip() for x in lines]
     assert 'upper' not in [x.strip() for x in lines]
 
     lines = s.split('\n')
-    doc = mangle_docstrings(MockApp(), 'class', 'str', str,
-                            {'exclude-members': ['upper']}, lines)
+    mangle_docstrings(
+        MockApp(), 'class', 'str', str, {'exclude-members': ['upper']}, lines)
     assert 'rpartition' in [x.strip() for x in lines]
     assert 'upper' not in [x.strip() for x in lines]
 
 
 if __name__ == "__main__":
     import pytest
+    pytest.main()
