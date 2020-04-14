@@ -88,13 +88,14 @@ def _is_cite_in_numpydoc_docstring(citation_node):
     for sibling_section in sibling_sections:
         if not sibling_section.children:
             continue
-        if isinstance(sibling_section, section):
-            return True
-        last_child = sibling_section.children[-1]
-        if not isinstance(last_child, comment):
-            continue
-        if last_child.rawsource.strip() == DEDUPLICATION_TAG.strip():
-            return True
+
+        for child in sibling_section.children[::-1]:
+            if not isinstance(child, comment):
+                continue
+
+            if child.rawsource.strip() == DEDUPLICATION_TAG.strip():
+                return True
+
     return False
 
 
