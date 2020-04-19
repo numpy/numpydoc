@@ -69,7 +69,7 @@ def test_my_function(sphinx_app):
 
 
 def test_reference(sphinx_app):
-    """Test for bad references e"""
+    """Test for bad references"""
     out_dir = sphinx_app.outdir
     html_files = [
         ["index.html"],
@@ -77,12 +77,16 @@ def test_reference(sphinx_app):
         ["generated", "numpydoc_test_module.MyClass.html"],
     ]
 
-    for html_file in html_files:
+    expected_lengths = [3, 1, 1]
+
+    for html_file, expected_length in zip(html_files, expected_lengths):
         html_file = op.join(out_dir, *html_file)
 
         with open(html_file, 'r') as fid:
             html = fid.read()
 
         reference_list = re.findall(r'<a class="fn-backref" href="\#id\d+">(.*)<\/a>', html)
+
+        assert len(reference_list) == expected_length
         for ref in reference_list:
             assert '-' not in ref  # Bad reference if it contains "-" e.g. R1896e33633d5-1
