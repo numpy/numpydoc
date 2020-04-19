@@ -1,4 +1,5 @@
 import os.path as op
+import re
 import shutil
 
 import pytest
@@ -65,3 +66,23 @@ def test_my_function(sphinx_app):
     assert '*args' in html
     # check xref (iterable should link using xref):
     assert 'glossary.html#term-iterable' in html
+
+
+def test_reference(sphinx_app):
+    """Test for bad references e"""
+    out_dir = sphinx_app.outdir
+    html_files = [
+        ["index.html"],
+        ["generated", "numpydoc_test_module.my_function.html"],
+        ["generated", "numpydoc_test_module.MyClass.html"],
+    ]
+
+    for html_file in html_files:
+        html_file = op.join(out_dir, *html_file)
+
+        with open(html_file, 'r') as fid:
+            html = fid.read()
+
+        reference_list = re.findall(r'<a class="fn-backref" href="\#id\d+">(.*)<\/a>', html)
+        for ref in reference_list:
+            assert '-' not in ref  # Bad reference if it contains "-" e.g. R1896e33633d5-1

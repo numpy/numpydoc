@@ -7,6 +7,13 @@
 
    MyClass
    my_function
+
+Reference [1]_
+
+References
+----------
+.. [1] https://numpydoc.readthedocs.io
+
 """
 
 __all__ = ['MyClass', 'my_function']
@@ -15,22 +22,33 @@ __all__ = ['MyClass', 'my_function']
 class MyClass(object):
     """A class.
 
+    Reference [2]_
+
     Parameters
     ----------
     *args : iterable
         Arguments.
     **kwargs : dict
         Keyword arguments.
+
+    References
+    ----------
+    .. [2] https://numpydoc.readthedocs.io
     """
 
     def __init__(self, *args, **kwargs):
+        pass
+
+    def example(self):
+        """Exampel function
+        """
         pass
 
 
 def my_function(*args, **kwargs):
     """Return None.
 
-    See [1]_.
+    See [3]_.
 
     Parameters
     ----------
@@ -46,6 +64,6 @@ def my_function(*args, **kwargs):
 
     References
     ----------
-    .. [1] https://numpydoc.readthedocs.io
+    .. [3] https://numpydoc.readthedocs.io
     """
     return None
