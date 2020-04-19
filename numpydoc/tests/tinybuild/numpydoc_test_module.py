@@ -13,13 +13,19 @@ Reference [1]_
 References
 ----------
 .. [1] https://numpydoc.readthedocs.io
-
 """
 
 __all__ = ['MyClass', 'my_function']
 
 
-class MyClass(object):
+class _MyBaseClass(object):
+
+    def inherited(self):
+        """Inherit a method."""
+        pass
+
+
+class MyClass(_MyBaseClass):
     """A class.
 
     Reference [2]_
@@ -40,8 +46,7 @@ class MyClass(object):
         pass
 
     def example(self):
-        """Exampel function
-        """
+        """Example function."""
         pass
 
 

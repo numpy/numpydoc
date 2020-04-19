@@ -11,12 +11,15 @@ extensions = [
 ]
 project = 'numpydoc_test_module'
 autosummary_generate = True
+autodoc_default_options = {'inherited-members': None}
 source_suffix = '.rst'
 master_doc = 'index'
-exclude_patterns = ['_build']
+templates_path = ['_templates']
+exclude_patterns = ['_build', '_templates']
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
 }
 nitpicky = True
 highlight_language = 'python3'
+numpydoc_class_members_toctree = False
 numpydoc_xref_param_type = True
