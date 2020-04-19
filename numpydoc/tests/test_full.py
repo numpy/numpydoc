@@ -1,8 +1,10 @@
+from distutils.version import LooseVersion
 import os.path as op
 import re
 import shutil
 
 import pytest
+import sphinx
 from sphinx.application import Sphinx
 from sphinx.util.docutils import docutils_namespace
 
@@ -25,10 +27,12 @@ def sphinx_app(tmpdir_factory):
     toctrees_dir = op.join(temp_dir, '_build', 'toctrees')
     # Avoid warnings about re-registration, see:
     # https://github.com/sphinx-doc/sphinx/issues/5038
+    kwargs = dict()
+    if LooseVersion(sphinx.__version__) >= LooseVersion('1.8'):
+        kwargs.update(warningiserror=True, keep_going=True)
     with docutils_namespace():
         app = Sphinx(src_dir, conf_dir, out_dir, toctrees_dir,
-                     buildername='html', warningiserror=True,
-                     keep_going=True)
+                     buildername='html', **kwargs)
         # need to build within the context manager
         # for automodule and backrefs to work
         app.build(False, [])
