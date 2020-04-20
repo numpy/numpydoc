@@ -2,4 +2,6 @@ numpydoc_test_module
 ====================
 
 .. automodule:: numpydoc_test_module
-    :members:
+   :no-members:
+   :no-inherited-members:
+   :no-special-members:

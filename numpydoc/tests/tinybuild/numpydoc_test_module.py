@@ -13,7 +13,6 @@ Reference [1]_
 References
 ----------
 .. [1] https://numpydoc.readthedocs.io
-
 """
 
 __all__ = ['MyClass', 'my_function']
@@ -36,12 +35,8 @@ class MyClass(object):
     .. [2] https://numpydoc.readthedocs.io
     """
 
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def example(self):
-        """Exampel function
-        """
+    def example(self, x):
+        """Example method."""
         pass
 
 

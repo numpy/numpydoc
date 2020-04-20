@@ -1,8 +1,10 @@
+from distutils.version import LooseVersion
 import os.path as op
 import re
 import shutil
 
 import pytest
+import sphinx
 from sphinx.application import Sphinx
 from sphinx.util.docutils import docutils_namespace
 
@@ -25,9 +27,12 @@ def sphinx_app(tmpdir_factory):
     toctrees_dir = op.join(temp_dir, '_build', 'toctrees')
     # Avoid warnings about re-registration, see:
     # https://github.com/sphinx-doc/sphinx/issues/5038
+    kwargs = dict()
+    if LooseVersion(sphinx.__version__) >= LooseVersion('1.8'):
+        kwargs.update(warningiserror=True, keep_going=True)
     with docutils_namespace():
         app = Sphinx(src_dir, conf_dir, out_dir, toctrees_dir,
-                     buildername='html')
+                     buildername='html', **kwargs)
         # need to build within the context manager
         # for automodule and backrefs to work
         app.build(False, [])
@@ -46,6 +51,9 @@ def test_MyClass(sphinx_app):
                          'numpydoc_test_module.MyClass.html')
     with open(class_html, 'r') as fid:
         html = fid.read()
+    # ensure that no autodoc weirdness ($) occurs
+    assert '$self' not in html
+    assert '__init__' in html  # inherited
     # escaped * chars should no longer be preceded by \'s,
     # if we see a \* in the output we know it's incorrect:
     assert r'\*' not in html
@@ -77,7 +85,7 @@ def test_reference(sphinx_app):
         ["generated", "numpydoc_test_module.MyClass.html"],
     ]
 
-    expected_lengths = [3, 1, 1]
+    expected_lengths = [1, 1, 1]
 
     for html_file, expected_length in zip(html_files, expected_lengths):
         html_file = op.join(out_dir, *html_file)

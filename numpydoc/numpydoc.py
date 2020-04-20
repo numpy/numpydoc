@@ -168,7 +168,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
             doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg,
                                  builder=app.builder)
             lines[:] = str(doc).split(u_NL)
-        except:
+        except Exception:
             logger.error('[numpydoc] While processing docstring for %r', name)
             raise
 

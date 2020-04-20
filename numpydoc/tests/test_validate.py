@@ -1274,7 +1274,10 @@ class TestValidator:
         ],
     )
     def test_bad_docstrings(self, capsys, klass, func, msgs):
-        result = validate_one(self._import_path(klass=klass, func=func))
+        with pytest.warns(None) as w:
+            result = validate_one(self._import_path(klass=klass, func=func))
+        if len(w):
+            assert all('Unknown section' in str(ww.message) for ww in w)
         for msg in msgs:
             assert msg in " ".join(err[1] for err in result["errors"])
 
