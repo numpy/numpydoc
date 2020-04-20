@@ -14,8 +14,7 @@ autosummary_generate = True
 autodoc_default_options = {'inherited-members': None}
 source_suffix = '.rst'
 master_doc = 'index'
-templates_path = ['_templates']
-exclude_patterns = ['_build', '_templates']
+exclude_patterns = ['_build']
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
 }

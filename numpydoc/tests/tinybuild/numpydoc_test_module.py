@@ -36,7 +36,7 @@ class MyClass(object):
     """
 
     def example(self):
-        """Example function."""
+        """Example method."""
         pass
 
 
