@@ -35,7 +35,7 @@ class MyClass(object):
     .. [2] https://numpydoc.readthedocs.io
     """
 
-    def example(self):
+    def example(self, x):
         """Example method."""
         pass
 
