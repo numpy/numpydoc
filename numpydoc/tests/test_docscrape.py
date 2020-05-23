@@ -828,8 +828,7 @@ def test_see_also_print():
         """
         pass
 
-    obj = Dummy()
-    s = str(FunctionDoc(obj, role='func'))
+    s = str(FunctionDoc(Dummy, role='func'))
     assert(':func:`func_a`, :func:`func_b`' in s)
     assert('    some relationship' in s)
     assert(':func:`func_d`' in s)
