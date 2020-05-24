@@ -12,7 +12,10 @@ Release notes
    :local:
    :depth: 2
 
-.. note:: Release notes were not kept prior to version 1.0.0.
+.. note::
+
+   For notes (sparsely) kept prior to 1.0.0, look at the `releases page on
+   GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
 1.0.0
 -----
