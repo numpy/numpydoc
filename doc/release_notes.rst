@@ -6,7 +6,7 @@ Release notes
 .. 1. tagging PRs as enhancement/bug/removed
 .. 2. $ github_changelog_generator -u numpy -p numpydoc --since-tag=v0.9.2
 .. 3. $ pandoc CHANGELOG.md --wrap=none -o release_notes.rst
-.. 4. adding a manual addition (CSS note), tweaking the heading levels, adding TOC
+.. 4. adding a manual addition (CSS note), tweaking heading levels, adding TOC
 
 .. contents:: Page contents
    :local:
@@ -14,8 +14,8 @@ Release notes
 
 .. note::
 
-   For notes (sparsely) kept prior to 1.0.0, look at the `releases page on
-   GitHub <https://github.com/numpy/numpydoc/releases>`__.
+   For release notes (sparsely) kept prior to 1.0.0, look at the `releases page
+   on GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
 1.0.0
 -----
