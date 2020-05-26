@@ -27,9 +27,10 @@ jobs:
 
 before_install:
   - pip install --upgrade pip setuptools  # Ensure there is `wheel` support
-  - pip install pytest pytest-cov pydocstyle numpy matplotlib sphinx${SPHINX_SPEC} codecov
+  - pip install pytest pytest-cov pydocstyle numpy matplotlib sphinx${SPHINX_SPEC} codecov check-manifest
 
 script:
+  - check-manifest
   - |
     python setup.py sdist
     cd dist
