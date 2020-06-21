@@ -206,6 +206,7 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
     sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
     if sig:
         sig = re.sub("^[^(]*", "", sig)
+        sig = re.sub("$", "", sig)
         return sig, ''
 
 
