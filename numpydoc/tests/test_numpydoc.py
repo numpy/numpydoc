@@ -36,7 +36,7 @@ app.builder.app = app
 
 
 def test_mangle_docstrings():
-    s ='''
+    s = '''
 A top section before
 
 .. autoclass:: str
@@ -66,16 +66,16 @@ A top section before
 
 def test_clean_text_signature():
     assert _clean_text_signature(None) is None
-    assert _clean_text_signature('func($self)') == '()'
-    assert (_clean_text_signature('func($self, *args, **kwargs)') ==
-            '(*args, **kwargs)')
+    assert _clean_text_signature('func($self)') == 'func()'
+    assert (_clean_text_signature('func($self, *args, **kwargs)')
+            == 'func(*args, **kwargs)')
     assert _clean_text_signature('($self)') == '()'
     assert _clean_text_signature('()') == '()'
-    assert _clean_text_signature('func()') == '()'
-    assert (_clean_text_signature('func($self, /, *args, **kwargs)') ==
-            '(*args, **kwargs)')
+    assert _clean_text_signature('func()') == 'func()'
+    assert (_clean_text_signature('func($self, /, *args, **kwargs)')
+            == 'func(*args, **kwargs)')
     assert _clean_text_signature('($module)') == '()'
-    assert _clean_text_signature('func($type)') == '()'
+    assert _clean_text_signature('func($type)') == 'func()'
 
 
 if __name__ == "__main__":

@@ -213,18 +213,16 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
 def _clean_text_signature(sig):
     if sig is None:
         return None
-    sig = re.sub(r"^[^(]*\(", "", sig)
+    start_pattern = re.compile(r"^[^(]*\(*")
+    start, end = start_pattern.search(sig).span()
+    start_sig = sig[start:end]
+    sig = sig[end:]
     sig = re.sub(r"\)", "", sig)
     params = sig.replace(' ', '').split(',')
-    if '$self' in params:
-        params.remove('$self')
-    if '$module' in params:
-        params.remove('$module')
-    if '$type' in params:
-        params.remove('$type')
-    if '/' in params:
-        params.remove('/')
-    return '(' + ', '.join(params) + ')'
+    for param in ('$self', '$module', '$type', '/'):
+        if param in params:
+            params.remove(param)
+    return start_sig + ', '.join(params) + ')'
 
 
 def setup(app, get_doc_object_=get_doc_object):
