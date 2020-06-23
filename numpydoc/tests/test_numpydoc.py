@@ -1,6 +1,6 @@
 # -*- encoding:utf-8 -*-
 from copy import deepcopy
-from numpydoc.numpydoc import mangle_docstrings
+from numpydoc.numpydoc import mangle_docstrings, _clean_text_signature
 from numpydoc.xref import DEFAULT_LINKS
 from sphinx.ext.autodoc import ALL
 
@@ -62,6 +62,20 @@ A top section before
         MockApp(), 'class', 'str', str, {'exclude-members': ['upper']}, lines)
     assert 'rpartition' in [x.strip() for x in lines]
     assert 'upper' not in [x.strip() for x in lines]
+
+
+def test_clean_text_signature():
+    assert _clean_text_signature(None) is None
+    assert _clean_text_signature('func($self)') == '()'
+    assert (_clean_text_signature('func($self, *args, **kwargs)') ==
+            '(*args, **kwargs)')
+    assert _clean_text_signature('($self)') == '()'
+    assert _clean_text_signature('()') == '()'
+    assert _clean_text_signature('func()') == '()'
+    assert (_clean_text_signature('func($self, /, *args, **kwargs)') ==
+            '(*args, **kwargs)')
+    assert _clean_text_signature('($module)') == '()'
+    assert _clean_text_signature('func($type)') == '()'
 
 
 if __name__ == "__main__":

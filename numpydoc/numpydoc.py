@@ -203,12 +203,28 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
     if not hasattr(obj, '__doc__'):
         return
     doc = get_doc_object(obj, config={'show_class_members': False})
-    sig = doc['Signature'] or getattr(obj, '__text_signature__', None)
+    sig = (doc['Signature'] or
+           _clean_text_signature(getattr(obj, '__text_signature__', None)))
     if sig:
         sig = re.sub("^[^(]*", "", sig)
-        sig = re.sub(r"\$self,\s", "", sig)
-        sig = re.sub(r"\/,\s", "", sig)
         return sig, ''
+
+
+def _clean_text_signature(sig):
+    if sig is None:
+        return None
+    sig = re.sub(r"^[^(]*\(", "", sig)
+    sig = re.sub(r"\)", "", sig)
+    params = sig.replace(' ', '').split(',')
+    if '$self' in params:
+        params.remove('$self')
+    if '$module' in params:
+        params.remove('$module')
+    if '$type' in params:
+        params.remove('$type')
+    if '/' in params:
+        params.remove('/')
+    return '(' + ', '.join(params) + ')'
 
 
 def setup(app, get_doc_object_=get_doc_object):
