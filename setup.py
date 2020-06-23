@@ -46,6 +46,12 @@ setup(
     license="BSD",
     install_requires=["sphinx >= 1.6.5", 'Jinja2>=2.3'],
     python_requires=">=3.5",
+    extras_require={
+        "testing": [
+            req for req in read('test_requirements.txt').split('\n')
+            if not req.startswith('#')
+        ],
+    },
     package_data={'numpydoc': [
         'tests/test_*.py',
         'tests/tinybuild/Makefile',
