@@ -53,6 +53,7 @@ def test_MyClass(sphinx_app):
         html = fid.read()
     # ensure that no autodoc weirdness ($) occurs
     assert '$self' not in html
+    assert '/,' not in html
     assert '__init__' in html  # inherited
     # escaped * chars should no longer be preceded by \'s,
     # if we see a \* in the output we know it's incorrect:
