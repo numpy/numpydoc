@@ -218,7 +218,7 @@ def setup(app, get_doc_object_=get_doc_object):
 
     app.setup_extension('sphinx.ext.autosummary')
 
-    app.connect('builder-inited', update_config)
+    app.connect('config-inited', update_config)
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
     app.connect('doctree-read', relabel_references)
@@ -244,17 +244,19 @@ def setup(app, get_doc_object_=get_doc_object):
     return metadata
 
 
-def update_config(app):
+def update_config(app, config=None):
     """Update the configuration with default values."""
+    if config is None:  # only really needed for testing
+        config = app.config
     # Do not simply overwrite the `app.config.numpydoc_xref_aliases`
     # otherwise the next sphinx-build will compare the incoming values (without
     # our additions) to the old values (with our additions) and trigger
     # a full rebuild!
-    numpydoc_xref_aliases_complete = deepcopy(app.config.numpydoc_xref_aliases)
+    numpydoc_xref_aliases_complete = deepcopy(config.numpydoc_xref_aliases)
     for key, value in DEFAULT_LINKS.items():
         if key not in numpydoc_xref_aliases_complete:
             numpydoc_xref_aliases_complete[key] = value
-    app.config.numpydoc_xref_aliases_complete = numpydoc_xref_aliases_complete
+    config.numpydoc_xref_aliases_complete = numpydoc_xref_aliases_complete
 
 
 # ------------------------------------------------------------------------------
