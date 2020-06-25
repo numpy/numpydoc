@@ -566,7 +566,6 @@ class FunctionDoc(NumpyDocString):
             doc = inspect.getdoc(func) or ''
         NumpyDocString.__init__(self, doc, config)
 
-
     def get_func(self):
         func_name = getattr(self._f, '__name__', self.__class__.__name__)
         if inspect.isclass(self._f):
