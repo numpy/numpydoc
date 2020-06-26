@@ -28,6 +28,7 @@ from docutils.nodes import citation, Text, section, comment, reference
 import sphinx
 from sphinx.addnodes import pending_xref, desc_content
 from sphinx.util import logging
+from sphinx.errors import ExtensionError
 
 if sphinx.__version__ < '1.6.5':
     raise RuntimeError("Sphinx 1.6.5 or newer is required")
@@ -218,7 +219,13 @@ def setup(app, get_doc_object_=get_doc_object):
 
     app.setup_extension('sphinx.ext.autosummary')
 
-    app.connect('config-inited', update_config)
+    # Once we bump our Sphinx requirement higher (1.7 or 1.8?)
+    # we can just connect to config-inited
+    try:
+        app.connect('config-inited', update_config)
+    except ExtensionError:
+        app.connect('builder-inited', update_config)
+
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
     app.connect('doctree-read', relabel_references)
@@ -246,7 +253,7 @@ def setup(app, get_doc_object_=get_doc_object):
 
 def update_config(app, config=None):
     """Update the configuration with default values."""
-    if config is None:  # only really needed for testing
+    if config is None:  # needed for testing and old Sphinx
         config = app.config
     # Do not simply overwrite the `app.config.numpydoc_xref_aliases`
     # otherwise the next sphinx-build will compare the incoming values (without
