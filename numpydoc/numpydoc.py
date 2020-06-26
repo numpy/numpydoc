@@ -217,11 +217,9 @@ def _clean_text_signature(sig):
     start, end = start_pattern.search(sig).span()
     start_sig = sig[start:end]
     sig = sig[end:-1]
-    params = sig.split(', ')
-    for param in ('$self', '$module', '$type', '/'):
-        if param in params:
-            params.remove(param)
-    return start_sig + ', '.join(params) + ')'
+    sig = re.sub(r'^\$(self|module|type)(,\s|$)','' , sig, count=1)
+    sig = re.sub(r'(^|(?<=,\s))/,\s\*', '*', sig, count=1)
+    return start_sig + sig + ')'
 
 
 def setup(app, get_doc_object_=get_doc_object):

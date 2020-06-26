@@ -74,6 +74,8 @@ def test_clean_text_signature():
     assert _clean_text_signature('func()') == 'func()'
     assert (_clean_text_signature('func($self, /, *args, **kwargs)')
             == 'func(*args, **kwargs)')
+    assert (_clean_text_signature('func($self, other, /, *args, **kwargs)')
+            == 'func(other, *args, **kwargs)')
     assert _clean_text_signature('($module)') == '()'
     assert _clean_text_signature('func($type)') == 'func()'
     assert (_clean_text_signature('func($self, foo="hello world")')
@@ -87,7 +89,7 @@ def test_clean_text_signature():
     assert (_clean_text_signature('func($self, foo="$self")')
             == 'func(foo="$self")')
     assert _clean_text_signature('func(self, other)') == 'func(self, other)'
-    assert _clean_text_signature('func(self, $self)') == 'func(self)'
+    assert _clean_text_signature('func($self, *args)') == 'func(*args)'
 
 
 if __name__ == "__main__":
