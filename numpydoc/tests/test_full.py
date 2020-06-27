@@ -53,12 +53,13 @@ def test_MyClass(sphinx_app):
         html = fid.read()
     # ensure that no autodoc weirdness ($) occurs
     assert '$self' not in html
+    assert '/,' not in html
     assert '__init__' in html  # inherited
     # escaped * chars should no longer be preceded by \'s,
     # if we see a \* in the output we know it's incorrect:
     assert r'\*' not in html
     # "self" should not be in the parameter list for the class:
-    assert 'self,' in html   # XXX should be "not in", bug!
+    assert 'self,' not in html
     # check xref was embedded properly (dict should link using xref):
     assert 'stdtypes.html#dict' in html
 

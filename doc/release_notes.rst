@@ -71,3 +71,21 @@ Additional notes
 
    -  https://github.com/numpy/numpydoc/issues/215#issuecomment-568261611
    -  https://github.com/readthedocs/sphinx_rtd_theme/pull/838
+
+1.1.0
+-----
+
+Fixed bugs
+~~~~~~~~~~
+
+-  BUG: Defer to autodoc for signatures `#221 <https://github.com/numpy/numpydoc/pull/221>`__ (`thequackdaddy <https://github.com/thequackdaddy>`__)
+
+Closed issues
+~~~~~~~~~~~~~
+
+-  self included in list of params for method `#220 <https://github.com/numpy/numpydoc/issues/220>`__
+
+Additional notes
+~~~~~~~~~~~~~~~~
+
+-  Due to merging of `#221 <https://github.com/numpy/numpydoc/pull/221>`__, self and cls no longer will appear in method signatures.

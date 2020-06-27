@@ -1,6 +1,6 @@
 # -*- encoding:utf-8 -*-
 from copy import deepcopy
-from numpydoc.numpydoc import mangle_docstrings
+from numpydoc.numpydoc import mangle_docstrings, _clean_text_signature
 from numpydoc.xref import DEFAULT_LINKS
 from sphinx.ext.autodoc import ALL
 
@@ -36,7 +36,7 @@ app.builder.app = app
 
 
 def test_mangle_docstrings():
-    s ='''
+    s = '''
 A top section before
 
 .. autoclass:: str
@@ -62,6 +62,34 @@ A top section before
         MockApp(), 'class', 'str', str, {'exclude-members': ['upper']}, lines)
     assert 'rpartition' in [x.strip() for x in lines]
     assert 'upper' not in [x.strip() for x in lines]
+
+
+def test_clean_text_signature():
+    assert _clean_text_signature(None) is None
+    assert _clean_text_signature('func($self)') == 'func()'
+    assert (_clean_text_signature('func($self, *args, **kwargs)')
+            == 'func(*args, **kwargs)')
+    assert _clean_text_signature('($self)') == '()'
+    assert _clean_text_signature('()') == '()'
+    assert _clean_text_signature('func()') == 'func()'
+    assert (_clean_text_signature('func($self, /, *args, **kwargs)')
+            == 'func(*args, **kwargs)')
+    assert (_clean_text_signature('func($self, other, /, *args, **kwargs)')
+            == 'func(other, *args, **kwargs)')
+    assert _clean_text_signature('($module)') == '()'
+    assert _clean_text_signature('func($type)') == 'func()'
+    assert (_clean_text_signature('func($self, foo="hello world")')
+            == 'func(foo="hello world")')
+    assert (_clean_text_signature("func($self, foo='hello world')")
+            == "func(foo='hello world')")
+    assert (_clean_text_signature('func(foo="hello world")')
+            == 'func(foo="hello world")')
+    assert (_clean_text_signature('func(foo="$self")')
+            == 'func(foo="$self")')
+    assert (_clean_text_signature('func($self, foo="$self")')
+            == 'func(foo="$self")')
+    assert _clean_text_signature('func(self, other)') == 'func(self, other)'
+    assert _clean_text_signature('func($self, *args)') == 'func(*args)'
 
 
 if __name__ == "__main__":
