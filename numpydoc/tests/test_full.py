@@ -65,7 +65,7 @@ def test_MyClass(sphinx_app):
 
 
 def test_my_function(sphinx_app):
-    """Test that a timings page is created."""
+    """Test that function documentation is reasonable."""
     out_dir = sphinx_app.outdir
     function_html = op.join(out_dir, 'generated',
                             'numpydoc_test_module.my_function.html')
