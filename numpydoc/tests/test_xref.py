@@ -1,4 +1,5 @@
 # -*- encoding:utf-8 -*-
+import pytest
 from numpydoc.xref import make_xref
 
 xref_aliases = {
@@ -114,12 +115,9 @@ dict[tuple(str, str), int]
 xref_ignore = {'or', 'in', 'of', 'default', 'optional'}
 
 
-def test_make_xref():
-    for s in data.strip().split('\n\n'):
-        param_type, expected_result = s.split('\n')
-        result = make_xref(
-            param_type,
-            xref_aliases,
-            xref_ignore
-        )
-        assert result == expected_result
+@pytest.mark.parametrize(
+    ('param_type', 'expected_result'),
+    [tuple(s.split('\n')) for s in data.strip().split('\n\n')]
+)
+def test_make_xref(param_type, expected_result):
+    assert make_xref(param_type, xref_aliases, xref_ignore) == expected_result
