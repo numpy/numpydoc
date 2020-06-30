@@ -278,7 +278,7 @@ That should break...
     assert_raises(ValueError, NumpyDocString, doc_text)
 
     # if we have a numpydoc object, we know where the error came from
-    class Dummy(object):
+    class Dummy:
         """
         Dummy class.
 
@@ -817,7 +817,7 @@ def test_see_also_parse_error():
 
 
 def test_see_also_print():
-    class Dummy(object):
+    class Dummy:
         """
         See Also
         --------
@@ -858,7 +858,7 @@ Mope
 This should be ignored and warned about
 """
 
-    class BadSection(object):
+    class BadSection:
         """Class with bad section.
 
         Nope
@@ -995,7 +995,7 @@ def test_use_blockquotes():
 
 def test_class_members():
 
-    class Dummy(object):
+    class Dummy:
         """
         Dummy class.
 
@@ -1011,7 +1011,7 @@ def test_class_members():
             """Spammity index"""
             return 0.95
 
-        class Ignorable(object):
+        class Ignorable:
             """local class, to be ignored"""
             pass
 
@@ -1327,7 +1327,7 @@ def test_templated_sections():
 def test_nonstandard_property():
     # test discovery of a property that does not satisfy isinstace(.., property)
 
-    class SpecialProperty(object):
+    class SpecialProperty:
 
         def __init__(self, axis=0, doc=""):
             self.axis = axis
