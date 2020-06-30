@@ -18,7 +18,7 @@ References
 __all__ = ['MyClass', 'my_function']
 
 
-class MyClass(object):
+class MyClass:
     """A class.
 
     Reference [2]_
