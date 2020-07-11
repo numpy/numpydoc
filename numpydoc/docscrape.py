@@ -220,7 +220,7 @@ class NumpyDocString(Mapping):
         while not r.eof():
             header = r.read().strip()
             if ' : ' in header:
-                arg_name, arg_type = header.split(' : ')[:2]
+                arg_name, arg_type = header.split(' : ', maxsplit=1)
             else:
                 if single_element_is_type:
                     arg_name, arg_type = '', header

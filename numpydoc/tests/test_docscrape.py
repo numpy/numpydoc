@@ -45,6 +45,8 @@ doc_txt = '''\
       Given a shape of, for example, (m,n,k), m*n*k samples are
       generated, and packed in an m-by-n-by-k arrangement.  Because
       each sample is N-dimensional, the output shape is (m,n,k,N).
+  dtype : data type object, optional (default : float)
+      The type and size of the data to be returned.
 
   Returns
   -------
@@ -180,7 +182,7 @@ def test_extended_summary():
 
 
 def test_parameters():
-    assert len(doc['Parameters']) == 3
+    assert len(doc['Parameters']) == 4
     names = [n for n, _, _ in doc['Parameters']]
     assert all(a == b for a, b in zip(names, ['mean', 'cov', 'shape']))
 
@@ -188,6 +190,17 @@ def test_parameters():
     assert arg_type == '(N, N) ndarray'
     assert desc[0].startswith('Covariance matrix')
     assert doc['Parameters'][0][-1][-1] == '   (1+2+3)/3'
+
+    arg, arg_type, desc = doc['Parameters'][2]
+    assert arg == 'shape'
+    assert arg_type == 'tuple of ints'
+    assert desc[0].startswith('Given')
+    assert doc['Parameters'][0][-1][-1] == '   (1+2+3)/3'
+
+    arg, arg_type, desc = doc['Parameters'][3]
+    assert arg == 'dtype'
+    assert arg_type == 'data type object, optional (default : float)'
+    assert desc[0].startswith('The type and size')
 
 
 def test_other_parameters():
@@ -205,7 +218,7 @@ def test_returns():
     assert arg_type == 'ndarray'
     assert desc[0].startswith('The drawn samples')
     assert desc[-1].endswith('distribution.')
-
+    
     arg, arg_type, desc = doc['Returns'][1]
     assert arg == ''
     assert arg_type == 'list of str'
@@ -394,6 +407,8 @@ shape : tuple of ints
     Given a shape of, for example, (m,n,k), m*n*k samples are
     generated, and packed in an m-by-n-by-k arrangement.  Because
     each sample is N-dimensional, the output shape is (m,n,k,N).
+dtype : data type object, optional (default : float)
+    The type and size of the data to be returned.
 
 Returns
 -------
@@ -559,6 +574,9 @@ of the one-dimensional normal distribution to higher dimensions.
         Given a shape of, for example, (m,n,k), m*n*k samples are
         generated, and packed in an m-by-n-by-k arrangement.  Because
         each sample is N-dimensional, the output shape is (m,n,k,N).
+
+    **dtype** : data type object, optional (default : float)
+        The type and size of the data to be returned.
 
 :Returns:
 
