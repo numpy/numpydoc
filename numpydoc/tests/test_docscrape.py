@@ -110,6 +110,7 @@ doc_txt = '''\
   --------
   some, other, funcs
   otherfunc : relationship
+  :py:meth:`spyder.widgets.mixins.GetHelpMixin.show_object_info`
 
   Examples
   --------
@@ -435,6 +436,8 @@ See Also
     ..
 `otherfunc`_
     relationship
+:py:meth:`spyder.widgets.mixins.GetHelpMixin.show_object_info`
+    ..
 
 Notes
 -----
@@ -602,6 +605,8 @@ of the one-dimensional normal distribution to higher dimensions.
         ..
     :obj:`otherfunc`
         relationship
+    :py:meth:`spyder.widgets.mixins.GetHelpMixin.show_object_info`
+        ..
 
 .. rubric:: Notes
 
