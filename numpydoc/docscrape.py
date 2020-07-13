@@ -251,7 +251,7 @@ class NumpyDocString(Mapping):
     # Examples: func_f1  :meth:`func_h1` :obj:`~baz.obj_r` :class:`class_j`
     # <DESC> is a string describing the function.
 
-    _role = r":(?P<role>\w+):"
+    _role = r":(?P<role>(py:)?\w+):"
     _funcbacktick = r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_\.-]+)`"
     _funcplain = r"(?P<name2>[a-zA-Z0-9_\.-]+)"
     _funcname = r"(" + _role + _funcbacktick + r"|" + _funcplain + r")"
