@@ -176,6 +176,10 @@ class NumpyDocString(Mapping):
             return True
 
         l2 = self._doc.peek(1).strip()  # ---------- or ==========
+        if len(l2) >= 3 and (set(l2) in ({'-'}, {'='}) ) and len(l2) != len(l1):
+            snip = '\n'.join(self._doc._str[:2])+'...'
+            self._error_location("potentially wrong underline length... \n%s \n%s in \n%s"\
+                    % (l1, l2, snip), error=False)
         return l2.startswith('-'*len(l1)) or l2.startswith('='*len(l1))
 
     def _strip(self, doc):
@@ -387,8 +391,8 @@ class NumpyDocString(Mapping):
                 section = (s.capitalize() for s in section.split(' '))
                 section = ' '.join(section)
                 if self.get(section):
-                    self._error_location("The section %s appears twice"
-                                         % section)
+                    self._error_location("The section %s appears twice in  %s"
+                            % (section, '\n'.join(self._doc._str)))
 
             if section in ('Parameters', 'Other Parameters', 'Attributes',
                            'Methods'):
