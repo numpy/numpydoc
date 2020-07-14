@@ -585,6 +585,22 @@ class BadGenericDocStrings:
         """
         pass
 
+class WarnGenericFormat:
+    """
+    Those contains things that _may_ be incorrect formatting.
+    """
+
+    def too_short_header_underline(self, a, b):
+        """
+        The header line is too short.
+
+        Parameters
+        ------
+        a, b : int
+            Foo bar baz.
+        """
+        pass
+
 
 class BadSummaries:
     def no_summary(self):
@@ -1036,6 +1052,20 @@ class TestValidator:
         errors = validate_one(self._import_path(klass="BadGenericDocStrings"))["errors"]
         assert isinstance(errors, list)
         assert errors
+
+    @pytest.mark.parametrize(
+        "func",
+        [
+            "too_short_header_underline",
+        ],
+    )
+    def test_bad_generic_functions(self, capsys, func):
+        with pytest.warns(UserWarning):
+            errors = validate_one(
+                self._import_path(klass="WarnGenericFormat", func=func)  # noqa:F821
+                )
+        assert 'is too short' in w.msg
+
 
     @pytest.mark.parametrize(
         "func",
