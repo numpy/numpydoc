@@ -17,6 +17,7 @@ from numpydoc.docscrape import (
 )
 from numpydoc.docscrape_sphinx import (SphinxDocString, SphinxClassDoc,
                                        SphinxFunctionDoc, get_doc_object)
+import pytest
 from pytest import raises as assert_raises
 from pytest import warns as assert_warns
 
@@ -766,11 +767,16 @@ def test_warns():
     assert param.type == 'SomeWarning'
     assert param.desc == ['If needed']
 
-
-def test_see_also():
+# see numpydoc/numpydoc #281
+# we want to correctly parse "See Also" both in docstrings both like
+#"""foo
+# and
+#"""
+#foo
+@pytest.mark.parametrize('prefix', ['', '\n    '])
+def test_see_also(prefix):
     doc6 = NumpyDocString(
-    """
-    z(x,theta)
+    prefix + """z(x,theta)
 
     See Also
     --------

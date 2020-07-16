@@ -284,6 +284,8 @@ class NumpyDocString(Mapping):
 
         """
 
+        content = dedent_lines(content)
+
         items = []
 
         def parse_item_name(text):
