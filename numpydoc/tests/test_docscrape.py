@@ -183,7 +183,12 @@ def test_extended_summary():
     assert doc['Extended Summary'][0].startswith('The multivariate normal')
 
 
-def test_parameters():
+@pytest.mark.parametrize('sig_on_first_line', (True, False))
+def test_parameters(sig_on_first_line):
+    if sig_on_first_line:
+        doc = NumpyDocString(doc_txt.lstrip())
+    else:
+        doc = NumpyDocString(doc_txt)
     assert len(doc['Parameters']) == 4
     names = [n for n, _, _ in doc['Parameters']]
     assert all(a == b for a, b in zip(names, ['mean', 'cov', 'shape']))
@@ -921,6 +926,20 @@ doc7 = NumpyDocString("""
 def test_empty_first_line():
     assert doc7['Summary'][0].startswith('Doc starts')
 
+doc8 = NumpyDocString("""
+
+        Parameters wit colon and no types:
+
+        Parameters
+        ----------
+
+        data :
+            some stuff, technically invalid
+        """)
+
+
+def test_trailing_colon():
+    assert doc8['Parameters'][0].name == 'data'
 
 def test_no_summary():
     str(SphinxDocString("""
