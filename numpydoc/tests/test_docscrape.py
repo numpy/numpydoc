@@ -134,6 +134,7 @@ doc_txt = '''\
 
   '''
 doc = NumpyDocString(doc_txt)
+doc_firstline_dedent = NumpyDocString(doc_txt.lstrip())
 
 doc_yields_txt = """
 Test generator
@@ -168,22 +169,25 @@ c : int
 """
 doc_sent = NumpyDocString(doc_sent_txt)
 
-
-def test_signature():
+@pytest.mark.parametrize('doc', (doc, doc_firstline_dedent))
+def test_signature(doc):
     assert doc['Signature'].startswith('numpy.multivariate_normal(')
     assert doc['Signature'].endswith('spam=None)')
 
 
-def test_summary():
+@pytest.mark.parametrize('doc', (doc, doc_firstline_dedent))
+def test_summary(doc):
     assert doc['Summary'][0].startswith('Draw values')
     assert doc['Summary'][-1].endswith('covariance.')
 
 
-def test_extended_summary():
+@pytest.mark.parametrize('doc', (doc, doc_firstline_dedent))
+def test_extended_summary(doc):
     assert doc['Extended Summary'][0].startswith('The multivariate normal')
 
 
-def test_parameters():
+@pytest.mark.parametrize('doc', (doc, doc_firstline_dedent))
+def test_parameters(doc):
     assert len(doc['Parameters']) == 4
     names = [n for n, _, _ in doc['Parameters']]
     assert all(a == b for a, b in zip(names, ['mean', 'cov', 'shape']))
@@ -205,7 +209,8 @@ def test_parameters():
     assert desc[0].startswith('The type and size')
 
 
-def test_other_parameters():
+@pytest.mark.parametrize('doc', (doc, doc_firstline_dedent))
+def test_other_parameters(doc):
     assert len(doc['Other Parameters']) == 1
     assert [n for n, _, _ in doc['Other Parameters']] == ['spam']
     arg, arg_type, desc = doc['Other Parameters'][0]
@@ -213,7 +218,8 @@ def test_other_parameters():
     assert desc[0].startswith('A parrot off its mortal coil')
 
 
-def test_returns():
+@pytest.mark.parametrize('doc', (doc, doc_firstline_dedent))
+def test_returns(doc):
     assert len(doc['Returns']) == 3
     arg, arg_type, desc = doc['Returns'][0]
     assert arg == 'out'

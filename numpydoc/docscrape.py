@@ -138,7 +138,7 @@ class NumpyDocString(Mapping):
 
     def __init__(self, docstring, config={}):
         orig_docstring = docstring
-        docstring = textwrap.dedent(docstring).split('\n')
+        docstring = inspect.cleandoc(docstring).split('\n')
 
         self._doc = Reader(docstring)
         self._parsed_data = copy.deepcopy(self.sections)
