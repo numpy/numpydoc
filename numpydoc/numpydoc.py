@@ -136,6 +136,34 @@ def clean_backrefs(app, doc, docname):
         citation_node['backrefs'] = [id_ for id_ in citation_node['backrefs']
                                      if id_ in known_ref_ids]
 
+def _update_deprecations(app, name, numpy_docstring):
+    env = app.env
+    if not hasattr(env, 'numpydoc_deprecations'):
+        env.numpydoc_deprecations = set()
+
+    if '.. deprecated' in (
+        numpy_docstring['Summary'] + numpy_docstring['Extended Summary']
+    ):
+
+        env.numpydoc_deprecations.add(name)
+#    print(name)
+#    print(env.numpydoc_deprecations)
+
+
+def _update_seealso(app, name, numpy_docstring):
+    env = app.env
+    if not hasattr(env, 'numpydoc_seealso_links'):
+        env.numpydoc_seealso_links = set()
+
+    for link in numpy_docstring['See Also']:
+        env.numpydoc_seealso_links.add(link[0][0][0])
+#    print(name)
+
+
+def check_for_deprecated_seealso(app, env):
+    print('\n\n\n', app.env.numpydoc_deprecations)
+    print(app.env.numpydoc_seealso_links, '\n\n\n')
+
 
 DEDUPLICATION_TAG = '    !! processed by numpydoc !!'
 
@@ -168,6 +196,8 @@ def mangle_docstrings(app, what, name, obj, options, lines):
         try:
             doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg,
                                  builder=app.builder)
+            _update_deprecations(app, name, doc)
+            _update_seealso(app, name, doc)
             lines[:] = str(doc).split(u_NL)
         except Exception:
             logger.error('[numpydoc] While processing docstring for %r', name)
@@ -243,6 +273,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.connect('autodoc-process-signature', mangle_signature)
     app.connect('doctree-read', relabel_references)
     app.connect('doctree-resolved', clean_backrefs)
+    app.connect('env-updated', check_for_deprecated_seealso)
     app.add_config_value('numpydoc_edit_link', None, False)
     app.add_config_value('numpydoc_use_plots', None, False)
     app.add_config_value('numpydoc_use_blockquotes', None, False)
