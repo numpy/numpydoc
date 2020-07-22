@@ -23,6 +23,7 @@ import inspect
 from collections.abc import Callable
 import hashlib
 import itertools
+from warnings import warn
 
 from docutils.nodes import citation, Text, section, comment, reference
 import sphinx
@@ -161,8 +162,16 @@ def _update_seealso(app, name, numpy_docstring):
 
 
 def check_for_deprecated_seealso(app, env):
-    print('\n\n\n', app.env.numpydoc_deprecations)
-    print(app.env.numpydoc_seealso_links, '\n\n\n')
+    dep_set, sa_set = env.numpydoc_deprecations, env.numpydoc_seealso_links
+    overlap = dep_set.intersection(sa_set)
+    if len(overlap) > 0:
+        warn(
+            "The following deprecated functions were linked to in the "
+            "See Also section of other docstrings: {}".format(overlap)
+        )
+        
+#    print('\n\n\n', app.env.numpydoc_deprecations)
+#    print(app.env.numpydoc_seealso_links, '\n\n\n')
 
 
 DEDUPLICATION_TAG = '    !! processed by numpydoc !!'
