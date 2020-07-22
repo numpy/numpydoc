@@ -146,8 +146,6 @@ def _update_deprecations(app, name, numpy_docstring):
     ):
 
         env.numpydoc_deprecations.add(name)
-#    print(name)
-#    print(env.numpydoc_deprecations)
 
 
 def _update_seealso(app, name, numpy_docstring):
@@ -157,20 +155,17 @@ def _update_seealso(app, name, numpy_docstring):
 
     for link in numpy_docstring['See Also']:
         env.numpydoc_seealso_links.add(link[0][0][0])
-#    print(name)
 
 
 def check_for_deprecated_seealso(app, env):
-    dep_set, sa_set = env.numpydoc_deprecations, env.numpydoc_seealso_links
-    overlap = dep_set.intersection(sa_set)
-    if len(overlap) > 0:
-        logger.warn(
-            "The following deprecated functions were linked to in the "
-            "See Also section of other docstrings: {}".format(overlap)
-        )
-        
-#    print('\n\n\n', app.env.numpydoc_deprecations)
-#    print(app.env.numpydoc_seealso_links, '\n\n\n')
+    if app.config.numpydoc_check_deprecated_seealso_links:
+        dep_set, sa_set = env.numpydoc_deprecations, env.numpydoc_seealso_links
+        overlap = dep_set.intersection(sa_set)
+        if len(overlap) > 0:
+            logger.warn(
+                "The following deprecated functions were linked to in the "
+                "See Also section of other docstrings: {}".format(overlap)
+            )
 
 
 DEDUPLICATION_TAG = '    !! processed by numpydoc !!'
@@ -204,9 +199,10 @@ def mangle_docstrings(app, what, name, obj, options, lines):
         try:
             doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg,
                                  builder=app.builder)
-            _update_deprecations(app, name, doc)
-            _update_seealso(app, name, doc)
             lines[:] = str(doc).split(u_NL)
+            if app.config.numpydoc_check_deprecated_seealso_links:
+                _update_deprecations(app, name, doc)
+                _update_seealso(app, name, doc)
         except Exception:
             logger.error('[numpydoc] While processing docstring for %r', name)
             raise
@@ -293,6 +289,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_xref_param_type', False, True)
     app.add_config_value('numpydoc_xref_aliases', dict(), True)
     app.add_config_value('numpydoc_xref_ignore', set(), True)
+    app.add_config_value('numpydoc_check_deprecated_seealso_links', True, 'env')
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
