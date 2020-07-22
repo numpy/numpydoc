@@ -141,8 +141,8 @@ def _update_deprecations(app, name, numpy_docstring):
     if not hasattr(env, 'numpydoc_deprecations'):
         env.numpydoc_deprecations = set()
 
-    if '.. deprecated' in (
-        numpy_docstring['Summary'] + numpy_docstring['Extended Summary']
+    if '.. deprecated::' in (
+        ''.join(numpy_docstring['Summary'] + numpy_docstring['Extended Summary'])
     ):
 
         env.numpydoc_deprecations.add(name)
