@@ -137,24 +137,24 @@ def clean_backrefs(app, doc, docname):
                                      if id_ in known_ref_ids]
 
 def _update_deprecations(app, name, numpy_docstring):
-    env = app.env
-    if not hasattr(env, 'numpydoc_deprecations'):
-        env.numpydoc_deprecations = set()
+    if not hasattr(app.env, 'numpydoc_deprecations'):
+        app.env.numpydoc_deprecations = set()
 
-    if '.. deprecated::' in (
-        ''.join(numpy_docstring['Summary'] + numpy_docstring['Extended Summary'])
+    # Look for unnested deprecation directive
+    if '\n.. deprecated::' in (
+        '\n'.join(
+            numpy_docstring['Summary'] + numpy_docstring['Extended Summary']
+        )
     ):
-
-        env.numpydoc_deprecations.add(name)
+        app.env.numpydoc_deprecations.add(name)
 
 
 def _update_seealso(app, name, numpy_docstring):
-    env = app.env
-    if not hasattr(env, 'numpydoc_seealso_links'):
-        env.numpydoc_seealso_links = set()
+    if not hasattr(app.env, 'numpydoc_seealso_links'):
+        app.env.numpydoc_seealso_links = set()
 
     for link in numpy_docstring['See Also']:
-        env.numpydoc_seealso_links.add(link[0][0][0])
+        app.env.numpydoc_seealso_links.add(link[0][0][0])
 
 
 def check_for_deprecated_seealso(app, env):
