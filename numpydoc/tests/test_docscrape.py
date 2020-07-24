@@ -133,7 +133,13 @@ doc_txt = '''\
      :refguide: random;distributions, random;gauss
 
   '''
-doc = NumpyDocString(doc_txt)
+
+@pytest.fixture(params=['',''], ids=["flush", "newline_indented"])
+def doc(request):
+    return NumpyDocString(doc_txt)
+
+
+doc_firstline = NumpyDocString(doc_txt.lstrip())
 
 doc_yields_txt = """
 Test generator
@@ -169,7 +175,7 @@ c : int
 doc_sent = NumpyDocString(doc_sent_txt)
 
 
-def test_signature():
+def test_signature(doc):
     assert doc['Signature'].startswith('numpy.multivariate_normal(')
     assert doc['Signature'].endswith('spam=None)')
 
@@ -183,12 +189,7 @@ def test_extended_summary():
     assert doc['Extended Summary'][0].startswith('The multivariate normal')
 
 
-@pytest.mark.parametrize('sig_on_first_line', (True, False))
-def test_parameters(sig_on_first_line):
-    if sig_on_first_line:
-        doc = NumpyDocString(doc_txt.lstrip())
-    else:
-        doc = NumpyDocString(doc_txt)
+def test_parameters(doc):
     assert len(doc['Parameters']) == 4
     names = [n for n, _, _ in doc['Parameters']]
     assert all(a == b for a, b in zip(names, ['mean', 'cov', 'shape']))
@@ -210,7 +211,7 @@ def test_parameters(sig_on_first_line):
     assert desc[0].startswith('The type and size')
 
 
-def test_other_parameters():
+def test_other_parameters(doc):
     assert len(doc['Other Parameters']) == 1
     assert [n for n, _, _ in doc['Other Parameters']] == ['spam']
     arg, arg_type, desc = doc['Other Parameters'][0]
@@ -218,7 +219,8 @@ def test_other_parameters():
     assert desc[0].startswith('A parrot off its mortal coil')
 
 
-def test_returns():
+
+def test_returns(doc):
     assert len(doc['Returns']) == 3
     arg, arg_type, desc = doc['Returns'][0]
     assert arg == 'out'
