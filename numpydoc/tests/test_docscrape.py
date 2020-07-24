@@ -134,12 +134,10 @@ doc_txt = '''\
 
   '''
 
-@pytest.fixture(params=['',''], ids=["flush", "newline_indented"])
+@pytest.fixture(params=['','\n    '], ids=["flush", "newline_indented"])
 def doc(request):
-    return NumpyDocString(doc_txt)
+    return NumpyDocString(request.param+doc_txt)
 
-
-doc_firstline = NumpyDocString(doc_txt.lstrip())
 
 doc_yields_txt = """
 Test generator
@@ -180,12 +178,12 @@ def test_signature(doc):
     assert doc['Signature'].endswith('spam=None)')
 
 
-def test_summary():
+def test_summary(doc):
     assert doc['Summary'][0].startswith('Draw values')
     assert doc['Summary'][-1].endswith('covariance.')
 
 
-def test_extended_summary():
+def test_extended_summary(doc):
     assert doc['Extended Summary'][0].startswith('The multivariate normal')
 
 
@@ -349,23 +347,23 @@ That should break...
                 or 'function dummy_func' in str(e))
 
 
-def test_notes():
+def test_notes(doc):
     assert doc['Notes'][0].startswith('Instead')
     assert doc['Notes'][-1].endswith('definite.')
     assert len(doc['Notes']) == 17
 
 
-def test_references():
+def test_references(doc):
     assert doc['References'][0].startswith('..')
     assert doc['References'][-1].endswith('2001.')
 
 
-def test_examples():
+def test_examples(doc):
     assert doc['Examples'][0].startswith('>>>')
     assert doc['Examples'][-1].endswith('True]')
 
 
-def test_index():
+def test_index(doc):
     assert doc['index']['default'] == 'random'
     assert len(doc['index']) == 2
     assert len(doc['index']['refguide']) == 2
@@ -389,7 +387,7 @@ def line_by_line_compare(a, b, n_lines=None):
         assert aa == bb
 
 
-def test_str():
+def test_str(doc):
     # doc_txt has the order of Notes and See Also sections flipped.
     # This should be handled automatically, and so, one thing this test does
     # is to make sure that See Also precedes Notes in the output.
