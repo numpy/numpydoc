@@ -78,6 +78,18 @@ def test_my_function(sphinx_app):
     assert 'glossary.html#term-iterable' in html
 
 
+@pytest.mark.xfail(reason='Sphinx bug with tuple defaults')
+def test_my_function_tuple(sphinx_app):
+    """Test that tuple arguments are handled properly."""
+    out_dir = sphinx_app.outdir
+    function_html = op.join(out_dir, 'generated',
+                            'numpydoc_test_module.my_function.html')
+    with open(function_html, 'r') as fid:
+        html = fid.read()
+    assert 'x=(1' in html
+    assert '2)' in html
+
+
 @pytest.mark.parametrize(("html_file", "expected_length"), (
     (["index.html"], 1),
     (["generated", "numpydoc_test_module.my_function.html"], 1),

@@ -40,7 +40,7 @@ class MyClass:
         pass
 
 
-def my_function(*args, **kwargs):
+def my_function(*args, x=(1, 2), **kwargs):
     """Return None.
 
     See [3]_.
