@@ -95,7 +95,9 @@ DEFAULT_LINKS = {
 
 
 def make_xref(param_type, xref_aliases, xref_ignore):
-    """Enclose str in a :obj: role.
+    """Parse and apply appropriate sphinx role(s) to `param_type`.
+
+    The :obj: role is the default.
 
     Parameters
     ----------
@@ -110,7 +112,7 @@ def make_xref(param_type, xref_aliases, xref_ignore):
     Returns
     -------
     out : str
-        Text with parts that may be wrapped in a
+        Text with fully-qualified names and terms that may be wrapped in a
         ``:obj:`` role.
     """
     if param_type in xref_aliases:
