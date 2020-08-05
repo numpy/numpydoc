@@ -63,15 +63,6 @@ numpydoc_xref_aliases : dict
   aliases/shortcuts used when specifying the types of parameters.
   The keys should not have any spaces. Together with the ``intersphinx``
   extension, you can map to links in any documentation.
-  The default is an empty ``dict``.
-
-  If you have the following ``intersphinx`` namespace configuration::
-
-      intersphinx_mapping = {
-          'python': ('https://docs.python.org/3/', None),
-          'numpy': ('https://docs.scipy.org/doc/numpy', None),
-          ...
-      }
 
   The default ``numpydoc_xref_aliases`` will supply some common ``Python``
   standard library and ``NumPy`` names for you. Then for your module, a useful
