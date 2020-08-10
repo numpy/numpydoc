@@ -133,7 +133,11 @@ doc_txt = '''\
      :refguide: random;distributions, random;gauss
 
   '''
-doc = NumpyDocString(doc_txt)
+
+@pytest.fixture(params=['','\n    '], ids=["flush", "newline_indented"])
+def doc(request):
+    return NumpyDocString(request.param+doc_txt)
+
 
 doc_yields_txt = """
 Test generator
@@ -169,21 +173,21 @@ c : int
 doc_sent = NumpyDocString(doc_sent_txt)
 
 
-def test_signature():
+def test_signature(doc):
     assert doc['Signature'].startswith('numpy.multivariate_normal(')
     assert doc['Signature'].endswith('spam=None)')
 
 
-def test_summary():
+def test_summary(doc):
     assert doc['Summary'][0].startswith('Draw values')
     assert doc['Summary'][-1].endswith('covariance.')
 
 
-def test_extended_summary():
+def test_extended_summary(doc):
     assert doc['Extended Summary'][0].startswith('The multivariate normal')
 
 
-def test_parameters():
+def test_parameters(doc):
     assert len(doc['Parameters']) == 4
     names = [n for n, _, _ in doc['Parameters']]
     assert all(a == b for a, b in zip(names, ['mean', 'cov', 'shape']))
@@ -205,7 +209,7 @@ def test_parameters():
     assert desc[0].startswith('The type and size')
 
 
-def test_other_parameters():
+def test_other_parameters(doc):
     assert len(doc['Other Parameters']) == 1
     assert [n for n, _, _ in doc['Other Parameters']] == ['spam']
     arg, arg_type, desc = doc['Other Parameters'][0]
@@ -213,7 +217,8 @@ def test_other_parameters():
     assert desc[0].startswith('A parrot off its mortal coil')
 
 
-def test_returns():
+
+def test_returns(doc):
     assert len(doc['Returns']) == 3
     arg, arg_type, desc = doc['Returns'][0]
     assert arg == 'out'
@@ -342,23 +347,23 @@ That should break...
                 or 'function dummy_func' in str(e))
 
 
-def test_notes():
+def test_notes(doc):
     assert doc['Notes'][0].startswith('Instead')
     assert doc['Notes'][-1].endswith('definite.')
     assert len(doc['Notes']) == 17
 
 
-def test_references():
+def test_references(doc):
     assert doc['References'][0].startswith('..')
     assert doc['References'][-1].endswith('2001.')
 
 
-def test_examples():
+def test_examples(doc):
     assert doc['Examples'][0].startswith('>>>')
     assert doc['Examples'][-1].endswith('True]')
 
 
-def test_index():
+def test_index(doc):
     assert doc['index']['default'] == 'random'
     assert len(doc['index']) == 2
     assert len(doc['index']['refguide']) == 2
@@ -382,7 +387,7 @@ def line_by_line_compare(a, b, n_lines=None):
         assert aa == bb
 
 
-def test_str():
+def test_str(doc):
     # doc_txt has the order of Notes and See Also sections flipped.
     # This should be handled automatically, and so, one thing this test does
     # is to make sure that See Also precedes Notes in the output.
@@ -920,6 +925,21 @@ doc7 = NumpyDocString("""
 
 def test_empty_first_line():
     assert doc7['Summary'][0].startswith('Doc starts')
+
+doc8 = NumpyDocString("""
+
+        Parameters with colon and no types:
+
+        Parameters
+        ----------
+
+        data :
+            some stuff, technically invalid
+        """)
+
+
+def test_trailing_colon():
+    assert doc8['Parameters'][0].name == 'data'
 
 
 def test_no_summary():
