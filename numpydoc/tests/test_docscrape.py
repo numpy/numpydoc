@@ -928,7 +928,7 @@ def test_empty_first_line():
 
 doc8 = NumpyDocString("""
 
-        Parameters wit colon and no types:
+        Parameters with colon and no types:
 
         Parameters
         ----------
