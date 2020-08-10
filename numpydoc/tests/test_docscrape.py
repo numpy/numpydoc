@@ -941,6 +941,7 @@ doc8 = NumpyDocString("""
 def test_trailing_colon():
     assert doc8['Parameters'][0].name == 'data'
 
+
 def test_no_summary():
     str(SphinxDocString("""
     Parameters
