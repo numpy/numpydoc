@@ -18,20 +18,7 @@ from .docscrape import NumpyDocString
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
 DIRECTIVE_PATTERN = re.compile(r"^\s*\.\. ({})(?!::)".format('|'.join(DIRECTIVES)),
                                re.I | re.M)
-ALLOWED_SECTIONS = [
-    "Parameters",
-    "Attributes",
-    "Methods",
-    "Returns",
-    "Yields",
-    "Other Parameters",
-    "Raises",
-    "Warns",
-    "See Also",
-    "Notes",
-    "References",
-    "Examples",
-]
+ALLOWED_SECTIONS = list(NumpyDocString.sections.keys())
 ERROR_MSGS = {
     "GL01": "Docstring text (summary) should start in the line immediately "
     "after the opening quotes (not in the same line, or leaving a "
