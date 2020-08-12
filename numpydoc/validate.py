@@ -126,12 +126,12 @@ class Docstring:
     def __init__(self, name):
         self.name = name
         obj = self._load_obj(name)
-        self.obj = obj
-        self.code_obj = inspect.unwrap(obj)
-        self.raw_doc = obj.__doc__ or ""
-        self.clean_doc = pydoc.getdoc(obj)
-#        self.doc = NumpyDocString(self.clean_doc)
         self.doc = get_doc_object(obj)
+        self.obj = self.doc._obj
+        self.code_obj = inspect.unwrap(self.obj)
+        self.raw_doc = self.obj.__doc__ or ""
+        self.clean_doc = pydoc.getdoc(self.obj)
+#        self.doc = NumpyDocString(self.clean_doc)
 
     @staticmethod
     def _load_obj(name):
