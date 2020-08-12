@@ -409,6 +409,7 @@ class SphinxObjDoc(SphinxDocString, ObjDoc):
         ObjDoc.__init__(self, obj, doc=doc, config=config)
 
 
+# TODO: refactor to use docscrape.get_doc_object
 def get_doc_object(obj, what=None, doc=None, config={}, builder=None):
     if what is None:
         if inspect.isclass(obj):
