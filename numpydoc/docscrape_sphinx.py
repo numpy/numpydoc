@@ -10,7 +10,7 @@ from jinja2.sandbox import SandboxedEnvironment
 import sphinx
 from sphinx.jinja2glue import BuiltinTemplateLoader
 
-from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
+from .docscrape import NumpyDocString, FunctionDoc, ClassDoc, ObjDoc
 from .xref import make_xref
 
 
@@ -411,11 +411,10 @@ class SphinxClassDoc(SphinxDocString, ClassDoc):
         ClassDoc.__init__(self, obj, doc=doc, func_doc=None, config=config)
 
 
-class SphinxObjDoc(SphinxDocString):
+class SphinxObjDoc(SphinxDocString, ObjDoc):
     def __init__(self, obj, doc=None, config={}):
-        self._f = obj
         self.load_config(config)
-        SphinxDocString.__init__(self, doc, config=config)
+        ObjDoc.__init__(self, obj, doc=doc, config=config)
 
 
 def get_doc_object(obj, what=None, doc=None, config={}, builder=None):

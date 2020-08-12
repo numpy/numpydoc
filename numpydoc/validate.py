@@ -12,7 +12,7 @@ import inspect
 import pydoc
 import re
 import textwrap
-from .docscrape import NumpyDocString
+from .docscrape import get_doc_object
 
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
@@ -130,7 +130,8 @@ class Docstring:
         self.code_obj = inspect.unwrap(obj)
         self.raw_doc = obj.__doc__ or ""
         self.clean_doc = pydoc.getdoc(obj)
-        self.doc = NumpyDocString(self.clean_doc)
+#        self.doc = NumpyDocString(self.clean_doc)
+        self.doc = get_doc_object(obj)
 
     @staticmethod
     def _load_obj(name):

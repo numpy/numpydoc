@@ -581,6 +581,12 @@ class FunctionDoc(NumpyDocString):
         return out
 
 
+class ObjDoc(NumpyDocString):
+    def __init__(self, obj, doc=None, config={}):
+        self._f = obj
+        NumpyDocString.__init__(self, doc, config=config)
+
+
 class ClassDoc(NumpyDocString):
 
     extra_public_methods = ['__call__']
@@ -663,3 +669,24 @@ class ClassDoc(NumpyDocString):
         if name not in self._cls.__dict__:
             return False  # class member is inherited, we do not show it
         return True
+
+
+def get_doc_object(obj, what=None, doc=None, config={}):
+    if what is None:
+        if inspect.isclass(obj):
+            what = 'class'
+        elif inspect.ismodule(obj):
+            what = 'module'
+        elif isinstance(obj, Callable):
+            what = 'function'
+        else:
+            what = 'object'
+
+    if what == 'class':
+        return ClassDoc(obj, func_doc=FunctionDoc, doc=doc, config=config)
+    elif what in ('function', 'method'):
+        return FunctionDoc(obj, doc=doc, config=config)
+    else:
+        if doc is None:
+            doc = pydoc.getdoc(obj)
+        return ObjDoc(obj, doc, config=config)
