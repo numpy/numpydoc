@@ -411,8 +411,16 @@ class NumpyDocString(Mapping):
             else:
                 self[section] = content
 
+    @property
+    def _obj(self):
+        if hasattr(self, '_cls'):
+            return self._cls
+        elif hasattr(self, '_f'):
+            return self._f
+        return None
+
     def _error_location(self, msg, error=True):
-        if hasattr(self, '_obj') and self._obj is not None:
+        if self._obj is not None:
             # we know where the docs came from:
             try:
                 filename = inspect.getsourcefile(self._obj)

@@ -229,14 +229,6 @@ class SphinxDocString(NumpyDocString):
 
         return out
 
-    @property
-    def _obj(self):
-        if hasattr(self, '_cls'):
-            return self._cls
-        elif hasattr(self, '_f'):
-            return self._f
-        return None
-
     def _str_member_list(self, name):
         """
         Generate a member listing, autosummary:: table where possible,
