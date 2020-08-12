@@ -425,14 +425,17 @@ def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
     return errs
 
 
-def validate(func_name):
+def validate(obj_name):
     """
     Validate the docstring.
 
     Parameters
     ----------
-    func_name : function
-        Function whose docstring will be evaluated (e.g. pandas.read_csv).
+    obj_name : str
+        The name of the object whose docstring will be evaluated, e.g.
+        'pandas.read_csv'. The string must include the full, unabbreviated
+        package/module names, i.e. 'pandas.read_csv', not 'pd.read_csv' or
+        'read_csv'.
 
     Returns
     -------
