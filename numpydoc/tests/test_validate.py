@@ -1312,12 +1312,12 @@ class TestValidator:
             assert msg in " ".join(err[1] for err in result["errors"])
 
 
-class TestDocstringClass:
+class TestValidatorClass:
     @pytest.mark.parametrize("invalid_name", ["unknown_mod", "unknown_mod.MyClass"])
     def test_raises_for_invalid_module_name(self, invalid_name):
         msg = 'No module can be imported from "{}"'.format(invalid_name)
         with pytest.raises(ImportError, match=msg):
-            numpydoc.validate.Docstring(invalid_name)
+            numpydoc.validate.Validator._load_obj(invalid_name)
 
     @pytest.mark.parametrize(
         "invalid_name", ["datetime.BadClassName", "datetime.bad_method_name"]
@@ -1327,4 +1327,4 @@ class TestDocstringClass:
         obj_name, invalid_attr_name = name_components[-2], name_components[-1]
         msg = "'{}' has no attribute '{}'".format(obj_name, invalid_attr_name)
         with pytest.raises(AttributeError, match=msg):
-            numpydoc.validate.Docstring(invalid_name)
+            numpydoc.validate.Validator._load_obj(invalid_name)

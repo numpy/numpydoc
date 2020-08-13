@@ -121,17 +121,18 @@ def error(code, **kwargs):
     return (code, ERROR_MSGS[code].format(**kwargs))
 
 
-class Docstring:
+class Validator:
     # TODO Can all this class be merged into NumpyDocString?
-    def __init__(self, name):
-        self.name = name
-        obj = self._load_obj(name)
-        self.doc = get_doc_object(obj)
+    def __init__(self, doc_object):
+        self.doc = doc_object
         self.obj = self.doc._obj
         self.code_obj = inspect.unwrap(self.obj)
         self.raw_doc = self.obj.__doc__ or ""
         self.clean_doc = pydoc.getdoc(self.obj)
-#        self.doc = NumpyDocString(self.clean_doc)
+
+    @property
+    def name(self):
+        return '.'.join([self.obj.__module__, self.obj.__name__])
 
     @staticmethod
     def _load_obj(name):
@@ -150,7 +151,7 @@ class Docstring:
 
         Examples
         --------
-        >>> Docstring._load_obj('datetime.datetime')
+        >>> Validator._load_obj('datetime.datetime')
         <class 'datetime.datetime'>
         """
         for maxsplit in range(0, name.count(".") + 1):
@@ -469,7 +470,8 @@ def validate(obj_name):
     they are validated, are not documented more than in the source code of this
     function.
     """
-    doc = Docstring(obj_name)
+    obj = Validator._load_obj(obj_name)
+    doc = Validator(get_doc_object(obj))
 
     errs = []
     if not doc.raw_doc:

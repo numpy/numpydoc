@@ -6,13 +6,13 @@ import argparse
 import ast
 
 from .docscrape_sphinx import get_doc_object
-from .validate import validate, Docstring
+from .validate import validate, Validator
 
 
 def render_object(import_path, config=None):
     """Test numpydoc docstring generation for a given object"""
-    # TODO: Move Docstring._load_obj to a better place than validate
-    print(get_doc_object(Docstring(import_path).obj,
+    # TODO: Move Validator._load_obj to a better place than validate
+    print(get_doc_object(Validator._load_obj(import_path),
                          config=dict(config or [])))
     return 0
 
