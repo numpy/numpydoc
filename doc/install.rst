@@ -84,6 +84,21 @@ numpydoc_xref_ignore : set
         numpydoc_xref_ignore = {'type', 'optional', 'default'}
 
     The default is an empty set.
+numpydoc_xref_wrap_all : bool
+    Whether to wrap unrecognized terms in ``param_type`` in the default
+    ``:obj:`` role. The default is ``True``.
+    An unrecognized term is one that:
+      1. Is in neither ``numpydoc_xref_aliases`` nor ``numpydoc_xref_ignore``.
+      2. Is not already wrapped in a ReST role.
+
+    This configuration parameter may be useful if you only want create
+    cross references for a small set of terms. In this case, including the
+    desired cross reference mappings in ``numpydoc_xref_aliases`` and setting
+    ``numpydoc_xref_wrap_all = False`` is more convenient than adding all of
+    the non-linked terms to the ``numpydoc_xref_ignore`` set.
+
+    If ``numpydoc_xref_param_type`` is set to ``False``, this config parameter
+    has no effect.
 numpydoc_edit_link : bool
   .. deprecated:: edit your HTML template instead
 

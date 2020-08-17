@@ -108,6 +108,11 @@ def make_xref(param_type, xref_aliases, xref_ignore, wrap_unknown=True):
         to fully qualified names that can be cross-referenced.
     xref_ignore : set
         Words not to cross-reference.
+    wrap_unknown : bool, default=True
+        Toggle whether to wrap unrecognized terms in the default :obj: role,
+        default is `True`. Unrecognized terms include those that are in
+        neither `xref_aliases` nor `xref_ignore` and are not already wrapped
+        in an rST role.
 
     Returns
     -------
