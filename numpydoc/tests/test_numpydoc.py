@@ -15,6 +15,7 @@ class MockConfig():
     numpydoc_xref_aliases = {}
     numpydoc_xref_aliases_complete = deepcopy(DEFAULT_LINKS)
     numpydoc_xref_ignore = set()
+    numpydoc_xref_wrap_all = True
     templates_path = []
     numpydoc_edit_link = False
     numpydoc_citation_re = '[a-z0-9_.-]+'

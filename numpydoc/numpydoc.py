@@ -155,6 +155,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
            'xref_param_type': app.config.numpydoc_xref_param_type,
            'xref_aliases': app.config.numpydoc_xref_aliases_complete,
            'xref_ignore': app.config.numpydoc_xref_ignore,
+           'xref_wrap_all': app.config.numpydoc_xref_wrap_all,
            }
 
     cfg.update(options or {})
@@ -254,6 +255,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_xref_param_type', False, True)
     app.add_config_value('numpydoc_xref_aliases', dict(), True)
     app.add_config_value('numpydoc_xref_ignore', set(), True)
+    app.add_config_value('numpydoc_xref_wrap_all', True, True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
