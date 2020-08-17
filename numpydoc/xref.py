@@ -94,7 +94,7 @@ DEFAULT_LINKS = {
 }
 
 
-def make_xref(param_type, xref_aliases, xref_ignore):
+def make_xref(param_type, xref_aliases, xref_ignore, wrap_unknown=True):
     """Parse and apply appropriate sphinx role(s) to `param_type`.
 
     The :obj: role is the default.
@@ -124,8 +124,9 @@ def make_xref(param_type, xref_aliases, xref_ignore):
     if QUALIFIED_NAME_RE.match(link) and link not in xref_ignore:
         if link != title:
             return ':obj:`%s <%s>`' % (title, link)
-        else:
+        if wrap_unknown:
             return ':obj:`%s`' % link
+        return link
 
     def _split_and_apply_re(s, pattern):
         """
@@ -142,7 +143,8 @@ def make_xref(param_type, xref_aliases, xref_ignore):
                     results.append(tok)
                 else:
                     res = make_xref(
-                        tok, xref_aliases, xref_ignore)
+                        tok, xref_aliases, xref_ignore, wrap_unknown
+                    )
                     # Opening brackets immediately after a role is
                     # bad markup. Detect that and add backslash.
                     # :role:`type`( to :role:`type`\(
