@@ -470,8 +470,10 @@ def validate(obj_name):
     they are validated, are not documented more than in the source code of this
     function.
     """
-    obj = Validator._load_obj(obj_name)
-    doc = Validator(get_doc_object(obj))
+    if isinstance(obj_name, str):
+        doc = Validator(get_doc_object(Validator._load_obj(obj_name)))
+    else:
+        doc = Validator(obj_name)
 
     errs = []
     if not doc.raw_doc:

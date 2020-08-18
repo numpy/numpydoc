@@ -34,6 +34,7 @@ if sphinx.__version__ < '1.6.5':
     raise RuntimeError("Sphinx 1.6.5 or newer is required")
 
 from .docscrape_sphinx import get_doc_object
+from .validate import validate
 from .xref import DEFAULT_LINKS
 from . import __version__
 
@@ -173,6 +174,13 @@ def mangle_docstrings(app, what, name, obj, options, lines):
             logger.error('[numpydoc] While processing docstring for %r', name)
             raise
 
+        # TODO: validation only applies to non-module docstrings?
+        if app.config.numpydoc_validate:
+            errors = validate(doc)["errors"]
+            for err in errors:
+                logger.warn(err)
+
+
     if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
             obj.__name__):
         if hasattr(obj, '__module__'):
@@ -254,6 +262,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_xref_param_type', False, True)
     app.add_config_value('numpydoc_xref_aliases', dict(), True)
     app.add_config_value('numpydoc_xref_ignore', set(), True)
+    app.add_config_value('numpydoc_validate', False, True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
