@@ -468,7 +468,7 @@ def validate(obj_name):
     they are validated, are not documented more than in the source code of this
     function.
     """
-    doc = Docstring(func_name)
+    doc = Docstring(obj_name)
 
     errs = []
     if not doc.raw_doc:
