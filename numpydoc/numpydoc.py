@@ -178,7 +178,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
         if app.config.numpydoc_validate:
             errors = validate(doc)["errors"]
             for err in errors:
-                logger.warn(err)
+                logger.warning(err)
 
 
     if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
