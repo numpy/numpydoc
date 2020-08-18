@@ -88,8 +88,9 @@ numpydoc_xref_wrap_all : bool
     Whether to wrap unrecognized terms in ``param_type`` in the default
     ``:obj:`` role. The default is ``True``.
     An unrecognized term is one that:
-      1. Is in neither ``numpydoc_xref_aliases`` nor ``numpydoc_xref_ignore``.
-      2. Is not already wrapped in a ReST role.
+
+    1. Is in neither ``numpydoc_xref_aliases`` nor ``numpydoc_xref_ignore``.
+    2. Is not already wrapped in a ReST role.
 
     This configuration parameter may be useful if you only want create
     cross references for a small set of terms. In this case, including the
