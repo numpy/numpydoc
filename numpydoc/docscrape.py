@@ -431,28 +431,22 @@ class NumpyDocString(Mapping):
         return [name, len(name)*symbol]
 
     def _str_indent(self, doc, indent=4):
-        out = []
-        for line in doc:
-            out += [' '*indent + line]
-        return out
+        return [' '*indent + line for line in doc]
 
     def _str_signature(self):
         if self['Signature']:
             return [self['Signature'].replace('*', r'\*')] + ['']
-        else:
-            return ['']
+        return ['']
 
     def _str_summary(self):
         if self['Summary']:
             return self['Summary'] + ['']
-        else:
-            return []
+        return []
 
     def _str_extended_summary(self):
         if self['Extended Summary']:
             return self['Extended Summary'] + ['']
-        else:
-            return []
+        return []
 
     def _str_param_list(self, name):
         out = []
@@ -525,8 +519,7 @@ class NumpyDocString(Mapping):
             out += ['   :%s: %s' % (section, ', '.join(references))]
         if output_index:
             return out
-        else:
-            return ''
+        return ''
 
     def __str__(self, func_role=''):
         out = []
