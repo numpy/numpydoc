@@ -539,14 +539,6 @@ class NumpyDocString(Mapping):
         return '\n'.join(out)
 
 
-def indent(str, indent=4):
-    indent_str = ' '*indent
-    if str is None:
-        return indent_str
-    lines = str.split('\n')
-    return '\n'.join(indent_str + l for l in lines)
-
-
 def dedent_lines(lines):
     """Deindent a list of lines maximally"""
     return textwrap.dedent("\n".join(lines)).split("\n")
