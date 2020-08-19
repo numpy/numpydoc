@@ -544,10 +544,6 @@ def dedent_lines(lines):
     return textwrap.dedent("\n".join(lines)).split("\n")
 
 
-def header(text, style='-'):
-    return text + '\n' + style*len(text) + '\n'
-
-
 class FunctionDoc(NumpyDocString):
     def __init__(self, func, role='func', doc=None, config={}):
         self._f = func
