@@ -30,7 +30,6 @@ class SphinxDocString(NumpyDocString):
         self.xref_param_type = config.get('xref_param_type', False)
         self.xref_aliases = config.get('xref_aliases', dict())
         self.xref_ignore = config.get('xref_ignore', set())
-        self.xref_wrap_all = config.get('xref_wrap_all', True)
         self.template = config.get('template', None)
         if self.template is None:
             template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
@@ -78,8 +77,7 @@ class SphinxDocString(NumpyDocString):
                     param_type = make_xref(
                         param_type,
                         self.xref_aliases,
-                        self.xref_ignore,
-                        self.xref_wrap_all
+                        self.xref_ignore
                     )
                 if param.name:
                     out += self._str_indent([named_fmt % (param.name.strip(),
@@ -220,8 +218,7 @@ class SphinxDocString(NumpyDocString):
                         param_type = make_xref(
                             param_type,
                             self.xref_aliases,
-                            self.xref_ignore,
-                            self.xref_wrap_all
+                            self.xref_ignore
                         )
                     parts.append(param_type)
                 out += self._str_indent([' : '.join(parts)])

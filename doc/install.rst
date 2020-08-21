@@ -76,30 +76,26 @@ numpydoc_xref_aliases : dict
 
   This option depends on the ``numpydoc_xref_param_type`` option
   being ``True``.
-numpydoc_xref_ignore : set
-    Words not to cross-reference. Most likely, these are common words
+numpydoc_xref_ignore : set or ``"all"``
+    How to handle terms not in ``numpydoc_xref_aliases`` when
+    ``numpydoc_xref_aliases=True``. The value can either be a ``set`` 
+    containing terms to ignore, or ``"all"``. In the former case, the set
+    contains words not to cross-reference. Most likely, these are common words
     used in parameter type descriptions that may be confused for
     classes of the same name. For example::
 
         numpydoc_xref_ignore = {'type', 'optional', 'default'}
 
     The default is an empty set.
-numpydoc_xref_wrap_all : bool
-    Whether to wrap unrecognized terms in ``param_type`` in the default
-    ``:obj:`` role. The default is ``True``.
-    An unrecognized term is one that:
 
-    1. Is in neither ``numpydoc_xref_aliases`` nor ``numpydoc_xref_ignore``.
-    2. Is not already wrapped in a ReST role.
-
+    If the ``numpydoc_xref_ignore="all"``, then all unrecognized terms are
+    ignored, i.e. terms not in ``numpydoc_xref_aliases`` are *not* wrapped in
+    ``:obj:`` roles.
     This configuration parameter may be useful if you only want create
-    cross references for a small set of terms. In this case, including the
+    cross references for a small number of terms. In this case, including the
     desired cross reference mappings in ``numpydoc_xref_aliases`` and setting
-    ``numpydoc_xref_wrap_all = False`` is more convenient than adding all of
-    the non-linked terms to the ``numpydoc_xref_ignore`` set.
-
-    If ``numpydoc_xref_param_type`` is set to ``False``, this config parameter
-    has no effect.
+    ``numpydoc_xref_ignore="all"`` is more convenient than explicitly listing
+    terms to ignore in a set.
 numpydoc_edit_link : bool
   .. deprecated:: edit your HTML template instead
 

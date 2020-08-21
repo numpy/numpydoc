@@ -94,7 +94,7 @@ DEFAULT_LINKS = {
 }
 
 
-def make_xref(param_type, xref_aliases, xref_ignore, wrap_unknown=True):
+def make_xref(param_type, xref_aliases, xref_ignore):
     """Parse and apply appropriate sphinx role(s) to `param_type`.
 
     The :obj: role is the default.
@@ -106,13 +106,11 @@ def make_xref(param_type, xref_aliases, xref_ignore, wrap_unknown=True):
     xref_aliases : dict
         Mapping used to resolve common abbreviations and aliases
         to fully qualified names that can be cross-referenced.
-    xref_ignore : set
-        Words not to cross-reference.
-    wrap_unknown : bool, default=True
-        Toggle whether to wrap unrecognized terms in the default :obj: role,
-        default is `True`. Unrecognized terms include those that are in
-        neither `xref_aliases` nor `xref_ignore` and are not already wrapped
-        in an rST role.
+    xref_ignore : set or "all"
+        A set containing words not to cross-reference. Instead of a set, the
+        string 'all' can be given to ignore all unrecognized terms. 
+        Unrecognized terms include those that are not in `xref_aliases` and
+        are not already wrapped in a reST role.
 
     Returns
     -------
@@ -120,13 +118,24 @@ def make_xref(param_type, xref_aliases, xref_ignore, wrap_unknown=True):
         Text with fully-qualified names and terms that may be wrapped in a
         ``:obj:`` role.
     """
+    ignore_set = xref_ignore
+    wrap_unknown = True
+    if isinstance(xref_ignore, str):
+        if xref_ignore.lower() == "all":
+            wrap_unknown = False
+            ignore_set = set()
+        else:
+            raise TypeError(
+                "xref_ignore must be a set or 'all', got {}".format(xref_ignore)
+            )
+
     if param_type in xref_aliases:
         link, title = xref_aliases[param_type], param_type
         param_type = link
     else:
         link = title = param_type
 
-    if QUALIFIED_NAME_RE.match(link) and link not in xref_ignore:
+    if QUALIFIED_NAME_RE.match(link) and link not in ignore_set:
         if link != title:
             return ':obj:`%s <%s>`' % (title, link)
         if wrap_unknown:
@@ -147,9 +156,7 @@ def make_xref(param_type, xref_aliases, xref_ignore, wrap_unknown=True):
                 if pattern.match(tok):
                     results.append(tok)
                 else:
-                    res = make_xref(
-                        tok, xref_aliases, xref_ignore, wrap_unknown
-                    )
+                    res = make_xref(tok, xref_aliases, xref_ignore)
                     # Opening brackets immediately after a role is
                     # bad markup. Detect that and add backslash.
                     # :role:`type`( to :role:`type`\(

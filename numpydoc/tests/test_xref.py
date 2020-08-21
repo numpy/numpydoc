@@ -212,4 +212,8 @@ def test_make_xref(param_type, expected_result):
     [tuple(s.split('\n')) for s in data_ignore_obj.strip().split('\n\n')]
 )
 def test_make_xref_ignore_unknown(param_type, expected_result):
-    assert make_xref(param_type, xref_aliases, xref_ignore, wrap_unknown=False) == expected_result
+    assert make_xref(param_type, xref_aliases, xref_ignore="all") == expected_result
+
+def test_xref_ignore_is_all():
+    with pytest.raises(TypeError, match="must be a set or 'all'"):
+        make_xref("array_like", xref_aliases, xref_ignore="foo")
