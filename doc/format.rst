@@ -166,7 +166,7 @@ The sections of a function's docstring are:
      x : type
          Description of parameter `x`.
      y
-         Description of parameter `y` (with type not specified)
+         Description of parameter `y` (with type not specified).
 
    Enclose variables in single backticks.  The colon must be preceded
    by a space, or omitted if the type is absent.
@@ -303,7 +303,7 @@ The sections of a function's docstring are:
 
       See Also
       --------
-      average : Weighted average
+      average : Weighted average.
 
     When referring to functions in the same sub-module, no prefix is
     needed, and the tree is searched upwards for a match.
@@ -314,7 +314,7 @@ The sections of a function's docstring are:
 
     ::
 
-      fft.fft2 : 2-D fast discrete Fourier transform
+      fft.fft2 : 2-D fast discrete Fourier transform.
 
     When referring to an entirely different module::
 
@@ -426,7 +426,7 @@ The sections of a function's docstring are:
       >>> np.add(1, 2)
       3
 
-      Comment explaining the second example
+      Comment explaining the second example.
 
       >>> np.add([1, 2], [3, 4])
       array([4, 6])
@@ -512,9 +512,9 @@ simply listed by name::
   real
   imag
   x : float
-      The X coordinate
+      The X coordinate.
   y : float
-      The Y coordinate
+      The Y coordinate.
 
 In general, it is not necessary to list class methods.  Those that are
 not part of the public API have names that start with an underscore.

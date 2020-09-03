@@ -71,9 +71,9 @@ def foo(var1, var2, *args, long_var_name='hi', **kwargs):
     Other Parameters
     ----------------
     only_seldom_used_keywords : type
-        Explanation
+        Explanation.
     common_parameters_listed_above : type
-        Explanation
+        Explanation.
 
     Raises
     ------
