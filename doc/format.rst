@@ -329,6 +329,16 @@ The sections of a function's docstring are:
       func_b, func_c_, func_d
       func_e
 
+    If the combination of the function name and the description creates
+    a line that is too long, the entry may be written as two lines, with
+    the function name and colon on the first line, and the description
+    on the next line, indented four spaces::
+
+      See Also
+      --------
+      package.module.submodule.func_a :
+          A somewhat long description of the function.
+
 13. **Notes**
 
     An optional section that provides additional information about the
