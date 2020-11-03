@@ -31,9 +31,8 @@ class MockApp():
     builder = MockBuilder()
     translator = None
 
-
-app = MockApp()
-app.builder.app = app
+    def __init__(self):
+        self.builder.app = self
 
 
 def test_mangle_docstrings():
