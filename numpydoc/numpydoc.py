@@ -176,9 +176,14 @@ def mangle_docstrings(app, what, name, obj, options, lines):
 
         # TODO: validation only applies to non-module docstrings?
         if app.config.numpydoc_validate:
+            # TODO: Currently, all validation checks are run and only those
+            # selected via config are reported. It would be more efficient to
+            # only run the selected checks.
             errors = validate(doc)["errors"]
             for err in errors:
-                logger.warning(err)
+                # err[0] = error code
+                if err[0] in app.config.numpydoc_validation_checks:
+                    logger.warning(err)
 
 
     if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
@@ -263,6 +268,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_xref_aliases', dict(), True)
     app.add_config_value('numpydoc_xref_ignore', set(), True)
     app.add_config_value('numpydoc_validate', False, True)
+    app.add_config_value('numpydoc_validation_checks', set(), True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
