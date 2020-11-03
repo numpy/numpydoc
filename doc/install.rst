@@ -96,6 +96,9 @@ numpydoc_xref_ignore : set or ``"all"``
   desired cross reference mappings in ``numpydoc_xref_aliases`` and setting
   ``numpydoc_xref_ignore="all"`` is more convenient than explicitly listing
   terms to ignore in a set.
+numpydoc_validate : bool
+    Whether or not to run docstring validation during the sphinx-build process.
+    Default is ``False``.
 numpydoc_edit_link : bool
   .. deprecated:: 0.7.0
 
