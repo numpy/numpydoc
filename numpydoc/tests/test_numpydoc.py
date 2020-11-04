@@ -1,8 +1,11 @@
 # -*- encoding:utf-8 -*-
+import pytest
+from io import StringIO
 from copy import deepcopy
 from numpydoc.numpydoc import mangle_docstrings, _clean_text_signature
 from numpydoc.xref import DEFAULT_LINKS
 from sphinx.ext.autodoc import ALL
+from sphinx.util import logging
 
 
 class MockConfig():
@@ -33,6 +36,10 @@ class MockApp():
 
     def __init__(self):
         self.builder.app = self
+        # Attrs required for logging
+        self.verbosity = 2
+        self._warncount = 0
+        self.warningiserror = False
 
 
 def test_mangle_docstrings():
@@ -90,6 +97,58 @@ def test_clean_text_signature():
             == 'func(foo="$self")')
     assert _clean_text_signature('func(self, other)') == 'func(self, other)'
     assert _clean_text_signature('func($self, *args)') == 'func(*args)'
+
+
+@pytest.fixture
+def f():
+    def _function_without_seealso_and_examples():
+        """
+        A function whose docstring has no examples or see also section.
+
+        Expect SA01 and EX01 errors if validation enabled.
+        """
+        pass
+    return _function_without_seealso_and_examples
+
+
+@pytest.mark.parametrize(
+    (
+        'numpydoc_validate',
+        'numpydoc_validation_checks',
+        'expected_warn',
+        'non_warnings',
+    ),
+    (
+        # Validation configured off - expect no warnings
+        (False, set(['SA01', 'EX01']), [], []),
+        # Validation on with expected warnings
+        (True, set(['SA01', 'EX01']), ('SA01', 'EX01'), []),
+        # Validation on with only one activated check
+        (True, set(['SA01']), ('SA01',), ('EX01',)),
+    ),
+)
+def test_mangle_docstring_validation_warnings(
+    f,
+    numpydoc_validate,
+    numpydoc_validation_checks,
+    expected_warn,
+    non_warnings,
+):
+    app = MockApp()
+    # Set up config for test
+    app.config.numpydoc_validate = numpydoc_validate
+    app.config.numpydoc_validation_checks = numpydoc_validation_checks
+    # Set up logging
+    status, warning = StringIO(), StringIO()
+    logging.setup(app, status, warning)
+    # Run mangle docstrings with the above configuration
+    mangle_docstrings(app, 'function', 'f', f, None, f.__doc__.split('\n'))
+    # Assert that all (and only) expected warnings are logged
+    warnings = warning.getvalue()
+    for w in expected_warn:
+        assert w in warnings
+    for w in non_warnings:
+        assert w not in warnings
 
 
 if __name__ == "__main__":
