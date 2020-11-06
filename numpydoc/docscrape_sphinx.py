@@ -93,12 +93,7 @@ class SphinxDocString(NumpyDocString):
         return out
 
     def _escape_args_and_kwargs(self, name):
-        if name[:2] == '**':
-            return r'\*\*' + name[2:]
-        elif name[:1] == '*':
-            return r'\*' + name[1:]
-        else:
-            return name
+        return name.replace('*', '\*')
 
     def _process_param(self, param, desc, fake_autosummary):
         """Determine how to display a parameter
@@ -398,6 +393,16 @@ class SphinxDocString(NumpyDocString):
         ns = dict((k, '\n'.join(v)) for k, v in ns.items())
 
         rendered = self.template.render(**ns)
+
+        # Modify the markups for parameters (`x` to *x*)
+        for param_section in ['Parameters', 'Other Parameters', 'Attributes']:
+            for param in self[param_section]:
+                rendered = re.sub(
+                    r'([^`:])`' + self._escape_args_and_kwargs(param.name) + r'`',
+                    r'\1*' + param.name + r'*',
+                    rendered,
+                )
+
         return '\n'.join(self._str_indent(rendered.split('\n'), indent))
 
 
