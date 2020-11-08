@@ -30,6 +30,7 @@ class SphinxDocString(NumpyDocString):
         self.xref_param_type = config.get('xref_param_type', False)
         self.xref_aliases = config.get('xref_aliases', dict())
         self.xref_ignore = config.get('xref_ignore', set())
+        self.role_param = config.get('role_param', None)
         self.template = config.get('template', None)
         if self.template is None:
             template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
@@ -394,14 +395,18 @@ class SphinxDocString(NumpyDocString):
 
         rendered = self.template.render(**ns)
 
-        # Modify the markups for parameters (`x` to *x*)
-        for param_section in ['Parameters', 'Other Parameters', 'Attributes']:
-            for param in self[param_section]:
-                rendered = re.sub(
-                    r'([^`:])`' + self._escape_args_and_kwargs(param.name) + r'`',
-                    r'\1*' + param.name + r'*',
-                    rendered,
-                )
+        # Add roles for parameters
+        if self.role_param is not None:
+            param_sections = ['Parameters', 'Other Parameters'] + (
+                    ['Attributes'] if self.attributes_as_param_list else [])
+
+            for param_section in param_sections:
+                for param in self[param_section]:
+                    rendered = re.sub(
+                        r'([^`:])`' + self._escape_args_and_kwargs(param.name) + r'`',
+                        r'\1' + self.role_param + r'`' + param.name + r'`',
+                        rendered,
+                    )
 
         return '\n'.join(self._str_indent(rendered.split('\n'), indent))
 
