@@ -294,7 +294,7 @@ class NumpyDocString(Mapping):
             """Match ':role:`name`' or 'name'."""
             m = self._func_rgx.match(text)
             if not m:
-                raise ParseError("%s is not a item name" % text)
+                self._error_location(f"Error parsing See Also entry {line!r}")
             role = m.group('role')
             name = m.group('name') if role else m.group('name2')
             return name, role, m.end()
@@ -329,7 +329,7 @@ class NumpyDocString(Mapping):
                 rest = list(filter(None, [description]))
                 items.append((funcs, rest))
             else:
-                raise ParseError("%s is not a item name" % line)
+                self._error_location(f"Error parsing See Also entry {line!r}")
         return items
 
     def _parse_index(self, section, content):
