@@ -295,7 +295,8 @@ Notes
 -----
 That should break...
 """
-    assert_raises(ValueError, NumpyDocString, doc_text)
+    with pytest.raises(ValueError, match="The section Notes appears twice"):
+        NumpyDocString(doc_text)
 
     # if we have a numpydoc object, we know where the error came from
     class Dummy:
@@ -332,19 +333,11 @@ That should break...
         Second note.
         """
 
-    try:
+    with pytest.raises(ValueError, match="Dummy class"):
         SphinxClassDoc(Dummy)
-    except ValueError as e:
-        # python 3 version or python 2 version
-        assert ("test_section_twice.<locals>.Dummy" in str(e)
-                or 'test_docscrape.Dummy' in str(e))
 
-    try:
+    with pytest.raises(ValueError, match="dummy_func"):
         SphinxFunctionDoc(dummy_func)
-    except ValueError as e:
-        # python 3 version or python 2 version
-        assert ("test_section_twice.<locals>.dummy_func" in str(e)
-                or 'function dummy_func' in str(e))
 
 
 def test_notes(doc):
@@ -842,12 +835,8 @@ def test_see_also_parse_error():
     --------
     :func:`~foo`
     """)
-    with assert_raises(ParseError) as err:
+    with pytest.raises(ValueError, match="See Also entry ':func:`~foo`'"):
         NumpyDocString(text)
-
-    s1 = str(r":func:`~foo` is not a item name in '\n    z(x,theta)\n\n    See Also\n    --------\n    :func:`~foo`\n    '")
-    s2 = str(err.value)
-    assert s1 == s2
 
 
 def test_see_also_print():
@@ -901,19 +890,16 @@ This should be ignored and warned about
         """
         pass
 
-    with warnings.catch_warnings(record=True) as w:
-        warnings.filterwarnings('always', '', UserWarning)
+    with pytest.warns(UserWarning, match="Unknown section Mope") as record:
         NumpyDocString(doc_text)
-        assert len(w) == 1
-        assert "Unknown section Mope" == str(w[0].message)
+    assert len(record) == 1
 
-    with warnings.catch_warnings(record=True) as w:
-        warnings.filterwarnings('always', '', UserWarning)
+    # SphinxClassDoc has _obj.__name__ == "BadSection". Test that this is
+    # included in the message
+    msg_match = "Unknown section Nope in the docstring of BadSection"
+    with pytest.warns(UserWarning, match=msg_match) as record:
         SphinxClassDoc(BadSection)
-        assert len(w) == 1
-        assert('test_docscrape.test_unknown_section.<locals>.BadSection'
-               in str(w[0].message)
-               or 'test_docscrape.BadSection' in str(w[0].message))
+    assert len(record) == 1
 
 
 doc7 = NumpyDocString("""

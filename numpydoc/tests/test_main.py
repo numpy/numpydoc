@@ -87,7 +87,7 @@ def test_render_object_returns_correct_exit_status():
         'numpydoc.tests.test_main._capture_stdout')
     assert exit_status == 0
 
-    with pytest.raises(numpydoc.docscrape.ParseError):
+    with pytest.raises(ValueError):
         numpydoc.__main__.render_object(
             'numpydoc.tests.test_main._invalid_docstring')
 
