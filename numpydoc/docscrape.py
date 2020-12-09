@@ -418,8 +418,8 @@ class NumpyDocString(Mapping):
                 filename = inspect.getsourcefile(self._obj)
             except TypeError:
                 filename = None
-            msg = msg + (" in the docstring of %s in %s."
-                         % (self._obj, filename))
+            msg += f" in the docstring of {self._obj.__name__}"
+            msg += f" in {filename}." if filename else ""
         if error:
             raise ValueError(msg)
         else:
