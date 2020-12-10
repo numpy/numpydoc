@@ -45,3 +45,14 @@ jobs:
         echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
         python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
         echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
+
+    - name: Setup for doc build
+      run: |
+        # Get scipy-sphinx-theme
+        git submodule update --init
+        sudo apt install texlive texlive-latex-extra latexmk dvipng
+
+    - name: Build documentation
+      run: |
+        make -C doc html SPHINXOPTS="-nWT"
+        make -C doc latexpdf SPHINXOPTS="-nWT"
