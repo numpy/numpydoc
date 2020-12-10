@@ -13,6 +13,7 @@ jobs:
       matrix:
         os: [Ubuntu]
         python-version: [3.6, 3.7, 3.8, 3.9]
+        sphinx-version: ["sphinx==1.6.5", "sphinx==2.1", "sphinx>3.0"]
     steps:
     - uses: actions/checkout@v2
     
@@ -30,6 +31,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip wheel setuptools
         python -m pip install -r test_requirements.txt -r doc/requirements.txt
+        python -m pip install ${{ matrix.sphinx-version }}
         python -m pip install .
         pip list
 
