@@ -4,3 +4,5 @@ source = numpydoc
 include = */numpydoc/*
 omit =
     */setup.py
+    numpydoc/tests/*
+    numpydoc/templates/*
