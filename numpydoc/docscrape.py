@@ -412,7 +412,7 @@ class NumpyDocString(Mapping):
                 self[section] = content
 
     def _error_location(self, msg, error=True):
-        if hasattr(self, '_obj'):
+        if hasattr(self, '_obj') and self._obj is not None:
             # we know where the docs came from:
             try:
                 filename = inspect.getsourcefile(self._obj)
