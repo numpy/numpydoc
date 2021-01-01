@@ -197,7 +197,7 @@ The sections of a function's docstring are:
      Description of parameter `x` (the default is -1, which implies summation
      over all axes).
 
-   or as part of the type::
+   or as part of the type, instead of "optional"::
 
      copy : bool, default True
      dtype : data-type, default: int
