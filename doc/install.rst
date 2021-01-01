@@ -76,14 +76,26 @@ numpydoc_xref_aliases : dict
 
   This option depends on the ``numpydoc_xref_param_type`` option
   being ``True``.
-numpydoc_xref_ignore : set
-    Words not to cross-reference. Most likely, these are common words
+numpydoc_xref_ignore : set or ``"all"``
+    How to handle terms not in ``numpydoc_xref_aliases`` when
+    ``numpydoc_xref_aliases=True``. The value can either be a ``set`` 
+    containing terms to ignore, or ``"all"``. In the former case, the set
+    contains words not to cross-reference. Most likely, these are common words
     used in parameter type descriptions that may be confused for
     classes of the same name. For example::
 
         numpydoc_xref_ignore = {'type', 'optional', 'default'}
 
     The default is an empty set.
+
+    If the ``numpydoc_xref_ignore="all"``, then all unrecognized terms are
+    ignored, i.e. terms not in ``numpydoc_xref_aliases`` are *not* wrapped in
+    ``:obj:`` roles.
+    This configuration parameter may be useful if you only want create
+    cross references for a small number of terms. In this case, including the
+    desired cross reference mappings in ``numpydoc_xref_aliases`` and setting
+    ``numpydoc_xref_ignore="all"`` is more convenient than explicitly listing
+    terms to ignore in a set.
 numpydoc_edit_link : bool
   .. deprecated:: edit your HTML template instead
 

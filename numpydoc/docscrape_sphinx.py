@@ -73,7 +73,8 @@ class SphinxDocString(NumpyDocString):
                     param_type = make_xref(
                         param_type,
                         self.xref_aliases,
-                        self.xref_ignore)
+                        self.xref_ignore
+                    )
                 if param.name:
                     out += self._str_indent([named_fmt % (param.name.strip(),
                                                           param_type)])
@@ -213,7 +214,8 @@ class SphinxDocString(NumpyDocString):
                         param_type = make_xref(
                             param_type,
                             self.xref_aliases,
-                            self.xref_ignore)
+                            self.xref_ignore
+                        )
                     parts.append(param_type)
                 out += self._str_indent([' : '.join(parts)])
 
