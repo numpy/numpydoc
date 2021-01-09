@@ -197,6 +197,13 @@ The sections of a function's docstring are:
      Description of parameter `x` (the default is -1, which implies summation
      over all axes).
 
+   or as part of the type, instead of ``optional``. If the default value would not be
+   used as a value, ``optional`` is preferred. These are all equivalent::
+
+     copy : bool, default True
+     copy : bool, default=True
+     copy : bool, default: True
+
    When a parameter can only assume one of a fixed set of values,
    those values can be listed in braces, with the default appearing first::
 
