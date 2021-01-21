@@ -98,6 +98,7 @@ numpydoc_xref_ignore : set or ``"all"``
   terms to ignore in a set.
 numpydoc_edit_link : bool
   .. deprecated:: 0.7.0
+
   edit your HTML template instead
 
   Whether to insert an edit link after docstrings.
