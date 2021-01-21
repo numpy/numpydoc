@@ -78,7 +78,7 @@ numpydoc_xref_aliases : dict
   being ``True``.
 numpydoc_xref_ignore : set or ``"all"``
     How to handle terms not in ``numpydoc_xref_aliases`` when
-    ``numpydoc_xref_aliases=True``. The value can either be a ``set`` 
+    ``numpydoc_xref_aliases=True``. The value can either be a ``set``
     containing terms to ignore, or ``"all"``. In the former case, the set
     contains words not to cross-reference. Most likely, these are common words
     used in parameter type descriptions that may be confused for
@@ -97,6 +97,7 @@ numpydoc_xref_ignore : set or ``"all"``
     ``numpydoc_xref_ignore="all"`` is more convenient than explicitly listing
     terms to ignore in a set.
 numpydoc_edit_link : bool
-  .. deprecated:: edit your HTML template instead
+  .. deprecated::
+  edit your HTML template instead
 
   Whether to insert an edit link after docstrings.
