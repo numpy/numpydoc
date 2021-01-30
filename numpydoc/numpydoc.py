@@ -180,10 +180,15 @@ def mangle_docstrings(app, what, name, obj, options, lines):
             # selected via config are reported. It would be more efficient to
             # only run the selected checks.
             errors = validate(doc)["errors"]
-            for err in errors:
-                # err[0] = error code
-                if err[0] in app.config.numpydoc_validation_checks:
-                    logger.warning(err)
+            if {err[0] for err in errors} & app.config.numpydoc_validation_checks:
+                msg = (
+                    f"[numpydoc] Validation warnings while processing "
+                    f"docstring for {name!r}:\n"
+                )
+                for err in errors:
+                    if err[0] in app.config.numpydoc_validation_checks:
+                        msg += f"  {err[0]}: {err[1]}\n"
+                logger.warning(msg)
 
 
     if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
