@@ -300,9 +300,17 @@ def update_config(app, config=None):
 
     # Processing to determine whether numpydoc_validation_checks is treated
     # as a blocklist or allowlist
+    valid_error_codes = set(ERROR_MSGS.keys())
     if "all" in config.numpydoc_validation_checks:
         block = deepcopy(config.numpydoc_validation_checks)
-        config.numpydoc_validation_checks = set(ERROR_MSGS.keys()) - block
+        config.numpydoc_validation_checks = valid_error_codes - block
+    # Ensure that the validation check set contains only valid error codes
+    invalid_error_codes = config.numpydoc_validation_checks - valid_error_codes
+    if invalid_error_codes:
+        raise ValueError(
+            f"Unrecognized validation code(s) in numpydoc_validation_checks "
+            f"config value: {invalid_error_codes}"
+        )
 
 
 # ------------------------------------------------------------------------------

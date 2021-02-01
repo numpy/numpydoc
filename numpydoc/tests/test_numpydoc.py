@@ -2,7 +2,9 @@
 import pytest
 from io import StringIO
 from copy import deepcopy
-from numpydoc.numpydoc import mangle_docstrings, _clean_text_signature
+from numpydoc.numpydoc import (
+    mangle_docstrings, _clean_text_signature, update_config
+)
 from numpydoc.xref import DEFAULT_LINKS
 from sphinx.ext.autodoc import ALL
 from sphinx.util import logging
@@ -149,6 +151,14 @@ def test_mangle_docstring_validation_warnings(
         assert w in warnings
     for w in non_warnings:
         assert w not in warnings
+
+
+def test_update_config_invalid_validation_set():
+    app = MockApp()
+    # Results in {'a', 'l'} instead of {"all"}
+    app.config.numpydoc_validation_checks = set("all")
+    with pytest.raises(ValueError, match="Unrecognized validation code"):
+        update_config(app)
 
 
 if __name__ == "__main__":
