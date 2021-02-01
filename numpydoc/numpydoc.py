@@ -34,7 +34,7 @@ if sphinx.__version__ < '1.6.5':
     raise RuntimeError("Sphinx 1.6.5 or newer is required")
 
 from .docscrape_sphinx import get_doc_object
-from .validate import validate
+from .validate import validate, ERROR_MSGS
 from .xref import DEFAULT_LINKS
 from . import __version__
 
@@ -297,6 +297,12 @@ def update_config(app, config=None):
         if key not in numpydoc_xref_aliases_complete:
             numpydoc_xref_aliases_complete[key] = value
     config.numpydoc_xref_aliases_complete = numpydoc_xref_aliases_complete
+
+    # Processing to determine whether numpydoc_validation_checks is treated
+    # as a blocklist or allowlist
+    if "all" in config.numpydoc_validation_checks:
+        block = deepcopy(config.numpydoc_validation_checks)
+        config.numpydoc_validation_checks = set(ERROR_MSGS.keys()) - block
 
 
 # ------------------------------------------------------------------------------

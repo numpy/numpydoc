@@ -16,6 +16,8 @@ For an exhaustive validation of the formatting of the docstring, use the
 incorrect capitalization, wrong order of the sections, and many other
 issues.
 
+.. _validation_checks:
+
 Built-in Validation Checks
 --------------------------
 

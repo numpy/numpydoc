@@ -102,8 +102,25 @@ numpydoc_validate : bool
 numpydoc_validation_checks : set
     The set of validation checks to report during the sphinx build process.
     Only has an effect when ``numpydoc_validate = True``.
-    By default, report warnings from all the validation checks provided by the
-    :doc:`validation` module.
+    If ``"all"`` is in the set, then the results of all of the
+    :ref:`built-in validation checks <validation_checks>` are reported.
+    If the set includes ``"all"`` and additional error codes, then all
+    validation checks *except* the listed error codes will be run.
+    If the set contains *only* individual error codes, then only those checks
+    will be run.
+    For example::
+
+        # Report warnings for all validation checks
+        numpydoc_validation_checks = {"all"}
+
+        # Report warnings for all checks *except* for GL01, GL02, and GL05
+        numpydoc_validation_checks = {"all", "GL01", "GL02", "GL05"}
+
+        # Only report warnings for the SA01 and EX01 checks
+        numpydoc_validation_checks = {"SA01", "EX01"}
+
+    The default is an empty set, thus no warnings from docstring validation
+    are reported.
 numpydoc_edit_link : bool
   .. deprecated:: 0.7.0
 
