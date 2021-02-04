@@ -174,21 +174,26 @@ def mangle_docstrings(app, what, name, obj, options, lines):
             logger.error('[numpydoc] While processing docstring for %r', name)
             raise
 
-        # TODO: validation only applies to non-module docstrings?
         if app.config.numpydoc_validate:
-            # TODO: Currently, all validation checks are run and only those
-            # selected via config are reported. It would be more efficient to
-            # only run the selected checks.
-            errors = validate(doc)["errors"]
-            if {err[0] for err in errors} & app.config.numpydoc_validation_checks:
-                msg = (
-                    f"[numpydoc] Validation warnings while processing "
-                    f"docstring for {name!r}:\n"
-                )
-                for err in errors:
-                    if err[0] in app.config.numpydoc_validation_checks:
-                        msg += f"  {err[0]}: {err[1]}\n"
-                logger.warning(msg)
+            # If the user has supplied patterns to ignore via the
+            # numpydoc_validation_exclude config option, skip validation for
+            # any objs whose name matches any of the patterns
+            excluder = app.config.numpydoc_validation_excluder
+            exclude_from_validation = excluder.search(name) if excluder else False
+            if not exclude_from_validation:
+                # TODO: Currently, all validation checks are run and only those
+                # selected via config are reported. It would be more efficient to
+                # only run the selected checks.
+                errors = validate(doc)["errors"]
+                if {err[0] for err in errors} & app.config.numpydoc_validation_checks:
+                    msg = (
+                        f"[numpydoc] Validation warnings while processing "
+                        f"docstring for {name!r}:\n"
+                    )
+                    for err in errors:
+                        if err[0] in app.config.numpydoc_validation_checks:
+                            msg += f"  {err[0]}: {err[1]}\n"
+                    logger.warning(msg)
 
 
     if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
@@ -274,6 +279,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_xref_ignore', set(), True)
     app.add_config_value('numpydoc_validate', False, True)
     app.add_config_value('numpydoc_validation_checks', set(), True)
+    app.add_config_value('numpydoc_validation_exclude', set(), False)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
@@ -311,6 +317,19 @@ def update_config(app, config=None):
             f"Unrecognized validation code(s) in numpydoc_validation_checks "
             f"config value: {invalid_error_codes}"
         )
+
+    # Generate the regexp for docstrings to ignore during validation
+    if isinstance(config.numpydoc_validation_exclude, str):
+        raise ValueError(
+            f"numpydoc_validation_exclude must be a container of strings, "
+            f"e.g. [{config.numpydoc_validation_exclude!r}]."
+        )
+    config.numpydoc_validation_excluder = None
+    if config.numpydoc_validation_exclude:
+        exclude_expr = re.compile(
+            r"|".join(exp for exp in config.numpydoc_validation_exclude)
+        )
+        config.numpydoc_validation_excluder = exclude_expr
 
 
 # ------------------------------------------------------------------------------

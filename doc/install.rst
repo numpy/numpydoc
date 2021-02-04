@@ -121,6 +121,21 @@ numpydoc_validation_checks : set
 
     The default is an empty set, thus no warnings from docstring validation
     are reported.
+numpydoc_validation_exclude : set
+    A container of strings using :py:mod:`re` syntax specifying patterns to
+    ignore for docstring validation.
+    For example, to skip docstring validation for all objects in
+    ``mypkg.mymodule``::
+
+        numpydoc_validation_exclude = {"mypkg.mymodule."}
+
+    If you wanted to also skip getter methods of ``MyClass``::
+
+        numpydoc_validation_exclude = {"mypkg.mymodule.", "MyClass.get"}
+
+    The default is an empty set meaning no objects are excluded from docstring
+    validation by default.
+    Only has an effect when ``numpydoc_validate = True``.
 numpydoc_edit_link : bool
   .. deprecated:: 0.7.0
 

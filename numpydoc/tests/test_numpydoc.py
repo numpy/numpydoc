@@ -25,6 +25,8 @@ class MockConfig():
     numpydoc_citation_re = '[a-z0-9_.-]+'
     numpydoc_attributes_as_param_list = True
     numpydoc_validate = False
+    numpydoc_validation_checks = set()
+    numpydoc_validation_exclude = set()
 
 
 class MockBuilder():
@@ -140,6 +142,8 @@ def test_mangle_docstring_validation_warnings(
     # Set up config for test
     app.config.numpydoc_validate = numpydoc_validate
     app.config.numpydoc_validation_checks = numpydoc_validation_checks
+    # Update configuration
+    update_config(app)
     # Set up logging
     status, warning = StringIO(), StringIO()
     logging.setup(app, status, warning)
@@ -153,11 +157,46 @@ def test_mangle_docstring_validation_warnings(
         assert w not in warnings
 
 
+def test_mangle_docstring_validation_exclude():
+    def function_with_bad_docstring():
+        """
+        This docstring will raise docstring validation warnings."""
+    app = MockApp()
+    app.config.numpydoc_validate = True
+    app.config.numpydoc_validation_checks = {"all"}
+    app.config.numpydoc_validation_exclude = [r"_bad_"]
+    # Call update_config to construct regexp from config value
+    update_config(app)
+    # Setup for catching warnings
+    status, warning = StringIO(), StringIO()
+    logging.setup(app, status, warning)
+    # Run mangle docstrings on function_with_bad_docstring
+    mangle_docstrings(
+        app,
+        'function',
+        function_with_bad_docstring.__name__,
+        function_with_bad_docstring,
+        None,
+        function_with_bad_docstring.__doc__.split('\n'),
+    )
+    # Validation is skipped due to exclude pattern matching fn name, therefore
+    # no warnings expected
+    assert warning.getvalue() == ""
+
+
 def test_update_config_invalid_validation_set():
     app = MockApp()
     # Results in {'a', 'l'} instead of {"all"}
     app.config.numpydoc_validation_checks = set("all")
     with pytest.raises(ValueError, match="Unrecognized validation code"):
+        update_config(app)
+
+
+def test_update_config_exclude_str():
+    app = MockApp()
+    app.config.numpydoc_validation_checks = set()
+    app.config.numpydoc_validation_exclude = "shouldnt-be-a-str"
+    with pytest.raises(ValueError, match="\['shouldnt-be-a-str'\]"):
         update_config(app)
 
 
