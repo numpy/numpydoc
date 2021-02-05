@@ -22,4 +22,3 @@ nitpicky = True
 highlight_language = 'python3'
 numpydoc_class_members_toctree = False
 numpydoc_xref_param_type = True
-numpydoc_validate = True

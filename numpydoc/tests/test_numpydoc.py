@@ -24,7 +24,6 @@ class MockConfig():
     numpydoc_edit_link = False
     numpydoc_citation_re = '[a-z0-9_.-]+'
     numpydoc_attributes_as_param_list = True
-    numpydoc_validate = False
     numpydoc_validation_checks = set()
     numpydoc_validation_exclude = set()
 
@@ -117,30 +116,27 @@ def f():
 
 @pytest.mark.parametrize(
     (
-        'numpydoc_validate',
         'numpydoc_validation_checks',
         'expected_warn',
         'non_warnings',
     ),
     (
         # Validation configured off - expect no warnings
-        (False, set(['SA01', 'EX01']), [], []),
+        (set(), [], []),
         # Validation on with expected warnings
-        (True, set(['SA01', 'EX01']), ('SA01', 'EX01'), []),
+        (set(['SA01', 'EX01']), ('SA01', 'EX01'), []),
         # Validation on with only one activated check
-        (True, set(['SA01']), ('SA01',), ('EX01',)),
+        (set(['SA01']), ('SA01',), ('EX01',)),
     ),
 )
 def test_mangle_docstring_validation_warnings(
     f,
-    numpydoc_validate,
     numpydoc_validation_checks,
     expected_warn,
     non_warnings,
 ):
     app = MockApp()
     # Set up config for test
-    app.config.numpydoc_validate = numpydoc_validate
     app.config.numpydoc_validation_checks = numpydoc_validation_checks
     # Update configuration
     update_config(app)
@@ -162,7 +158,6 @@ def test_mangle_docstring_validation_exclude():
         """
         This docstring will raise docstring validation warnings."""
     app = MockApp()
-    app.config.numpydoc_validate = True
     app.config.numpydoc_validation_checks = {"all"}
     app.config.numpydoc_validation_exclude = [r"_bad_"]
     # Call update_config to construct regexp from config value

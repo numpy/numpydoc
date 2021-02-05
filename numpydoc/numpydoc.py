@@ -174,7 +174,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
             logger.error('[numpydoc] While processing docstring for %r', name)
             raise
 
-        if app.config.numpydoc_validate:
+        if app.config.numpydoc_validation_checks:
             # If the user has supplied patterns to ignore via the
             # numpydoc_validation_exclude config option, skip validation for
             # any objs whose name matches any of the patterns
@@ -277,7 +277,6 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_xref_param_type', False, True)
     app.add_config_value('numpydoc_xref_aliases', dict(), True)
     app.add_config_value('numpydoc_xref_ignore', set(), True)
-    app.add_config_value('numpydoc_validate', False, True)
     app.add_config_value('numpydoc_validation_checks', set(), True)
     app.add_config_value('numpydoc_validation_exclude', set(), False)
 
