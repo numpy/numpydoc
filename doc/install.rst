@@ -131,7 +131,7 @@ numpydoc_validation_exclude : set
 
     If you wanted to also skip getter methods of ``MyClass``::
 
-        numpydoc_validation_exclude = {"mypkg.mymodule.", "MyClass.get"}
+        numpydoc_validation_exclude = {r"mypkg\.mymodule\.", r"MyClass\.get$"}
 
     The default is an empty set meaning no objects are excluded from docstring
     validation by default.
