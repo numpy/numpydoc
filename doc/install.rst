@@ -96,6 +96,42 @@ numpydoc_xref_ignore : set or ``"all"``
   desired cross reference mappings in ``numpydoc_xref_aliases`` and setting
   ``numpydoc_xref_ignore="all"`` is more convenient than explicitly listing
   terms to ignore in a set.
+numpydoc_validation_checks : set
+    The set of validation checks to report during the sphinx build process.
+    The default is an empty set, so docstring validation is not run by
+    default.
+    If ``"all"`` is in the set, then the results of all of the
+    :ref:`built-in validation checks <validation_checks>` are reported.
+    If the set includes ``"all"`` and additional error codes, then all
+    validation checks *except* the listed error codes will be run.
+    If the set contains *only* individual error codes, then only those checks
+    will be run.
+    For example::
+
+        # Report warnings for all validation checks
+        numpydoc_validation_checks = {"all"}
+
+        # Report warnings for all checks *except* for GL01, GL02, and GL05
+        numpydoc_validation_checks = {"all", "GL01", "GL02", "GL05"}
+
+        # Only report warnings for the SA01 and EX01 checks
+        numpydoc_validation_checks = {"SA01", "EX01"}
+numpydoc_validation_exclude : set
+    A container of strings using :py:mod:`re` syntax specifying patterns to
+    ignore for docstring validation.
+    For example, to skip docstring validation for all objects in
+    ``mypkg.mymodule``::
+
+        numpydoc_validation_exclude = {"mypkg.mymodule."}
+
+    If you wanted to also skip getter methods of ``MyClass``::
+
+        numpydoc_validation_exclude = {r"mypkg\.mymodule\.", r"MyClass\.get$"}
+
+    The default is an empty set meaning no objects are excluded from docstring
+    validation.
+    Only has an effect when docstring validation is activated, i.e.
+    ``numpydoc_validation_checks`` is not an empty set.
 numpydoc_edit_link : bool
   .. deprecated:: 0.7.0
 

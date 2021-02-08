@@ -34,6 +34,7 @@ if sphinx.__version__ < '1.6.5':
     raise RuntimeError("Sphinx 1.6.5 or newer is required")
 
 from .docscrape_sphinx import get_doc_object
+from .validate import validate, ERROR_MSGS
 from .xref import DEFAULT_LINKS
 from . import __version__
 
@@ -173,6 +174,28 @@ def mangle_docstrings(app, what, name, obj, options, lines):
             logger.error('[numpydoc] While processing docstring for %r', name)
             raise
 
+        if app.config.numpydoc_validation_checks:
+            # If the user has supplied patterns to ignore via the
+            # numpydoc_validation_exclude config option, skip validation for
+            # any objs whose name matches any of the patterns
+            excluder = app.config.numpydoc_validation_excluder
+            exclude_from_validation = excluder.search(name) if excluder else False
+            if not exclude_from_validation:
+                # TODO: Currently, all validation checks are run and only those
+                # selected via config are reported. It would be more efficient to
+                # only run the selected checks.
+                errors = validate(doc)["errors"]
+                if {err[0] for err in errors} & app.config.numpydoc_validation_checks:
+                    msg = (
+                        f"[numpydoc] Validation warnings while processing "
+                        f"docstring for {name!r}:\n"
+                    )
+                    for err in errors:
+                        if err[0] in app.config.numpydoc_validation_checks:
+                            msg += f"  {err[0]}: {err[1]}\n"
+                    logger.warning(msg)
+
+
     if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
             obj.__name__):
         if hasattr(obj, '__module__'):
@@ -254,6 +277,8 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value('numpydoc_xref_param_type', False, True)
     app.add_config_value('numpydoc_xref_aliases', dict(), True)
     app.add_config_value('numpydoc_xref_ignore', set(), True)
+    app.add_config_value('numpydoc_validation_checks', set(), True)
+    app.add_config_value('numpydoc_validation_exclude', set(), False)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
@@ -277,6 +302,33 @@ def update_config(app, config=None):
         if key not in numpydoc_xref_aliases_complete:
             numpydoc_xref_aliases_complete[key] = value
     config.numpydoc_xref_aliases_complete = numpydoc_xref_aliases_complete
+
+    # Processing to determine whether numpydoc_validation_checks is treated
+    # as a blocklist or allowlist
+    valid_error_codes = set(ERROR_MSGS.keys())
+    if "all" in config.numpydoc_validation_checks:
+        block = deepcopy(config.numpydoc_validation_checks)
+        config.numpydoc_validation_checks = valid_error_codes - block
+    # Ensure that the validation check set contains only valid error codes
+    invalid_error_codes = config.numpydoc_validation_checks - valid_error_codes
+    if invalid_error_codes:
+        raise ValueError(
+            f"Unrecognized validation code(s) in numpydoc_validation_checks "
+            f"config value: {invalid_error_codes}"
+        )
+
+    # Generate the regexp for docstrings to ignore during validation
+    if isinstance(config.numpydoc_validation_exclude, str):
+        raise ValueError(
+            f"numpydoc_validation_exclude must be a container of strings, "
+            f"e.g. [{config.numpydoc_validation_exclude!r}]."
+        )
+    config.numpydoc_validation_excluder = None
+    if config.numpydoc_validation_exclude:
+        exclude_expr = re.compile(
+            r"|".join(exp for exp in config.numpydoc_validation_exclude)
+        )
+        config.numpydoc_validation_excluder = exclude_expr
 
 
 # ------------------------------------------------------------------------------

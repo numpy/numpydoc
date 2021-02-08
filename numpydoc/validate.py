@@ -12,7 +12,7 @@ import inspect
 import pydoc
 import re
 import textwrap
-from .docscrape import NumpyDocString
+from .docscrape import get_doc_object
 
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
@@ -34,58 +34,58 @@ ALLOWED_SECTIONS = [
 ]
 ERROR_MSGS = {
     "GL01": "Docstring text (summary) should start in the line immediately "
-    "after the opening quotes (not in the same line, or leaving a "
-    "blank line in between)",
+            "after the opening quotes (not in the same line, or leaving a "
+            "blank line in between)",
     "GL02": "Closing quotes should be placed in the line after the last text "
-    "in the docstring (do not close the quotes in the same line as "
-    "the text, or leave a blank line between the last text and the "
-    "quotes)",
+            "in the docstring (do not close the quotes in the same line as "
+            "the text, or leave a blank line between the last text and the "
+            "quotes)",
     "GL03": "Double line break found; please use only one blank line to "
-    "separate sections or paragraphs, and do not leave blank lines "
-    "at the end of docstrings",
+            "separate sections or paragraphs, and do not leave blank lines "
+            "at the end of docstrings",
     "GL05": 'Tabs found at the start of line "{line_with_tabs}", please use '
-    "whitespace only",
+            "whitespace only",
     "GL06": 'Found unknown section "{section}". Allowed sections are: '
-    "{allowed_sections}",
+            "{allowed_sections}",
     "GL07": "Sections are in the wrong order. Correct order is: {correct_sections}",
     "GL08": "The object does not have a docstring",
     "GL09": "Deprecation warning should precede extended summary",
     "GL10": "reST directives {directives} must be followed by two colons",
     "SS01": "No summary found (a short summary in a single line should be "
-    "present at the beginning of the docstring)",
+            "present at the beginning of the docstring)",
     "SS02": "Summary does not start with a capital letter",
     "SS03": "Summary does not end with a period",
     "SS04": "Summary contains heading whitespaces",
     "SS05": "Summary must start with infinitive verb, not third person "
-    '(e.g. use "Generate" instead of "Generates")',
+            '(e.g. use "Generate" instead of "Generates")',
     "SS06": "Summary should fit in a single line",
     "ES01": "No extended summary found",
     "PR01": "Parameters {missing_params} not documented",
     "PR02": "Unknown parameters {unknown_params}",
     "PR03": "Wrong parameters order. Actual: {actual_params}. "
-    "Documented: {documented_params}",
+            "Documented: {documented_params}",
     "PR04": 'Parameter "{param_name}" has no type',
     "PR05": 'Parameter "{param_name}" type should not finish with "."',
     "PR06": 'Parameter "{param_name}" type should use "{right_type}" instead '
-    'of "{wrong_type}"',
+            'of "{wrong_type}"',
     "PR07": 'Parameter "{param_name}" has no description',
     "PR08": 'Parameter "{param_name}" description should start with a '
-    "capital letter",
+            "capital letter",
     "PR09": 'Parameter "{param_name}" description should finish with "."',
     "PR10": 'Parameter "{param_name}" requires a space before the colon '
-    "separating the parameter name and type",
+            "separating the parameter name and type",
     "RT01": "No Returns section found",
     "RT02": "The first line of the Returns section should contain only the "
-    "type, unless multiple values are being returned",
+            "type, unless multiple values are being returned",
     "RT03": "Return value has no description",
     "RT04": "Return value description should start with a capital letter",
     "RT05": 'Return value description should finish with "."',
     "YD01": "No Yields section found",
     "SA01": "See Also section not found",
     "SA02": "Missing period at end of description for See Also "
-    '"{reference_name}" reference',
+            '"{reference_name}" reference',
     "SA03": "Description should be capitalized for See Also "
-    '"{reference_name}" reference',
+            '"{reference_name}" reference',
     "SA04": 'Missing description for See Also "{reference_name}" reference',
     "EX01": "No examples section found",
 }
@@ -121,16 +121,18 @@ def error(code, **kwargs):
     return (code, ERROR_MSGS[code].format(**kwargs))
 
 
-class Docstring:
+class Validator:
     # TODO Can all this class be merged into NumpyDocString?
-    def __init__(self, name):
-        self.name = name
-        obj = self._load_obj(name)
-        self.obj = obj
-        self.code_obj = inspect.unwrap(obj)
-        self.raw_doc = obj.__doc__ or ""
-        self.clean_doc = pydoc.getdoc(obj)
-        self.doc = NumpyDocString(self.clean_doc)
+    def __init__(self, doc_object):
+        self.doc = doc_object
+        self.obj = self.doc._obj
+        self.code_obj = inspect.unwrap(self.obj)
+        self.raw_doc = self.obj.__doc__ or ""
+        self.clean_doc = pydoc.getdoc(self.obj)
+
+    @property
+    def name(self):
+        return '.'.join([self.obj.__module__, self.obj.__name__])
 
     @staticmethod
     def _load_obj(name):
@@ -149,7 +151,7 @@ class Docstring:
 
         Examples
         --------
-        >>> Docstring._load_obj('datetime.datetime')
+        >>> Validator._load_obj('datetime.datetime')
         <class 'datetime.datetime'>
         """
         for maxsplit in range(0, name.count(".") + 1):
@@ -468,7 +470,10 @@ def validate(obj_name):
     they are validated, are not documented more than in the source code of this
     function.
     """
-    doc = Docstring(obj_name)
+    if isinstance(obj_name, str):
+        doc = Validator(get_doc_object(Validator._load_obj(obj_name)))
+    else:
+        doc = Validator(obj_name)
 
     errs = []
     if not doc.raw_doc:
