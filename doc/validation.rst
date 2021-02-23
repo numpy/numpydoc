@@ -16,6 +16,35 @@ For an exhaustive validation of the formatting of the docstring, use the
 incorrect capitalization, wrong order of the sections, and many other
 issues.
 
+Docstring Validation during Sphinx Build
+----------------------------------------
+
+It is also possible to run docstring validation as part of the sphinx build
+process.
+This behavior is controlled by the ``numpydoc_validation_checks`` configuration
+parameter in ``conf.py``.
+For example, to verify that all of the parameters in the function signature
+are accounted for in the ``Parameters`` section of the docstring, add the
+following line to ``conf.py``::
+
+    numpydoc_validation_checks = {"PR01"}
+
+This will cause a sphinx warning to be raised for any (non-module) docstring
+that has undocumented parameters in the signature.
+The full set of validation checks can be activated by::
+
+    numpydoc_validation_checks = {"all"}
+
+The complete validation suite contains `many checks <validation_checks>`_
+including some for style, capitalization, and grammar.
+It is unlikely that reporting *all* validation warnings is desireable for
+most use-cases.
+Individual checks can be excluded by including them in the set with the
+special keyword ``"all"``::
+
+    # Report warnings for all validation checks except GL01, GL02, and GL05
+    numpydoc_validation_checks = {"all", "GL01", "GL02", "GL05"}
+
 .. _validation_checks:
 
 Built-in Validation Checks
