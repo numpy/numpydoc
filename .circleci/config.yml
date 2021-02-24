@@ -18,10 +18,8 @@ jobs:
             name: Get dependencies and install
             command: |
               pip install --user -q --upgrade pip setuptools
-              pip install --user -q --upgrade numpy matplotlib sphinx
+              pip install --user -q --upgrade numpy matplotlib sphinx pydata-sphinx-theme
               pip install --user -e .
-              git submodule init
-              git submodule update
         - save_cache:
             key: pip-cache
             paths:

@@ -53,8 +53,6 @@ jobs:
 
     - name: Setup for doc build
       run: |
-        # Get scipy-sphinx-theme
-        git submodule update --init
         sudo apt install texlive texlive-latex-extra latexmk dvipng
 
     - name: Build documentation
