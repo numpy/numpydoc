@@ -1,8 +1,3 @@
-.. NOTE: The :notoc: metadata is used to suppress the right-sidebar in the
-   pydata-sphinx-theme.
-
-:notoc:
-
 .. _example:
 
 =======

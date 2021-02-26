@@ -134,13 +134,15 @@ pygments_style = 'sphinx'
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "github_url": "https://github.com/numpy/numpydoc",
+    "show_prev_next": False,
+    "search_bar_position": "navbar",
+}
+html_sidebars = {
+    "**": [],
 }
 
 html_title = "%s v%s Manual" % (project, version)
 html_last_updated_fmt = '%b %d, %Y'
-html_sidebars = {
-    "**": ["sidebar-search-bs.html", "docs-toc.html"],
-}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

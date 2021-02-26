@@ -1,11 +1,9 @@
-.. NOTE: The :notoc: metadata is used to suppress the right-sidebar in the
-   pydata-sphinx-theme.
+==========
+Validation
+==========
 
-:notoc:
-
-==============================
-Validating NumpyDoc docstrings
-==============================
+Docstring Validation using Python
+---------------------------------
 
 To see the Restructured Text generated for an object, the ``numpydoc`` module
 can be called. For example, to do it for ``numpy.ndarray``, use:
