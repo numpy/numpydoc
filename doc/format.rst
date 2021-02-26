@@ -1,11 +1,8 @@
-
 .. _format:
 
-========================
-numpydoc docstring guide
-========================
-
-.. Contents::
+===========
+Style guide
+===========
 
 This document describes the syntax and best practices for docstrings used with
 the numpydoc extension for Sphinx_.
@@ -352,7 +349,7 @@ The sections of a function's docstring are:
     code, possibly including a discussion of the algorithm. This
     section may include mathematical equations, written in
     `LaTeX <https://www.latex-project.org/>`_ format::
-    
+
       Notes
       -----
       The FFT is a fast implementation of the discrete Fourier transform:

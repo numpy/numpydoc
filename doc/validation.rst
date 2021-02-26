@@ -1,6 +1,9 @@
-==============================
-Validating NumpyDoc docstrings
-==============================
+==========
+Validation
+==========
+
+Docstring Validation using Python
+---------------------------------
 
 To see the Restructured Text generated for an object, the ``numpydoc`` module
 can be called. For example, to do it for ``numpy.ndarray``, use:

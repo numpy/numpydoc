@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [Ubuntu]
         python-version: [3.6, 3.7, 3.8, 3.9]
-        sphinx-version: ["sphinx==1.6.5", "sphinx==2.1", "sphinx>3.0"]
+        sphinx-version: ["sphinx==1.8.0", "sphinx==2.1", "sphinx>3.0"]
     steps:
     - uses: actions/checkout@v2
     
@@ -53,8 +53,6 @@ jobs:
 
     - name: Setup for doc build
       run: |
-        # Get scipy-sphinx-theme
-        git submodule update --init
         sudo apt install texlive texlive-latex-extra latexmk dvipng
 
     - name: Build documentation

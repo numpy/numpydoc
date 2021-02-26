@@ -99,7 +99,7 @@ numpydoc_validation_checks = {"all", "GL01", "SA04", "RT03"}
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'scipy-sphinx-theme']
+exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -131,32 +131,15 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-themedir = os.path.join(os.path.dirname(__file__), 'scipy-sphinx-theme', '_theme')
-if not os.path.isdir(themedir):
-    raise RuntimeError("Get the scipy-sphinx-theme first, "
-                       "via git submodule init && git submodule update")
-
-html_theme = 'scipy'
-html_theme_path = [themedir]
-
-if 'scipyorg' in tags:  # noqa: F821
-    # Build for the scipy.org website
-    html_theme_options = {
-        "edit_link": True,
-        "sidebar": "right",
-        "scipy_org_logo": True,
-        "rootlinks": [("https://scipy.org/", "Scipy.org"),
-                      ("https://docs.scipy.org/", "Docs")]
-    }
-else:
-    # Default build
-    html_theme_options = {
-        "edit_link": False,
-        "sidebar": "left",
-        "scipy_org_logo": False,
-        "rootlinks": []
-    }
-    html_sidebars = {}
+html_theme = "pydata_sphinx_theme"
+html_theme_options = {
+    "github_url": "https://github.com/numpy/numpydoc",
+    "show_prev_next": False,
+    "search_bar_position": "navbar",
+}
+html_sidebars = {
+    "**": [],
+}
 
 html_title = "%s v%s Manual" % (project, version)
 html_last_updated_fmt = '%b %d, %Y'

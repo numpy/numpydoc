@@ -1,19 +1,21 @@
+===============
+Getting started
+===============
 
-============
 Installation
 ============
 
-This extension requires Python 3.5+, sphinx 1.6.5+ and is available from:
+This extension requires Python 3.5+, sphinx 1.8+ and is available from:
 
 * `numpydoc on PyPI <http://pypi.python.org/pypi/numpydoc>`_
 * `numpydoc on GitHub <https://github.com/numpy/numpydoc/>`_
 
-'numpydoc' should be added to the ``extensions`` option in your Sphinx
-``conf.py``. (Note that `sphinx.ext.autosummary` will automatically be loaded
-as well.)
+`'numpydoc'` should be added to the ``extensions`` option in your Sphinx
+``conf.py``. ``'sphinx.ext.autosummary'`` will automatically be loaded
+as well.
 
-Sphinx config options
-=====================
+Configuration
+=============
 
 The following options can be set in your Sphinx ``conf.py``:
 
