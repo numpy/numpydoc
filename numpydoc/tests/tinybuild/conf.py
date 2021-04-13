@@ -13,7 +13,7 @@ project = 'numpydoc_test_module'
 autosummary_generate = True
 autodoc_default_options = {'inherited-members': None}
 source_suffix = '.rst'
-master_doc = 'index'
+master_doc = 'index'  # NOTE: will be changed to `root_doc` in sphinx 4
 exclude_patterns = ['_build']
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),

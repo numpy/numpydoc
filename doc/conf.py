@@ -63,8 +63,8 @@ source_suffix = '.rst'
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
-# The master toctree document.
-master_doc = 'index'
+# The root toctree document
+master_doc = 'index'  # NOTE: will be changed to `root_doc` in sphinx 4
 
 # General information about the project.
 project = u'numpydoc'

@@ -1,6 +1,3 @@
-.. image:: https://travis-ci.org/numpy/numpydoc.png?branch=master
-   :target: https://travis-ci.org/numpy/numpydoc/
-
 .. |docs| image:: https://readthedocs.org/projects/numpydoc/badge/?version=latest
    :alt: Documentation Status
    :scale: 100%
