@@ -12,7 +12,7 @@ the numpydoc extension for Sphinx_.
    For an accompanying example, see :ref:`example.py <example>`.
 
    Some features described in this document require a recent version of
-   ``numpydoc``. For example, the **Yields** section was added in
+   ``numpydoc``. For example, the :ref:`Yields <yields>` section was added in
    ``numpydoc`` 0.6.
 
 Overview
@@ -38,6 +38,7 @@ Use a code checker:
 
 Import conventions
 ------------------
+
 The following import conventions are used throughout the NumPy source
 and documentation::
 
@@ -51,6 +52,7 @@ to avoid confusion.
 
 Docstring Standard
 ------------------
+
 A documentation string (docstring) is a string that describes a module,
 function, class, or method definition.  The docstring is a special attribute
 of the object (``object.__doc__``) and, for consistency, is surrounded by
@@ -94,419 +96,447 @@ the section ordering should be consistent with the description below.
 
 The sections of a function's docstring are:
 
-1. **Short summary**
+1. Short summary
+````````````````
 
-   A one-line summary that does not use variable names or the function
-   name, e.g.
+A one-line summary that does not use variable names or the function
+name, e.g.
 
-   ::
+::
 
-     def add(a, b):
-        """The sum of two numbers.
-
-        """
-
-   The function signature is normally found by introspection and
-   displayed by the help function.  For some functions (notably those
-   written in C) the signature is not available, so we have to specify
-   it as the first line of the docstring::
+  def add(a, b):
+     """The sum of two numbers.
 
      """
-     add(a, b)
 
-     The sum of two numbers.
+The function signature is normally found by introspection and
+displayed by the help function.  For some functions (notably those
+written in C) the signature is not available, so we have to specify
+it as the first line of the docstring::
 
-     """
+  """
+  add(a, b)
+
+  The sum of two numbers.
+
+  """
 
 .. highlight:: rst
 
-2. **Deprecation warning**
+2. Deprecation warning
+``````````````````````
 
-   A section (use if applicable) to warn users that the object is deprecated.
-   Section contents should include:
+A section (use if applicable) to warn users that the object is deprecated.
+Section contents should include:
 
-   * In what NumPy version the object was deprecated, and when it will be
-     removed.
+* In what NumPy version the object was deprecated, and when it will be
+  removed.
 
-   * Reason for deprecation if this is useful information (e.g., object
-     is superseded, duplicates functionality found elsewhere, etc.).
+* Reason for deprecation if this is useful information (e.g., object
+  is superseded, duplicates functionality found elsewhere, etc.).
 
-   * New recommended way of obtaining the same functionality.
+* New recommended way of obtaining the same functionality.
 
-   This section should use the ``deprecated`` Sphinx directive instead of an
-   underlined section header.
+This section should use the ``deprecated`` Sphinx directive instead of an
+underlined section header.
 
-   ::
+::
 
-     .. deprecated:: 1.6.0
-               `ndobj_old` will be removed in NumPy 2.0.0, it is replaced by
-               `ndobj_new` because the latter works also with array subclasses.
+  .. deprecated:: 1.6.0
+            `ndobj_old` will be removed in NumPy 2.0.0, it is replaced by
+            `ndobj_new` because the latter works also with array subclasses.
 
-3. **Extended Summary**
+.. _extended_summary:
 
-   A few sentences giving an extended description.  This section
-   should be used to clarify *functionality*, not to discuss
-   implementation detail or background theory, which should rather be
-   explored in the **Notes** section below.  You may refer to the
-   parameters and the function name, but parameter descriptions still
-   belong in the **Parameters** section.
+3. Extended Summary
+```````````````````
 
-4. **Parameters**
+A few sentences giving an extended description.  This section
+should be used to clarify *functionality*, not to discuss
+implementation detail or background theory, which should rather be
+explored in the :ref:`Notes <notes>` section below.  You may refer to the
+parameters and the function name, but parameter descriptions still
+belong in the :ref:`Parameters <params>` section.
 
-   Description of the function arguments, keywords and their
-   respective types.
+.. _params:
 
-   ::
+4. Parameters
+`````````````
 
-     Parameters
-     ----------
-     x : type
-         Description of parameter `x`.
-     y
-         Description of parameter `y` (with type not specified).
+Description of the function arguments, keywords and their
+respective types.
 
-   Enclose variables in single backticks.  The colon must be preceded
-   by a space, or omitted if the type is absent.
+::
 
-   For the parameter types, be as precise as possible.  Below are a
-   few examples of parameters and their types.
+  Parameters
+  ----------
+  x : type
+      Description of parameter `x`.
+  y
+      Description of parameter `y` (with type not specified).
 
-   ::
+Enclose variables in single backticks.  The colon must be preceded
+by a space, or omitted if the type is absent.
 
-     Parameters
-     ----------
-     filename : str
-     copy : bool
-     dtype : data-type
-     iterable : iterable object
-     shape : int or tuple of int
-     files : list of str
+For the parameter types, be as precise as possible.  Below are a
+few examples of parameters and their types.
 
-   If it is not necessary to specify a keyword argument, use
-   ``optional``::
+::
 
-     x : int, optional
+  Parameters
+  ----------
+  filename : str
+  copy : bool
+  dtype : data-type
+  iterable : iterable object
+  shape : int or tuple of int
+  files : list of str
 
-   Optional keyword parameters have default values, which are
-   displayed as part of the function signature.  They can also be
-   detailed in the description::
+If it is not necessary to specify a keyword argument, use
+``optional``::
 
-     Description of parameter `x` (the default is -1, which implies summation
-     over all axes).
+  x : int, optional
 
-   or as part of the type, instead of ``optional``. If the default value would not be
-   used as a value, ``optional`` is preferred. These are all equivalent::
+Optional keyword parameters have default values, which are
+displayed as part of the function signature.  They can also be
+detailed in the description::
 
-     copy : bool, default True
-     copy : bool, default=True
-     copy : bool, default: True
+  Description of parameter `x` (the default is -1, which implies summation
+  over all axes).
 
-   When a parameter can only assume one of a fixed set of values,
-   those values can be listed in braces, with the default appearing first::
+or as part of the type, instead of ``optional``. If the default value would not be
+used as a value, ``optional`` is preferred. These are all equivalent::
 
-     order : {'C', 'F', 'A'}
-         Description of `order`.
+  copy : bool, default True
+  copy : bool, default=True
+  copy : bool, default: True
 
-   When two or more input parameters have exactly the same type, shape and
-   description, they can be combined::
+When a parameter can only assume one of a fixed set of values,
+those values can be listed in braces, with the default appearing first::
 
-     x1, x2 : array_like
-         Input arrays, description of `x1`, `x2`.
+  order : {'C', 'F', 'A'}
+      Description of `order`.
 
-   When documenting variable length positional, or keyword arguments, leave the
-   leading star(s) in front of the name::
+When two or more input parameters have exactly the same type, shape and
+description, they can be combined::
 
-     *args : tuple
-         Additional arguments should be passed as keyword arguments
-     **kwargs : dict, optional
-         Extra arguments to `metric`: refer to each metric documentation for a
-         list of all possible arguments.
+  x1, x2 : array_like
+      Input arrays, description of `x1`, `x2`.
 
-   ..
-      above example is from scipy.spatial.distance.pdist
+When documenting variable length positional, or keyword arguments, leave the
+leading star(s) in front of the name::
 
-5. **Returns**
+  *args : tuple
+      Additional arguments should be passed as keyword arguments
+  **kwargs : dict, optional
+      Extra arguments to `metric`: refer to each metric documentation for a
+      list of all possible arguments.
 
-   Explanation of the returned values and their types. Similar to the
-   **Parameters** section, except the name of each return value is optional.
-   The type of each return value is always required::
+..
+   above example is from scipy.spatial.distance.pdist
 
-     Returns
-     -------
-     int
-         Description of anonymous integer return value.
+.. _returns:
 
-   If both the name and type are specified, the **Returns** section takes the
-   same form as the **Parameters** section::
+5. Returns
+``````````
 
-     Returns
-     -------
-     err_code : int
-         Non-zero value indicates error code, or zero on success.
-     err_msg : str or None
-         Human readable error message, or None on success.
+Explanation of the returned values and their types. Similar to the
+:ref:`Parameters <params>` section, except the name of each return value is
+optional.
+The type of each return value is always required::
 
-6. **Yields**
+  Returns
+  -------
+  int
+      Description of anonymous integer return value.
 
-   Explanation of the yielded values and their types. This is relevant to
-   generators only. Similar to the **Returns** section in that the name of
-   each value is optional, but the type of each value is always required::
+If both the name and type are specified, the :ref:`Returns <returns>` section
+takes the same form as the :ref:`Parameters <params>` section::
 
-     Yields
-     ------
-     int
-         Description of the anonymous integer return value.
+  Returns
+  -------
+  err_code : int
+      Non-zero value indicates error code, or zero on success.
+  err_msg : str or None
+      Human readable error message, or None on success.
 
-   If both the name and type are specified, the **Yields** section takes the
-   same form as the **Returns** section::
+.. _yields:
 
-     Yields
-     ------
-     err_code : int
-         Non-zero value indicates error code, or zero on success.
-     err_msg : str or None
-         Human readable error message, or None on success.
+6. Yields
+`````````
 
-   Support for the **Yields** section was added in `numpydoc
-   <https://github.com/numpy/numpydoc>`_ version 0.6.
+Explanation of the yielded values and their types. This is relevant to
+generators only. Similar to the :ref:`Returns <returns>` section in that the
+name of each value is optional, but the type of each value is always required::
 
-7. **Receives**
+  Yields
+  ------
+  int
+      Description of the anonymous integer return value.
 
-   Explanation of parameters passed to a generator's ``.send()`` method,
-   formatted as for Parameters, above.  Since, like for Yields and Returns, a
-   single object is always passed to the method, this may describe either the
-   single parameter, or positional arguments passed as a tuple.  If a docstring
-   includes Receives it must also include Yields.
+If both the name and type are specified, the :ref:`Yields <yields>` section
+takes the same form as the :ref:`Returns <returns>` section::
 
-8. **Other Parameters**
+  Yields
+  ------
+  err_code : int
+      Non-zero value indicates error code, or zero on success.
+  err_msg : str or None
+      Human readable error message, or None on success.
 
-   An optional section used to describe infrequently used parameters.
-   It should only be used if a function has a large number of keyword
-   parameters, to prevent cluttering the **Parameters** section.
+Support for the :ref:`Yields <yields>` section was added in `numpydoc
+<https://github.com/numpy/numpydoc>`_ version 0.6.
 
-9. **Raises**
+7. Receives
+```````````
 
-   An optional section detailing which errors get raised and under
-   what conditions::
+Explanation of parameters passed to a generator's ``.send()`` method,
+formatted as for Parameters, above.  Since, like for Yields and Returns, a
+single object is always passed to the method, this may describe either the
+single parameter, or positional arguments passed as a tuple.  If a docstring
+includes Receives it must also include Yields.
 
-     Raises
-     ------
-     LinAlgException
-         If the matrix is not numerically invertible.
+8. Other Parameters
+```````````````````
 
-   This section should be used judiciously, i.e., only for errors
-   that are non-obvious or have a large chance of getting raised.
+An optional section used to describe infrequently used parameters.
+It should only be used if a function has a large number of keyword
+parameters, to prevent cluttering the :ref:`Parameters <params>` section.
 
-10. **Warns**
+9. Raises
+`````````
 
-    An optional section detailing which warnings get raised and
-    under what conditions, formatted similarly to Raises.
+An optional section detailing which errors get raised and under
+what conditions::
 
-11. **Warnings**
+  Raises
+  ------
+  LinAlgException
+      If the matrix is not numerically invertible.
 
-    An optional section with cautions to the user in free text/reST.
+This section should be used judiciously, i.e., only for errors
+that are non-obvious or have a large chance of getting raised.
 
-12. **See Also**
+10. Warns
+`````````
 
-    An optional section used to refer to related code.  This section
-    can be very useful, but should be used judiciously.  The goal is to
-    direct users to other functions they may not be aware of, or have
-    easy means of discovering (by looking at the module docstring, for
-    example).  Routines whose docstrings further explain parameters
-    used by this function are good candidates.
+An optional section detailing which warnings get raised and
+under what conditions, formatted similarly to Raises.
 
-    As an example, for ``numpy.mean`` we would have::
+11. Warnings
+````````````
 
-      See Also
-      --------
-      average : Weighted average.
+An optional section with cautions to the user in free text/reST.
 
-    When referring to functions in the same sub-module, no prefix is
-    needed, and the tree is searched upwards for a match.
+.. _seealso:
 
-    Prefix functions from other sub-modules appropriately.  E.g.,
-    whilst documenting the ``random`` module, refer to a function in
-    ``fft`` by
+12. See Also
+````````````
 
-    ::
+An optional section used to refer to related code.  This section
+can be very useful, but should be used judiciously.  The goal is to
+direct users to other functions they may not be aware of, or have
+easy means of discovering (by looking at the module docstring, for
+example).  Routines whose docstrings further explain parameters
+used by this function are good candidates.
 
-      fft.fft2 : 2-D fast discrete Fourier transform.
+As an example, for ``numpy.mean`` we would have::
 
-    When referring to an entirely different module::
+  See Also
+  --------
+  average : Weighted average.
 
-      scipy.random.norm : Random variates, PDFs, etc.
+When referring to functions in the same sub-module, no prefix is
+needed, and the tree is searched upwards for a match.
 
-    Functions may be listed without descriptions, and this is
-    preferable if the functionality is clear from the function name::
+Prefix functions from other sub-modules appropriately.  E.g.,
+whilst documenting the ``random`` module, refer to a function in
+``fft`` by
 
-      See Also
-      --------
-      func_a : Function a with its description.
-      func_b, func_c_, func_d
-      func_e
+::
 
-    If the combination of the function name and the description creates
-    a line that is too long, the entry may be written as two lines, with
-    the function name and colon on the first line, and the description
-    on the next line, indented four spaces::
+  fft.fft2 : 2-D fast discrete Fourier transform.
 
-      See Also
-      --------
-      package.module.submodule.func_a :
-          A somewhat long description of the function.
+When referring to an entirely different module::
 
-13. **Notes**
+  scipy.random.norm : Random variates, PDFs, etc.
 
-    An optional section that provides additional information about the
-    code, possibly including a discussion of the algorithm. This
-    section may include mathematical equations, written in
-    `LaTeX <https://www.latex-project.org/>`_ format::
+Functions may be listed without descriptions, and this is
+preferable if the functionality is clear from the function name::
 
-      Notes
-      -----
-      The FFT is a fast implementation of the discrete Fourier transform:
+  See Also
+  --------
+  func_a : Function a with its description.
+  func_b, func_c_, func_d
+  func_e
 
-      .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
+If the combination of the function name and the description creates
+a line that is too long, the entry may be written as two lines, with
+the function name and colon on the first line, and the description
+on the next line, indented four spaces::
 
-    Equations can also be typeset underneath the math directive::
+  See Also
+  --------
+  package.module.submodule.func_a :
+      A somewhat long description of the function.
 
-      The discrete-time Fourier time-convolution property states that
+.. _notes:
 
-      .. math::
+13. Notes
+`````````
 
-           x(n) * y(n) \Leftrightarrow X(e^{j\omega } )Y(e^{j\omega } )\\
-           another equation here
+An optional section that provides additional information about the
+code, possibly including a discussion of the algorithm. This
+section may include mathematical equations, written in
+`LaTeX <https://www.latex-project.org/>`_ format::
 
-    Math can furthermore be used inline, i.e.
+  Notes
+  -----
+  The FFT is a fast implementation of the discrete Fourier transform:
 
-    ::
+  .. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
 
-      The value of :math:`\omega` is larger than 5.
+Equations can also be typeset underneath the math directive::
 
-    Variable names are displayed in typewriter font, obtained by using
-    ``\mathtt{var}``::
+  The discrete-time Fourier time-convolution property states that
 
-      We square the input parameter `alpha` to obtain
-      :math:`\mathtt{alpha}^2`.
+  .. math::
 
-    Note that LaTeX is not particularly easy to read, so use equations
-    sparingly.
+       x(n) * y(n) \Leftrightarrow X(e^{j\omega } )Y(e^{j\omega } )\\
+       another equation here
 
-    Images are allowed, but should not be central to the explanation;
-    users viewing the docstring as text must be able to comprehend its
-    meaning without resorting to an image viewer.  These additional
-    illustrations are included using::
+Math can furthermore be used inline, i.e.
 
-      .. image:: filename
+::
 
-    where filename is a path relative to the reference guide source
-    directory.
+  The value of :math:`\omega` is larger than 5.
 
-14. **References**
+Variable names are displayed in typewriter font, obtained by using
+``\mathtt{var}``::
 
-    References cited in the **notes** section may be listed here,
-    e.g. if you cited the article below using the text ``[1]_``,
-    include it as in the list as follows::
+  We square the input parameter `alpha` to obtain
+  :math:`\mathtt{alpha}^2`.
 
-      .. [1] O. McNoleg, "The integration of GIS, remote sensing,
-         expert systems and adaptive co-kriging for environmental habitat
-         modelling of the Highland Haggis using object-oriented, fuzzy-logic
-         and neural-network techniques," Computers & Geosciences, vol. 22,
-         pp. 585-588, 1996.
+Note that LaTeX is not particularly easy to read, so use equations
+sparingly.
 
-    which renders as [1]_:
+Images are allowed, but should not be central to the explanation;
+users viewing the docstring as text must be able to comprehend its
+meaning without resorting to an image viewer.  These additional
+illustrations are included using::
 
-    .. [1] O. McNoleg, "The integration of GIS, remote sensing,
-       expert systems and adaptive co-kriging for environmental habitat
-       modelling of the Highland Haggis using object-oriented, fuzzy-logic
-       and neural-network techniques," Computers & Geosciences, vol. 22,
-       pp. 585-588, 1996.
+  .. image:: filename
 
-    Referencing sources of a temporary nature, like web pages, is
-    discouraged.  References are meant to augment the docstring, but
-    should not be required to understand it.  References are numbered, starting
-    from one, in the order in which they are cited.
+where filename is a path relative to the reference guide source
+directory.
 
-    .. warning:: **References will break tables**
+14. References
+``````````````
 
-        Where references like [1] appear in a tables within a numpydoc
-        docstring, the table markup will be broken by numpydoc processing.  See
-        `numpydoc issue #130 <https://github.com/numpy/numpydoc/issues/130>`_
+References cited in the :ref:`Notes <notes>` section may be listed here,
+e.g. if you cited the article below using the text ``[1]_``,
+include it as in the list as follows::
+
+  .. [1] O. McNoleg, "The integration of GIS, remote sensing,
+     expert systems and adaptive co-kriging for environmental habitat
+     modelling of the Highland Haggis using object-oriented, fuzzy-logic
+     and neural-network techniques," Computers & Geosciences, vol. 22,
+     pp. 585-588, 1996.
+
+which renders as [1]_:
+
+.. [1] O. McNoleg, "The integration of GIS, remote sensing,
+   expert systems and adaptive co-kriging for environmental habitat
+   modelling of the Highland Haggis using object-oriented, fuzzy-logic
+   and neural-network techniques," Computers & Geosciences, vol. 22,
+   pp. 585-588, 1996.
+
+Referencing sources of a temporary nature, like web pages, is
+discouraged.  References are meant to augment the docstring, but
+should not be required to understand it.  References are numbered, starting
+from one, in the order in which they are cited.
+
+.. warning:: **References will break tables**
+
+    Where references like [1] appear in a tables within a numpydoc
+    docstring, the table markup will be broken by numpydoc processing.  See
+    `numpydoc issue #130 <https://github.com/numpy/numpydoc/issues/130>`_
 
 .. highlight:: pycon
 
-15. **Examples**
+15. Examples
+````````````
 
-    An optional section for examples, using the `doctest
-    <http://docs.python.org/library/doctest.html>`_ format.
-    This section is meant to illustrate usage, not to provide a
-    testing framework -- for that, use the ``tests/`` directory.
-    While optional, this section is very strongly encouraged.
+An optional section for examples, using the `doctest
+<http://docs.python.org/library/doctest.html>`_ format.
+This section is meant to illustrate usage, not to provide a
+testing framework -- for that, use the ``tests/`` directory.
+While optional, this section is very strongly encouraged.
 
-    When multiple examples are provided, they should be separated by
-    blank lines. Comments explaining the examples should have blank
-    lines both above and below them::
+When multiple examples are provided, they should be separated by
+blank lines. Comments explaining the examples should have blank
+lines both above and below them::
 
-      Examples
-      --------
-      >>> np.add(1, 2)
-      3
+  Examples
+  --------
+  >>> np.add(1, 2)
+  3
 
-      Comment explaining the second example.
+  Comment explaining the second example.
 
-      >>> np.add([1, 2], [3, 4])
-      array([4, 6])
+  >>> np.add([1, 2], [3, 4])
+  array([4, 6])
 
-    The example code may be split across multiple lines, with each line after
-    the first starting with '... '::
+The example code may be split across multiple lines, with each line after
+the first starting with '... '::
 
-      >>> np.add([[1, 2], [3, 4]],
-      ...        [[5, 6], [7, 8]])
-      array([[ 6,  8],
-             [10, 12]])
+  >>> np.add([[1, 2], [3, 4]],
+  ...        [[5, 6], [7, 8]])
+  array([[ 6,  8],
+         [10, 12]])
 
-    For tests with a result that is random or platform-dependent, mark the
-    output as such::
+For tests with a result that is random or platform-dependent, mark the
+output as such::
 
-      >>> import numpy.random
-      >>> np.random.rand(2)
-      array([ 0.35773152,  0.38568979])  #random
+  >>> import numpy.random
+  >>> np.random.rand(2)
+  array([ 0.35773152,  0.38568979])  #random
 
-    You can run examples as doctests using::
+You can run examples as doctests using::
 
-      >>> np.test(doctests=True)
-      >>> np.linalg.test(doctests=True)  # for a single module
+  >>> np.test(doctests=True)
+  >>> np.linalg.test(doctests=True)  # for a single module
 
-    In IPython it is also possible to run individual examples simply by
-    copy-pasting them in doctest mode::
+In IPython it is also possible to run individual examples simply by
+copy-pasting them in doctest mode::
 
-      In [1]: %doctest_mode
-      Exception reporting mode: Plain
-      Doctest mode is: ON
-      >>> %paste
-       import numpy.random
-       np.random.rand(2)
-      ## -- End pasted text --
-      array([ 0.8519522 ,  0.15492887])
+  In [1]: %doctest_mode
+  Exception reporting mode: Plain
+  Doctest mode is: ON
+  >>> %paste
+   import numpy.random
+   np.random.rand(2)
+  ## -- End pasted text --
+  array([ 0.8519522 ,  0.15492887])
 
 
-    It is not necessary to use the doctest markup ``<BLANKLINE>`` to
-    indicate empty lines in the output. Note that the option to run
-    the examples through ``numpy.test`` is provided for checking if the
-    examples work, not for making the examples part of the testing framework.
+It is not necessary to use the doctest markup ``<BLANKLINE>`` to
+indicate empty lines in the output. Note that the option to run
+the examples through ``numpy.test`` is provided for checking if the
+examples work, not for making the examples part of the testing framework.
 
-    The examples may assume that ``import numpy as np`` is executed before
-    the example code in *numpy*. Additional examples may make use of
-    *matplotlib* for plotting, but should import it explicitly, e.g.,
-    ``import matplotlib.pyplot as plt``. All other imports, including the
-    demonstrated function, must be explicit.
+The examples may assume that ``import numpy as np`` is executed before
+the example code in *numpy*. Additional examples may make use of
+*matplotlib* for plotting, but should import it explicitly, e.g.,
+``import matplotlib.pyplot as plt``. All other imports, including the
+demonstrated function, must be explicit.
 
-    When matplotlib is imported in the example, the Example code will be
-    wrapped in `matplotlib's Sphinx \`plot\` directive
-    <http://matplotlib.org/sampledoc/extensions.html>`_.  When matplotlib is
-    not explicitly imported, `.. plot::` can be used directly if
-    `matplotlib.sphinxext.plot_directive` is loaded as a Sphinx extension in
-    ``conf.py``.
+When matplotlib is imported in the example, the Example code will be
+wrapped in `matplotlib's Sphinx \`plot\` directive
+<http://matplotlib.org/sampledoc/extensions.html>`_.  When matplotlib is
+not explicitly imported, `.. plot::` can be used directly if
+`matplotlib.sphinxext.plot_directive` is loaded as a Sphinx extension in
+``conf.py``.
 
 .. highlight:: rst
 
@@ -517,11 +547,11 @@ Class docstring
 ```````````````
 Use the same sections as outlined above (all except ``Returns`` are
 applicable).  The constructor (``__init__``) should also be documented
-here, the **Parameters** section of the docstring details the constructors
-parameters.
+here, the :ref:`Parameters <params>` section of the docstring details the
+constructor's parameters.
 
-An **Attributes** section, located below the **Parameters** section,
-may be used to describe non-method attributes of the class::
+An **Attributes** section, located below the :ref:`Parameters <params>`
+section, may be used to describe non-method attributes of the class::
 
   Attributes
   ----------
@@ -571,8 +601,9 @@ becomes useful to have an additional **Methods** section:
       """
 
 If it is necessary to explain a private method (use with care!), it can
-be referred to in the **Extended Summary** or the **Notes** section.
-Do not list private methods in the **methods** section.
+be referred to in the :ref:`Extended Summary <extended_summary>` or the
+:ref:`Notes <notes>` section.
+Do not list private methods in the **Methods** section.
 
 Note that `self` is *not* listed as the first parameter of methods.
 
@@ -582,9 +613,9 @@ Document these as you would any other function.  Do not include
 ``self`` in the list of parameters.  If a method has an equivalent function
 (which is the case for many ndarray methods for example), the function
 docstring should contain the detailed documentation, and the method docstring
-should refer to it.  Only put brief summary and **See Also** sections in the
-method docstring. The method should use a **Returns** or **Yields** section,
-as appropriate.
+should refer to it.  Only put brief summary and :ref:`See Also <seealso>`
+sections in the method docstring. The method should use a
+:ref:`Returns <returns>` or :ref:`Yields <yields>` section, as appropriate.
 
 
 Documenting class instances
@@ -599,15 +630,16 @@ instances a useful docstring, we do the following:
 * Multiple instances: If multiple instances are exposed, docstrings
   for each instance are written and assigned to the instances'
   ``__doc__`` attributes at run time. The class is documented as usual, and
-  the exposed instances can be mentioned in the **Notes** and **See Also**
-  sections.
+  the exposed instances can be mentioned in the :ref:`Notes <notes>` and
+  :ref:`See Also <seealso>` sections.
 
 
 Documenting generators
 ----------------------
 Generators should be documented just as functions are documented. The
-only difference is that one should use the **Yields** section instead
-of the **Returns** section. Support for the **Yields** section was added in
+only difference is that one should use the :ref:`Yields <yields>` section
+instead of the :ref:`Returns <returns>` section.
+Support for the :ref:`Yields <yields>` section was added in
 `numpydoc <https://github.com/numpy/numpydoc>`_ version 0.6.
 
 
@@ -651,8 +683,8 @@ belong in docstrings.
 
 Other points to keep in mind
 ----------------------------
-* Equations : as discussed in the **Notes** section above, LaTeX formatting
-  should be kept to a minimum.  Often it's possible to show equations as
+* Equations : as discussed in the :ref:`Notes <notes>` section above, LaTeX
+  formatting should be kept to a minimum.  Often it's possible to show equations as
   Python code or pseudo-code instead, which is much more readable in a
   terminal.  For inline display use double backticks (like ``y = np.sin(x)``).
   For display with blank lines above and below, use a double colon and indent
