@@ -27,11 +27,17 @@ jobs:
         - run:
             name: make html
             command: |
-              cd doc
-              make html
+              make -C doc html
         - store_artifacts:
             path: doc/_build/html/
             destination: html
+        - run:
+            name: make tinybuild
+            command: |
+              make -C numpydoc/tests/tinybuild html
+        - store_artifacts:
+            path: numpydoc/tests/tinybuild/_build/html/
+            destination: tinybuild
 
 workflows:
   version: 2
