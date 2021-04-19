@@ -213,6 +213,18 @@ The sections of a function's docstring are:
      x1, x2 : array_like
          Input arrays, description of `x1`, `x2`.
 
+   When documenting variable length positional, or keyword arguments, leave the
+   leading star(s) in front of the name::
+
+     *args : tuple
+         Additional arguments should be passed as keyword arguments
+     **kwargs : dict, optional
+         Extra arguments to `metric`: refer to each metric documentation for a
+         list of all possible arguments.
+
+   ..
+      above example is from scipy.spatial.distance.pdist
+
 5. **Returns**
 
    Explanation of the returned values and their types. Similar to the
