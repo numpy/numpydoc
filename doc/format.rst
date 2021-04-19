@@ -12,7 +12,7 @@ the numpydoc extension for Sphinx_.
    For an accompanying example, see :ref:`example.py <example>`.
 
    Some features described in this document require a recent version of
-   ``numpydoc``. For example, the **Yields** section was added in
+   ``numpydoc``. For example, the :ref:`Yields <yields>` section was added in
    ``numpydoc`` 0.6.
 
 Overview
@@ -146,15 +146,19 @@ underlined section header.
             `ndobj_old` will be removed in NumPy 2.0.0, it is replaced by
             `ndobj_new` because the latter works also with array subclasses.
 
+.. _extended_summary:
+
 3. Extended Summary
 ```````````````````
 
 A few sentences giving an extended description.  This section
 should be used to clarify *functionality*, not to discuss
 implementation detail or background theory, which should rather be
-explored in the **Notes** section below.  You may refer to the
+explored in the :ref:`Notes <notes>` section below.  You may refer to the
 parameters and the function name, but parameter descriptions still
-belong in the **Parameters** section.
+belong in the :ref:`Parameters <params>` section.
+
+.. _params:
 
 4. Parameters
 `````````````
@@ -231,11 +235,14 @@ leading star(s) in front of the name::
 ..
    above example is from scipy.spatial.distance.pdist
 
+.. _returns:
+
 5. Returns
 ``````````
 
 Explanation of the returned values and their types. Similar to the
-**Parameters** section, except the name of each return value is optional.
+:ref:`Parameters <params>` section, except the name of each return value is
+optional.
 The type of each return value is always required::
 
   Returns
@@ -243,8 +250,8 @@ The type of each return value is always required::
   int
       Description of anonymous integer return value.
 
-If both the name and type are specified, the **Returns** section takes the
-same form as the **Parameters** section::
+If both the name and type are specified, the :ref:`Returns <returns>` section
+takes the same form as the :ref:`Parameters <params>` section::
 
   Returns
   -------
@@ -253,20 +260,22 @@ same form as the **Parameters** section::
   err_msg : str or None
       Human readable error message, or None on success.
 
+.. _yields:
+
 6. Yields
 `````````
 
 Explanation of the yielded values and their types. This is relevant to
-generators only. Similar to the **Returns** section in that the name of
-each value is optional, but the type of each value is always required::
+generators only. Similar to the :ref:`Returns <returns>` section in that the
+name of each value is optional, but the type of each value is always required::
 
   Yields
   ------
   int
       Description of the anonymous integer return value.
 
-If both the name and type are specified, the **Yields** section takes the
-same form as the **Returns** section::
+If both the name and type are specified, the :ref:`Yields <yields>` section
+takes the same form as the :ref:`Returns <returns>` section::
 
   Yields
   ------
@@ -275,7 +284,7 @@ same form as the **Returns** section::
   err_msg : str or None
       Human readable error message, or None on success.
 
-Support for the **Yields** section was added in `numpydoc
+Support for the :ref:`Yields <yields>` section was added in `numpydoc
 <https://github.com/numpy/numpydoc>`_ version 0.6.
 
 7. Receives
@@ -292,7 +301,7 @@ includes Receives it must also include Yields.
 
 An optional section used to describe infrequently used parameters.
 It should only be used if a function has a large number of keyword
-parameters, to prevent cluttering the **Parameters** section.
+parameters, to prevent cluttering the :ref:`Parameters <params>` section.
 
 9. Raises
 `````````
@@ -318,6 +327,8 @@ under what conditions, formatted similarly to Raises.
 ````````````
 
 An optional section with cautions to the user in free text/reST.
+
+.. _seealso:
 
 12. See Also
 ````````````
@@ -368,6 +379,8 @@ on the next line, indented four spaces::
   --------
   package.module.submodule.func_a :
       A somewhat long description of the function.
+
+.. _notes:
 
 13. Notes
 `````````
@@ -420,7 +433,7 @@ directory.
 14. References
 ``````````````
 
-References cited in the **notes** section may be listed here,
+References cited in the :ref:`Notes <notes>` section may be listed here,
 e.g. if you cited the article below using the text ``[1]_``,
 include it as in the list as follows::
 
@@ -534,11 +547,11 @@ Class docstring
 ```````````````
 Use the same sections as outlined above (all except ``Returns`` are
 applicable).  The constructor (``__init__``) should also be documented
-here, the **Parameters** section of the docstring details the constructors
-parameters.
+here, the :ref:`Parameters <params>` section of the docstring details the
+constructor's parameters.
 
-An **Attributes** section, located below the **Parameters** section,
-may be used to describe non-method attributes of the class::
+An **Attributes** section, located below the :ref:`Parameters <params>`
+section, may be used to describe non-method attributes of the class::
 
   Attributes
   ----------
@@ -588,8 +601,9 @@ becomes useful to have an additional **Methods** section:
       """
 
 If it is necessary to explain a private method (use with care!), it can
-be referred to in the **Extended Summary** or the **Notes** section.
-Do not list private methods in the **methods** section.
+be referred to in the :ref:`Extended Summary <extended_summary>` or the
+:ref:`Notes <notes>` section.
+Do not list private methods in the **Methods** section.
 
 Note that `self` is *not* listed as the first parameter of methods.
 
@@ -599,9 +613,9 @@ Document these as you would any other function.  Do not include
 ``self`` in the list of parameters.  If a method has an equivalent function
 (which is the case for many ndarray methods for example), the function
 docstring should contain the detailed documentation, and the method docstring
-should refer to it.  Only put brief summary and **See Also** sections in the
-method docstring. The method should use a **Returns** or **Yields** section,
-as appropriate.
+should refer to it.  Only put brief summary and :ref:`See Also <seealso>`
+sections in the method docstring. The method should use a
+:ref:`Returns <returns>` or :ref:`Yields <yields>` section, as appropriate.
 
 
 Documenting class instances
@@ -616,15 +630,16 @@ instances a useful docstring, we do the following:
 * Multiple instances: If multiple instances are exposed, docstrings
   for each instance are written and assigned to the instances'
   ``__doc__`` attributes at run time. The class is documented as usual, and
-  the exposed instances can be mentioned in the **Notes** and **See Also**
-  sections.
+  the exposed instances can be mentioned in the :ref:`Notes <notes>` and
+  :ref:`See Also <seealso>` sections.
 
 
 Documenting generators
 ----------------------
 Generators should be documented just as functions are documented. The
-only difference is that one should use the **Yields** section instead
-of the **Returns** section. Support for the **Yields** section was added in
+only difference is that one should use the :ref:`Yields <yields>` section
+instead of the :ref:`Returns <returns>` section.
+Support for the :ref:`Yields <yields>` section was added in
 `numpydoc <https://github.com/numpy/numpydoc>`_ version 0.6.
 
 
@@ -668,8 +683,8 @@ belong in docstrings.
 
 Other points to keep in mind
 ----------------------------
-* Equations : as discussed in the **Notes** section above, LaTeX formatting
-  should be kept to a minimum.  Often it's possible to show equations as
+* Equations : as discussed in the :ref:`Notes <notes>` section above, LaTeX
+  formatting should be kept to a minimum.  Often it's possible to show equations as
   Python code or pseudo-code instead, which is much more readable in a
   terminal.  For inline display use double backticks (like ``y = np.sin(x)``).
   For display with blank lines above and below, use a double colon and indent
