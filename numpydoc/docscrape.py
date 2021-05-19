@@ -21,7 +21,7 @@ def strip_blank_lines(l):
     return l
 
 
-class Reader(object):
+class Reader:
     """A line-based string reader.
 
     """
