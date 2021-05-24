@@ -196,15 +196,15 @@ class NumpyDocString(Mapping):
 
         return doc[i:len(doc)-j]
 
-    def _read_to_next_section(self):
-        section = self._doc.read_to_next_empty_line()
+    def _read_to_next_section(self, doc=None):
+        if doc is None:
+            doc = self._doc
 
-        while not self._is_at_section() and not self._doc.eof():
-            if not self._doc.peek(-1).strip():  # previous line was empty
-                section += ['']
-
-            section += self._doc.read_to_next_empty_line()
-
+        section = []
+        # make sure we actually read to the next section
+        if self._is_at_section(doc=doc):
+            section.append(doc.read())
+        section += doc.read_to_condition(lambda l: self._is_at_section(doc=doc))
         return section
 
     def _read_sections(self):
