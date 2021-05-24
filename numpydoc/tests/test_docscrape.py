@@ -934,6 +934,18 @@ def test_no_summary():
     ----------"""))
 
 
+def test_missing_blank_line_after_summary():
+    doc = NumpyDocString("""
+    Parameters without separating blank line:
+    Parameters
+    ----------
+    data
+        Some parameter.
+    """)
+    assert len(doc["Parameters"]) == 1
+    assert doc["Parameters"][0].name == "data"
+
+
 def test_unicode():
     doc = SphinxDocString("""
     öäöäöäöäöåååå
