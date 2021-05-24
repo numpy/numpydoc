@@ -946,6 +946,22 @@ def test_missing_blank_line_after_summary():
     assert doc["Parameters"][0].name == "data"
 
 
+def test_missing_blank_line_between_sections():
+    doc = NumpyDocString("""
+    Parameters
+    ----------
+    data
+        Some parameter.
+    Returns
+    -------
+    int
+    """)
+    assert len(doc["Parameters"]) == 1
+    assert doc["Parameters"][0].name == "data"
+
+    assert len(doc["Returns"]) == 1
+
+
 def test_unicode():
     doc = SphinxDocString("""
     öäöäöäöäöåååå
