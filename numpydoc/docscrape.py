@@ -357,22 +357,25 @@ class NumpyDocString(Mapping):
         if self._is_at_section():
             return
 
+        entire_summary = Reader(self._read_to_next_section())
+
         # If several signatures present, take the last one
         while True:
-            summary = self._doc.read_to_next_empty_line()
+            summary = entire_summary.read_to_next_empty_line()
             summary_str = " ".join([s.strip() for s in summary]).strip()
             compiled = re.compile(r'^([\w., ]+=)?\s*[\w\.]+\(.*\)$')
             if compiled.match(summary_str):
                 self['Signature'] = summary_str
-                if not self._is_at_section():
+                if not self._is_at_section(doc=entire_summary):
                     continue
             break
 
         if summary is not None:
             self['Summary'] = summary
 
-        if not self._is_at_section():
-            self['Extended Summary'] = self._read_to_next_section()
+        if not self._is_at_section(doc=entire_summary):
+            entire_summary.seek_next_non_empty_line()
+            self['Extended Summary'] = self._read_to_next_section(doc=entire_summary)
 
     def _parse(self):
         self._doc.reset()
