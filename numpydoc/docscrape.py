@@ -181,6 +181,14 @@ class NumpyDocString(Mapping):
             snip = '\n'.join(doc._str[:2])+'...'
             self._error_location("potentially wrong underline length... \n%s \n%s in \n%s"\
                     % (l1, l2, snip), error=False)
+
+        l3 = doc.peek(1).strip()
+        if "Traceback (most recent call last)" in l3:
+            return False
+
+        if not l1.strip() or not l2.strip():
+            return False
+
         return l2.startswith('-'*len(l1)) or l2.startswith('='*len(l1))
 
     def _strip(self, doc):
