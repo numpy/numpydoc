@@ -164,20 +164,21 @@ class NumpyDocString(Mapping):
     def __len__(self):
         return len(self._parsed_data)
 
-    def _is_at_section(self):
-        self._doc.seek_next_non_empty_line()
+    def _is_at_section(self, doc=None):
+        if doc is None:
+            doc = self._doc
 
-        if self._doc.eof():
+        if doc.eof():
             return False
 
-        l1 = self._doc.peek().strip()  # e.g. Parameters
+        l1 = doc.peek().strip()  # e.g. Parameters
 
         if l1.startswith('.. index::'):
             return True
 
-        l2 = self._doc.peek(1).strip()  # ---------- or ==========
+        l2 = doc.peek(1).strip()  # ---------- or ==========
         if len(l2) >= 3 and (set(l2) in ({'-'}, {'='}) ) and len(l2) != len(l1):
-            snip = '\n'.join(self._doc._str[:2])+'...'
+            snip = '\n'.join(doc._str[:2])+'...'
             self._error_location("potentially wrong underline length... \n%s \n%s in \n%s"\
                     % (l1, l2, snip), error=False)
         return l2.startswith('-'*len(l1)) or l2.startswith('='*len(l1))
