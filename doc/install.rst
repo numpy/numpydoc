@@ -93,7 +93,7 @@ numpydoc_xref_ignore : set or ``"all"``
   If the ``numpydoc_xref_ignore="all"``, then all unrecognized terms are
   ignored, i.e. terms not in ``numpydoc_xref_aliases`` are *not* wrapped in
   ``:obj:`` roles.
-  This configuration parameter may be useful if you only want create
+  This configuration parameter may be useful if you only want to create
   cross references for a small number of terms. In this case, including the
   desired cross reference mappings in ``numpydoc_xref_aliases`` and setting
   ``numpydoc_xref_ignore="all"`` is more convenient than explicitly listing
