@@ -10,7 +10,8 @@ jobs:
             command: |
               echo "set -e" >> $BASH_ENV;
               echo "export PATH=~/.local/bin:$PATH" >> $BASH_ENV;
-              sudo apt-get install dvipng texlive-fonts-recommended texlive-latex-recommended texlive-latex-extra texlive-generic-extra latexmk texlive-xetex
+              sudo apt update
+              sudo apt install dvipng texlive-fonts-recommended texlive-latex-recommended texlive-latex-extra texlive-generic-extra latexmk texlive-xetex
         - restore_cache:
             keys:
               - pip-cache
