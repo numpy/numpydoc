@@ -27,6 +27,7 @@ ALLOWED_SECTIONS = [
     "Other Parameters",
     "Raises",
     "Warns",
+    "Warnings",
     "See Also",
     "Notes",
     "References",
