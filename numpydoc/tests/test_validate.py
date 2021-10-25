@@ -384,6 +384,27 @@ class GoodDocStrings:
         else:
             return None
 
+    def warnings(self):
+        """
+        Do one thing.
+
+        Sometimes, this function does other things.
+
+        Warnings
+        --------
+        This function may produce side effects when some condition
+        is met.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
+
     def multiple_variables_on_one_line(self, matrix, a, b, i, j):
         """
         Swap two values in a matrix.
@@ -1067,6 +1088,7 @@ class TestValidator:
             "empty_returns",
             "multiple_variables_on_one_line",
             "other_parameters",
+            "warnings",
         ],
     )
     def test_good_functions(self, capsys, func):
