@@ -9,6 +9,7 @@ import ast
 import collections
 import importlib
 import inspect
+import itertools
 import pydoc
 import re
 import textwrap
@@ -263,7 +264,7 @@ class Validator:
     @property
     def doc_parameters(self):
         parameters = collections.OrderedDict()
-        for names, type_, desc in self.doc["Parameters"]:
+        for names, type_, desc in itertools.chain(self.doc["Parameters"], self.doc["Other Parameters"]):
             for name in names.split(", "):
                 parameters[name] = (type_, desc)
         return parameters
