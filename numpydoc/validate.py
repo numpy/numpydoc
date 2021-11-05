@@ -326,25 +326,15 @@ class Validator:
         extra = set(all_params) - set(signature_params)
         if extra:
             errs.append(error("PR02", unknown_params=str(extra)))
-        order_match = True
-        params, other_params = tuple(self.doc_parameters.keys()), tuple(self.doc_other_parameters.keys())
-        i_p, i_o = 0, 0
-        for param in signature_params:
-            if i_p < len(params) and param == params[i_p]:
-                i_p += 1
-            elif i_o < len(other_params) and param == other_params[i_o]:
-                i_o += 1
-            else:
-                order_match = False
-                break
         if (
             not missing
             and not extra
-            and not order_match
+            and signature_params != all_params
+            and not (not signature_params and not all_params)
         ):
             errs.append(
                 error(
-                    "PR03", actual_params=signature_params, documented_params="{}, {}".format(params, other_params)
+                    "PR03", actual_params=signature_params, documented_params=all_params
                 )
             )
 

@@ -55,8 +55,6 @@ def foo(var1, var2, *args, long_var_name='hi', only_seldom_used_keyword=0, **kwa
         Other arguments.
     long_var_name : {'hi', 'ho'}, optional
         Choices in brackets, default first when optional.
-    **kwargs : dict
-        Keyword arguments.
 
     Returns
     -------
@@ -73,6 +71,11 @@ def foo(var1, var2, *args, long_var_name='hi', only_seldom_used_keyword=0, **kwa
     only_seldom_used_keyword : int, optional
         Infrequently used parameters can be described under this optional
         section to prevent cluttering the Parameters section.
+    **kwargs : dict
+        Other infrequently used keyword arguments. Note that all keyword
+        arguments appearing after the first parameter specified under the
+        Other Parameters section, should also be described under this
+        section.
 
     Raises
     ------
