@@ -431,6 +431,33 @@ class GoodDocStrings:
         """
         pass
 
+    def other_parameters(self, param1, param2):
+        """
+        Ensure "Other Parameters" are recognized.
+
+        The second parameter is used infrequently, so it is put in the
+        "Other Parameters" section.
+
+        Parameters
+        ----------
+        param1 : bool
+            Description of commonly used parameter.
+
+        Other Parameters
+        ----------------
+        param2 : str
+            Description of infrequently used parameter.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
+
 
 class BadGenericDocStrings:
     """Everything here has a bad docstring
@@ -1060,6 +1087,7 @@ class TestValidator:
             "no_returns",
             "empty_returns",
             "multiple_variables_on_one_line",
+            "other_parameters",
             "warnings",
         ],
     )

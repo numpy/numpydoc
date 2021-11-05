@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 # numpy module itself, unabbreviated.
 
 
-def foo(var1, var2, *args, long_var_name='hi', **kwargs):
+def foo(var1, var2, *args, long_var_name='hi', only_seldom_used_keyword=0, **kwargs):
     r"""Summarize the function in one line.
 
     Several sentences providing an extended description. Refer to
@@ -55,8 +55,6 @@ def foo(var1, var2, *args, long_var_name='hi', **kwargs):
         Other arguments.
     long_var_name : {'hi', 'ho'}, optional
         Choices in brackets, default first when optional.
-    **kwargs : dict
-        Keyword arguments.
 
     Returns
     -------
@@ -70,10 +68,14 @@ def foo(var1, var2, *args, long_var_name='hi', **kwargs):
 
     Other Parameters
     ----------------
-    only_seldom_used_keywords : type
-        Explanation.
-    common_parameters_listed_above : type
-        Explanation.
+    only_seldom_used_keyword : int, optional
+        Infrequently used parameters can be described under this optional
+        section to prevent cluttering the Parameters section.
+    **kwargs : dict
+        Other infrequently used keyword arguments. Note that all keyword
+        arguments appearing after the first parameter specified under the
+        Other Parameters section, should also be described under this
+        section.
 
     Raises
     ------

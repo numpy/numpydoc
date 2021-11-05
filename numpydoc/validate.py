@@ -261,13 +261,25 @@ class Validator:
             return " ".join(self.doc["Summary"])
         return " ".join(self.doc["Extended Summary"])
 
+    def _doc_parameters(self, sections):
+        parameters = collections.OrderedDict()
+        for section in sections:
+            for names, type_, desc in self.doc[section]:
+                for name in names.split(", "):
+                    parameters[name] = (type_, desc)
+        return parameters
+
     @property
     def doc_parameters(self):
-        parameters = collections.OrderedDict()
-        for names, type_, desc in self.doc["Parameters"]:
-            for name in names.split(", "):
-                parameters[name] = (type_, desc)
-        return parameters
+        return self._doc_parameters(["Parameters"])
+
+    @property
+    def doc_other_parameters(self):
+        return self._doc_parameters(["Other Parameters"])
+
+    @property
+    def doc_all_parameters(self):
+        return self._doc_parameters(["Parameters", "Other Parameters"])
 
     @property
     def signature_parameters(self):
@@ -307,22 +319,22 @@ class Validator:
     def parameter_mismatches(self):
         errs = []
         signature_params = self.signature_parameters
-        doc_params = tuple(self.doc_parameters)
-        missing = set(signature_params) - set(doc_params)
+        all_params = tuple(self.doc_all_parameters)
+        missing = set(signature_params) - set(all_params)
         if missing:
             errs.append(error("PR01", missing_params=str(missing)))
-        extra = set(doc_params) - set(signature_params)
+        extra = set(all_params) - set(signature_params)
         if extra:
             errs.append(error("PR02", unknown_params=str(extra)))
         if (
             not missing
             and not extra
-            and signature_params != doc_params
-            and not (not signature_params and not doc_params)
+            and signature_params != all_params
+            and not (not signature_params and not all_params)
         ):
             errs.append(
                 error(
-                    "PR03", actual_params=signature_params, documented_params=doc_params
+                    "PR03", actual_params=signature_params, documented_params=all_params
                 )
             )
 
@@ -333,7 +345,7 @@ class Validator:
         return DIRECTIVE_PATTERN.findall(self.raw_doc)
 
     def parameter_type(self, param):
-        return self.doc_parameters[param][0]
+        return self.doc_all_parameters[param][0]
 
     @property
     def see_also(self):
@@ -542,7 +554,7 @@ def validate(obj_name):
     # PR03: Wrong parameters order
     errs += doc.parameter_mismatches
 
-    for param, kind_desc in doc.doc_parameters.items():
+    for param, kind_desc in doc.doc_all_parameters.items():
         if not param.startswith("*"):  # Check can ignore var / kwargs
             if not doc.parameter_type(param):
                 if ":" in param:
