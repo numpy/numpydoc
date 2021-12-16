@@ -40,7 +40,7 @@ The full set of validation checks can be activated by::
 
 The complete validation suite contains `many checks <validation_checks>`_
 including some for style, capitalization, and grammar.
-It is unlikely that reporting *all* validation warnings is desireable for
+It is unlikely that reporting *all* validation warnings is desirable for
 most use-cases.
 Individual checks can be excluded by including them in the set with the
 special keyword ``"all"``::

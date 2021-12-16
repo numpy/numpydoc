@@ -58,7 +58,7 @@ class GoodDocStrings:
 
     def swap(self, arr, i, j, *args, **kwargs):
         """
-        Swap two indicies on an array.
+        Swap two indices on an array.
 
         The extended summary can be multiple paragraphs, but just one
         is enough to pass the validation.
@@ -417,9 +417,9 @@ class GoodDocStrings:
         matrix : list of list
             A double list that represents a matrix.
         a, b : int
-            The indicies of the first value.
+            The indices of the first value.
         i, j : int
-            The indicies of the second value.
+            The indices of the second value.
 
         See Also
         --------
@@ -899,7 +899,7 @@ class BadReturns:
 
     def no_description(self):
         """
-        Provides type but no descrption.
+        Provides type but no description.
 
         Returns
         -------
