@@ -136,7 +136,7 @@ class NumpyDocString(Mapping):
         'index': {}
     }
 
-    def __init__(self, docstring, config={}):
+    def __init__(self, docstring, config=None):
         orig_docstring = docstring
         docstring = textwrap.dedent(docstring).split('\n')
 
@@ -553,7 +553,7 @@ def dedent_lines(lines):
 
 
 class FunctionDoc(NumpyDocString):
-    def __init__(self, func, role='func', doc=None, config={}):
+    def __init__(self, func, role='func', doc=None, config=None):
         self._f = func
         self._role = role  # e.g. "func" or "meth"
 
@@ -561,6 +561,8 @@ class FunctionDoc(NumpyDocString):
             if func is None:
                 raise ValueError("No function or docstring given")
             doc = inspect.getdoc(func) or ''
+        if config is None:
+            config = {}
         NumpyDocString.__init__(self, doc, config)
 
     def get_func(self):
@@ -590,8 +592,10 @@ class FunctionDoc(NumpyDocString):
 
 
 class ObjDoc(NumpyDocString):
-    def __init__(self, obj, doc=None, config={}):
+    def __init__(self, obj, doc=None, config=None):
         self._f = obj
+        if config is None:
+            config = {}
         NumpyDocString.__init__(self, doc, config=config)
 
 
@@ -600,7 +604,7 @@ class ClassDoc(NumpyDocString):
     extra_public_methods = ['__call__']
 
     def __init__(self, cls, doc=None, modulename='', func_doc=FunctionDoc,
-                 config={}):
+                 config=None):
         if not inspect.isclass(cls) and cls is not None:
             raise ValueError("Expected a class or None, but got %r" % cls)
         self._cls = cls
@@ -610,6 +614,8 @@ class ClassDoc(NumpyDocString):
         else:
             ALL = object()
 
+        if config is None:
+            config = {}
         self.show_inherited_members = config.get(
                     'show_inherited_class_members', True)
 
@@ -679,7 +685,7 @@ class ClassDoc(NumpyDocString):
         return True
 
 
-def get_doc_object(obj, what=None, doc=None, config={}):
+def get_doc_object(obj, what=None, doc=None, config=None):
     if what is None:
         if inspect.isclass(obj):
             what = 'class'
@@ -689,6 +695,8 @@ def get_doc_object(obj, what=None, doc=None, config={}):
             what = 'function'
         else:
             what = 'object'
+    if config is None:
+        config = {}
 
     if what == 'class':
         return ClassDoc(obj, func_doc=FunctionDoc, doc=doc, config=config)

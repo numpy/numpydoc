@@ -225,7 +225,7 @@ def test_returns(doc):
     assert arg_type == 'ndarray'
     assert desc[0].startswith('The drawn samples')
     assert desc[-1].endswith('distribution.')
-    
+
     arg, arg_type, desc = doc['Returns'][1]
     assert arg == ''
     assert arg_type == 'list of str'
