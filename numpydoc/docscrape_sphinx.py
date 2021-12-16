@@ -18,7 +18,9 @@ IMPORT_MATPLOTLIB_RE = r'\b(import +matplotlib|from +matplotlib +import)\b'
 
 
 class SphinxDocString(NumpyDocString):
-    def __init__(self, docstring, config={}):
+    def __init__(self, docstring, config=None):
+        if config is None:
+            config = {}
         NumpyDocString.__init__(self, docstring, config=config)
         self.load_config(config)
 
@@ -392,25 +394,31 @@ class SphinxDocString(NumpyDocString):
 
 
 class SphinxFunctionDoc(SphinxDocString, FunctionDoc):
-    def __init__(self, obj, doc=None, config={}):
+    def __init__(self, obj, doc=None, config=None):
+        if config is None:
+            config = {}
         self.load_config(config)
         FunctionDoc.__init__(self, obj, doc=doc, config=config)
 
 
 class SphinxClassDoc(SphinxDocString, ClassDoc):
-    def __init__(self, obj, doc=None, func_doc=None, config={}):
+    def __init__(self, obj, doc=None, func_doc=None, config=None):
+        if config is None:
+            config = {}
         self.load_config(config)
         ClassDoc.__init__(self, obj, doc=doc, func_doc=None, config=config)
 
 
 class SphinxObjDoc(SphinxDocString, ObjDoc):
-    def __init__(self, obj, doc=None, config={}):
+    def __init__(self, obj, doc=None, config=None):
+        if config is None:
+            config = {}
         self.load_config(config)
         ObjDoc.__init__(self, obj, doc=doc, config=config)
 
 
 # TODO: refactor to use docscrape.get_doc_object
-def get_doc_object(obj, what=None, doc=None, config={}, builder=None):
+def get_doc_object(obj, what=None, doc=None, config=None, builder=None):
     if what is None:
         if inspect.isclass(obj):
             what = 'class'
@@ -421,6 +429,8 @@ def get_doc_object(obj, what=None, doc=None, config={}, builder=None):
         else:
             what = 'object'
 
+    if config is None:
+        config = {}
     template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
     if builder is not None:
         template_loader = BuiltinTemplateLoader()

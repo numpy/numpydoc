@@ -108,7 +108,7 @@ def make_xref(param_type, xref_aliases, xref_ignore):
         to fully qualified names that can be cross-referenced.
     xref_ignore : set or "all"
         A set containing words not to cross-reference. Instead of a set, the
-        string 'all' can be given to ignore all unrecognized terms. 
+        string 'all' can be given to ignore all unrecognized terms.
         Unrecognized terms include those that are not in `xref_aliases` and
         are not already wrapped in a reST role.
 
