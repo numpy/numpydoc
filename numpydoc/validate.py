@@ -564,6 +564,10 @@ def validate(obj_name):
             else:
                 if doc.parameter_type(param)[-1] == ".":
                     errs.append(error("PR05", param_name=param))
+                # skip common_type_error checks when the param type is a set of
+                # options
+                if "{" in doc.parameter_type(param):
+                    continue
                 common_type_errors = [
                     ("integer", "int"),
                     ("boolean", "bool"),
