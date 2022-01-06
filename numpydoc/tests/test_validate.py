@@ -458,6 +458,28 @@ class GoodDocStrings:
         """
         pass
 
+    def valid_options_in_parameter_description_sets(self, bar):
+        """
+        Ensure a PR06 error is not raised when type is member of a set.
+
+        Literal keywords like 'integer' are valid when specified in a set of
+        valid options for a keyword parameter.
+
+        Parameters
+        ----------
+        bar : {'integer', 'boolean'}
+            The literal values of 'integer' and 'boolean' are part of an
+            options set and thus should not be subject to PR06 warnings.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+
 
 class BadGenericDocStrings:
     """Everything here has a bad docstring
@@ -1089,6 +1111,7 @@ class TestValidator:
             "multiple_variables_on_one_line",
             "other_parameters",
             "warnings",
+            "valid_options_in_parameter_description_sets",
         ],
     )
     def test_good_functions(self, capsys, func):
