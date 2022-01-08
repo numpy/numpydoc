@@ -164,7 +164,7 @@ class Validator:
             else:
                 break
         else:
-            raise ImportError("No module can be imported " 'from "{}"'.format(name))
+            raise ImportError(f"No module can be imported from \"{name}\"")
 
         for part in func_parts:
             obj = getattr(obj, part)
@@ -288,9 +288,9 @@ class Validator:
             Add stars to *args and **kwargs parameters
             """
             if info.kind == inspect.Parameter.VAR_POSITIONAL:
-                return "*{}".format(param_name)
+                return f"*{param_name}"
             elif info.kind == inspect.Parameter.VAR_KEYWORD:
-                return "**{}".format(param_name)
+                return f"**{param_name}"
             else:
                 return param_name
 
@@ -420,7 +420,7 @@ def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
     # Find and strip out any sphinx directives
     desc = "\n".join(desc)
     for directive in DIRECTIVES:
-        full_directive = ".. {}".format(directive)
+        full_directive = f".. {directive}"
         if full_directive in desc:
             # Only retain any description before the directive
             desc = desc[: desc.index(full_directive)].rstrip("\n")

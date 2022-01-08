@@ -101,7 +101,7 @@ class ParseError(Exception):
     def __str__(self):
         message = self.args[0]
         if hasattr(self, 'docstring'):
-            message = "%s in %r" % (message, self.docstring)
+            message = f"{message} in {self.docstring!r}"
         return message
 
 
@@ -154,7 +154,7 @@ class NumpyDocString(Mapping):
 
     def __setitem__(self, key, val):
         if key not in self._parsed_data:
-            self._error_location("Unknown section %s" % key, error=False)
+            self._error_location(f"Unknown section {key}", error=False)
         else:
             self._parsed_data[key] = val
 
@@ -492,11 +492,11 @@ class NumpyDocString(Mapping):
             links = []
             for func, role in funcs:
                 if role:
-                    link = ':%s:`%s`' % (role, func)
+                    link = f':{role}:`{func}`'
                 elif func_role:
-                    link = ':%s:`%s`' % (func_role, func)
+                    link = f':{func_role}:`{func}`'
                 else:
-                    link = "`%s`_" % func
+                    link = f"`{func}`_"
                 links.append(link)
             link = ', '.join(links)
             out += [link]
@@ -519,12 +519,12 @@ class NumpyDocString(Mapping):
         default_index = idx.get('default', '')
         if default_index:
             output_index = True
-        out += ['.. index:: %s' % default_index]
+        out += [f'.. index:: {default_index}']
         for section, references in idx.items():
             if section == 'default':
                 continue
             output_index = True
-            out += ['   :%s: %s' % (section, ', '.join(references))]
+            out += [f"   :{section}: {', '.join(references)}"]
         if output_index:
             return out
         return ''
@@ -583,9 +583,8 @@ class FunctionDoc(NumpyDocString):
 
         if self._role:
             if self._role not in roles:
-                print("Warning: invalid role %s" % self._role)
-            out += '.. %s:: %s\n    \n\n' % (roles.get(self._role, ''),
-                                             func_name)
+                print(f"Warning: invalid role {self._role}")
+            out += f".. {roles.get(self._role, '')}:: {func_name}\n    \n\n"
 
         out += super().__str__(func_role=self._role)
         return out
@@ -606,7 +605,7 @@ class ClassDoc(NumpyDocString):
     def __init__(self, cls, doc=None, modulename='', func_doc=FunctionDoc,
                  config=None):
         if not inspect.isclass(cls) and cls is not None:
-            raise ValueError("Expected a class or None, but got %r" % cls)
+            raise ValueError(f"Expected a class or None, but got {cls!r}")
         self._cls = cls
 
         if 'sphinx' in sys.modules:
