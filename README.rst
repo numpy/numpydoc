@@ -13,7 +13,7 @@ docstrings formatted according to the NumPy documentation format.
 The extension also adds the code description directives
 ``np:function``, ``np-c:function``, etc.
 
-numpydoc requires Python 3.5+ and sphinx 1.6.5+.
+numpydoc requires Python 3.7+ and sphinx 1.6.5+.
 
 For usage information, please refer to the `documentation
 <https://numpydoc.readthedocs.io/>`_.
