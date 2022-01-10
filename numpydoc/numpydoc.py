@@ -63,10 +63,10 @@ def rename_references(app, what, name, obj, options, lines):
         for r in references:
             new_r = prefix + '-' + r
             for i, line in enumerate(lines):
-                lines[i] = lines[i].replace('[%s]_' % r,
-                                            '[%s]_' % new_r)
-                lines[i] = lines[i].replace('.. [%s]' % r,
-                                            '.. [%s]' % new_r)
+                lines[i] = lines[i].replace(f'[{r}]_',
+                                            f'[{new_r}]_')
+                lines[i] = lines[i].replace(f'.. [{r}]',
+                                            f'.. [{new_r}]')
 
 
 def _is_cite_in_numpydoc_docstring(citation_node):
@@ -119,10 +119,10 @@ def relabel_references(app, doc):
             # Sphinx has created pending_xref nodes with [reftext] text.
             def matching_pending_xref(node):
                 return (isinstance(node, pending_xref) and
-                        node[0].astext() == '[%s]' % ref_text)
+                        node[0].astext() == f'[{ref_text}]')
 
             for xref_node in ref.parent.traverse(matching_pending_xref):
-                xref_node.replace(xref_node[0], Text('[%s]' % new_text))
+                xref_node.replace(xref_node[0], Text(f'[{new_text}]'))
             ref.replace(ref_text, new_text.copy())
 
 
@@ -199,11 +199,11 @@ def mangle_docstrings(app, what, name, obj, options, lines):
     if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
             obj.__name__):
         if hasattr(obj, '__module__'):
-            v = dict(full_name="%s.%s" % (obj.__module__, obj.__name__))
+            v = dict(full_name=f"{obj.__module__}.{obj.__name__}")
         else:
             v = dict(full_name=obj.__name__)
         lines += ['', '.. htmlonly::', '']
-        lines += ['    %s' % x for x in
+        lines += [f'    {x}' for x in
                   (app.config.numpydoc_edit_link % v).split("\n")]
 
     # call function to replace reference numbers so that there are no

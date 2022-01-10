@@ -138,7 +138,7 @@ class SphinxDocString(NumpyDocString):
         # XXX: If changing the following, please check the rendering when param
         # ends with '_', e.g. 'word_'
         # See https://github.com/numpy/numpydoc/pull/144
-        display_param = '**%s**' % param
+        display_param = f'**{param}**'
 
         if not fake_autosummary:
             return display_param, desc
@@ -156,14 +156,12 @@ class SphinxDocString(NumpyDocString):
 
         prefix = getattr(self, '_name', '')
         if prefix:
-            link_prefix = '%s.' % prefix
+            link_prefix = f'{prefix}.'
         else:
             link_prefix = ''
 
         # Referenced object has a docstring
-        display_param = ':obj:`%s <%s%s>`' % (param,
-                                              link_prefix,
-                                              param)
+        display_param = f':obj:`{param} <{link_prefix}{param}>`'
         if obj_doc:
             # Overwrite desc. Take summary logic of autosummary
             desc = re.split(r'\n\s*\n', obj_doc.strip(), 1)[0]
@@ -239,11 +237,11 @@ class SphinxDocString(NumpyDocString):
         """
         out = []
         if self[name]:
-            out += ['.. rubric:: %s' % name, '']
+            out += [f'.. rubric:: {name}', '']
             prefix = getattr(self, '_name', '')
 
             if prefix:
-                prefix = '~%s.' % prefix
+                prefix = f'~{prefix}.'
 
             autosum = []
             others = []
@@ -259,7 +257,7 @@ class SphinxDocString(NumpyDocString):
 
                 if param_obj and pydoc.getdoc(param_obj):
                     # Referenced object has a docstring
-                    autosum += ["   %s%s" % (prefix, param.name)]
+                    autosum += [f"   {prefix}{param.name}"]
                 else:
                     others.append(param)
 
@@ -279,7 +277,7 @@ class SphinxDocString(NumpyDocString):
                     desc = " ".join(x.strip()
                                           for x in param.desc).strip()
                     if param.type:
-                        desc = "(%s) %s" % (param.type, desc)
+                        desc = f"({param.type}) {desc}"
                     out += [fmt % (name, desc)]
                 out += [hdr]
             out += ['']
@@ -316,14 +314,14 @@ class SphinxDocString(NumpyDocString):
         if len(idx) == 0:
             return out
 
-        out += ['.. index:: %s' % idx.get('default', '')]
+        out += [f".. index:: {idx.get('default', '')}"]
         for section, references in idx.items():
             if section == 'default':
                 continue
             elif section == 'refguide':
-                out += ['   single: %s' % (', '.join(references))]
+                out += [f"   single: {', '.join(references)}"]
             else:
-                out += ['   %s: %s' % (section, ','.join(references))]
+                out += [f"   {section}: {','.join(references)}"]
         out += ['']
         return out
 
@@ -343,7 +341,7 @@ class SphinxDocString(NumpyDocString):
                 m = re.match(r'.. \[([a-z0-9._-]+)\]', line, re.I)
                 if m:
                     items.append(m.group(1))
-            out += ['   ' + ", ".join(["[%s]_" % item for item in items]), '']
+            out += ['   ' + ", ".join([f"[{item}]_" for item in items]), '']
         return out
 
     def _str_examples(self):

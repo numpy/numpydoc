@@ -141,7 +141,7 @@ html_sidebars = {
     "**": [],
 }
 
-html_title = "%s v%s Manual" % (project, version)
+html_title = f"{project} v{version} Manual"
 html_last_updated_fmt = '%b %d, %Y'
 
 # Add any paths that contain custom static files (such as style sheets) here,

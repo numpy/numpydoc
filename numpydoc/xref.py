@@ -126,7 +126,7 @@ def make_xref(param_type, xref_aliases, xref_ignore):
             ignore_set = set()
         else:
             raise TypeError(
-                "xref_ignore must be a set or 'all', got {}".format(xref_ignore)
+                f"xref_ignore must be a set or 'all', got {xref_ignore}"
             )
 
     if param_type in xref_aliases:
@@ -137,9 +137,9 @@ def make_xref(param_type, xref_aliases, xref_ignore):
 
     if QUALIFIED_NAME_RE.match(link) and link not in ignore_set:
         if link != title:
-            return ':obj:`%s <%s>`' % (title, link)
+            return f':obj:`{title} <{link}>`'
         if wrap_unknown:
-            return ':obj:`%s`' % link
+            return f':obj:`{link}`'
         return link
 
     def _split_and_apply_re(s, pattern):
