@@ -1,4 +1,3 @@
-from distutils.version import LooseVersion
 import os.path as op
 import re
 import shutil
@@ -25,10 +24,7 @@ def sphinx_app(tmpdir_factory):
     conf_dir = temp_dir
     out_dir = op.join(temp_dir, '_build', 'html')
     toctrees_dir = op.join(temp_dir, '_build', 'toctrees')
-    # Set behavior across different Sphinx versions
-    kwargs = dict()
-    if LooseVersion(sphinx.__version__) >= LooseVersion('1.8'):
-        kwargs.update(warningiserror=True, keep_going=True)
+    kwargs = {'warningiserror': True, 'keep_going': True}
     # Avoid warnings about re-registration, see:
     # https://github.com/sphinx-doc/sphinx/issues/5038
     with docutils_namespace():
