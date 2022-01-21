@@ -53,6 +53,7 @@ jobs:
 
     - name: Setup for doc build
       run: |
+        sudo apt-get update
         sudo apt install texlive texlive-latex-extra latexmk dvipng
 
     - name: Build documentation
