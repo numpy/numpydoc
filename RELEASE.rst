@@ -1,6 +1,22 @@
 Release process for ``numpydoc``
 ================================
 
+Introduction
+------------
+
+Example ``__version__``
+
+- 1.8.dev0     # development version of 1.8 (release candidate 1)
+- 1.8rc1       # 1.8 release candidate 1
+- 1.8rc2.dev0  # development version of 1.8 (release candidate 2)
+- 1.8          # 1.8 release
+- 1.9.dev0     # development version of 1.9 (release candidate 1)
+
+Test release candidates on numpy, scipy, matplotlib, scikit-image, and networkx.
+
+Process
+-------
+
 - Review and update ``doc/release_notes.rst``.
 
 - Update ``__version__`` in ``numpydoc/__init__.py``.
@@ -39,3 +55,4 @@ Release process for ``numpydoc``
 
     git add numpydoc/__init__.py
     git commit -m 'Bump version'
+    git push origin main
