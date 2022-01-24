@@ -17,6 +17,61 @@ Release notes
    For release notes (sparsely) kept prior to 1.0.0, look at the `releases page
    on GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
+1.2.0
+-----
+
+Release date: 24 January 2022
+
+Requires Python 3.7+ and Sphinx 1.8+.
+
+Implemented enhancements
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+-  Document release process `#357 <https://github.com/numpy/numpydoc/pull/357>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Use setuptools `#349 <https://github.com/numpy/numpydoc/pull/349>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  DOC: Switch docs to pydata-sphinx-theme `#313 <https://github.com/numpy/numpydoc/pull/313>`__ (`rossbar <https://github.com/rossbar>`__)
+-  Improve error messages for see also parsing `#306 <https://github.com/numpy/numpydoc/pull/306>`__ (`rossbar <https://github.com/rossbar>`__)
+-  ENH: Enable validation during sphinx-build process `#302 <https://github.com/numpy/numpydoc/pull/302>`__ (`rossbar <https://github.com/rossbar>`__)
+-  Add a note to the docstring standard about long ‘See Also’ entries. `#300 <https://github.com/numpy/numpydoc/pull/300>`__ (`WarrenWeckesser <https://github.com/WarrenWeckesser>`__)
+-  MAINT: minor refactoring in docscrape `#297 <https://github.com/numpy/numpydoc/pull/297>`__ (`rossbar <https://github.com/rossbar>`__)
+-  ENH: Add configuration option for parameter cross-referencing `#295 <https://github.com/numpy/numpydoc/pull/295>`__ (`rossbar <https://github.com/rossbar>`__)
+-  ENH: Better warning for sections. `#278 <https://github.com/numpy/numpydoc/pull/278>`__ (`Carreau <https://github.com/Carreau>`__)
+
+Fixed bugs
+~~~~~~~~~~
+
+-  How to specify that parameter can equal the string ‘integer’? `#341 <https://github.com/numpy/numpydoc/issues/341>`__
+-  Fix validation bug when parameter type is set of options. `#347 <https://github.com/numpy/numpydoc/pull/347>`__ (`rossbar <https://github.com/rossbar>`__)
+-  Escape newline in docstring. `#345 <https://github.com/numpy/numpydoc/pull/345>`__ (`Carreau <https://github.com/Carreau>`__)
+-  Correctly validate parameters under the “Other Parameters” section `#337 <https://github.com/numpy/numpydoc/pull/337>`__ (`dcbr <https://github.com/dcbr>`__)
+-  BUG: fix an incomplete check in ``Reader.\_error\_location`` `#308 <https://github.com/numpy/numpydoc/pull/308>`__ (`rgommers <https://github.com/rgommers>`__)
+-  MAINT: pytest ignore doc directory. `#296 <https://github.com/numpy/numpydoc/pull/296>`__ (`rossbar <https://github.com/rossbar>`__)
+-  DOC: fix inaccuracy in validate docstring. `#294 <https://github.com/numpy/numpydoc/pull/294>`__ (`rossbar <https://github.com/rossbar>`__)
+-  Fix param parsing. `#286 <https://github.com/numpy/numpydoc/pull/286>`__ (`Carreau <https://github.com/Carreau>`__)
+-  BUG: Properly parse See Also when summary on first line. `#283 <https://github.com/numpy/numpydoc/pull/283>`__ (`Carreau <https://github.com/Carreau>`__)
+-  BUG: fix role regex. `#280 <https://github.com/numpy/numpydoc/pull/280>`__ (`Carreau <https://github.com/Carreau>`__)
+-  fix splitting of parameter lines. `#279 <https://github.com/numpy/numpydoc/pull/279>`__ (`Carreau <https://github.com/Carreau>`__)
+
+Closed issues
+~~~~~~~~~~~~~
+
+-  Class methods (@classmethod) are not documented using ``numpydoc`` `#340 <https://github.com/numpy/numpydoc/issues/340>`__
+-  Exclude certain methods from METHODS section `#338 <https://github.com/numpy/numpydoc/issues/338>`__
+-  Warnings is not allowed in “GL06” check `#334 <https://github.com/numpy/numpydoc/issues/334>`__
+-  Add version to style guide `#333 <https://github.com/numpy/numpydoc/issues/333>`__
+-  numpydoc does not render parameters as expected `#329 <https://github.com/numpy/numpydoc/issues/329>`__
+-  1.1.0: pytest warnings `#324 <https://github.com/numpy/numpydoc/issues/324>`__
+-  RTD configuration - ``latest`` `#321 <https://github.com/numpy/numpydoc/issues/321>`__
+-  Rendering of types in latest doc build `#318 <https://github.com/numpy/numpydoc/issues/318>`__
+-  Anchors for individual sections in numpydoc doc? `#317 <https://github.com/numpy/numpydoc/issues/317>`__
+-  Development documentation not up-to-date `#311 <https://github.com/numpy/numpydoc/issues/311>`__
+-  Warning: autosummary: stub file not found `#290 <https://github.com/numpy/numpydoc/issues/290>`__
+-  Wrong number of Parameter for numpy array. `#285 <https://github.com/numpy/numpydoc/issues/285>`__
+-  syntax to document default values `#284 <https://github.com/numpy/numpydoc/issues/284>`__
+-  Failed See Also Parsing. `#281 <https://github.com/numpy/numpydoc/issues/281>`__
+-  Sphinx emits “WARNING: py:class reference target not found” with numpydoc 1.1.0 `#275 <https://github.com/numpy/numpydoc/issues/275>`__
+
+
 1.1.0
 -----
 
