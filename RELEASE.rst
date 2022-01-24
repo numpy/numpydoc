@@ -46,7 +46,8 @@ Process
 - Publish on PyPi::
 
     git clean -fxd
-    python setup.py sdist bdist_wheel
+    pip install build wheel twine
+    python -m build --sdist --wheel
     twine upload -s dist/*
 
 - Update ``__version__`` in ``numpydoc/__init__.py``.
