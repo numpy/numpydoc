@@ -1522,6 +1522,32 @@ def test_xref():
     line_by_line_compare(str(doc), xref_doc_txt_expected)
 
 
+def test__error_location_no_name_attr():
+    """
+    Ensure that NumpyDocString._error_location doesn't fail when self._obj
+    does not have a __name__ attr.
+
+    See gh-362
+    """
+    from collections.abc import Callable
+
+    # Create a Callable that doesn't have a __name__ attribute
+    class Foo():
+        def __call__(self):
+            pass
+
+
+    foo = Foo()  # foo is a Callable, but no a function instance
+    assert isinstance(foo, Callable)
+
+    # Create an NumpyDocString instance to call the _error_location method
+    nds = get_doc_object(foo)
+
+    msg = "Potentially wrong underline length"
+    with pytest.raises(ValueError, match=msg):
+        nds._error_location(msg=msg)
+
+
 if __name__ == "__main__":
     import pytest
     pytest.main()
