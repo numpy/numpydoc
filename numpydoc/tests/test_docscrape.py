@@ -1543,7 +1543,7 @@ def test__error_location_no_name_attr():
     # Create an NumpyDocString instance to call the _error_location method
     nds = get_doc_object(foo)
 
-    msg = "Potentially wrong underline length"
+    msg = "Potentially wrong underline length.*Foo.*"
     with pytest.raises(ValueError, match=msg):
         nds._error_location(msg=msg)
 
