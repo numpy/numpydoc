@@ -426,7 +426,13 @@ class NumpyDocString(Mapping):
                 filename = inspect.getsourcefile(self._obj)
             except TypeError:
                 filename = None
-            msg += f" in the docstring of {self._obj.__name__}"
+            # Make UserWarning more descriptive via object introspection.
+            # Skip if introspection fails
+            name = getattr(self._obj, '__name__', None)
+            if name is None:
+                name = getattr(getattr(self._obj, '__class__', None), '__name__', None)
+            if name is not None:
+                msg += f" in the docstring of {name}"
             msg += f" in {filename}." if filename else ""
         if error:
             raise ValueError(msg)
