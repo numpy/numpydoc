@@ -428,10 +428,11 @@ class NumpyDocString(Mapping):
                 filename = None
             # Make UserWarning more descriptive via object introspection.
             # Skip if introspection fails
-            try:
-                msg += f" in the docstring of {self._obj.__name__}"
-            except AttributeError:
-                pass
+            name = getattr(self._obj, '__name__', None)
+            if name is None:
+                name = getattr(getattr(self._obj, '__class__', None), '__name__', None)
+            if name is not None:
+                msg += f" in the docstring of {name}"
             msg += f" in {filename}." if filename else ""
         if error:
             raise ValueError(msg)
