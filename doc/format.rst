@@ -211,6 +211,10 @@ used as a value, ``optional`` is preferred. These are all equivalent::
   copy : bool, default=True
   copy : bool, default: True
 
+For keyword-only arguments, use ``keyword-only``::
+
+  x : int, keyword-only
+
 When a parameter can only assume one of a fixed set of values,
 those values can be listed in braces, with the default appearing first::
 
