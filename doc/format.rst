@@ -214,6 +214,7 @@ used as a value, ``optional`` is preferred. These are all equivalent::
 For keyword-only arguments, use ``keyword-only``::
 
   x : int, keyword-only
+  y : int, keyword-only, optional
 
 When a parameter can only assume one of a fixed set of values,
 those values can be listed in braces, with the default appearing first::
