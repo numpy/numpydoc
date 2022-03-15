@@ -179,6 +179,10 @@ class Validator:
         return inspect.isfunction(self.obj)
 
     @property
+    def is_generator_function(self):
+        return inspect.isgeneratorfunction(self.obj)
+
+    @property
     def source_file_name(self):
         """
         File name where the object is implemented (e.g. pandas/core/frame.py).
@@ -596,7 +600,7 @@ def validate(obj_name):
             for name_or_type, type_, desc in doc.returns:
                 errs.extend(_check_desc(desc, "RT03", "RT04", "RT05"))
 
-        if not doc.yields and "yield" in doc.method_source:
+        if not doc.yields and doc.is_generator_function:
             errs.append(error("YD01"))
 
     if not doc.see_also:
