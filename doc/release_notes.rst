@@ -17,6 +17,37 @@ Release notes
    For release notes (sparsely) kept prior to 1.0.0, look at the `releases page
    on GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
+1.2.1
+-----
+
+Release date: 29 March 2022
+
+Requires Python 3.7+ and Sphinx 1.8+.
+
+`Full Changelog <https://github.com/numpy/numpydoc/compare/numpydoc-1.2...HEAD>`__
+
+Implemented enhancements
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+-  Update year `#370 <https://github.com/numpy/numpydoc/pull/370>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+
+Fixed bugs
+~~~~~~~~~~
+
+-  Use consistent release tags `#361 <https://github.com/numpy/numpydoc/pull/361>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  BUG: 1.2 raises error w.r.t. object has no attribute ‘\__name_\_’ `#362 <https://github.com/numpy/numpydoc/issues/362>`__
+-  Use isgeneratorfunction to avoid false alarm YD01 validation `#368 <https://github.com/numpy/numpydoc/pull/368>`__ (`jnothman <https://github.com/jnothman>`__)
+-  Fix AttributeError in underline length check `#363 <https://github.com/numpy/numpydoc/pull/363>`__ (`rossbar <https://github.com/rossbar>`__)
+-  Upper bound jinja `#369 <https://github.com/numpy/numpydoc/pull/369>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+
+Closed issues
+~~~~~~~~~~~~~
+
+-  Validation check YD01 not implemented properly `#365 <https://github.com/numpy/numpydoc/issues/365>`__
+-  Support numpydoc validation without running sphinx `#364 <https://github.com/numpy/numpydoc/issues/364>`__
+-  1.2: change tagging convention? `#360 <https://github.com/numpy/numpydoc/issues/360>`__
+
+
 1.2.0
 -----
 
