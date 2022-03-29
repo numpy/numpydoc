@@ -1,4 +1,4 @@
 numpy
 matplotlib
-pydata-sphinx-theme
+pydata-sphinx-theme<=0.8.0
 sphinx>2
