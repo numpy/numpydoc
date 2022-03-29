@@ -12,6 +12,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from datetime import date
 import sys
 import os
 import re
@@ -68,7 +69,7 @@ master_doc = 'index'  # NOTE: will be changed to `root_doc` in sphinx 4
 
 # General information about the project.
 project = u'numpydoc'
-copyright = u'2019, numpydoc maintainers'
+copyright = f'2019-{date.today().year}, numpydoc maintainers'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
