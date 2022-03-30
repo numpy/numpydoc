@@ -254,14 +254,7 @@ def setup(app, get_doc_object_=get_doc_object):
     get_doc_object = get_doc_object_
 
     app.setup_extension('sphinx.ext.autosummary')
-
-    # Once we bump our Sphinx requirement higher (1.7 or 1.8?)
-    # we can just connect to config-inited
-    try:
-        app.connect('config-inited', update_config)
-    except ExtensionError:
-        app.connect('builder-inited', update_config)
-
+    app.connect('config-inited', update_config)
     app.connect('autodoc-process-docstring', mangle_docstrings)
     app.connect('autodoc-process-signature', mangle_signature)
     app.connect('doctree-read', relabel_references)
