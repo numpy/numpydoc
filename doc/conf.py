@@ -15,7 +15,6 @@
 from datetime import date
 import sys
 import os
-import re
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -46,14 +45,8 @@ extensions = [
     'numpydoc',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'sphinx.ext.imgmath',
 ]
-
-try:
-    import sphinx.ext.imgmath  # noqa
-except ImportError:
-    extensions.append('sphinx.ext.pngmath')
-else:
-    extensions.append('sphinx.ext.imgmath')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -81,8 +74,7 @@ import numpydoc
 # version = .__version__
 # The full version, including alpha/beta/rc tags.
 release = numpydoc.__version__
-version = re.sub(r'(\d+\.\d+)\.\d+(.*)', r'\1\2', numpydoc.__version__)
-version = re.sub(r'(\.dev\d+).*?$', r'\1', version)
+version = numpydoc.__version__
 numpydoc_xref_param_type = True
 numpydoc_xref_ignore = {'optional', 'type_without_description', 'BadException'}
 # Run docstring validation as part of build process
