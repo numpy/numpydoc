@@ -196,16 +196,6 @@ def mangle_docstrings(app, what, name, obj, options, lines):
                     logger.warning(msg)
 
 
-    if (app.config.numpydoc_edit_link and hasattr(obj, '__name__') and
-            obj.__name__):
-        if hasattr(obj, '__module__'):
-            v = dict(full_name=f"{obj.__module__}.{obj.__name__}")
-        else:
-            v = dict(full_name=obj.__name__)
-        lines += ['', '.. htmlonly::', '']
-        lines += [f'    {x}' for x in
-                  (app.config.numpydoc_edit_link % v).split("\n")]
-
     # call function to replace reference numbers so that there are no
     # duplicates
     rename_references(app, what, name, obj, options, lines)
@@ -266,7 +256,6 @@ def setup(app, get_doc_object_=get_doc_object):
     app.connect('autodoc-process-signature', mangle_signature)
     app.connect('doctree-read', relabel_references)
     app.connect('doctree-resolved', clean_backrefs)
-    app.add_config_value('numpydoc_edit_link', None, False)
     app.add_config_value('numpydoc_use_plots', None, False)
     app.add_config_value('numpydoc_use_blockquotes', None, False)
     app.add_config_value('numpydoc_show_class_members', True, True)
