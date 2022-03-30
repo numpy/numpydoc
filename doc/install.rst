@@ -134,9 +134,3 @@ numpydoc_validation_exclude : set
     validation.
     Only has an effect when docstring validation is activated, i.e.
     ``numpydoc_validation_checks`` is not an empty set.
-numpydoc_edit_link : bool
-  .. deprecated:: 0.7.0
-
-  edit your HTML template instead
-
-  Whether to insert an edit link after docstrings.
