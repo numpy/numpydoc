@@ -1,4 +1,3 @@
-# -*- encoding:utf-8 -*-
 import pytest
 from numpydoc.xref import make_xref, DEFAULT_LINKS
 

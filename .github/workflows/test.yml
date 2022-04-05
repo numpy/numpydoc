@@ -2,9 +2,9 @@ name: numpydoc tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -15,48 +15,48 @@ jobs:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
         sphinx-version: ["sphinx==1.8.0", "sphinx==2.1", "sphinx>3.0"]
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Python setup
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v2
 
-    - name: Setup environment
-      run: |
-        python -m venv venv
-        source venv/bin/activate
+      - name: Python setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install
-      run: |
-        python -m pip install --upgrade pip wheel setuptools
-        python -m pip install -r test_requirements.txt -r doc/requirements.txt
-        python -m pip install codecov
-        python -m pip install ${{ matrix.sphinx-version }}
-        python -m pip install .
-        pip list
+      - name: Setup environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
 
-    - name: Run test suite
-      run: |
-        pytest -v --pyargs .
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r test_requirements.txt -r doc/requirements.txt
+          python -m pip install codecov
+          python -m pip install ${{ matrix.sphinx-version }}
+          python -m pip install .
+          pip list
 
-    - name: Test coverage
-      run: |
-        codecov
+      - name: Run test suite
+        run: |
+          pytest -v --pyargs .
 
-    - name: Make sure CLI works
-      run: |
-        python -m numpydoc numpydoc.tests.test_main._capture_stdout
-        echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
-        python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
-        echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
+      - name: Test coverage
+        run: |
+          codecov
 
-    - name: Setup for doc build
-      run: |
-        sudo apt-get update
-        sudo apt install texlive texlive-latex-extra latexmk dvipng
+      - name: Make sure CLI works
+        run: |
+          python -m numpydoc numpydoc.tests.test_main._capture_stdout
+          echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
+          python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
+          echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
 
-    - name: Build documentation
-      run: |
-        make -C doc html SPHINXOPTS="-nT"
-        make -C doc latexpdf SPHINXOPTS="-nT"
+      - name: Setup for doc build
+        run: |
+          sudo apt-get update
+          sudo apt install texlive texlive-latex-extra latexmk dvipng
+
+      - name: Build documentation
+        run: |
+          make -C doc html SPHINXOPTS="-nT"
+          make -C doc latexpdf SPHINXOPTS="-nT"

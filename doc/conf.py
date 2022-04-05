@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # project-template documentation build configuration file, created by
 # sphinx-quickstart on Mon Jan 18 14:44:12 2016.
@@ -61,7 +60,7 @@ source_suffix = '.rst'
 master_doc = 'index'  # NOTE: will be changed to `root_doc` in sphinx 4
 
 # General information about the project.
-project = u'numpydoc'
+project = 'numpydoc'
 copyright = f'2019-{date.today().year}, numpydoc maintainers'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -209,8 +208,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('index', 'numpydoc.tex', u'numpydoc Documentation',
-     u'Numpydoc maintainers', 'manual'),
+    ('index', 'numpydoc.tex', 'numpydoc Documentation',
+     'Numpydoc maintainers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

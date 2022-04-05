@@ -1,4 +1,3 @@
-# -*- encoding:utf-8 -*-
 import pytest
 from io import StringIO
 from copy import deepcopy
@@ -123,9 +122,9 @@ def f():
         # Validation configured off - expect no warnings
         (set(), [], []),
         # Validation on with expected warnings
-        (set(['SA01', 'EX01']), ('SA01', 'EX01'), []),
+        ({'SA01', 'EX01'}, ('SA01', 'EX01'), []),
         # Validation on with only one activated check
-        (set(['SA01']), ('SA01',), ('EX01',)),
+        ({'SA01'}, ('SA01',), ('EX01',)),
     ),
 )
 def test_mangle_docstring_validation_warnings(
@@ -190,7 +189,7 @@ def test_update_config_exclude_str():
     app = MockApp()
     app.config.numpydoc_validation_checks = set()
     app.config.numpydoc_validation_exclude = "shouldnt-be-a-str"
-    with pytest.raises(ValueError, match="\['shouldnt-be-a-str'\]"):
+    with pytest.raises(ValueError, match=r"\['shouldnt-be-a-str'\]"):
         update_config(app)
 
 

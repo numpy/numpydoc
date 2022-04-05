@@ -41,12 +41,12 @@ def test_MyClass(sphinx_app):
     src_dir, out_dir = sphinx_app.srcdir, sphinx_app.outdir
     class_rst = op.join(src_dir, 'generated',
                         'numpydoc_test_module.MyClass.rst')
-    with open(class_rst, 'r') as fid:
+    with open(class_rst) as fid:
         rst = fid.read()
     assert r'numpydoc\_test\_module' in rst  # properly escaped
     class_html = op.join(out_dir, 'generated',
                          'numpydoc_test_module.MyClass.html')
-    with open(class_html, 'r') as fid:
+    with open(class_html) as fid:
         html = fid.read()
     # ensure that no autodoc weirdness ($) occurs
     assert '$self' not in html
@@ -66,7 +66,7 @@ def test_my_function(sphinx_app):
     out_dir = sphinx_app.outdir
     function_html = op.join(out_dir, 'generated',
                             'numpydoc_test_module.my_function.html')
-    with open(function_html, 'r') as fid:
+    with open(function_html) as fid:
         html = fid.read()
     assert r'\*args' not in html
     assert '*args' in html
@@ -83,7 +83,7 @@ def test_reference(sphinx_app, html_file, expected_length):
     """Test for bad references"""
     out_dir = sphinx_app.outdir
 
-    with open(op.join(out_dir, *html_file), 'r') as fid:
+    with open(op.join(out_dir, *html_file)) as fid:
         html = fid.read()
 
     reference_list = re.findall(r'<a class="fn-backref" href="\#id\d+">(.*)<\/a>', html)

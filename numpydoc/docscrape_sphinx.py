@@ -268,7 +268,7 @@ class SphinxDocString(NumpyDocString):
                 out += [''] + autosum
 
             if others:
-                maxlen_0 = max(3, max([len(p.name) + 4 for p in others]))
+                maxlen_0 = max(3, max(len(p.name) + 4 for p in others))
                 hdr = "=" * maxlen_0 + "  " + "=" * 10
                 fmt = '%%%ds  %%s  ' % (maxlen_0,)
                 out += ['', '', hdr]
@@ -382,7 +382,7 @@ class SphinxDocString(NumpyDocString):
                 else self._str_member_list('Attributes'),
             'methods': self._str_member_list('Methods'),
         }
-        ns = dict((k, '\n'.join(v)) for k, v in ns.items())
+        ns = {k: '\n'.join(v) for k, v in ns.items()}
 
         rendered = self.template.render(**ns)
         return '\n'.join(self._str_indent(rendered.split('\n'), indent))
