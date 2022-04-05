@@ -47,7 +47,7 @@ setup(
     python_requires=">=3.7",
     extras_require={
         "testing": [
-            req for req in read('test_requirements.txt').split('\n')
+            req for req in read('requirements/test.txt').split('\n')
             if not req.startswith('#')
         ],
     },

@@ -9,7 +9,6 @@ extend over multiple lines, the closing three quotation marks must be on
 a line by itself, preferably preceded by a blank line.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import os  # standard library imports first
 
