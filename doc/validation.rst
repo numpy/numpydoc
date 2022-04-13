@@ -38,7 +38,7 @@ The full set of validation checks can be activated by::
 
     numpydoc_validation_checks = {"all"}
 
-The complete validation suite contains `many checks <validation_checks>`_
+The complete validation suite contains :ref:`many checks <validation_checks>`
 including some for style, capitalization, and grammar.
 It is unlikely that reporting *all* validation warnings is desirable for
 most use-cases.
