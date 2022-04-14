@@ -3,7 +3,15 @@ import os
 
 from setuptools import setup
 
-from numpydoc import __version__ as version
+# Adapted from MNE-Python (BSD)
+version = None
+with open(os.path.join('numpydoc', '_version.py')) as fid:
+    for line in (line.strip() for line in fid):
+        if line.startswith('__version__'):
+            version = line.split('=')[1].strip().strip('\'')
+            break
+if version is None:
+    raise RuntimeError('Could not determine version')
 
 if sys.version_info < (3, 7):
     raise RuntimeError("Python version >= 3.7 required.")
