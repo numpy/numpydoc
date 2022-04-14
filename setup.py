@@ -5,7 +5,7 @@ from setuptools import setup
 
 # Adapted from MNE-Python (BSD)
 version = None
-with open(op.path.join('numpydoc', '_version.py'), 'r') as fid:
+with open(os.path.join('numpydoc', '_version.py'), 'r') as fid:
     for line in (line.strip() for line in fid):
         if line.startswith('__version__'):
             version = line.split('=')[1].strip().strip('\'')
