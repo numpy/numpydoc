@@ -1,4 +1,5 @@
 import pytest
+import warnings
 import numpydoc.validate
 import numpydoc.tests
 
@@ -1377,7 +1378,7 @@ class TestValidator:
         ],
     )
     def test_bad_docstrings(self, capsys, klass, func, msgs):
-        with pytest.warns(None) as w:
+        with warnings.catch_warnings(record=True) as w:
             result = validate_one(self._import_path(klass=klass, func=func))
         if len(w):
             assert all('Unknown section' in str(ww.message) for ww in w)
