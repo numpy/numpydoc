@@ -17,6 +17,34 @@ Release notes
    For release notes (sparsely) kept prior to 1.0.0, look at the `releases page
    on GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
+
+1.3rc1
+------
+
+Release date: 25 April 2022
+
+Requires Python 3.7+ and Sphinx 3.0+.
+
+`Full Changelog <https://github.com/numpy/numpydoc/compare/v1.2.1...HEAD>`__
+
+Closed issues
+~~~~~~~~~~~~~
+
+-  Broken “many checks” link in validation chapter `#378 <https://github.com/numpy/numpydoc/issues/378>`__
+-  1.2.1: pytest warnings `#377 <https://github.com/numpy/numpydoc/issues/377>`__
+
+Merged pull requests
+~~~~~~~~~~~~~~~~~~~~
+
+-  Require sphinx>3 `#385 <https://github.com/numpy/numpydoc/pull/385>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Update tests + coverage config to rm warnings. `#383 <https://github.com/numpy/numpydoc/pull/383>`__ (`rossbar <https://github.com/rossbar>`__)
+-  MAINT: Dont import for version `#382 <https://github.com/numpy/numpydoc/pull/382>`__ (`larsoner <https://github.com/larsoner>`__)
+-  Runtime verification of sphinx and jinja2 versions `#381 <https://github.com/numpy/numpydoc/pull/381>`__ (`rossbar <https://github.com/rossbar>`__)
+-  DOC: fix broken link to built-in validation checks. `#379 <https://github.com/numpy/numpydoc/pull/379>`__ (`rossbar <https://github.com/rossbar>`__)
+-  Add pre-commit hook / linter `#374 <https://github.com/numpy/numpydoc/pull/374>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Remove deprecated numpydoc_edit_link `#372 <https://github.com/numpy/numpydoc/pull/372>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Cleanup cruft `#371 <https://github.com/numpy/numpydoc/pull/371>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+
 1.2.1
 -----
 
