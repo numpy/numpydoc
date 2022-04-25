@@ -19,11 +19,11 @@ Process
 
 - Review and update ``doc/release_notes.rst``.
 
-- Update ``__version__`` in ``numpydoc/__init__.py``.
+- Update ``__version__`` in ``numpydoc/_version.py``.
 
 - Commit changes::
 
-    git add numpydoc/__init__.py doc/release_notes.rst
+    git add numpydoc/_version.py doc/release_notes.rst
     git commit -m 'Designate <version> release'
 
 - Add the version number (e.g., `v1.2.0`) as a tag in git::
@@ -50,10 +50,10 @@ Process
     python -m build --sdist --wheel
     twine upload -s dist/*
 
-- Update ``__version__`` in ``numpydoc/__init__.py``.
+- Update ``__version__`` in ``numpydoc/_version.py``.
 
 - Commit changes::
 
-    git add numpydoc/__init__.py
+    git add numpydoc/_version.py
     git commit -m 'Bump version'
     git push origin main
