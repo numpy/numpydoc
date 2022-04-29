@@ -18,14 +18,14 @@ Release notes
    on GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
 
-1.3rc1
-------
+1.3
+---
 
-Release date: 25 April 2022
+Release date: 29 April 2022
 
 Requires Python 3.7+ and Sphinx 3.0+.
 
-`Full Changelog <https://github.com/numpy/numpydoc/compare/v1.2.1...HEAD>`__
+`Full Changelog <https://github.com/numpy/numpydoc/compare/v1.2.1...v1.3>`__
 
 Closed issues
 ~~~~~~~~~~~~~
@@ -52,7 +52,7 @@ Release date: 29 March 2022
 
 Requires Python 3.7+ and Sphinx 1.8+.
 
-`Full Changelog <https://github.com/numpy/numpydoc/compare/numpydoc-1.2...HEAD>`__
+`Full Changelog <https://github.com/numpy/numpydoc/compare/numpydoc-1.2...v1.2.1>`__
 
 Implemented enhancements
 ~~~~~~~~~~~~~~~~~~~~~~~~
