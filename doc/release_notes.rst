@@ -25,7 +25,7 @@ Release date: 29 April 2022
 
 Requires Python 3.7+ and Sphinx 3.0+.
 
-`Full Changelog <https://github.com/numpy/numpydoc/compare/v1.2.1...v1.3>`__
+`Full Changelog <https://github.com/numpy/numpydoc/compare/v1.2.1...v1.3.0>`__
 
 Closed issues
 ~~~~~~~~~~~~~
