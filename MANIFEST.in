@@ -1,14 +1,13 @@
 include MANIFEST.in
-recursive-include numpydoc *
 include *.txt
 include *.rst
 recursive-include doc *
+recursive-include requirements *
+recursive-include numpydoc *
 
 # Exclude what we don't want to include
 prune */__pycache__
 exclude .circleci/config.yml
 exclude .coveragerc
 exclude codecov.yml
-exclude doc/scipy-sphinx-theme/.git
-exclude .gitmodules
 global-exclude *.pyc *~ *.bak *.swp *.pyo
