@@ -32,7 +32,7 @@ jobs:
 
       - name: Downgrade Jinja2 for sphinx<4
         if: ${{ matrix.sphinx-version }} == 'sphinx<4.0.2'
-        run: python -m pip install jinja2==3.0.3
+        run: python -m pip install jinja2==3.0.3 markupsafe==2.0.1 pydata-sphinx-theme==0.8.0
 
       - name: Install
         run: |
