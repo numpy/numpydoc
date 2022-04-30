@@ -17,6 +17,26 @@ Release notes
    For release notes (sparsely) kept prior to 1.0.0, look at the `releases page
    on GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
+1.3.1
+-----
+
+Release date: 30 April 2022
+
+Requires Python 3.7+ and Sphinx 3.0+.
+
+`Full Changelog <https://github.com/numpy/numpydoc/compare/v1.3.0...v1.3.1>`__
+
+**Closed issues:**
+
+-  numpydoc-1.3.tar.gz on pypi is missing requirements/ needed by setup.py `#387 <https://github.com/numpy/numpydoc/issues/387>`__
+-  What to do about Jinja2 dependency & supporting old sphinx versions `#380 <https://github.com/numpy/numpydoc/issues/380>`__
+-  RFE: please update for ``jinja2`` 3.x `#376 <https://github.com/numpy/numpydoc/issues/376>`__
+-  Test failures with Sphinx 4.5.0 `#373 <https://github.com/numpy/numpydoc/issues/373>`__
+
+**Merged pull requests:**
+
+-  Update doc requirements `#389 <https://github.com/numpy/numpydoc/pull/389>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Update manifest `#388 <https://github.com/numpy/numpydoc/pull/388>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
 
 1.3
 ---
