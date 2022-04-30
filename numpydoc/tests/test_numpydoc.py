@@ -74,6 +74,7 @@ A top section before
 
 def test_clean_text_signature():
     assert _clean_text_signature(None) is None
+    assert _clean_text_signature({"a": 1}) is None # i.e. not a string
     assert _clean_text_signature('func($self)') == 'func()'
     assert (_clean_text_signature('func($self, *args, **kwargs)')
             == 'func(*args, **kwargs)')

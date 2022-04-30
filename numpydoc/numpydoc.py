@@ -228,7 +228,10 @@ def _clean_text_signature(sig):
     if sig is None:
         return None
     start_pattern = re.compile(r"^[^(]*\(")
-    start, end = start_pattern.search(sig).span()
+    try:
+        start, end = start_pattern.search(sig).span()
+    except TypeError:
+        return None
     start_sig = sig[start:end]
     sig = sig[end:-1]
     sig = re.sub(r'^\$(self|module|type)(,\s|$)','' , sig, count=1)
