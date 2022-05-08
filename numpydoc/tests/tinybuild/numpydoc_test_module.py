@@ -15,7 +15,7 @@ References
 .. [1] https://numpydoc.readthedocs.io
 """
 
-__all__ = ['MyClass', 'my_function']
+__all__ = ["MyClass", "my_function"]
 
 
 class MyClass:

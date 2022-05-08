@@ -16,81 +16,81 @@ import re
 
 QUALIFIED_NAME_RE = re.compile(
     # e.g int, numpy.array, ~numpy.array, .class_in_current_module
-    r'^'
-    r'[~\.]?'
-    r'[a-zA-Z_]\w*'
-    r'(?:\.[a-zA-Z_]\w*)*'
-    r'$'
+    r"^"
+    r"[~\.]?"
+    r"[a-zA-Z_]\w*"
+    r"(?:\.[a-zA-Z_]\w*)*"
+    r"$"
 )
 
 CONTAINER_SPLIT_RE = re.compile(
     # splits dict(str, int) into
     #    ['dict', '[', 'str', ', ', 'int', ']', '']
-    r'(\s*[\[\]\(\)\{\}]\s*|,\s+)'
+    r"(\s*[\[\]\(\)\{\}]\s*|,\s+)"
 )
 
 CONTAINER_SPLIT_REJECT_RE = re.compile(
     # Leads to bad markup e.g.
     # {int}qualified_name
-    r'[\]\)\}]\w'
+    r"[\]\)\}]\w"
 )
 
 DOUBLE_QUOTE_SPLIT_RE = re.compile(
     # splits 'callable ``f(x0, *args)`` or ``f(x0, y0, *args)``' into
     #    ['callable ', '``f(x0, *args)``', ' or ', '``f(x0, y0, *args)``', '']
-    r'(``.+?``)'
+    r"(``.+?``)"
 )
 
 ROLE_SPLIT_RE = re.compile(
     # splits to preserve ReST roles
-    r'(:\w+:`.+?(?<!\\)`)'
+    r"(:\w+:`.+?(?<!\\)`)"
 )
 
 SINGLE_QUOTE_SPLIT_RE = re.compile(
     # splits to preserve quoted expressions roles
-    r'(`.+?`)'
+    r"(`.+?`)"
 )
 
 TEXT_SPLIT_RE = re.compile(
     # splits on ' or ', ' | ', ', ' and ' '
-    r'(\s+or\s+|\s+\|\s+|,\s+|\s+)'
+    r"(\s+or\s+|\s+\|\s+|,\s+|\s+)"
 )
 
-CONTAINER_CHARS = set('[](){}')
+CONTAINER_CHARS = set("[](){}")
 
 # Save people some time and add some common standard aliases
 DEFAULT_LINKS = {
     # Python
-    'None': ':data:`python:None`',
-    'bool': ':ref:`bool <python:bltin-boolean-values>`',
-    'boolean': ':ref:`bool <python:bltin-boolean-values>`',
-    'True': ':data:`python:True`',
-    'False': ':data:`python:False`',
-    'list': ':class:`python:list`',
-    'tuple': ':class:`python:tuple`',
-    'str': ':class:`python:str`',
-    'string': ':class:`python:str`',
-    'dict': ':class:`python:dict`',
-    'float': ':class:`python:float`',
-    'int': ':class:`python:int`',
-    'callable': ':func:`python:callable`',
-    'iterable': ':term:`python:iterable`',
-    'sequence': ':term:`python:sequence`',
-    'contextmanager': ':func:`python:contextlib.contextmanager`',
-    'namedtuple': ':func:`python:collections.namedtuple`',
-    'generator': ':term:`python:generator`',
+    "None": ":data:`python:None`",
+    "bool": ":ref:`bool <python:bltin-boolean-values>`",
+    "boolean": ":ref:`bool <python:bltin-boolean-values>`",
+    "True": ":data:`python:True`",
+    "False": ":data:`python:False`",
+    "list": ":class:`python:list`",
+    "tuple": ":class:`python:tuple`",
+    "str": ":class:`python:str`",
+    "string": ":class:`python:str`",
+    "dict": ":class:`python:dict`",
+    "float": ":class:`python:float`",
+    "int": ":class:`python:int`",
+    "callable": ":func:`python:callable`",
+    "iterable": ":term:`python:iterable`",
+    "sequence": ":term:`python:sequence`",
+    "contextmanager": ":func:`python:contextlib.contextmanager`",
+    "namedtuple": ":func:`python:collections.namedtuple`",
+    "generator": ":term:`python:generator`",
     # NumPy
-    'array': 'numpy.ndarray',
-    'ndarray': 'numpy.ndarray',
-    'np.ndarray': 'numpy.ndarray',
-    'array-like': ':term:`numpy:array_like`',
-    'array_like': ':term:`numpy:array_like`',
-    'scalar': ':ref:`scalar <numpy:arrays.scalars>`',
-    'RandomState': 'numpy.random.RandomState',
-    'np.random.RandomState': 'numpy.random.RandomState',
-    'np.inf': ':data:`numpy.inf`',
-    'np.nan': ':data:`numpy.nan`',
-    'numpy': ':mod:`numpy`',
+    "array": "numpy.ndarray",
+    "ndarray": "numpy.ndarray",
+    "np.ndarray": "numpy.ndarray",
+    "array-like": ":term:`numpy:array_like`",
+    "array_like": ":term:`numpy:array_like`",
+    "scalar": ":ref:`scalar <numpy:arrays.scalars>`",
+    "RandomState": "numpy.random.RandomState",
+    "np.random.RandomState": "numpy.random.RandomState",
+    "np.inf": ":data:`numpy.inf`",
+    "np.nan": ":data:`numpy.nan`",
+    "numpy": ":mod:`numpy`",
 }
 
 
@@ -125,9 +125,7 @@ def make_xref(param_type, xref_aliases, xref_ignore):
             wrap_unknown = False
             ignore_set = set()
         else:
-            raise TypeError(
-                f"xref_ignore must be a set or 'all', got {xref_ignore}"
-            )
+            raise TypeError(f"xref_ignore must be a set or 'all', got {xref_ignore}")
 
     if param_type in xref_aliases:
         link, title = xref_aliases[param_type], param_type
@@ -137,9 +135,9 @@ def make_xref(param_type, xref_aliases, xref_ignore):
 
     if QUALIFIED_NAME_RE.match(link) and link not in ignore_set:
         if link != title:
-            return f':obj:`{title} <{link}>`'
+            return f":obj:`{title} <{link}>`"
         if wrap_unknown:
-            return f':obj:`{link}`'
+            return f":obj:`{link}`"
         return link
 
     def _split_and_apply_re(s, pattern):
@@ -160,13 +158,13 @@ def make_xref(param_type, xref_aliases, xref_ignore):
                     # Opening brackets immediately after a role is
                     # bad markup. Detect that and add backslash.
                     # :role:`type`( to :role:`type`\(
-                    if res and res[-1] == '`' and i < n-1:
-                        next_char = tokens[i+1][0]
-                        if next_char in '([{':
-                            res += '\\'
+                    if res and res[-1] == "`" and i < n - 1:
+                        next_char = tokens[i + 1][0]
+                        if next_char in "([{":
+                            res += "\\"
                     results.append(res)
 
-            return ''.join(results)
+            return "".join(results)
         return s
 
     # The cases are dealt with in an order the prevents
@@ -178,15 +176,15 @@ def make_xref(param_type, xref_aliases, xref_ignore):
     #   - join the results with the pattern
 
     # Unsplittable literal
-    if '``' in param_type:
+    if "``" in param_type:
         return _split_and_apply_re(param_type, DOUBLE_QUOTE_SPLIT_RE)
 
     # Any roles
-    if ':`' in param_type:
+    if ":`" in param_type:
         return _split_and_apply_re(param_type, ROLE_SPLIT_RE)
 
     # Any quoted expressions
-    if '`' in param_type:
+    if "`" in param_type:
         return _split_and_apply_re(param_type, SINGLE_QUOTE_SPLIT_RE)
 
     # Any sort of bracket '[](){}'

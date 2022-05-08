@@ -14,7 +14,7 @@ from .docscrape import NumpyDocString, FunctionDoc, ClassDoc, ObjDoc
 from .xref import make_xref
 
 
-IMPORT_MATPLOTLIB_RE = r'\b(import +matplotlib|from +matplotlib +import)\b'
+IMPORT_MATPLOTLIB_RE = r"\b(import +matplotlib|from +matplotlib +import)\b"
 
 
 class SphinxDocString(NumpyDocString):
@@ -25,77 +25,76 @@ class SphinxDocString(NumpyDocString):
         self.load_config(config)
 
     def load_config(self, config):
-        self.use_plots = config.get('use_plots', False)
-        self.use_blockquotes = config.get('use_blockquotes', False)
-        self.class_members_toctree = config.get('class_members_toctree', True)
-        self.attributes_as_param_list = config.get('attributes_as_param_list', True)
-        self.xref_param_type = config.get('xref_param_type', False)
-        self.xref_aliases = config.get('xref_aliases', dict())
-        self.xref_ignore = config.get('xref_ignore', set())
-        self.template = config.get('template', None)
+        self.use_plots = config.get("use_plots", False)
+        self.use_blockquotes = config.get("use_blockquotes", False)
+        self.class_members_toctree = config.get("class_members_toctree", True)
+        self.attributes_as_param_list = config.get("attributes_as_param_list", True)
+        self.xref_param_type = config.get("xref_param_type", False)
+        self.xref_aliases = config.get("xref_aliases", dict())
+        self.xref_ignore = config.get("xref_ignore", set())
+        self.template = config.get("template", None)
         if self.template is None:
-            template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
+            template_dirs = [os.path.join(os.path.dirname(__file__), "templates")]
             template_loader = FileSystemLoader(template_dirs)
             template_env = SandboxedEnvironment(loader=template_loader)
-            self.template = template_env.get_template('numpydoc_docstring.rst')
+            self.template = template_env.get_template("numpydoc_docstring.rst")
 
     # string conversion routines
-    def _str_header(self, name, symbol='`'):
-        return ['.. rubric:: ' + name, '']
+    def _str_header(self, name, symbol="`"):
+        return [".. rubric:: " + name, ""]
 
     def _str_field_list(self, name):
-        return [':' + name + ':']
+        return [":" + name + ":"]
 
     def _str_indent(self, doc, indent=4):
         out = []
         for line in doc:
-            out += [' '*indent + line]
+            out += [" " * indent + line]
         return out
 
     def _str_signature(self):
-        return ['']
+        return [""]
 
     def _str_summary(self):
-        return self['Summary'] + ['']
+        return self["Summary"] + [""]
 
     def _str_extended_summary(self):
-        return self['Extended Summary'] + ['']
+        return self["Extended Summary"] + [""]
 
-    def _str_returns(self, name='Returns'):
-        named_fmt = '**%s** : %s'
-        unnamed_fmt = '%s'
+    def _str_returns(self, name="Returns"):
+        named_fmt = "**%s** : %s"
+        unnamed_fmt = "%s"
 
         out = []
         if self[name]:
             out += self._str_field_list(name)
-            out += ['']
+            out += [""]
             for param in self[name]:
                 param_type = param.type
                 if param_type and self.xref_param_type:
                     param_type = make_xref(
-                        param_type,
-                        self.xref_aliases,
-                        self.xref_ignore
+                        param_type, self.xref_aliases, self.xref_ignore
                     )
                 if param.name:
-                    out += self._str_indent([named_fmt % (param.name.strip(),
-                                                          param_type)])
+                    out += self._str_indent(
+                        [named_fmt % (param.name.strip(), param_type)]
+                    )
                 else:
                     out += self._str_indent([unnamed_fmt % param_type.strip()])
                 if not param.desc:
-                    out += self._str_indent(['..'], 8)
+                    out += self._str_indent([".."], 8)
                 else:
                     if self.use_blockquotes:
-                        out += ['']
+                        out += [""]
                     out += self._str_indent(param.desc, 8)
-                out += ['']
+                out += [""]
         return out
 
     def _escape_args_and_kwargs(self, name):
-        if name[:2] == '**':
-            return r'\*\*' + name[2:]
-        elif name[:1] == '*':
-            return r'\*' + name[1:]
+        if name[:2] == "**":
+            return r"\*\*" + name[2:]
+        elif name[:1] == "*":
+            return r"\*" + name[1:]
         else:
             return name
 
@@ -138,42 +137,43 @@ class SphinxDocString(NumpyDocString):
         # XXX: If changing the following, please check the rendering when param
         # ends with '_', e.g. 'word_'
         # See https://github.com/numpy/numpydoc/pull/144
-        display_param = f'**{param}**'
+        display_param = f"**{param}**"
 
         if not fake_autosummary:
             return display_param, desc
 
         param_obj = getattr(self._obj, param, None)
-        if not (callable(param_obj)
-                or isinstance(param_obj, property)
-                or inspect.isgetsetdescriptor(param_obj)
-                or inspect.ismemberdescriptor(param_obj)):
+        if not (
+            callable(param_obj)
+            or isinstance(param_obj, property)
+            or inspect.isgetsetdescriptor(param_obj)
+            or inspect.ismemberdescriptor(param_obj)
+        ):
             param_obj = None
         obj_doc = pydoc.getdoc(param_obj)
 
         if not (param_obj and obj_doc):
             return display_param, desc
 
-        prefix = getattr(self, '_name', '')
+        prefix = getattr(self, "_name", "")
         if prefix:
-            link_prefix = f'{prefix}.'
+            link_prefix = f"{prefix}."
         else:
-            link_prefix = ''
+            link_prefix = ""
 
         # Referenced object has a docstring
-        display_param = f':obj:`{param} <{link_prefix}{param}>`'
+        display_param = f":obj:`{param} <{link_prefix}{param}>`"
         if obj_doc:
             # Overwrite desc. Take summary logic of autosummary
-            desc = re.split(r'\n\s*\n', obj_doc.strip(), 1)[0]
+            desc = re.split(r"\n\s*\n", obj_doc.strip(), 1)[0]
             # XXX: Should this have DOTALL?
             #      It does not in autosummary
-            m = re.search(r"^([A-Z].*?\.)(?:\s|$)",
-                          ' '.join(desc.split()))
+            m = re.search(r"^([A-Z].*?\.)(?:\s|$)", " ".join(desc.split()))
             if m:
                 desc = m.group(1).strip()
             else:
-                desc = desc.partition('\n')[0]
-            desc = desc.split('\n')
+                desc = desc.partition("\n")[0]
+            desc = desc.split("\n")
         return display_param, desc
 
     def _str_param_list(self, name, fake_autosummary=False):
@@ -199,11 +199,11 @@ class SphinxDocString(NumpyDocString):
         out = []
         if self[name]:
             out += self._str_field_list(name)
-            out += ['']
+            out += [""]
             for param in self[name]:
-                display_param, desc = self._process_param(param.name,
-                                                          param.desc,
-                                                          fake_autosummary)
+                display_param, desc = self._process_param(
+                    param.name, param.desc, fake_autosummary
+                )
                 parts = []
                 if display_param:
                     parts.append(display_param)
@@ -212,20 +212,18 @@ class SphinxDocString(NumpyDocString):
                     param_type = param.type
                     if self.xref_param_type:
                         param_type = make_xref(
-                            param_type,
-                            self.xref_aliases,
-                            self.xref_ignore
+                            param_type, self.xref_aliases, self.xref_ignore
                         )
                     parts.append(param_type)
-                out += self._str_indent([' : '.join(parts)])
+                out += self._str_indent([" : ".join(parts)])
 
                 if desc and self.use_blockquotes:
-                    out += ['']
+                    out += [""]
                 elif not desc:
                     # empty definition
-                    desc = ['..']
+                    desc = [".."]
                 out += self._str_indent(desc, 8)
-                out += ['']
+                out += [""]
 
         return out
 
@@ -237,11 +235,11 @@ class SphinxDocString(NumpyDocString):
         """
         out = []
         if self[name]:
-            out += [f'.. rubric:: {name}', '']
-            prefix = getattr(self, '_name', '')
+            out += [f".. rubric:: {name}", ""]
+            prefix = getattr(self, "_name", "")
 
             if prefix:
-                prefix = f'~{prefix}.'
+                prefix = f"~{prefix}."
 
             autosum = []
             others = []
@@ -250,9 +248,11 @@ class SphinxDocString(NumpyDocString):
 
                 # Check if the referenced member can have a docstring or not
                 param_obj = getattr(self._obj, param.name, None)
-                if not (callable(param_obj)
-                        or isinstance(param_obj, property)
-                        or inspect.isdatadescriptor(param_obj)):
+                if not (
+                    callable(param_obj)
+                    or isinstance(param_obj, property)
+                    or inspect.isdatadescriptor(param_obj)
+                ):
                     param_obj = None
 
                 if param_obj and pydoc.getdoc(param_obj):
@@ -262,25 +262,24 @@ class SphinxDocString(NumpyDocString):
                     others.append(param)
 
             if autosum:
-                out += ['.. autosummary::']
+                out += [".. autosummary::"]
                 if self.class_members_toctree:
-                    out += ['   :toctree:']
-                out += [''] + autosum
+                    out += ["   :toctree:"]
+                out += [""] + autosum
 
             if others:
                 maxlen_0 = max(3, max(len(p.name) + 4 for p in others))
                 hdr = "=" * maxlen_0 + "  " + "=" * 10
-                fmt = '%%%ds  %%s  ' % (maxlen_0,)
-                out += ['', '', hdr]
+                fmt = "%%%ds  %%s  " % (maxlen_0,)
+                out += ["", "", hdr]
                 for param in others:
                     name = "**" + param.name.strip() + "**"
-                    desc = " ".join(x.strip()
-                                          for x in param.desc).strip()
+                    desc = " ".join(x.strip() for x in param.desc).strip()
                     if param.type:
                         desc = f"({param.type}) {desc}"
                     out += [fmt % (name, desc)]
                 out += [hdr]
-            out += ['']
+            out += [""]
         return out
 
     def _str_section(self, name):
@@ -289,103 +288,105 @@ class SphinxDocString(NumpyDocString):
             out += self._str_header(name)
             content = textwrap.dedent("\n".join(self[name])).split("\n")
             out += content
-            out += ['']
+            out += [""]
         return out
 
     def _str_see_also(self, func_role):
         out = []
-        if self['See Also']:
+        if self["See Also"]:
             see_also = super()._str_see_also(func_role)
-            out = ['.. seealso::', '']
+            out = [".. seealso::", ""]
             out += self._str_indent(see_also[2:])
         return out
 
     def _str_warnings(self):
         out = []
-        if self['Warnings']:
-            out = ['.. warning::', '']
-            out += self._str_indent(self['Warnings'])
-            out += ['']
+        if self["Warnings"]:
+            out = [".. warning::", ""]
+            out += self._str_indent(self["Warnings"])
+            out += [""]
         return out
 
     def _str_index(self):
-        idx = self['index']
+        idx = self["index"]
         out = []
         if len(idx) == 0:
             return out
 
         out += [f".. index:: {idx.get('default', '')}"]
         for section, references in idx.items():
-            if section == 'default':
+            if section == "default":
                 continue
-            elif section == 'refguide':
+            elif section == "refguide":
                 out += [f"   single: {', '.join(references)}"]
             else:
                 out += [f"   {section}: {','.join(references)}"]
-        out += ['']
+        out += [""]
         return out
 
     def _str_references(self):
         out = []
-        if self['References']:
-            out += self._str_header('References')
-            if isinstance(self['References'], str):
-                self['References'] = [self['References']]
-            out.extend(self['References'])
-            out += ['']
+        if self["References"]:
+            out += self._str_header("References")
+            if isinstance(self["References"], str):
+                self["References"] = [self["References"]]
+            out.extend(self["References"])
+            out += [""]
             # Latex collects all references to a separate bibliography,
             # so we need to insert links to it
-            out += ['.. only:: latex', '']
+            out += [".. only:: latex", ""]
             items = []
-            for line in self['References']:
-                m = re.match(r'.. \[([a-z0-9._-]+)\]', line, re.I)
+            for line in self["References"]:
+                m = re.match(r".. \[([a-z0-9._-]+)\]", line, re.I)
                 if m:
                     items.append(m.group(1))
-            out += ['   ' + ", ".join([f"[{item}]_" for item in items]), '']
+            out += ["   " + ", ".join([f"[{item}]_" for item in items]), ""]
         return out
 
     def _str_examples(self):
-        examples_str = "\n".join(self['Examples'])
+        examples_str = "\n".join(self["Examples"])
 
-        if (self.use_plots and re.search(IMPORT_MATPLOTLIB_RE, examples_str)
-                and 'plot::' not in examples_str):
+        if (
+            self.use_plots
+            and re.search(IMPORT_MATPLOTLIB_RE, examples_str)
+            and "plot::" not in examples_str
+        ):
             out = []
-            out += self._str_header('Examples')
-            out += ['.. plot::', '']
-            out += self._str_indent(self['Examples'])
-            out += ['']
+            out += self._str_header("Examples")
+            out += [".. plot::", ""]
+            out += self._str_indent(self["Examples"])
+            out += [""]
             return out
         else:
-            return self._str_section('Examples')
+            return self._str_section("Examples")
 
     def __str__(self, indent=0, func_role="obj"):
         ns = {
-            'signature':  self._str_signature(),
-            'index': self._str_index(),
-            'summary': self._str_summary(),
-            'extended_summary': self._str_extended_summary(),
-            'parameters': self._str_param_list('Parameters'),
-            'returns': self._str_returns('Returns'),
-            'yields': self._str_returns('Yields'),
-            'receives': self._str_returns('Receives'),
-            'other_parameters': self._str_param_list('Other Parameters'),
-            'raises': self._str_returns('Raises'),
-            'warns': self._str_returns('Warns'),
-            'warnings': self._str_warnings(),
-            'see_also': self._str_see_also(func_role),
-            'notes': self._str_section('Notes'),
-            'references': self._str_references(),
-            'examples': self._str_examples(),
-            'attributes':
-                self._str_param_list('Attributes', fake_autosummary=True)
-                if self.attributes_as_param_list
-                else self._str_member_list('Attributes'),
-            'methods': self._str_member_list('Methods'),
+            "signature": self._str_signature(),
+            "index": self._str_index(),
+            "summary": self._str_summary(),
+            "extended_summary": self._str_extended_summary(),
+            "parameters": self._str_param_list("Parameters"),
+            "returns": self._str_returns("Returns"),
+            "yields": self._str_returns("Yields"),
+            "receives": self._str_returns("Receives"),
+            "other_parameters": self._str_param_list("Other Parameters"),
+            "raises": self._str_returns("Raises"),
+            "warns": self._str_returns("Warns"),
+            "warnings": self._str_warnings(),
+            "see_also": self._str_see_also(func_role),
+            "notes": self._str_section("Notes"),
+            "references": self._str_references(),
+            "examples": self._str_examples(),
+            "attributes": self._str_param_list("Attributes", fake_autosummary=True)
+            if self.attributes_as_param_list
+            else self._str_member_list("Attributes"),
+            "methods": self._str_member_list("Methods"),
         }
-        ns = {k: '\n'.join(v) for k, v in ns.items()}
+        ns = {k: "\n".join(v) for k, v in ns.items()}
 
         rendered = self.template.render(**ns)
-        return '\n'.join(self._str_indent(rendered.split('\n'), indent))
+        return "\n".join(self._str_indent(rendered.split("\n"), indent))
 
 
 class SphinxFunctionDoc(SphinxDocString, FunctionDoc):
@@ -416,29 +417,28 @@ class SphinxObjDoc(SphinxDocString, ObjDoc):
 def get_doc_object(obj, what=None, doc=None, config=None, builder=None):
     if what is None:
         if inspect.isclass(obj):
-            what = 'class'
+            what = "class"
         elif inspect.ismodule(obj):
-            what = 'module'
+            what = "module"
         elif isinstance(obj, Callable):
-            what = 'function'
+            what = "function"
         else:
-            what = 'object'
+            what = "object"
 
     if config is None:
         config = {}
-    template_dirs = [os.path.join(os.path.dirname(__file__), 'templates')]
+    template_dirs = [os.path.join(os.path.dirname(__file__), "templates")]
     if builder is not None:
         template_loader = BuiltinTemplateLoader()
         template_loader.init(builder, dirs=template_dirs)
     else:
         template_loader = FileSystemLoader(template_dirs)
     template_env = SandboxedEnvironment(loader=template_loader)
-    config['template'] = template_env.get_template('numpydoc_docstring.rst')
+    config["template"] = template_env.get_template("numpydoc_docstring.rst")
 
-    if what == 'class':
-        return SphinxClassDoc(obj, func_doc=SphinxFunctionDoc, doc=doc,
-                              config=config)
-    elif what in ('function', 'method'):
+    if what == "class":
+        return SphinxClassDoc(obj, func_doc=SphinxFunctionDoc, doc=doc, config=config)
+    elif what in ("function", "method"):
         return SphinxFunctionDoc(obj, doc=doc, config=config)
     else:
         if doc is None:

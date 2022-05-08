@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 # numpy module itself, unabbreviated.
 
 
-def foo(var1, var2, *args, long_var_name='hi', only_seldom_used_keyword=0, **kwargs):
+def foo(var1, var2, *args, long_var_name="hi", only_seldom_used_keyword=0, **kwargs):
     r"""Summarize the function in one line.
 
     Several sentences providing an extended description. Refer to
