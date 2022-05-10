@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [Ubuntu]
         python-version: ["3.7", "3.8", "3.9", "3.10"]
-        sphinx-version: ["sphinx==3.5"]
+        sphinx-version: ["sphinx==3.3"]
     steps:
       - uses: actions/checkout@v2
 
