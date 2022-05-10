@@ -20,6 +20,7 @@ def _verify_sphinx_jinja():
     if version.parse(sphinx.__version__) <= version.parse("4.0.2"):
         if version.parse(jinja2.__version__) >= version.parse("3.1"):
             from sphinx.errors import VersionRequirementError
+
             raise VersionRequirementError(
                 "\n\nSphinx<4.0.2 is incompatible with Jinja2>=3.1.\n"
                 "If you wish to continue using sphinx<4.0.2 you need to pin "
@@ -32,4 +33,5 @@ _verify_sphinx_jinja()
 
 def setup(app, *args, **kwargs):
     from .numpydoc import setup
+
     return setup(app, *args, **kwargs)
