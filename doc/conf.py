@@ -83,7 +83,14 @@ release = numpydoc.__version__
 version = re.sub(r'(\d+\.\d+)\.\d+(.*)', r'\1\2', numpydoc.__version__)
 version = re.sub(r'(\.dev\d+).*?$', r'\1', version)
 numpydoc_xref_param_type = True
-numpydoc_xref_ignore = {'optional', 'type_without_description', 'BadException'}
+numpydoc_xref_ignore = {
+    'optional',
+    'type_without_description',
+    'BadException',
+    'keyword-only',
+    'positional-only',
+}
+
 # Run docstring validation as part of build process
 numpydoc_validation_checks = {"all", "GL01", "SA04", "RT03"}
 
