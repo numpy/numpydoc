@@ -8,7 +8,7 @@ version = None
 with open(os.path.join("numpydoc", "_version.py")) as fid:
     for line in (line.strip() for line in fid):
         if line.startswith("__version__"):
-            version = line.split("=")[1].strip().strip("'")
+            version = line.split("=")[1].strip().strip('"')
             break
 if version is None:
     raise RuntimeError("Could not determine version")
