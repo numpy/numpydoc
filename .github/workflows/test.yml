@@ -123,7 +123,9 @@ jobs:
       - name: Setup environment
         run: |
           python -m pip install --upgrade pip wheel setuptools
-          python -m pip install --pre -r requirements/test.txt -r doc/requirements.txt
+          #python -m pip install --pre -r requirements/test.txt -r doc/requirements.txt
+          python -m pip install -r requirements/test.txt -r doc/requirements.txt
+          python -m pip install -U --pre sphinx pydata-sphinx-theme
           python -m pip install codecov
           python -m pip list
 
