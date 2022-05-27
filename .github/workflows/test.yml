@@ -105,3 +105,55 @@ jobs:
           echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
           python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
           echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
+
+  prerelease:
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu]
+        python-version: ["3.9", "3.10"]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Python setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup environment
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install --pre -r requirements/test.txt -r doc/requirements.txt
+          python -m pip install docutils==0.17.1  # FIXME
+          python -m pip install codecov
+          python -m pip list
+
+      - name: Install
+        run: |
+          python -m pip install .
+          pip list
+
+      - name: Run test suite
+        run: |
+          pytest -v --pyargs .
+
+      - name: Test coverage
+        run: |
+          codecov
+
+      - name: Make sure CLI works
+        run: |
+          python -m numpydoc numpydoc.tests.test_main._capture_stdout
+          echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
+          python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
+          echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
+
+      - name: Setup for doc build
+        run: |
+          sudo apt-get update
+          sudo apt install texlive texlive-latex-extra latexmk dvipng
+
+      - name: Build documentation
+        run: |
+          make -C doc html SPHINXOPTS="-nT"
+          make -C doc latexpdf SPHINXOPTS="-nT"
