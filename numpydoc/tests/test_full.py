@@ -89,7 +89,7 @@ def test_reference(sphinx_app, html_file, expected_length):
     with open(op.join(out_dir, *html_file)) as fid:
         html = fid.read()
 
-    reference_list = re.findall(r'<a class="fn-backref" href="\#id\d+">(.*)<\/a>', html)
+    reference_list = re.findall(r'<a role="doc-backlink" href="\#id\d+">(.*)<\/a>', html)
 
     assert len(reference_list) == expected_length
     for ref in reference_list:
