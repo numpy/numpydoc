@@ -45,8 +45,8 @@ HASH_LEN = 12
 
 def _traverse_or_findall(node, condition, **kwargs):
     """Triage node.traverse (docutils <0.18) vs node.findall.
-    
-   TODO: This check can be removed when the minimum supported docutils version
+
+    TODO: This check can be removed when the minimum supported docutils version
     for numpydoc is docutils>=0.18
     """
     return (
