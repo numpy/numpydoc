@@ -91,6 +91,8 @@ def test_reference(sphinx_app, html_file, expected_length):
     with open(op.join(out_dir, *html_file)) as fid:
         html = fid.read()
 
+    # TODO: This check can be removed when the minimum supported docutils version
+    # for numpydoc is docutils>=0.18
     pattern = (
         'role="doc-backlink"'
         if version.parse(docutils_version) >= version.parse("0.18")
