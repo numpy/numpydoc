@@ -1,11 +1,13 @@
 import os.path as op
 import re
 import shutil
+from packaging import version
 
 import pytest
 import sphinx
 from sphinx.application import Sphinx
 from sphinx.util.docutils import docutils_namespace
+from docutils import __version__ as docutils_version
 
 
 # Test framework adapted from sphinx-gallery (BSD 3-clause)
@@ -89,7 +91,14 @@ def test_reference(sphinx_app, html_file, expected_length):
     with open(op.join(out_dir, *html_file)) as fid:
         html = fid.read()
 
-    reference_list = re.findall(r'<a class="fn-backref" href="\#id\d+">(.*)<\/a>', html)
+    # TODO: This check can be removed when the minimum supported docutils version
+    # for numpydoc is docutils>=0.18
+    pattern = (
+        'role="doc-backlink"'
+        if version.parse(docutils_version) >= version.parse("0.18")
+        else 'class="fn-backref"'
+    )
+    reference_list = re.findall(rf'<a {pattern} href="\#id\d+">(.*)<\/a>', html)
 
     assert len(reference_list) == expected_length
     for ref in reference_list:
