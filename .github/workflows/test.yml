@@ -97,7 +97,9 @@ jobs:
 
       - name: Run test suite
         run: |
-          pytest -v --pyargs numpydoc
+          # NOTE: --assert=plain necessary to work around known pytest issue.
+          # See pytest-dev/pytest#10008
+          pytest -v --pyargs --assert=plain numpydoc
 
       - name: Make sure CLI works
         run: |
