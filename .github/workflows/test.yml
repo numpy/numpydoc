@@ -14,7 +14,7 @@ jobs:
         os: [Ubuntu]
         python-version: ["3.7", "3.8", "3.9", "3.10"]
         sphinx-version:
-          ["sphinx==4.0.2", "sphinx==4.5", "sphinx==5.0", "sphinx>=5.0"]
+          ["sphinx==4.0.3", "sphinx==4.5", "sphinx==5.0", "sphinx>=5.0"]
     steps:
       - uses: actions/checkout@v3
 
@@ -68,7 +68,7 @@ jobs:
         os: [ubuntu, macos, windows]
         python-version: ["3.11-dev"]
         sphinx-version:
-          ["sphinx==4.0.2", "sphinx==4.5", "sphinx==5.0", "sphinx>=5.0"]
+          ["sphinx==4.0.3", "sphinx==4.5", "sphinx==5.0", "sphinx>=5.0"]
     steps:
       - uses: actions/checkout@v3
 
