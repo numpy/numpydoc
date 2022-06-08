@@ -21,6 +21,7 @@ jobs:
         include:
           - python-version: "3.10"
             sphinx-version: "sphinx==4.2"
+            os: [Ubuntu]
     steps:
       - uses: actions/checkout@v3
 
