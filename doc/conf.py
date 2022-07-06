@@ -83,8 +83,17 @@ html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "github_url": "https://github.com/numpy/numpydoc",
     "show_prev_next": False,
-    "navbar_end": ["theme-switcher", "search-field.html", "navbar-icon-links.html"],
+    "navbar_end": ["search-field.html", "navbar-icon-links.html"],
 }
+# Add version switcher for versions of pydata_sphinx_theme that support it
+import packaging
+import pydata_sphinx_theme
+
+if packaging.version.parse(pydata_sphinx_theme.__version__) >= packaging.version.parse(
+    "0.9.0"
+):
+    html_theme_options["navbar_end"].insert(0, "theme-switcher")
+
 html_sidebars = {
     "**": [],
 }
