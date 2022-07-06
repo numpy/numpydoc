@@ -83,9 +83,7 @@ html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "github_url": "https://github.com/numpy/numpydoc",
     "show_prev_next": False,
-    "navbar_end": [
-        "theme-switcher", "search-field.html", "navbar-icon-links.html"
-    ],
+    "navbar_end": ["theme-switcher", "search-field.html", "navbar-icon-links.html"],
 }
 html_sidebars = {
     "**": [],
