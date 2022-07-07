@@ -1,5 +1,7 @@
 import pytest
+from collections import defaultdict
 from io import StringIO
+from pathlib import PosixPath
 from copy import deepcopy
 from numpydoc.numpydoc import mangle_docstrings, _clean_text_signature, update_config
 from numpydoc.xref import DEFAULT_LINKS
@@ -41,7 +43,7 @@ class MockApp:
         self.warningiserror = False
 
 
-def test_mangle_docstrings():
+def test_mangle_docstrings_basic():
     s = """
 A top section before
 
@@ -67,6 +69,35 @@ A top section before
     )
     assert "rpartition" in [x.strip() for x in lines]
     assert "upper" not in [x.strip() for x in lines]
+
+
+def test_mangle_docstrings_inherited_class_members():
+    # if subclass docs are rendered, this PosixPath should have Path.samefile
+    p = """
+A top section before
+
+.. autoclass:: pathlib.PosixPath
+"""
+    lines = p.split("\n")
+    app = MockApp()
+    mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
+    lines = [x.strip() for x in lines]
+    assert "samefile" in lines
+    app.config.numpydoc_show_inherited_class_members = False
+    lines = p.split("\n")
+    mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
+    lines = [x.strip() for x in lines]
+    assert "samefile" not in lines
+    app.config.numpydoc_show_inherited_class_members = dict()
+    lines = p.split("\n")
+    mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
+    lines = [x.strip() for x in lines]
+    assert "samefile" in lines
+    app.config.numpydoc_show_inherited_class_members = defaultdict(lambda: False)
+    lines = p.split("\n")
+    mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
+    lines = [x.strip() for x in lines]
+    assert "samefile" not in lines
 
 
 def test_clean_text_signature():
