@@ -276,8 +276,9 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value("numpydoc_use_plots", None, False)
     app.add_config_value("numpydoc_use_blockquotes", None, False)
     app.add_config_value("numpydoc_show_class_members", True, True)
-    app.add_config_value("numpydoc_show_inherited_class_members", True, True,
-                         types=(bool, dict))
+    app.add_config_value(
+        "numpydoc_show_inherited_class_members", True, True, types=(bool, dict)
+    )
     app.add_config_value("numpydoc_class_members_toctree", True, True)
     app.add_config_value("numpydoc_citation_re", "[a-z0-9_.-]+", True)
     app.add_config_value("numpydoc_attributes_as_param_list", True, True)
