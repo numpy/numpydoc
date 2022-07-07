@@ -85,6 +85,10 @@ html_theme_options = {
     "show_prev_next": False,
     "navbar_end": ["search-field.html", "navbar-icon-links.html"],
 }
+# NOTE: The following is required for supporting of older sphinx toolchains.
+#       The "theme-switcher" templated should be added directly to navbar_end
+#       above and the following lines removed when the minimum supported
+#       version of pydata_sphinx_theme is 0.9.0
 # Add version switcher for versions of pydata_sphinx_theme that support it
 import packaging
 import pydata_sphinx_theme
@@ -93,6 +97,7 @@ if packaging.version.parse(pydata_sphinx_theme.__version__) >= packaging.version
     "0.9.0"
 ):
     html_theme_options["navbar_end"].insert(0, "theme-switcher")
+
 
 html_sidebars = {
     "**": [],
