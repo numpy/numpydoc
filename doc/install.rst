@@ -26,10 +26,18 @@ numpydoc_show_class_members : bool
   Whether to show all members of a class in the Methods and Attributes
   sections automatically.
   ``True`` by default.
-numpydoc_show_inherited_class_members : bool
+numpydoc_show_inherited_class_members : bool | dict
   Whether to show all inherited members of a class in the Methods and Attributes
   sections automatically. If it's false, inherited members won't shown.
-  ``True`` by default.
+  ``True`` by default. It can also be a dict mapping names of classes to
+  boolean values (missing keys are treated as ``True``).
+  For example, ``defaultdict(lambda: False, {'mymod.MyClass': True})``
+  would only show inherited class members for ``MyClass``, whereas
+  ``{'mymod.MyClass': False}`` would show inherited class members for all
+  classes except ``MyClass``. Note that disabling this for a limited set of
+  classes might simultaneously require the use of a separate, custom
+  autosummary class template with ``:no-inherited-members:`` in the
+  ``autoclass`` directive options.
 numpydoc_class_members_toctree : bool
   Whether to create a Sphinx table of contents for the lists of class
   methods and attributes. If a table of contents is made, Sphinx expects
