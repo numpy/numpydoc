@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Python setup
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -84,7 +84,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Python setup
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -136,7 +136,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Python setup
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -176,7 +176,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Python setup
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
