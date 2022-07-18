@@ -64,4 +64,4 @@ a more detailed message. For example::
 The full mapping of validation checks is given below.
 
 .. literalinclude:: ../numpydoc/validate.py
-   :lines: 36-90
+   :lines: 37-93
