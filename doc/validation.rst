@@ -64,5 +64,5 @@ a more detailed message. For example::
 The full mapping of validation checks is given below.
 
 .. literalinclude:: ../numpydoc/validate.py
-   :start-after: [validate-docs]
-   :end-before: [validate-docs]
+   :start-after: start-err-msg
+   :end-before: end-err-msg
