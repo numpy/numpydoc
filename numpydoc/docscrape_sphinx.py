@@ -177,8 +177,7 @@ class SphinxDocString(NumpyDocString):
         """Generate RST for a listing of parameters or similar
 
         Parameter names are displayed as bold text, and descriptions
-        are in blockquotes.  Descriptions may therefore contain block
-        markup as well.
+        are in definition lists.
 
         Parameters
         ----------
