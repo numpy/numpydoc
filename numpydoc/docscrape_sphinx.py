@@ -26,7 +26,6 @@ class SphinxDocString(NumpyDocString):
 
     def load_config(self, config):
         self.use_plots = config.get("use_plots", False)
-        self.use_blockquotes = config.get("use_blockquotes", False)
         self.class_members_toctree = config.get("class_members_toctree", True)
         self.attributes_as_param_list = config.get("attributes_as_param_list", True)
         self.xref_param_type = config.get("xref_param_type", False)
@@ -84,8 +83,6 @@ class SphinxDocString(NumpyDocString):
                 if not param.desc:
                     out += self._str_indent([".."], 8)
                 else:
-                    if self.use_blockquotes:
-                        out += [""]
                     out += self._str_indent(param.desc, 8)
                 out += [""]
         return out
@@ -217,9 +214,7 @@ class SphinxDocString(NumpyDocString):
                     parts.append(param_type)
                 out += self._str_indent([" : ".join(parts)])
 
-                if desc and self.use_blockquotes:
-                    out += [""]
-                elif not desc:
+                if not desc:
                     # empty definition
                     desc = [".."]
                 out += self._str_indent(desc, 8)
