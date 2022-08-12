@@ -16,8 +16,9 @@ from .docscrape import get_doc_object
 
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
-DIRECTIVE_PATTERN = re.compile(r"^\s*\.\. ({})(?!::)".format('|'.join(DIRECTIVES)),
-                               re.I | re.M)
+DIRECTIVE_PATTERN = re.compile(
+    r"^\s*\.\. ({})(?!::)".format("|".join(DIRECTIVES)), re.I | re.M
+)
 ALLOWED_SECTIONS = [
     "Parameters",
     "Attributes",
@@ -33,63 +34,69 @@ ALLOWED_SECTIONS = [
     "References",
     "Examples",
 ]
+# NOTE: The following comment is a sentinel for embedding in the docs - do not
+# modify/remove
+# start-err-msg
 ERROR_MSGS = {
     "GL01": "Docstring text (summary) should start in the line immediately "
-            "after the opening quotes (not in the same line, or leaving a "
-            "blank line in between)",
+    "after the opening quotes (not in the same line, or leaving a "
+    "blank line in between)",
     "GL02": "Closing quotes should be placed in the line after the last text "
-            "in the docstring (do not close the quotes in the same line as "
-            "the text, or leave a blank line between the last text and the "
-            "quotes)",
+    "in the docstring (do not close the quotes in the same line as "
+    "the text, or leave a blank line between the last text and the "
+    "quotes)",
     "GL03": "Double line break found; please use only one blank line to "
-            "separate sections or paragraphs, and do not leave blank lines "
-            "at the end of docstrings",
+    "separate sections or paragraphs, and do not leave blank lines "
+    "at the end of docstrings",
     "GL05": 'Tabs found at the start of line "{line_with_tabs}", please use '
-            "whitespace only",
+    "whitespace only",
     "GL06": 'Found unknown section "{section}". Allowed sections are: '
-            "{allowed_sections}",
+    "{allowed_sections}",
     "GL07": "Sections are in the wrong order. Correct order is: {correct_sections}",
     "GL08": "The object does not have a docstring",
     "GL09": "Deprecation warning should precede extended summary",
     "GL10": "reST directives {directives} must be followed by two colons",
     "SS01": "No summary found (a short summary in a single line should be "
-            "present at the beginning of the docstring)",
+    "present at the beginning of the docstring)",
     "SS02": "Summary does not start with a capital letter",
     "SS03": "Summary does not end with a period",
     "SS04": "Summary contains heading whitespaces",
     "SS05": "Summary must start with infinitive verb, not third person "
-            '(e.g. use "Generate" instead of "Generates")',
+    '(e.g. use "Generate" instead of "Generates")',
     "SS06": "Summary should fit in a single line",
     "ES01": "No extended summary found",
     "PR01": "Parameters {missing_params} not documented",
     "PR02": "Unknown parameters {unknown_params}",
     "PR03": "Wrong parameters order. Actual: {actual_params}. "
-            "Documented: {documented_params}",
+    "Documented: {documented_params}",
     "PR04": 'Parameter "{param_name}" has no type',
     "PR05": 'Parameter "{param_name}" type should not finish with "."',
     "PR06": 'Parameter "{param_name}" type should use "{right_type}" instead '
-            'of "{wrong_type}"',
+    'of "{wrong_type}"',
     "PR07": 'Parameter "{param_name}" has no description',
     "PR08": 'Parameter "{param_name}" description should start with a '
-            "capital letter",
+    "capital letter",
     "PR09": 'Parameter "{param_name}" description should finish with "."',
     "PR10": 'Parameter "{param_name}" requires a space before the colon '
-            "separating the parameter name and type",
+    "separating the parameter name and type",
     "RT01": "No Returns section found",
     "RT02": "The first line of the Returns section should contain only the "
-            "type, unless multiple values are being returned",
+    "type, unless multiple values are being returned",
     "RT03": "Return value has no description",
     "RT04": "Return value description should start with a capital letter",
     "RT05": 'Return value description should finish with "."',
     "YD01": "No Yields section found",
     "SA01": "See Also section not found",
     "SA02": "Missing period at end of description for See Also "
-            '"{reference_name}" reference',
+    '"{reference_name}" reference',
     "SA03": "Description should be capitalized for See Also "
-            '"{reference_name}" reference',
+    '"{reference_name}" reference',
     "SA04": 'Missing description for See Also "{reference_name}" reference',
     "EX01": "No examples section found",
 }
+# end-err-msg
+# NOTE: The above comment is a sentinel for embedding in the docs - do not
+# modify/remove
 
 # Ignore these when evaluating end-of-line-"." checks
 IGNORE_STARTS = (" ", "* ", "- ")
@@ -133,7 +140,7 @@ class Validator:
 
     @property
     def name(self):
-        return '.'.join([self.obj.__module__, self.obj.__name__])
+        return ".".join([self.obj.__module__, self.obj.__name__])
 
     @staticmethod
     def _load_obj(name):
@@ -164,7 +171,7 @@ class Validator:
             else:
                 break
         else:
-            raise ImportError(f"No module can be imported from \"{name}\"")
+            raise ImportError(f'No module can be imported from "{name}"')
 
         for part in func_parts:
             obj = getattr(obj, part)
@@ -177,6 +184,10 @@ class Validator:
     @property
     def is_function_or_method(self):
         return inspect.isfunction(self.obj)
+
+    @property
+    def is_generator_function(self):
+        return inspect.isgeneratorfunction(self.obj)
 
     @property
     def source_file_name(self):
@@ -434,8 +445,7 @@ def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
             errs.append(error(code_no_upper, **kwargs))
         # Not ending in "." is only an error if the last bit is not
         # indented (e.g., quote or code block)
-        if not desc[-1].endswith(".") and \
-                not desc[-1].startswith(IGNORE_STARTS):
+        if not desc[-1].endswith(".") and not desc[-1].startswith(IGNORE_STARTS):
             errs.append(error(code_no_period, **kwargs))
     return errs
 
@@ -583,8 +593,7 @@ def validate(obj_name):
                                 wrong_type=wrong_type,
                             )
                         )
-        errs.extend(_check_desc(
-            kind_desc[1], "PR07", "PR08", "PR09", param_name=param))
+        errs.extend(_check_desc(kind_desc[1], "PR07", "PR08", "PR09", param_name=param))
 
     if doc.is_function_or_method:
         if not doc.returns:
@@ -596,7 +605,7 @@ def validate(obj_name):
             for name_or_type, type_, desc in doc.returns:
                 errs.extend(_check_desc(desc, "RT03", "RT04", "RT05"))
 
-        if not doc.yields and "yield" in doc.method_source:
+        if not doc.yields and doc.is_generator_function:
             errs.append(error("YD01"))
 
     if not doc.see_also:

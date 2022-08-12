@@ -1,4 +1,5 @@
 import pytest
+import warnings
 import numpydoc.validate
 import numpydoc.tests
 
@@ -21,6 +22,7 @@ class GoodDocStrings:
     --------
     >>> result = 1 + 1
     """
+
     def one_liner(self):
         """Allow one liner docstrings (including quotes)."""
         # This should fail, but not because of the position of the quotes
@@ -247,7 +249,7 @@ class GoodDocStrings:
         """
         return 1
 
-    def contains(self, pat, case=True, na=float('NaN')):
+    def contains(self, pat, case=True, na=float("NaN")):
         """
         Return whether each value contains `pat`.
 
@@ -482,8 +484,7 @@ class GoodDocStrings:
 
 
 class BadGenericDocStrings:
-    """Everything here has a bad docstring
-    """
+    """Everything here has a bad docstring"""
 
     def func(self):
 
@@ -655,6 +656,7 @@ class BadGenericDocStrings:
         """
         pass
 
+
 class WarnGenericFormat:
     """
     Those contains things that _may_ be incorrect formatting.
@@ -734,6 +736,7 @@ class BadParameters:
     """
     Everything here has a problem with its Parameters section.
     """
+
     def no_type(self, value):
         """
         Lacks the type.
@@ -1082,10 +1085,15 @@ class TestValidator:
         return base_path
 
     def test_one_liner(self, capsys):
-        result = validate_one(self._import_path(klass="GoodDocStrings", func='one_liner'))
+        result = validate_one(
+            self._import_path(klass="GoodDocStrings", func="one_liner")
+        )
         errors = " ".join(err[1] for err in result["errors"])
-        assert 'should start in the line immediately after the opening quotes' not in errors
-        assert 'should be placed in the line after the last text' not in errors
+        assert (
+            "should start in the line immediately after the opening quotes"
+            not in errors
+        )
+        assert "should be placed in the line after the last text" not in errors
 
     def test_good_class(self, capsys):
         errors = validate_one(self._import_path(klass="GoodDocStrings"))["errors"]
@@ -1136,9 +1144,8 @@ class TestValidator:
         with pytest.warns(UserWarning):
             errors = validate_one(
                 self._import_path(klass="WarnGenericFormat", func=func)  # noqa:F821
-                )
-        assert 'is too short' in w.msg
-
+            )
+        assert "is too short" in w.msg
 
     @pytest.mark.parametrize(
         "func",
@@ -1218,8 +1225,10 @@ class TestValidator:
             (
                 "BadSummaries",
                 "wrong_line",
-                ("should start in the line immediately after the opening quotes",
-                 "should be placed in the line after the last text"),
+                (
+                    "should start in the line immediately after the opening quotes",
+                    "should be placed in the line after the last text",
+                ),
             ),
             ("BadSummaries", "no_punctuation", ("Summary does not end with a period",)),
             (
@@ -1377,10 +1386,10 @@ class TestValidator:
         ],
     )
     def test_bad_docstrings(self, capsys, klass, func, msgs):
-        with pytest.warns(None) as w:
+        with warnings.catch_warnings(record=True) as w:
             result = validate_one(self._import_path(klass=klass, func=func))
         if len(w):
-            assert all('Unknown section' in str(ww.message) for ww in w)
+            assert all("Unknown section" in str(ww.message) for ww in w)
         for msg in msgs:
             assert msg in " ".join(err[1] for err in result["errors"])
 

@@ -1,16 +1,15 @@
-# -*- encoding:utf-8 -*-
 import pytest
+from collections import defaultdict
 from io import StringIO
+from pathlib import PosixPath
 from copy import deepcopy
-from numpydoc.numpydoc import (
-    mangle_docstrings, _clean_text_signature, update_config
-)
+from numpydoc.numpydoc import mangle_docstrings, _clean_text_signature, update_config
 from numpydoc.xref import DEFAULT_LINKS
 from sphinx.ext.autodoc import ALL
 from sphinx.util import logging
 
 
-class MockConfig():
+class MockConfig:
     numpydoc_use_plots = False
     numpydoc_use_blockquotes = True
     numpydoc_show_class_members = True
@@ -21,18 +20,17 @@ class MockConfig():
     numpydoc_xref_aliases_complete = deepcopy(DEFAULT_LINKS)
     numpydoc_xref_ignore = set()
     templates_path = []
-    numpydoc_edit_link = False
-    numpydoc_citation_re = '[a-z0-9_.-]+'
+    numpydoc_citation_re = "[a-z0-9_.-]+"
     numpydoc_attributes_as_param_list = True
     numpydoc_validation_checks = set()
     numpydoc_validation_exclude = set()
 
 
-class MockBuilder():
+class MockBuilder:
     config = MockConfig()
 
 
-class MockApp():
+class MockApp:
     config = MockConfig()
     builder = MockBuilder()
     translator = None
@@ -45,61 +43,95 @@ class MockApp():
         self.warningiserror = False
 
 
-def test_mangle_docstrings():
-    s = '''
+def test_mangle_docstrings_basic():
+    s = """
 A top section before
 
 .. autoclass:: str
-    '''
-    lines = s.split('\n')
-    mangle_docstrings(MockApp(), 'class', 'str', str, {}, lines)
-    assert 'rpartition' in [x.strip() for x in lines]
+    """
+    lines = s.split("\n")
+    mangle_docstrings(MockApp(), "class", "str", str, {}, lines)
+    assert "rpartition" in [x.strip() for x in lines]
 
-    lines = s.split('\n')
-    mangle_docstrings(
-        MockApp(), 'class', 'str', str, {'members': ['upper']}, lines)
-    assert 'rpartition' not in [x.strip() for x in lines]
-    assert 'upper' in [x.strip() for x in lines]
+    lines = s.split("\n")
+    mangle_docstrings(MockApp(), "class", "str", str, {"members": ["upper"]}, lines)
+    assert "rpartition" not in [x.strip() for x in lines]
+    assert "upper" in [x.strip() for x in lines]
 
-    lines = s.split('\n')
-    mangle_docstrings(
-        MockApp(), 'class', 'str', str, {'exclude-members': ALL}, lines)
-    assert 'rpartition' not in [x.strip() for x in lines]
-    assert 'upper' not in [x.strip() for x in lines]
+    lines = s.split("\n")
+    mangle_docstrings(MockApp(), "class", "str", str, {"exclude-members": ALL}, lines)
+    assert "rpartition" not in [x.strip() for x in lines]
+    assert "upper" not in [x.strip() for x in lines]
 
-    lines = s.split('\n')
+    lines = s.split("\n")
     mangle_docstrings(
-        MockApp(), 'class', 'str', str, {'exclude-members': ['upper']}, lines)
-    assert 'rpartition' in [x.strip() for x in lines]
-    assert 'upper' not in [x.strip() for x in lines]
+        MockApp(), "class", "str", str, {"exclude-members": ["upper"]}, lines
+    )
+    assert "rpartition" in [x.strip() for x in lines]
+    assert "upper" not in [x.strip() for x in lines]
+
+
+def test_mangle_docstrings_inherited_class_members():
+    # if subclass docs are rendered, this PosixPath should have Path.samefile
+    p = """
+A top section before
+
+.. autoclass:: pathlib.PosixPath
+"""
+    lines = p.split("\n")
+    app = MockApp()
+    mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
+    lines = [x.strip() for x in lines]
+    assert "samefile" in lines
+    app.config.numpydoc_show_inherited_class_members = False
+    lines = p.split("\n")
+    mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
+    lines = [x.strip() for x in lines]
+    assert "samefile" not in lines
+    app.config.numpydoc_show_inherited_class_members = dict()
+    lines = p.split("\n")
+    mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
+    lines = [x.strip() for x in lines]
+    assert "samefile" in lines
+    app.config.numpydoc_show_inherited_class_members = defaultdict(lambda: False)
+    lines = p.split("\n")
+    mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
+    lines = [x.strip() for x in lines]
+    assert "samefile" not in lines
 
 
 def test_clean_text_signature():
     assert _clean_text_signature(None) is None
-    assert _clean_text_signature('func($self)') == 'func()'
-    assert (_clean_text_signature('func($self, *args, **kwargs)')
-            == 'func(*args, **kwargs)')
-    assert _clean_text_signature('($self)') == '()'
-    assert _clean_text_signature('()') == '()'
-    assert _clean_text_signature('func()') == 'func()'
-    assert (_clean_text_signature('func($self, /, *args, **kwargs)')
-            == 'func(*args, **kwargs)')
-    assert (_clean_text_signature('func($self, other, /, *args, **kwargs)')
-            == 'func(other, *args, **kwargs)')
-    assert _clean_text_signature('($module)') == '()'
-    assert _clean_text_signature('func($type)') == 'func()'
-    assert (_clean_text_signature('func($self, foo="hello world")')
-            == 'func(foo="hello world")')
-    assert (_clean_text_signature("func($self, foo='hello world')")
-            == "func(foo='hello world')")
-    assert (_clean_text_signature('func(foo="hello world")')
-            == 'func(foo="hello world")')
-    assert (_clean_text_signature('func(foo="$self")')
-            == 'func(foo="$self")')
-    assert (_clean_text_signature('func($self, foo="$self")')
-            == 'func(foo="$self")')
-    assert _clean_text_signature('func(self, other)') == 'func(self, other)'
-    assert _clean_text_signature('func($self, *args)') == 'func(*args)'
+    assert _clean_text_signature("func($self)") == "func()"
+    assert (
+        _clean_text_signature("func($self, *args, **kwargs)") == "func(*args, **kwargs)"
+    )
+    assert _clean_text_signature("($self)") == "()"
+    assert _clean_text_signature("()") == "()"
+    assert _clean_text_signature("func()") == "func()"
+    assert (
+        _clean_text_signature("func($self, /, *args, **kwargs)")
+        == "func(*args, **kwargs)"
+    )
+    assert (
+        _clean_text_signature("func($self, other, /, *args, **kwargs)")
+        == "func(other, *args, **kwargs)"
+    )
+    assert _clean_text_signature("($module)") == "()"
+    assert _clean_text_signature("func($type)") == "func()"
+    assert (
+        _clean_text_signature('func($self, foo="hello world")')
+        == 'func(foo="hello world")'
+    )
+    assert (
+        _clean_text_signature("func($self, foo='hello world')")
+        == "func(foo='hello world')"
+    )
+    assert _clean_text_signature('func(foo="hello world")') == 'func(foo="hello world")'
+    assert _clean_text_signature('func(foo="$self")') == 'func(foo="$self")'
+    assert _clean_text_signature('func($self, foo="$self")') == 'func(foo="$self")'
+    assert _clean_text_signature("func(self, other)") == "func(self, other)"
+    assert _clean_text_signature("func($self, *args)") == "func(*args)"
 
 
 @pytest.fixture
@@ -111,22 +143,23 @@ def f():
         Expect SA01 and EX01 errors if validation enabled.
         """
         pass
+
     return _function_without_seealso_and_examples
 
 
 @pytest.mark.parametrize(
     (
-        'numpydoc_validation_checks',
-        'expected_warn',
-        'non_warnings',
+        "numpydoc_validation_checks",
+        "expected_warn",
+        "non_warnings",
     ),
     (
         # Validation configured off - expect no warnings
         (set(), [], []),
         # Validation on with expected warnings
-        (set(['SA01', 'EX01']), ('SA01', 'EX01'), []),
+        ({"SA01", "EX01"}, ("SA01", "EX01"), []),
         # Validation on with only one activated check
-        (set(['SA01']), ('SA01',), ('EX01',)),
+        ({"SA01"}, ("SA01",), ("EX01",)),
     ),
 )
 def test_mangle_docstring_validation_warnings(
@@ -144,7 +177,7 @@ def test_mangle_docstring_validation_warnings(
     status, warning = StringIO(), StringIO()
     logging.setup(app, status, warning)
     # Run mangle docstrings with the above configuration
-    mangle_docstrings(app, 'function', 'f', f, None, f.__doc__.split('\n'))
+    mangle_docstrings(app, "function", "f", f, None, f.__doc__.split("\n"))
     # Assert that all (and only) expected warnings are logged
     warnings = warning.getvalue()
     for w in expected_warn:
@@ -157,6 +190,7 @@ def test_mangle_docstring_validation_exclude():
     def function_with_bad_docstring():
         """
         This docstring will raise docstring validation warnings."""
+
     app = MockApp()
     app.config.numpydoc_validation_checks = {"all"}
     app.config.numpydoc_validation_exclude = [r"_bad_"]
@@ -168,11 +202,11 @@ def test_mangle_docstring_validation_exclude():
     # Run mangle docstrings on function_with_bad_docstring
     mangle_docstrings(
         app,
-        'function',
+        "function",
         function_with_bad_docstring.__name__,
         function_with_bad_docstring,
         None,
-        function_with_bad_docstring.__doc__.split('\n'),
+        function_with_bad_docstring.__doc__.split("\n"),
     )
     # Validation is skipped due to exclude pattern matching fn name, therefore
     # no warnings expected
@@ -191,10 +225,11 @@ def test_update_config_exclude_str():
     app = MockApp()
     app.config.numpydoc_validation_checks = set()
     app.config.numpydoc_validation_exclude = "shouldnt-be-a-str"
-    with pytest.raises(ValueError, match="\['shouldnt-be-a-str'\]"):
+    with pytest.raises(ValueError, match=r"\['shouldnt-be-a-str'\]"):
         update_config(app)
 
 
 if __name__ == "__main__":
     import pytest
+
     pytest.main()

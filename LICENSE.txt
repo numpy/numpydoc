@@ -1,4 +1,4 @@
-Copyright (C) 2008 Stefan van der Walt <stefan@mentat.za.net>, Pauli Virtanen <pav@iki.fi>
+Copyright (C) 2008-2022 Stefan van der Walt <stefan@mentat.za.net>, Pauli Virtanen <pav@iki.fi>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are

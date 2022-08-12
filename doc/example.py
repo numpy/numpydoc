@@ -9,7 +9,6 @@ extend over multiple lines, the closing three quotation marks must be on
 a line by itself, preferably preceded by a blank line.
 
 """
-from __future__ import division, absolute_import, print_function
 
 import os  # standard library imports first
 
@@ -35,7 +34,7 @@ import matplotlib.pyplot as plt
 # numpy module itself, unabbreviated.
 
 
-def foo(var1, var2, *args, long_var_name='hi', only_seldom_used_keyword=0, **kwargs):
+def foo(var1, var2, *args, long_var_name="hi", only_seldom_used_keyword=0, **kwargs):
     r"""Summarize the function in one line.
 
     Several sentences providing an extended description. Refer to
