@@ -11,7 +11,6 @@ from sphinx.util import logging
 
 class MockConfig:
     numpydoc_use_plots = False
-    numpydoc_use_blockquotes = True
     numpydoc_show_class_members = True
     numpydoc_show_inherited_class_members = True
     numpydoc_class_members_toctree = True
