@@ -482,6 +482,29 @@ class GoodDocStrings:
         >>> result = 1 + 1
         """
 
+    def parameters_with_trailing_underscores(self, str_):
+        r"""
+        Ensure PR01 and PR02 errors are not raised with trailing underscores.
+        
+        Parameters with trailing underscores need to escape the them to render
+        properly in the documentation since trailing underscores are used to
+        create links.
+
+        Parameters
+        ----------
+        str\_ : str
+           Some text.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass       
+
 
 class BadGenericDocStrings:
     """Everything here has a bad docstring"""
