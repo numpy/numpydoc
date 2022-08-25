@@ -330,7 +330,7 @@ class Validator:
     def parameter_mismatches(self):
         errs = []
         signature_params = self.signature_parameters
-        all_params = tuple(self.doc_all_parameters)
+        all_params = tuple(param.replace("\\", "") for param in self.doc_all_parameters)
         missing = set(signature_params) - set(all_params)
         if missing:
             errs.append(error("PR01", missing_params=str(missing)))
