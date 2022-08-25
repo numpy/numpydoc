@@ -1144,6 +1144,7 @@ class TestValidator:
             "other_parameters",
             "warnings",
             "valid_options_in_parameter_description_sets",
+            "parameters_with_trailing_underscores",
         ],
     )
     def test_good_functions(self, capsys, func):
