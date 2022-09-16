@@ -226,10 +226,14 @@ class NumpyDocString(Mapping):
         params = []
         while not r.eof():
             header = r.read().strip()
-            if " :" in header:
-                arg_name, arg_type = header.split(" :", maxsplit=1)
-                arg_name, arg_type = arg_name.strip(), arg_type.strip()
+            if " : " in header:
+                arg_name, arg_type = header.split(" : ", maxsplit=1)
             else:
+                # NOTE: param line with single element should never have a
+                # a " :" before the description line, so this should probably
+                # warn.
+                if header.endswith(" :"):
+                    header = header[:-2]
                 if single_element_is_type:
                     arg_name, arg_type = "", header
                 else:
