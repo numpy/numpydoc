@@ -980,6 +980,21 @@ doc8 = NumpyDocString(
 )
 
 
+def test_returns_with_roles_no_names():
+    """Make sure colons that are part of sphinx roles are not misinterpreted
+    as type separator in returns section. See gh-428."""
+    docstring = NumpyDocString(
+        """
+        Returns
+        -------
+        str or :class:`NumpyDocString`
+        """
+    )
+    expected = "str or :class:`NumpyDocString`"  # not "str or : class:...
+    assert docstring["Returns"][0].type == expected
+    assert expected in str(docstring)
+
+
 def test_trailing_colon():
     assert doc8["Parameters"][0].name == "data"
 
