@@ -300,13 +300,13 @@ class Validator:
                 self.name.split(".")[-1] in self.obj._accessors
             ):
                 # accessor classes have a signature but don't want to show this
-                return tuple()
+                return dict()
         try:
             sig = inspect.signature(self.obj)
         except (TypeError, ValueError):
             # Some objects, mainly in C extensions do not support introspection
             # of the signature
-            return tuple()
+            return dict()
         params = dict(sig.parameters)
 
         if params:
