@@ -336,7 +336,7 @@ class Validator:
         )
 
     @property
-    def optional_signature_parameter_names(self):
+    def optional_signature_parameters_names(self):
         return tuple(
             self._add_stars(param, info)
             for param, info in self.signature_parameters.items()
@@ -611,7 +611,7 @@ def validate(obj_name):
                             )
                         )
 
-        for param in doc.optional_signature_parameter_names:
+        for param in doc.optional_signature_parameters_names:
             type = doc.parameter_type(param)
             if "optional" not in type and "{" not in type and "default" not in type:
                 errs.append(error("PR11", param_name=param))
