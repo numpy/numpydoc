@@ -190,7 +190,7 @@ class GoodDocStrings:
 
         Parameters
         ----------
-        n : int
+        n : int, default 5
             Number of values to return.
 
         Returns
@@ -224,7 +224,7 @@ class GoodDocStrings:
 
         Parameters
         ----------
-        n : int
+        n : int, default 5
             4 Number of values to return.
 
         Returns
@@ -495,6 +495,31 @@ class GoodDocStrings:
         ----------
         str\_ : str
            Some text.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
+
+    def optional_params(self, a=None, b=2, c="Thing 1"):
+        """
+        Test different ways of testing optional parameters.
+
+        There are three ways to document optional paramters.
+
+        Parameters
+        ----------
+        a : int, optional
+            Default is implicitly determined.
+        b : int, default 5
+            Default is explicitly documented.
+        c : {"Thing 1", "Thing 2"}
+            Which thing.
 
         See Also
         --------
@@ -922,6 +947,17 @@ class BadParameters:
         """
         pass
 
+    def no_documented_optional(self, a=5):
+        """
+        Missing optional.
+
+        Parameters
+        ----------
+        a : int
+             Missing optional.
+        """
+        pass
+
 
 class BadReturns:
     def return_not_documented(self):
@@ -1145,6 +1181,7 @@ class TestValidator:
             "warnings",
             "valid_options_in_parameter_description_sets",
             "parameters_with_trailing_underscores",
+            "optional_params",
         ],
     )
     def test_good_functions(self, capsys, func):
@@ -1356,6 +1393,11 @@ class TestValidator:
                 "blank_lines",
                 ("No error yet?",),
                 marks=pytest.mark.xfail,
+            ),
+            (
+                "BadParameters",
+                "no_documented_optional",
+                ('Parameter "a" is optional but not documented',),
             ),
             # Returns tests
             ("BadReturns", "return_not_documented", ("No Returns section found",)),

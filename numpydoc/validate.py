@@ -79,6 +79,7 @@ ERROR_MSGS = {
     "PR09": 'Parameter "{param_name}" description should finish with "."',
     "PR10": 'Parameter "{param_name}" requires a space before the colon '
     "separating the parameter name and type",
+    "PR11": 'Parameter "{param_name}" is optional but not documented',
     "RT01": "No Returns section found",
     "RT02": "The first line of the Returns section should contain only the "
     "type, unless multiple values are being returned",
@@ -294,17 +295,6 @@ class Validator:
 
     @property
     def signature_parameters(self):
-        def add_stars(param_name, info):
-            """
-            Add stars to *args and **kwargs parameters
-            """
-            if info.kind == inspect.Parameter.VAR_POSITIONAL:
-                return f"*{param_name}"
-            elif info.kind == inspect.Parameter.VAR_KEYWORD:
-                return f"**{param_name}"
-            else:
-                return param_name
-
         if inspect.isclass(self.obj):
             if hasattr(self.obj, "_accessors") and (
                 self.name.split(".")[-1] in self.obj._accessors
@@ -317,19 +307,46 @@ class Validator:
             # Some objects, mainly in C extensions do not support introspection
             # of the signature
             return tuple()
+        params = dict(sig.parameters)
 
-        params = tuple(
-            add_stars(parameter, sig.parameters[parameter])
-            for parameter in sig.parameters
-        )
-        if params and params[0] in ("self", "cls"):
-            return params[1:]
+        if params:
+            first_param = next(iter(params.keys()))
+            if first_param in ("self", "cls"):
+                del params[first_param]
+
         return params
+
+    @staticmethod
+    def _add_stars(param_name, info):
+        """
+        Add stars to *args and **kwargs parameters
+        """
+        if info.kind == inspect.Parameter.VAR_POSITIONAL:
+            return f"*{param_name}"
+        elif info.kind == inspect.Parameter.VAR_KEYWORD:
+            return f"**{param_name}"
+        else:
+            return param_name
+
+    @property
+    def signature_parameters_names(self):
+        return tuple(
+            self._add_stars(param, info)
+            for param, info in self.signature_parameters.items()
+        )
+
+    @property
+    def optional_signature_parameter_names(self):
+        return tuple(
+            self._add_stars(param, info)
+            for param, info in self.signature_parameters.items()
+            if info.default is not inspect._empty
+        )
 
     @property
     def parameter_mismatches(self):
         errs = []
-        signature_params = self.signature_parameters
+        signature_params = self.signature_parameters_names
         all_params = tuple(param.replace("\\", "") for param in self.doc_all_parameters)
         missing = set(signature_params) - set(all_params)
         if missing:
@@ -593,6 +610,12 @@ def validate(obj_name):
                                 wrong_type=wrong_type,
                             )
                         )
+
+        for param in doc.optional_signature_parameter_names:
+            type = doc.parameter_type(param)
+            if "optional" not in type and "{" not in type and "default" not in type:
+                errs.append(error("PR11", param_name=param))
+
         errs.extend(_check_desc(kind_desc[1], "PR07", "PR08", "PR09", param_name=param))
 
     if doc.is_function_or_method:
