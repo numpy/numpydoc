@@ -79,7 +79,7 @@ ERROR_MSGS = {
     "PR09": 'Parameter "{param_name}" description should finish with "."',
     "PR10": 'Parameter "{param_name}" requires a space before the colon '
     "separating the parameter name and type",
-    "PR11": 'Parameter "{param_name}" is optional but not documented',
+    "PR11": 'Parameter "{param_name}" is optional but not documented, ' "or vice versa",
     "RT01": "No Returns section found",
     "RT02": "The first line of the Returns section should contain only the "
     "type, unless multiple values are being returned",
@@ -583,7 +583,8 @@ def validate(obj_name):
 
     for param, kind_desc in doc.doc_all_parameters.items():
         if not param.startswith("*"):  # Check can ignore var / kwargs
-            if not doc.parameter_type(param):
+            param_type = doc.parameter_type(param)
+            if not param_type:
                 if ":" in param:
                     errs.append(error("PR10", param_name=param.split(":")[0]))
                 else:
@@ -593,13 +594,19 @@ def validate(obj_name):
                     errs.append(error("PR05", param_name=param))
                 # skip common_type_error checks when the param type is a set of
                 # options
-                if "{" in doc.parameter_type(param):
+                if "{" in param_type:
                     continue
                 common_type_errors = [
                     ("integer", "int"),
                     ("boolean", "bool"),
                     ("string", "str"),
                 ]
+
+                # check that documented optional param has default in sig
+                if "optional" in param_type or "default" in param_type:
+                    if param not in doc.optional_signature_parameters_names:
+                        errs.append(error("PR11", param_name=param))
+
                 for wrong_type, right_type in common_type_errors:
                     if wrong_type in doc.parameter_type(param):
                         errs.append(
@@ -611,12 +618,13 @@ def validate(obj_name):
                             )
                         )
 
-        for param in doc.optional_signature_parameters_names:
-            type = doc.parameter_type(param)
-            if "optional" not in type and "{" not in type and "default" not in type:
-                errs.append(error("PR11", param_name=param))
-
         errs.extend(_check_desc(kind_desc[1], "PR07", "PR08", "PR09", param_name=param))
+
+    # check param with default in sig is documented as optional
+    for param in doc.optional_signature_parameters_names:
+        type = doc.parameter_type(param)
+        if "optional" not in type and "{" not in type and "default" not in type:
+            errs.append(error("PR11", param_name=param))
 
     if doc.is_function_or_method:
         if not doc.returns:

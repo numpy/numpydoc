@@ -949,12 +949,25 @@ class BadParameters:
 
     def no_documented_optional(self, a=5):
         """
-        Missing optional.
+        Missing optional in docstring.
 
         Parameters
         ----------
         a : int
              Missing optional.
+        """
+        pass
+
+    def no_default_when_documented_optional(self, a, b):
+        """
+        Missing default in signature.
+
+        Parameters
+        ----------
+        a : int, optional
+            One way to denote optional.
+        b : int, default 5
+            Another way to denote optional.
         """
         pass
 
@@ -1397,7 +1410,15 @@ class TestValidator:
             (
                 "BadParameters",
                 "no_documented_optional",
-                ('Parameter "a" is optional but not documented',),
+                ('Parameter "a" is optional but not documented, or vice versa',),
+            ),
+            (
+                "BadParameters",
+                "no_default_when_documented_optional",
+                (
+                    'Parameter "a" is optional but not documented, or vice versa',
+                    'Parameter "b" is optional but not documented, or vice versa',
+                ),
             ),
             # Returns tests
             ("BadReturns", "return_not_documented", ("No Returns section found",)),
