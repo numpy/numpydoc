@@ -622,8 +622,12 @@ def validate(obj_name):
 
     # check param with default in sig is documented as optional
     for param in doc.optional_signature_parameters_names:
-        type = doc.parameter_type(param)
-        if "optional" not in type and "{" not in type and "default" not in type:
+        param_type = doc.parameter_type(param)
+        if (
+            "optional" not in param_type
+            and "{" not in param_type
+            and "default" not in param_type
+        ):
             errs.append(error("PR11", param_name=param))
 
     if doc.is_function_or_method:
