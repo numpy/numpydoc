@@ -8,9 +8,15 @@ import pydoc
 from warnings import warn
 from collections import namedtuple
 from collections.abc import Callable, Mapping
-from functools import cached_property
 import copy
 import sys
+
+
+# TODO: Remove try-except when support for Python 3.7 is dropped
+try:
+    from functools import cached_property
+except ImportError:  # cached_property added in Python 3.8
+    cached_property = property
 
 
 def strip_blank_lines(l):
