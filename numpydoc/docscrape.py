@@ -8,6 +8,7 @@ import pydoc
 from warnings import warn
 from collections import namedtuple
 from collections.abc import Callable, Mapping
+from functools import cached_property
 import copy
 import sys
 
@@ -706,7 +707,7 @@ class ClassDoc(NumpyDocString):
                 not name.startswith("_")
                 and (
                     func is None
-                    or isinstance(func, property)
+                    or isinstance(func, (property, cached_property))
                     or inspect.isdatadescriptor(func)
                 )
                 and self._is_show_member(name)
