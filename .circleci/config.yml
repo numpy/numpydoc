@@ -20,7 +20,8 @@ jobs:
             python3 -m venv venv
             source venv/bin/activate
             python -m pip install --upgrade pip wheel setuptools
-            python -m pip install --upgrade -r requirements/doc.txt
+            python -m pip install -U numpy matplotlib sphinx
+            python -m pip install -U git+https://github.com/pydata/pydata-sphinx-theme
             python -m pip list
       - save_cache:
           key: pip-cache
