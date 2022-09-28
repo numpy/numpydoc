@@ -18,9 +18,10 @@ jobs:
       - run:
           name: Get dependencies and install
           command: |
-            pip install --user -q --upgrade pip setuptools
-            pip install --user -q --upgrade numpy matplotlib sphinx pydata-sphinx-theme
-            pip install --user -e .
+            python -m pip install --upgrade pip wheel setuptools
+            python -m pip install --upgrade -r requirements/doc.txt
+            python -m pip install .
+            python -m pip list
       - save_cache:
           key: pip-cache
           paths:
