@@ -38,7 +38,7 @@ jobs:
 
       - name: Run test suite
         run: |
-          pytest -v --pyargs .
+          pytest -v --pyargs numpydoc
 
       - name: Test coverage
         run: |
