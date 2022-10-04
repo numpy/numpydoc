@@ -17,6 +17,16 @@ Release notes
    For release notes (sparsely) kept prior to 1.0.0, look at the `releases page
    on GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
+
+1.5.0
+-----
+
+Release date: TBD
+
+Requires Python 3.7+ and Sphinx 4.2+.
+
+`Full Changelog <https://github.com/numpy/numpydoc/compare/v1.4.0...v1.5.0rc1>`__
+
 1.4.0
 -----
 
