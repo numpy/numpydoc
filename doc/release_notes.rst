@@ -51,7 +51,7 @@ Merged pull requests
 -  Support Python 3.11 `#438 <https://github.com/numpy/numpydoc/pull/438>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
 -  Update precommit hooks `#437 <https://github.com/numpy/numpydoc/pull/437>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
 -  Use Python 3.10 to build docs `#436 <https://github.com/numpy/numpydoc/pull/436>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
--  Use requirements/*.txt files for CI `#435 <https://github.com/numpy/numpydoc/pull/435>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Use `requirements/*.txt` files for CI `#435 <https://github.com/numpy/numpydoc/pull/435>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
 -  Fix front page `#434 <https://github.com/numpy/numpydoc/pull/434>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
 -  Add cached property support `#433 <https://github.com/numpy/numpydoc/pull/433>`__ (`rossbar <https://github.com/rossbar>`__)
 -  ENH: Update validate.py to allow parameters with trailing underscores. `#425 <https://github.com/numpy/numpydoc/pull/425>`__ (`stefmolin <https://github.com/stefmolin>`__)
