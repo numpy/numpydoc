@@ -958,6 +958,17 @@ class BadParameters:
         """
         pass
 
+    def no_documented_optional_when_None(self, a=None):
+        """
+        Missing optional in docstring when default is None.
+
+        Parameters
+        ----------
+        a : int
+             Missing optional.
+        """
+        pass
+
     def no_default_when_documented_optional(self, a, b):
         """
         Missing default in signature.
