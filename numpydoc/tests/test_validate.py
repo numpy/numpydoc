@@ -506,7 +506,7 @@ class GoodDocStrings:
         """
         pass
 
-    def optional_params(self, a=None, b=2, c="Thing 1"):
+    def optional_params(self, *, not_optional, a=None, b=2, c="Thing 1"):
         """
         Test different ways of testing optional parameters.
 
@@ -514,6 +514,8 @@ class GoodDocStrings:
 
         Parameters
         ----------
+        not_optional : str
+            A keyword arg that is not optional.
         a : int, optional
             Default is implicitly determined.
         b : int, default 5
@@ -955,6 +957,18 @@ class BadParameters:
         ----------
         a : int
              Missing optional.
+        """
+        pass
+
+    def documented_optional_but_kwarg(self, *, a):
+        """
+        Missing optional in docstring.
+
+        Parameters
+        ----------
+        a : int, optional
+            Keyword arg mislabelled as optional when there is no
+            default.
         """
         pass
 
