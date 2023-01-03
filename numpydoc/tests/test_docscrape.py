@@ -1011,7 +1011,7 @@ def test_no_summary():
 
 
 @pytest.mark.parametrize(
-    ["docstring", "expected_warnings"],
+    ["docstring", "expected_warning"],
     (
         (
             """\
@@ -1021,7 +1021,7 @@ def test_no_summary():
             data
                 some parameter
             """,
-            ["missing blank line before the Parameters section"],
+            "missing blank line before the Parameters section",
         ),
         (
             """\
@@ -1033,7 +1033,7 @@ def test_no_summary():
             -------
             int
             """,
-            ["missing blank line before the Returns section"],
+            "missing blank line before the Returns section",
         ),
     ),
     ids=[
@@ -1041,11 +1041,10 @@ def test_no_summary():
         "missing blank line between sections",
     ],
 )
-def test_section_detection_warnings(mock_app, caplog, docstring, expected_warnings):
-    _ = NumpyDocString(docstring)
-    messages = [record.msg for record in caplog.records]
-    for w in expected_warnings:
-        assert w in messages
+def test_section_detection_warnings(docstring, expected_warning):
+    warning_re = ".*%s.*" % expected_warning
+    with pytest.warns(UserWarning, match=warning_re):
+        _ = NumpyDocString(docstring)
 
 
 def test_unicode():
