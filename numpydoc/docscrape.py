@@ -205,13 +205,33 @@ class NumpyDocString(Mapping):
         return doc[i : len(doc) - j]
 
     def _read_to_next_section(self):
-        section = self._doc.read_to_next_empty_line()
+        def read_to_next_empty_line():
+            data = []
+            while True:
+                old_line = self._doc._l
+                if self._is_at_section() and self._doc.peek(-1).strip():
+                    section_name = self._doc.peek()
+                    self._error_location(
+                        "missing blank line before the %s section" % section_name,
+                        error=False,
+                    )
+                self._doc._l = old_line
+
+                current = self._doc.read()
+                if not current.strip():
+                    break
+
+                data.append(current)
+
+            return data
+
+        section = read_to_next_empty_line()
 
         while not self._is_at_section() and not self._doc.eof():
             if not self._doc.peek(-1).strip():  # previous line was empty
                 section += [""]
 
-            section += self._doc.read_to_next_empty_line()
+            section += read_to_next_empty_line()
 
         return section
 
