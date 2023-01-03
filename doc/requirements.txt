@@ -1,4 +1,0 @@
-numpy
-matplotlib
-pydata-sphinx-theme
-sphinx>2

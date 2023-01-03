@@ -5,7 +5,7 @@ Getting started
 Installation
 ============
 
-This extension requires Python 3.5+, sphinx 1.8+ and is available from:
+This extension requires Python 3.7+, sphinx 4.2+ and is available from:
 
 * `numpydoc on PyPI <http://pypi.python.org/pypi/numpydoc>`_
 * `numpydoc on GitHub <https://github.com/numpy/numpydoc/>`_
@@ -26,10 +26,18 @@ numpydoc_show_class_members : bool
   Whether to show all members of a class in the Methods and Attributes
   sections automatically.
   ``True`` by default.
-numpydoc_show_inherited_class_members : bool
+numpydoc_show_inherited_class_members : bool | dict
   Whether to show all inherited members of a class in the Methods and Attributes
   sections automatically. If it's false, inherited members won't shown.
-  ``True`` by default.
+  ``True`` by default. It can also be a dict mapping names of classes to
+  boolean values (missing keys are treated as ``True``).
+  For example, ``defaultdict(lambda: False, {'mymod.MyClass': True})``
+  would only show inherited class members for ``MyClass``, whereas
+  ``{'mymod.MyClass': False}`` would show inherited class members for all
+  classes except ``MyClass``. Note that disabling this for a limited set of
+  classes might simultaneously require the use of a separate, custom
+  autosummary class template with ``:no-inherited-members:`` in the
+  ``autoclass`` directive options.
 numpydoc_class_members_toctree : bool
   Whether to create a Sphinx table of contents for the lists of class
   methods and attributes. If a table of contents is made, Sphinx expects
@@ -40,10 +48,6 @@ numpydoc_citation_re : str
   should be mangled to avoid conflicts due to
   duplication across the documentation.  Defaults
   to ``[\w-]+``.
-numpydoc_use_blockquotes : bool
-  Until version 0.8, parameter definitions were shown as blockquotes, rather
-  than in a definition list.  If your styling requires blockquotes, switch
-  this config option to True.  This option will be removed in version 0.10.
 numpydoc_attributes_as_param_list : bool
   Whether to format the Attributes section of a class page in the same way
   as the Parameter section. If it's False, the Attributes section will be
@@ -93,7 +97,7 @@ numpydoc_xref_ignore : set or ``"all"``
   If the ``numpydoc_xref_ignore="all"``, then all unrecognized terms are
   ignored, i.e. terms not in ``numpydoc_xref_aliases`` are *not* wrapped in
   ``:obj:`` roles.
-  This configuration parameter may be useful if you only want create
+  This configuration parameter may be useful if you only want to create
   cross references for a small number of terms. In this case, including the
   desired cross reference mappings in ``numpydoc_xref_aliases`` and setting
   ``numpydoc_xref_ignore="all"`` is more convenient than explicitly listing
@@ -134,9 +138,3 @@ numpydoc_validation_exclude : set
     validation.
     Only has an effect when docstring validation is activated, i.e.
     ``numpydoc_validation_checks`` is not an empty set.
-numpydoc_edit_link : bool
-  .. deprecated:: 0.7.0
-
-  edit your HTML template instead
-
-  Whether to insert an edit link after docstrings.

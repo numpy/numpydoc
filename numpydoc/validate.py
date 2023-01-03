@@ -16,8 +16,9 @@ from .docscrape import get_doc_object
 
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
-DIRECTIVE_PATTERN = re.compile(r"^\s*\.\. ({})(?!::)".format('|'.join(DIRECTIVES)),
-                               re.I | re.M)
+DIRECTIVE_PATTERN = re.compile(
+    r"^\s*\.\. ({})(?!::)".format("|".join(DIRECTIVES)), re.I | re.M
+)
 ALLOWED_SECTIONS = [
     "Parameters",
     "Attributes",
@@ -27,68 +28,75 @@ ALLOWED_SECTIONS = [
     "Other Parameters",
     "Raises",
     "Warns",
+    "Warnings",
     "See Also",
     "Notes",
     "References",
     "Examples",
 ]
+# NOTE: The following comment is a sentinel for embedding in the docs - do not
+# modify/remove
+# start-err-msg
 ERROR_MSGS = {
     "GL01": "Docstring text (summary) should start in the line immediately "
-            "after the opening quotes (not in the same line, or leaving a "
-            "blank line in between)",
+    "after the opening quotes (not in the same line, or leaving a "
+    "blank line in between)",
     "GL02": "Closing quotes should be placed in the line after the last text "
-            "in the docstring (do not close the quotes in the same line as "
-            "the text, or leave a blank line between the last text and the "
-            "quotes)",
+    "in the docstring (do not close the quotes in the same line as "
+    "the text, or leave a blank line between the last text and the "
+    "quotes)",
     "GL03": "Double line break found; please use only one blank line to "
-            "separate sections or paragraphs, and do not leave blank lines "
-            "at the end of docstrings",
+    "separate sections or paragraphs, and do not leave blank lines "
+    "at the end of docstrings",
     "GL05": 'Tabs found at the start of line "{line_with_tabs}", please use '
-            "whitespace only",
+    "whitespace only",
     "GL06": 'Found unknown section "{section}". Allowed sections are: '
-            "{allowed_sections}",
+    "{allowed_sections}",
     "GL07": "Sections are in the wrong order. Correct order is: {correct_sections}",
     "GL08": "The object does not have a docstring",
     "GL09": "Deprecation warning should precede extended summary",
     "GL10": "reST directives {directives} must be followed by two colons",
     "SS01": "No summary found (a short summary in a single line should be "
-            "present at the beginning of the docstring)",
+    "present at the beginning of the docstring)",
     "SS02": "Summary does not start with a capital letter",
     "SS03": "Summary does not end with a period",
     "SS04": "Summary contains heading whitespaces",
     "SS05": "Summary must start with infinitive verb, not third person "
-            '(e.g. use "Generate" instead of "Generates")',
+    '(e.g. use "Generate" instead of "Generates")',
     "SS06": "Summary should fit in a single line",
     "ES01": "No extended summary found",
     "PR01": "Parameters {missing_params} not documented",
     "PR02": "Unknown parameters {unknown_params}",
     "PR03": "Wrong parameters order. Actual: {actual_params}. "
-            "Documented: {documented_params}",
+    "Documented: {documented_params}",
     "PR04": 'Parameter "{param_name}" has no type',
     "PR05": 'Parameter "{param_name}" type should not finish with "."',
     "PR06": 'Parameter "{param_name}" type should use "{right_type}" instead '
-            'of "{wrong_type}"',
+    'of "{wrong_type}"',
     "PR07": 'Parameter "{param_name}" has no description',
     "PR08": 'Parameter "{param_name}" description should start with a '
-            "capital letter",
+    "capital letter",
     "PR09": 'Parameter "{param_name}" description should finish with "."',
     "PR10": 'Parameter "{param_name}" requires a space before the colon '
-            "separating the parameter name and type",
+    "separating the parameter name and type",
     "RT01": "No Returns section found",
     "RT02": "The first line of the Returns section should contain only the "
-            "type, unless multiple values are being returned",
+    "type, unless multiple values are being returned",
     "RT03": "Return value has no description",
     "RT04": "Return value description should start with a capital letter",
     "RT05": 'Return value description should finish with "."',
     "YD01": "No Yields section found",
     "SA01": "See Also section not found",
     "SA02": "Missing period at end of description for See Also "
-            '"{reference_name}" reference',
+    '"{reference_name}" reference',
     "SA03": "Description should be capitalized for See Also "
-            '"{reference_name}" reference',
+    '"{reference_name}" reference',
     "SA04": 'Missing description for See Also "{reference_name}" reference',
     "EX01": "No examples section found",
 }
+# end-err-msg
+# NOTE: The above comment is a sentinel for embedding in the docs - do not
+# modify/remove
 
 # Ignore these when evaluating end-of-line-"." checks
 IGNORE_STARTS = (" ", "* ", "- ")
@@ -132,7 +140,7 @@ class Validator:
 
     @property
     def name(self):
-        return '.'.join([self.obj.__module__, self.obj.__name__])
+        return ".".join([self.obj.__module__, self.obj.__name__])
 
     @staticmethod
     def _load_obj(name):
@@ -163,7 +171,7 @@ class Validator:
             else:
                 break
         else:
-            raise ImportError("No module can be imported " 'from "{}"'.format(name))
+            raise ImportError(f'No module can be imported from "{name}"')
 
         for part in func_parts:
             obj = getattr(obj, part)
@@ -176,6 +184,10 @@ class Validator:
     @property
     def is_function_or_method(self):
         return inspect.isfunction(self.obj)
+
+    @property
+    def is_generator_function(self):
+        return inspect.isgeneratorfunction(self.obj)
 
     @property
     def source_file_name(self):
@@ -260,13 +272,25 @@ class Validator:
             return " ".join(self.doc["Summary"])
         return " ".join(self.doc["Extended Summary"])
 
+    def _doc_parameters(self, sections):
+        parameters = collections.OrderedDict()
+        for section in sections:
+            for names, type_, desc in self.doc[section]:
+                for name in names.split(", "):
+                    parameters[name] = (type_, desc)
+        return parameters
+
     @property
     def doc_parameters(self):
-        parameters = collections.OrderedDict()
-        for names, type_, desc in self.doc["Parameters"]:
-            for name in names.split(", "):
-                parameters[name] = (type_, desc)
-        return parameters
+        return self._doc_parameters(["Parameters"])
+
+    @property
+    def doc_other_parameters(self):
+        return self._doc_parameters(["Other Parameters"])
+
+    @property
+    def doc_all_parameters(self):
+        return self._doc_parameters(["Parameters", "Other Parameters"])
 
     @property
     def signature_parameters(self):
@@ -275,9 +299,9 @@ class Validator:
             Add stars to *args and **kwargs parameters
             """
             if info.kind == inspect.Parameter.VAR_POSITIONAL:
-                return "*{}".format(param_name)
+                return f"*{param_name}"
             elif info.kind == inspect.Parameter.VAR_KEYWORD:
-                return "**{}".format(param_name)
+                return f"**{param_name}"
             else:
                 return param_name
 
@@ -306,22 +330,22 @@ class Validator:
     def parameter_mismatches(self):
         errs = []
         signature_params = self.signature_parameters
-        doc_params = tuple(self.doc_parameters)
-        missing = set(signature_params) - set(doc_params)
+        all_params = tuple(param.replace("\\", "") for param in self.doc_all_parameters)
+        missing = set(signature_params) - set(all_params)
         if missing:
             errs.append(error("PR01", missing_params=str(missing)))
-        extra = set(doc_params) - set(signature_params)
+        extra = set(all_params) - set(signature_params)
         if extra:
             errs.append(error("PR02", unknown_params=str(extra)))
         if (
             not missing
             and not extra
-            and signature_params != doc_params
-            and not (not signature_params and not doc_params)
+            and signature_params != all_params
+            and not (not signature_params and not all_params)
         ):
             errs.append(
                 error(
-                    "PR03", actual_params=signature_params, documented_params=doc_params
+                    "PR03", actual_params=signature_params, documented_params=all_params
                 )
             )
 
@@ -332,7 +356,7 @@ class Validator:
         return DIRECTIVE_PATTERN.findall(self.raw_doc)
 
     def parameter_type(self, param):
-        return self.doc_parameters[param][0]
+        return self.doc_all_parameters[param][0]
 
     @property
     def see_also(self):
@@ -407,7 +431,7 @@ def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
     # Find and strip out any sphinx directives
     desc = "\n".join(desc)
     for directive in DIRECTIVES:
-        full_directive = ".. {}".format(directive)
+        full_directive = f".. {directive}"
         if full_directive in desc:
             # Only retain any description before the directive
             desc = desc[: desc.index(full_directive)].rstrip("\n")
@@ -421,8 +445,7 @@ def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
             errs.append(error(code_no_upper, **kwargs))
         # Not ending in "." is only an error if the last bit is not
         # indented (e.g., quote or code block)
-        if not desc[-1].endswith(".") and \
-                not desc[-1].startswith(IGNORE_STARTS):
+        if not desc[-1].endswith(".") and not desc[-1].startswith(IGNORE_STARTS):
             errs.append(error(code_no_period, **kwargs))
     return errs
 
@@ -541,7 +564,7 @@ def validate(obj_name):
     # PR03: Wrong parameters order
     errs += doc.parameter_mismatches
 
-    for param, kind_desc in doc.doc_parameters.items():
+    for param, kind_desc in doc.doc_all_parameters.items():
         if not param.startswith("*"):  # Check can ignore var / kwargs
             if not doc.parameter_type(param):
                 if ":" in param:
@@ -551,6 +574,10 @@ def validate(obj_name):
             else:
                 if doc.parameter_type(param)[-1] == ".":
                     errs.append(error("PR05", param_name=param))
+                # skip common_type_error checks when the param type is a set of
+                # options
+                if "{" in doc.parameter_type(param):
+                    continue
                 common_type_errors = [
                     ("integer", "int"),
                     ("boolean", "bool"),
@@ -566,8 +593,7 @@ def validate(obj_name):
                                 wrong_type=wrong_type,
                             )
                         )
-        errs.extend(_check_desc(
-            kind_desc[1], "PR07", "PR08", "PR09", param_name=param))
+        errs.extend(_check_desc(kind_desc[1], "PR07", "PR08", "PR09", param_name=param))
 
     if doc.is_function_or_method:
         if not doc.returns:
@@ -579,7 +605,7 @@ def validate(obj_name):
             for name_or_type, type_, desc in doc.returns:
                 errs.extend(_check_desc(desc, "RT03", "RT04", "RT05"))
 
-        if not doc.yields and "yield" in doc.method_source:
+        if not doc.yields and doc.is_generator_function:
             errs.append(error("YD01"))
 
     if not doc.see_also:

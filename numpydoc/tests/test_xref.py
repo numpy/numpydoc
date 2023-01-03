@@ -1,4 +1,3 @@
-# -*- encoding:utf-8 -*-
 import pytest
 from numpydoc.xref import make_xref, DEFAULT_LINKS
 
@@ -197,22 +196,24 @@ dict[tuple(str, str), int]
 :class:`python:dict`\[:class:`python:tuple`\(:class:`python:str`, :class:`python:str`), :class:`python:int`]
 """  # noqa: E501
 
-xref_ignore = {'or', 'in', 'of', 'default', 'optional'}
+xref_ignore = {"or", "in", "of", "default", "optional"}
 
 
 @pytest.mark.parametrize(
-    ('param_type', 'expected_result'),
-    [tuple(s.split('\n')) for s in data.strip().split('\n\n')]
+    ("param_type", "expected_result"),
+    [tuple(s.split("\n")) for s in data.strip().split("\n\n")],
 )
 def test_make_xref(param_type, expected_result):
     assert make_xref(param_type, xref_aliases, xref_ignore) == expected_result
 
+
 @pytest.mark.parametrize(
-    ('param_type', 'expected_result'),
-    [tuple(s.split('\n')) for s in data_ignore_obj.strip().split('\n\n')]
+    ("param_type", "expected_result"),
+    [tuple(s.split("\n")) for s in data_ignore_obj.strip().split("\n\n")],
 )
 def test_make_xref_ignore_unknown(param_type, expected_result):
     assert make_xref(param_type, xref_aliases, xref_ignore="all") == expected_result
+
 
 def test_xref_ignore_is_all():
     with pytest.raises(TypeError, match="must be a set or 'all'"):

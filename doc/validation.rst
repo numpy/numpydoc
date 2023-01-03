@@ -38,9 +38,9 @@ The full set of validation checks can be activated by::
 
     numpydoc_validation_checks = {"all"}
 
-The complete validation suite contains `many checks <validation_checks>`_
+The complete validation suite contains :ref:`many checks <validation_checks>`
 including some for style, capitalization, and grammar.
-It is unlikely that reporting *all* validation warnings is desireable for
+It is unlikely that reporting *all* validation warnings is desirable for
 most use-cases.
 Individual checks can be excluded by including them in the set with the
 special keyword ``"all"``::
@@ -64,4 +64,5 @@ a more detailed message. For example::
 The full mapping of validation checks is given below.
 
 .. literalinclude:: ../numpydoc/validate.py
-   :lines: 36-90
+   :start-after: start-err-msg
+   :end-before: end-err-msg

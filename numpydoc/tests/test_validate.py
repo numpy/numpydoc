@@ -1,4 +1,5 @@
 import pytest
+import warnings
 import numpydoc.validate
 import numpydoc.tests
 
@@ -21,6 +22,7 @@ class GoodDocStrings:
     --------
     >>> result = 1 + 1
     """
+
     def one_liner(self):
         """Allow one liner docstrings (including quotes)."""
         # This should fail, but not because of the position of the quotes
@@ -58,7 +60,7 @@ class GoodDocStrings:
 
     def swap(self, arr, i, j, *args, **kwargs):
         """
-        Swap two indicies on an array.
+        Swap two indices on an array.
 
         The extended summary can be multiple paragraphs, but just one
         is enough to pass the validation.
@@ -247,7 +249,7 @@ class GoodDocStrings:
         """
         return 1
 
-    def contains(self, pat, case=True, na=float('NaN')):
+    def contains(self, pat, case=True, na=float("NaN")):
         """
         Return whether each value contains `pat`.
 
@@ -384,6 +386,27 @@ class GoodDocStrings:
         else:
             return None
 
+    def warnings(self):
+        """
+        Do one thing.
+
+        Sometimes, this function does other things.
+
+        Warnings
+        --------
+        This function may produce side effects when some condition
+        is met.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
+
     def multiple_variables_on_one_line(self, matrix, a, b, i, j):
         """
         Swap two values in a matrix.
@@ -396,9 +419,82 @@ class GoodDocStrings:
         matrix : list of list
             A double list that represents a matrix.
         a, b : int
-            The indicies of the first value.
+            The indices of the first value.
         i, j : int
-            The indicies of the second value.
+            The indices of the second value.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
+
+    def other_parameters(self, param1, param2):
+        """
+        Ensure "Other Parameters" are recognized.
+
+        The second parameter is used infrequently, so it is put in the
+        "Other Parameters" section.
+
+        Parameters
+        ----------
+        param1 : bool
+            Description of commonly used parameter.
+
+        Other Parameters
+        ----------------
+        param2 : str
+            Description of infrequently used parameter.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
+
+    def valid_options_in_parameter_description_sets(self, bar):
+        """
+        Ensure a PR06 error is not raised when type is member of a set.
+
+        Literal keywords like 'integer' are valid when specified in a set of
+        valid options for a keyword parameter.
+
+        Parameters
+        ----------
+        bar : {'integer', 'boolean'}
+            The literal values of 'integer' and 'boolean' are part of an
+            options set and thus should not be subject to PR06 warnings.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+
+    def parameters_with_trailing_underscores(self, str_):
+        r"""
+        Ensure PR01 and PR02 errors are not raised with trailing underscores.
+
+        Parameters with trailing underscores need to be escaped to render
+        properly in the documentation since trailing underscores are used to
+        create links. Doing so without also handling the change in the validation
+        logic makes it impossible to both pass validation and render correctly.
+
+        Parameters
+        ----------
+        str\_ : str
+           Some text.
 
         See Also
         --------
@@ -412,8 +508,7 @@ class GoodDocStrings:
 
 
 class BadGenericDocStrings:
-    """Everything here has a bad docstring
-    """
+    """Everything here has a bad docstring"""
 
     def func(self):
 
@@ -585,6 +680,7 @@ class BadGenericDocStrings:
         """
         pass
 
+
 class WarnGenericFormat:
     """
     Those contains things that _may_ be incorrect formatting.
@@ -664,6 +760,7 @@ class BadParameters:
     """
     Everything here has a problem with its Parameters section.
     """
+
     def no_type(self, value):
         """
         Lacks the type.
@@ -851,7 +948,7 @@ class BadReturns:
 
     def no_description(self):
         """
-        Provides type but no descrption.
+        Provides type but no description.
 
         Returns
         -------
@@ -1012,10 +1109,15 @@ class TestValidator:
         return base_path
 
     def test_one_liner(self, capsys):
-        result = validate_one(self._import_path(klass="GoodDocStrings", func='one_liner'))
+        result = validate_one(
+            self._import_path(klass="GoodDocStrings", func="one_liner")
+        )
         errors = " ".join(err[1] for err in result["errors"])
-        assert 'should start in the line immediately after the opening quotes' not in errors
-        assert 'should be placed in the line after the last text' not in errors
+        assert (
+            "should start in the line immediately after the opening quotes"
+            not in errors
+        )
+        assert "should be placed in the line after the last text" not in errors
 
     def test_good_class(self, capsys):
         errors = validate_one(self._import_path(klass="GoodDocStrings"))["errors"]
@@ -1039,6 +1141,10 @@ class TestValidator:
             "no_returns",
             "empty_returns",
             "multiple_variables_on_one_line",
+            "other_parameters",
+            "warnings",
+            "valid_options_in_parameter_description_sets",
+            "parameters_with_trailing_underscores",
         ],
     )
     def test_good_functions(self, capsys, func):
@@ -1063,9 +1169,8 @@ class TestValidator:
         with pytest.warns(UserWarning):
             errors = validate_one(
                 self._import_path(klass="WarnGenericFormat", func=func)  # noqa:F821
-                )
-        assert 'is too short' in w.msg
-
+            )
+        assert "is too short" in w.msg
 
     @pytest.mark.parametrize(
         "func",
@@ -1145,8 +1250,10 @@ class TestValidator:
             (
                 "BadSummaries",
                 "wrong_line",
-                ("should start in the line immediately after the opening quotes",
-                 "should be placed in the line after the last text"),
+                (
+                    "should start in the line immediately after the opening quotes",
+                    "should be placed in the line after the last text",
+                ),
             ),
             ("BadSummaries", "no_punctuation", ("Summary does not end with a period",)),
             (
@@ -1304,10 +1411,10 @@ class TestValidator:
         ],
     )
     def test_bad_docstrings(self, capsys, klass, func, msgs):
-        with pytest.warns(None) as w:
+        with warnings.catch_warnings(record=True) as w:
             result = validate_one(self._import_path(klass=klass, func=func))
         if len(w):
-            assert all('Unknown section' in str(ww.message) for ww in w)
+            assert all("Unknown section" in str(ww.message) for ww in w)
         for msg in msgs:
             assert msg in " ".join(err[1] for err in result["errors"])
 
@@ -1315,7 +1422,7 @@ class TestValidator:
 class TestValidatorClass:
     @pytest.mark.parametrize("invalid_name", ["unknown_mod", "unknown_mod.MyClass"])
     def test_raises_for_invalid_module_name(self, invalid_name):
-        msg = 'No module can be imported from "{}"'.format(invalid_name)
+        msg = f'No module can be imported from "{invalid_name}"'
         with pytest.raises(ImportError, match=msg):
             numpydoc.validate.Validator._load_obj(invalid_name)
 
@@ -1325,6 +1432,6 @@ class TestValidatorClass:
     def test_raises_for_invalid_attribute_name(self, invalid_name):
         name_components = invalid_name.split(".")
         obj_name, invalid_attr_name = name_components[-2], name_components[-1]
-        msg = "'{}' has no attribute '{}'".format(obj_name, invalid_attr_name)
+        msg = f"'{obj_name}' has no attribute '{invalid_attr_name}'"
         with pytest.raises(AttributeError, match=msg):
             numpydoc.validate.Validator._load_obj(invalid_name)

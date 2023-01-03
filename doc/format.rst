@@ -31,7 +31,7 @@ Use a code checker:
  * pyflakes_: a tool to check Python code for errors by parsing
    the source file instead of importing it.
  * pycodestyle_: (formerly ``pep8``) a tool to check Python code against
-   some of the style conventions in PEP 8.
+   some of the style conventions in :pep:`8`.
  * flake8_: a tool that glues together ``pycodestyle``, ``pyflakes``,
    ``mccabe`` to check the style and quality of Python code.
  * vim-flake8_: a ``flake8`` plugin for Vim.
@@ -287,14 +287,18 @@ takes the same form as the :ref:`Returns <returns>` section::
 Support for the :ref:`Yields <yields>` section was added in `numpydoc
 <https://github.com/numpy/numpydoc>`_ version 0.6.
 
+.. _receives:
+
 7. Receives
 ```````````
 
 Explanation of parameters passed to a generator's ``.send()`` method,
-formatted as for Parameters, above.  Since, like for Yields and Returns, a
-single object is always passed to the method, this may describe either the
-single parameter, or positional arguments passed as a tuple.  If a docstring
-includes Receives it must also include Yields.
+formatted as for :ref:`Parameters <params>`, above.  Since, like for
+:ref:`Yields <yields>` and :ref:`Returns <returns>`, a single object is
+always passed to the method, this may describe either the single parameter,
+or positional arguments passed as a tuple.  If a docstring
+includes :ref:`Receives <receives>` it must also include
+:ref:`Yields <yields>`.
 
 8. Other Parameters
 ```````````````````
@@ -302,6 +306,8 @@ includes Receives it must also include Yields.
 An optional section used to describe infrequently used parameters.
 It should only be used if a function has a large number of keyword
 parameters, to prevent cluttering the :ref:`Parameters <params>` section.
+
+.. _raises:
 
 9. Raises
 `````````
@@ -321,7 +327,7 @@ that are non-obvious or have a large chance of getting raised.
 `````````
 
 An optional section detailing which warnings get raised and
-under what conditions, formatted similarly to Raises.
+under what conditions, formatted similarly to :ref:`Raises <raises>`.
 
 11. Warnings
 ````````````
@@ -545,8 +551,8 @@ Documenting classes
 
 Class docstring
 ```````````````
-Use the same sections as outlined above (all except ``Returns`` are
-applicable).  The constructor (``__init__``) should also be documented
+Use the same sections as outlined above (all except :ref:`Returns <returns>`
+are applicable).  The constructor (``__init__``) should also be documented
 here, the :ref:`Parameters <params>` section of the docstring details the
 constructor's parameters.
 
