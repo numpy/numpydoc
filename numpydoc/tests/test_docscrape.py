@@ -1015,13 +1015,13 @@ def test_no_summary():
     (
         (
             """\
-            Parameters without separating blank line:
+            Parameters without separating empty line:
             Parameters
             ----------
             data
                 some parameter
             """,
-            "missing blank line before the Parameters section",
+            "missing empty line before the Parameters section",
         ),
         (
             """\
@@ -1033,12 +1033,12 @@ def test_no_summary():
             -------
             int
             """,
-            "missing blank line before the Returns section",
+            "missing empty line before the Returns section",
         ),
     ),
     ids=[
-        "missing blank line after summary",
-        "missing blank line between sections",
+        "missing empty line after summary",
+        "missing empty line between sections",
     ],
 )
 def test_section_detection_warnings(docstring, expected_warning):

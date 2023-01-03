@@ -211,7 +211,7 @@ class NumpyDocString(Mapping):
             if self._is_at_section() and self._doc.peek(-1).strip() != "":
                 section_name = self._doc.peek()
                 self._error_location(
-                    "missing blank line before the %s section" % section_name,
+                    "missing empty line before the %s section" % section_name,
                     error=False,
                 )
             self._doc._l = old_line
