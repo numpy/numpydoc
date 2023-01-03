@@ -95,7 +95,7 @@ class Reader:
         return self.read_to_condition(is_unindented)
 
     def peek(self, n=0):
-        if self._l + n < len(self._str):
+        if 0 <= self._l + n < len(self._str):
             return self[self._l + n]
         else:
             return ""
