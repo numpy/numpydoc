@@ -396,7 +396,7 @@ class NumpyDocString(Mapping):
 
         # If several signatures present, take the last one
         while True:
-            summary = self._doc.read_to_next_empty_line()
+            summary = self.read_to_next_empty_line()
             summary_str = " ".join([s.strip() for s in summary]).strip()
             compiled = re.compile(r"^([\w., ]+=)?\s*[\w\.]+\(.*\)$")
             if compiled.match(summary_str):
