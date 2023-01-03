@@ -934,32 +934,42 @@ def test_no_summary():
     ----------"""))
 
 
-def test_missing_blank_line_after_summary():
-    doc = NumpyDocString("""
-    Parameters without separating blank line:
-    Parameters
-    ----------
-    data
-        Some parameter.
-    """)
-    assert len(doc["Parameters"]) == 1
-    assert doc["Parameters"][0].name == "data"
-
-
-def test_missing_blank_line_between_sections():
-    doc = NumpyDocString("""
-    Parameters
-    ----------
-    data
-        Some parameter.
-    Returns
-    -------
-    int
-    """)
-    assert len(doc["Parameters"]) == 1
-    assert doc["Parameters"][0].name == "data"
-
-    assert len(doc["Returns"]) == 1
+@pytest.mark.parametrize(
+    ["docstring", "expected_warnings"],
+    (
+        (
+            """\
+            Parameters without separating blank line:
+            Parameters
+            ----------
+            data
+                some parameter
+            """,
+            ["missing blank line before the Parameters section"],
+        ),
+        (
+            """\
+            Parameters
+            ----------
+            data
+                some parameter
+            Returns
+            -------
+            int
+            """,
+            ["missing blank line before the Returns section"],
+        ),
+    ),
+    ids=[
+        "missing blank line after summary",
+        "missing blank line between sections",
+    ],
+)
+def test_section_detection_warnings(mock_app, caplog, docstring, expected_warnings):
+    _ = NumpyDocString(docstring)
+    messages = [record.msg for record in caplog.records]
+    for w in expected_warnings:
+        assert w in messages
 
 
 def test_unicode():
