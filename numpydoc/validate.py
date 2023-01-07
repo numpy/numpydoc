@@ -584,7 +584,15 @@ def validate(obj_name):
                     ("string", "str"),
                 ]
                 for wrong_type, right_type in common_type_errors:
-                    if wrong_type in doc.parameter_type(param):
+                    param_type = doc.parameter_type(param)
+                    if wrong_type in param_type:
+                        # Ignore if wrong_type is used as a substring
+                        if (
+                            re.match(f"\w+{wrong_type}", param_type) or
+                            re.match(f"{wrong_type}\w+", param_type)
+                           ):
+                            continue
+
                         errs.append(
                             error(
                                 "PR06",
