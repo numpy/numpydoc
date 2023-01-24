@@ -1,5 +1,9 @@
 name: numpydoc tests
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number }}-${{ github.event.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
@@ -55,6 +59,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install texlive texlive-latex-extra latexmk dvipng
+          pip install "sphinx<6"
 
       - name: Build documentation
         run: |
@@ -106,6 +111,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install texlive texlive-latex-extra latexmk dvipng
+          pip install "sphinx<6"
 
       - name: Build documentation
         run: |
