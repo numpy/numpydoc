@@ -584,8 +584,7 @@ def validate(obj_name):
                     ("string", "str"),
                 ]
                 for wrong_type, right_type in common_type_errors:
-                    if wrong_type in set(re.split(r"\W", doc.parameter_type(
-                            param))):
+                    if wrong_type in set(re.split(r"\W", doc.parameter_type(param))):
                         errs.append(
                             error(
                                 "PR06",
