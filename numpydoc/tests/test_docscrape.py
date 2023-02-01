@@ -1443,7 +1443,6 @@ def test_nonstandard_property():
             obj._set_axis(self.axis, value)
 
     class Dummy:
-
         attr = SpecialProperty(doc="test attribute")
 
     doc = get_doc_object(Dummy)
