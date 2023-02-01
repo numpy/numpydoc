@@ -545,7 +545,6 @@ class BadGenericDocStrings:
     """Everything here has a bad docstring"""
 
     def func(self):
-
         """Some function.
 
         With several mistakes in the docstring.

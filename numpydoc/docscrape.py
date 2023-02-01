@@ -408,7 +408,7 @@ class NumpyDocString(Mapping):
             msg = "Docstring contains a Receives section but not Yields."
             raise ValueError(msg)
 
-        for (section, content) in sections:
+        for section, content in sections:
             if not section.startswith(".."):
                 section = (s.capitalize() for s in section.split(" "))
                 section = " ".join(section)
@@ -631,7 +631,6 @@ class ObjDoc(NumpyDocString):
 
 
 class ClassDoc(NumpyDocString):
-
     extra_public_methods = ["__call__"]
 
     def __init__(self, cls, doc=None, modulename="", func_doc=FunctionDoc, config=None):
