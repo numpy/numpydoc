@@ -30,7 +30,7 @@ def read(fname):
 
 setup(
     name="numpydoc",
-    packages=["numpydoc"],
+    packages=["numpydoc", "numpydoc.hooks"],
     version=version,
     description="Sphinx extension to support docstrings in Numpy format",
     long_description=read("README.rst"),
