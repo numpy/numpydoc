@@ -90,9 +90,9 @@ class AstValidator(validate.Validator):
                 entries = getattr(args_node, arg_type)
                 if arg_type in ["vararg", "kwarg"]:
                     if entries and arg_type == "vararg":
-                        params.append(f"*{entries}")
+                        params.append(f"*{entries.arg}")
                     if entries and arg_type == "kwarg":
-                        params.append(f"**{entries}")
+                        params.append(f"**{entries.arg}")
                 else:
                     params.extend([arg.arg for arg in entries])
             params = tuple(params)
@@ -131,8 +131,10 @@ class DocstringVisitor(ast.NodeVisitor):
     def __init__(self, filepath: str, config: dict) -> None:
         self.findings: list = []
         self.parent: str = None
-        self.filepath: str = filepath.replace("../", "")
-        self.name: str = self.filepath.replace("/", ".").replace(".py", "")
+        self.filepath: str = filepath
+        self.name: str = (
+            self.filepath.replace("../", "").replace("/", ".").replace(".py", "")
+        )
         self.config: dict = config
 
     def _ignore_issue(self, node: ast.AST, check: str) -> bool:
