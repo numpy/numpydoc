@@ -2,6 +2,54 @@
 Validation
 ==========
 
+Docstring Validation using Pre-Commit Hook
+------------------------------------------
+
+To enable validation of docstrings as you commit files, add the
+following to your ``.pre-commit-config.yaml`` file::
+
+    - repo: https://github.com/numpy/numpydoc
+      rev: <version>
+      hooks:
+        - id: numpydoc-validation
+
+After installing ``numpydoc``, run the following to see available
+command line options for this hook:
+
+.. code-block::
+
+    $ python -m numpydoc.hooks.validate_docstrings --help
+
+Using a ``setup.cfg`` file provides additional customization.
+Options must be placed under the ``[tool:numpydoc_validation]`` section.
+The example below configures the pre-commit hook to ignore three checks
+and specifies exceptions to the checks ``SS05`` (allow docstrings to
+start with "Process ", "Assess ", or "Access ") and ``GL08`` (allow
+the class/method/function with name "__init__" to not have a docstring)::
+
+    [tool:numpydoc_validation]
+    ignore = EX01,SA01,ES01
+    override_SS05 = ^(Process|Assess|Access )
+    override_GL08 = ^(__init__)$
+
+If any issues are found when commiting, a report is printed out and the
+commit is stopped::
+
+    numpydoc-validation......................................................Failed
+    - hook id: numpydoc-validation
+    - exit code: 1
+
+    +----------------------------+---------+--------------------------------------+
+    | item                       | check   | description                          |
+    +============================+=========+======================================+
+    | pkg.module                 | GL08    | The object does not have a docstring |
+    | pkg.module.function        | GL08    | The object does not have a docstring |
+    | pkg.module.class           | RT03    | Return value has no description      |
+    | pkg.module.class.method    | PR04    | Parameter "field" has no type        |
+    +----------------------------+---------+--------------------------------------+
+
+See below for a full listing of checks.
+
 Docstring Validation using Python
 ---------------------------------
 
