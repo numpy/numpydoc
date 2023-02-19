@@ -343,7 +343,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
                 findings,
                 headers=["item", "check", "description"],
                 tablefmt="grid",
-                maxcolwidths=80,
+                maxcolwidths=50,
             ),
             file=sys.stderr,
         )
