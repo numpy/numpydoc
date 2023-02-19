@@ -4,8 +4,10 @@ import argparse
 import ast
 import configparser
 import os
+import re
 import sys
 from pathlib import Path
+from typing import Sequence, Tuple, Union
 
 from tabulate import tabulate
 
@@ -26,32 +28,34 @@ class AstValidator(validate.Validator):
         A name for the node to use in the listing of issues for the file as a whole.
     """
 
-    def __init__(self, *, ast_node, filename, obj_name):
-        self.node = ast_node
-        self.raw_doc = ast.get_docstring(self.node, clean=False) or ""
-        self.clean_doc = ast.get_docstring(self.node, clean=True)
-        self.doc = docscrape.NumpyDocString(self.raw_doc)
+    def __init__(
+        self, *, ast_node: ast.AST, filename: os.PathLike, obj_name: str
+    ) -> None:
+        self.node: ast.AST = ast_node
+        self.raw_doc: str = ast.get_docstring(self.node, clean=False) or ""
+        self.clean_doc: str = ast.get_docstring(self.node, clean=True)
+        self.doc: docscrape.NumpyDocString = docscrape.NumpyDocString(self.raw_doc)
 
-        self._source_file = os.path.abspath(filename)
-        self._name = obj_name
+        self._source_file: os.PathLike = os.path.abspath(filename)
+        self._name: str = obj_name
 
-        self.is_class = isinstance(ast_node, ast.ClassDef)
-        self.is_module = isinstance(ast_node, ast.Module)
+        self.is_class: bool = isinstance(ast_node, ast.ClassDef)
+        self.is_module: bool = isinstance(ast_node, ast.Module)
 
     @staticmethod
     def _load_obj(name):
         raise NotImplementedError("AstValidator does not support this method.")
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def is_function_or_method(self):
+    def is_function_or_method(self) -> bool:
         return isinstance(self.node, (ast.FunctionDef, ast.AsyncFunctionDef))
 
     @property
-    def is_generator_function(self):
+    def is_generator_function(self) -> bool:
         if not self.is_function_or_method:
             return False
         for child in ast.iter_child_nodes(self.node):
@@ -60,7 +64,7 @@ class AstValidator(validate.Validator):
         return False
 
     @property
-    def type(self):
+    def type(self) -> str:
         if self.is_function_or_method:
             return "function"
         if self.is_class:
@@ -70,15 +74,15 @@ class AstValidator(validate.Validator):
         raise ValueError("Unknown type.")
 
     @property
-    def source_file_name(self):
+    def source_file_name(self) -> str:
         return self._source_file
 
     @property
-    def source_file_def_line(self):
+    def source_file_def_line(self) -> int:
         return self.node.lineno if not self.is_module else 0
 
     @property
-    def signature_parameters(self):
+    def signature_parameters(self) -> Tuple[str]:
         def extract_signature(node):
             args_node = node.args
             params = []
@@ -106,7 +110,7 @@ class AstValidator(validate.Validator):
         return params
 
     @property
-    def method_source(self):
+    def method_source(self) -> str:
         with open(self.source_file_name) as file:
             source = ast.get_source_segment(file.read(), self.node)
         return source
@@ -118,20 +122,44 @@ class DocstringVisitor(ast.NodeVisitor):
 
     Parameters
     ----------
-    filepath : path-like
+    filepath : str
         The absolute or relative path to the file to inspect.
-    ignore : list[str]
-        A list of check codes to ignore, if desired.
+    config : dict
+        Configuration options for reviewing flagged issues.
     """
 
-    def __init__(self, filepath, ignore):
-        self.findings = []
-        self.parent = None
-        self.filepath = filepath.replace("../", "")
-        self.name = self.filepath.replace("/", ".").replace(".py", "")
-        self.ignore = ignore
+    def __init__(self, filepath: str, config: dict) -> None:
+        self.findings: list = []
+        self.parent: str = None
+        self.filepath: str = filepath.replace("../", "")
+        self.name: str = self.filepath.replace("/", ".").replace(".py", "")
+        self.config: dict = config
 
-    def _get_numpydoc_issues(self, name, node):
+    def _ignore_issue(self, node: ast.AST, check: str) -> bool:
+        """
+        Check whether the issue should be ignored.
+
+        Parameters
+        ----------
+        node : ast.AST
+            The node under inspection.
+        check : str
+            The code for the check being evaluated.
+
+        Return
+        ------
+        bool
+            Whether the issue should be exluded from the report.
+        """
+        if check in self.config["exclusions"]:
+            return True
+        if check == "SS05":
+            pattern = self.config.get("SS05_override")
+            if pattern:
+                return re.match(pattern, ast.get_docstring(node)) is not None
+        return False
+
+    def _get_numpydoc_issues(self, name: str, node: ast.AST) -> None:
         """
         Get numpydoc validation issues.
 
@@ -149,11 +177,11 @@ class DocstringVisitor(ast.NodeVisitor):
             [
                 [name, check, description]
                 for check, description in report["errors"]
-                if check not in self.ignore
+                if not self._ignore_issue(node, check)
             ]
         )
 
-    def visit(self, node):
+    def visit(self, node: ast.AST) -> None:
         """
         Visit a node in the AST and report on numpydoc validation issues.
 
@@ -166,7 +194,6 @@ class DocstringVisitor(ast.NodeVisitor):
             self._get_numpydoc_issues(self.name, node)
             self.parent = self.name
             self.generic_visit(node)
-
         elif isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
             node_name = f"{self.parent}.{node.name}"
             self._get_numpydoc_issues(node_name, node)
@@ -175,7 +202,7 @@ class DocstringVisitor(ast.NodeVisitor):
             self.generic_visit(node)
 
 
-def parse_config():
+def parse_config() -> dict:
     """
     Parse config information from setup.cfg, if present.
 
@@ -197,12 +224,18 @@ def parse_config():
                 ).split(",")
             except configparser.NoOptionError:
                 pass
+            try:
+                options["SS05_override"] = re.compile(
+                    config.get(numpydoc_validation_config_section, "SS05_override")
+                )
+            except configparser.NoOptionError:
+                pass
         except configparser.NoSectionError:
             pass
     return options
 
 
-def process_file(filepath, ignore):
+def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
     """
     Run numpydoc validation on a file.
 
@@ -210,24 +243,24 @@ def process_file(filepath, ignore):
     ----------
     filepath : path-like
         The absolute or relative path to the file to inspect.
-    ignore : list[str]
-        A list of check codes to ignore, if desired.
+    config : dict
+        Configuration options for reviewing flagged issues.
 
     Returns
     -------
-    dict
-        Config options for the numpydoc validation hook.
+    list[list[str]]
+        A list of [name, check, description] lists for flagged issues.
     """
     with open(filepath) as file:
         module_node = ast.parse(file.read(), filepath)
 
-    docstring_visitor = DocstringVisitor(filepath=filepath, ignore=ignore)
+    docstring_visitor = DocstringVisitor(filepath=str(filepath), config=config)
     docstring_visitor.visit(module_node)
 
     return docstring_visitor.findings
 
 
-def main(argv=None):
+def main(argv: Union[Sequence[str], None] = None) -> int:
     """Run the numpydoc validation hook."""
 
     config_options = parse_config()
@@ -264,11 +297,11 @@ def main(argv=None):
     )
 
     args = parser.parse_args(argv)
+    config_options["exclusions"].extend(args.ignore or [])
 
-    ignore = config_options["exclusions"] + (args.ignore or [])
     findings = []
     for file in args.files:
-        findings.extend(process_file(file, ignore))
+        findings.extend(process_file(file, config_options))
 
     if findings:
         print(
