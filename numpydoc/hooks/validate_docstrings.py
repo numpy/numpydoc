@@ -211,16 +211,22 @@ class DocstringVisitor(ast.NodeVisitor):
             self.generic_visit(node)
 
 
-def parse_config() -> dict:
+def parse_config(filepath: os.PathLike = None) -> dict:
     """
-    Parse config information from setup.cfg, if present.
+    Parse config information from a .cfg file.
+
+    Parameters
+    ----------
+    filepath : os.PathLike
+        An absolute or relative path to a .cfg file specifying
+        a [tool:numpydoc_validation] section.
 
     Returns
     -------
     dict
         Config options for the numpydoc validation hook.
     """
-    filename = "setup.cfg"
+    filename = filepath or "setup.cfg"
     options = {"exclusions": [], "overrides": {}}
     config = configparser.ConfigParser()
     if Path(filename).exists():
@@ -298,6 +304,14 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         "files", type=str, nargs="+", help="File(s) to run numpydoc validation on."
     )
     parser.add_argument(
+        "--config",
+        type=str,
+        help=(
+            "Path to a .cfg file if not in the current directory. "
+            "Options must be placed under [tool:numpydoc_validation]."
+        ),
+    )
+    parser.add_argument(
         "--ignore",
         type=str,
         nargs="*",
@@ -312,6 +326,9 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
     )
 
     args = parser.parse_args(argv)
+    if args.config:  # an alternative config file was provided
+        config_options = parse_config(args.config)
+
     config_options["exclusions"].extend(args.ignore or [])
 
     findings = []
