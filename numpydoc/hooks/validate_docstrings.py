@@ -153,10 +153,19 @@ class DocstringVisitor(ast.NodeVisitor):
         """
         if check in self.config["exclusions"]:
             return True
-        if check == "SS05":
-            pattern = self.config.get("SS05_override")
-            if pattern:
-                return re.match(pattern, ast.get_docstring(node)) is not None
+        if self.config["overrides"]:
+            try:
+                if check == "GL08":
+                    pattern = self.config["overrides"].get("GL08")
+                    if pattern:
+                        return re.match(pattern, node.name)
+            except AttributeError:  # ast.Module nodes don't have a name
+                pass
+
+            if check == "SS05":
+                pattern = self.config["overrides"].get("SS05")
+                if pattern:
+                    return re.match(pattern, ast.get_docstring(node)) is not None
         return False
 
     def _get_numpydoc_issues(self, name: str, node: ast.AST) -> None:
@@ -212,7 +221,7 @@ def parse_config() -> dict:
         Config options for the numpydoc validation hook.
     """
     filename = "setup.cfg"
-    options = {"exclusions": []}
+    options = {"exclusions": [], "overrides": {}}
     config = configparser.ConfigParser()
     if Path(filename).exists():
         config.read(filename)
@@ -225,8 +234,14 @@ def parse_config() -> dict:
             except configparser.NoOptionError:
                 pass
             try:
-                options["SS05_override"] = re.compile(
-                    config.get(numpydoc_validation_config_section, "SS05_override")
+                options["overrides"]["SS05"] = re.compile(
+                    config.get(numpydoc_validation_config_section, "override_SS05")
+                )
+            except configparser.NoOptionError:
+                pass
+            try:
+                options["overrides"]["GL08"] = re.compile(
+                    config.get(numpydoc_validation_config_section, "override_GL08")
                 )
             except configparser.NoOptionError:
                 pass
