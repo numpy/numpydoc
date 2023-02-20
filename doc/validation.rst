@@ -39,14 +39,14 @@ commit is stopped::
     - hook id: numpydoc-validation
     - exit code: 1
 
-    +-------------------------+---------+--------------------------------------+
-    | item                    | check   | description                          |
-    +=========================+=========+======================================+
-    | pkg.module              | GL08    | The object does not have a docstring |
-    | pkg.module.function     | GL08    | The object does not have a docstring |
-    | pkg.module.class        | RT03    | Return value has no description      |
-    | pkg.module.class.method | PR04    | Parameter "field" has no type        |
-    +-------------------------+---------+--------------------------------------+
+    +-----------------------+--------------------------+---------+--------------------------------------+
+    | file                  | item                     | check   | description                          |
+    +=======================+==========================+=========+======================================+
+    | src/pkg/utils.py      | utils                    | GL08    | The object does not have a docstring |
+    | src/pkg/utils.py      | utils.normalize          | PR04    | Parameter "field" has no type        |
+    | src/pkg/module_one.py | module_one.MyClass       | GL08    | The object does not have a docstring |
+    | src/pkg/module_one.py | module_one.MyClass.parse | RT03    | Return value has no description      |
+    +-----------------------+--------------------------+---------+--------------------------------------+
 
 See below for a full listing of checks.
 
