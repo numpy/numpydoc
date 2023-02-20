@@ -129,11 +129,11 @@ class DocstringVisitor(ast.NodeVisitor):
     """
 
     def __init__(self, filepath: str, config: dict) -> None:
-        self.findings: list = []
-        self.parent: str = None
+        self.config: dict = config
         self.filepath: str = filepath
         self.module_name: str = os.path.splitext(os.path.basename(self.filepath))[0]
-        self.config: dict = config
+        self.stack: list[str] = []
+        self.findings: list = []
 
     def _ignore_issue(self, node: ast.AST, check: str) -> bool:
         """
@@ -168,17 +168,16 @@ class DocstringVisitor(ast.NodeVisitor):
                     return re.match(pattern, ast.get_docstring(node)) is not None
         return False
 
-    def _get_numpydoc_issues(self, name: str, node: ast.AST) -> None:
+    def _get_numpydoc_issues(self, node: ast.AST) -> None:
         """
         Get numpydoc validation issues.
 
         Parameters
         ----------
-        name : str
-            The full name of the node under inspection.
         node : ast.AST
             The node under inspection.
         """
+        name = ".".join(self.stack)
         report = validate.validate(
             name, AstValidator, ast_node=node, filename=self.filepath
         )
@@ -199,16 +198,15 @@ class DocstringVisitor(ast.NodeVisitor):
         node : ast.AST
             The node to visit.
         """
-        if isinstance(node, ast.Module):
-            self._get_numpydoc_issues(self.module_name, node)
-            self.parent = self.module_name
+        if isinstance(
+            node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+        ):
+            self.stack.append(
+                self.module_name if isinstance(node, ast.Module) else node.name
+            )
+            self._get_numpydoc_issues(node)
             self.generic_visit(node)
-        elif isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
-            node_name = f"{self.parent}.{node.name}"
-            self._get_numpydoc_issues(node_name, node)
-            if isinstance(node, ast.ClassDef):
-                self.parent = node_name
-            self.generic_visit(node)
+            _ = self.stack.pop()
 
 
 def parse_config(filepath: os.PathLike = None) -> dict:
