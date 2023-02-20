@@ -29,7 +29,7 @@ the class/method/function with name "__init__" to not have a docstring)::
 
     [tool:numpydoc_validation]
     ignore = EX01,SA01,ES01
-    override_SS05 = ^(Process|Assess|Access )
+    override_SS05 = ^((Process|Assess|Access) )
     override_GL08 = ^(__init__)$
 
 If any issues are found when commiting, a report is printed out and the
