@@ -132,9 +132,7 @@ class DocstringVisitor(ast.NodeVisitor):
         self.findings: list = []
         self.parent: str = None
         self.filepath: str = filepath
-        self.name: str = (
-            self.filepath.replace("../", "").replace("/", ".").replace(".py", "")
-        )
+        self.module_name: str = os.path.splitext(os.path.basename(self.filepath))[0]
         self.config: dict = config
 
     def _ignore_issue(self, node: ast.AST, check: str) -> bool:
@@ -186,7 +184,7 @@ class DocstringVisitor(ast.NodeVisitor):
         )
         self.findings.extend(
             [
-                [name, check, description]
+                [self.filepath, name, check, description]
                 for check, description in report["errors"]
                 if not self._ignore_issue(node, check)
             ]
@@ -202,8 +200,8 @@ class DocstringVisitor(ast.NodeVisitor):
             The node to visit.
         """
         if isinstance(node, ast.Module):
-            self._get_numpydoc_issues(self.name, node)
-            self.parent = self.name
+            self._get_numpydoc_issues(self.module_name, node)
+            self.parent = self.module_name
             self.generic_visit(node)
         elif isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
             node_name = f"{self.parent}.{node.name}"
@@ -341,7 +339,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         print(
             tabulate(
                 findings,
-                headers=["item", "check", "description"],
+                headers=["file", "item", "check", "description"],
                 tablefmt="grid",
                 maxcolwidths=50,
             ),
