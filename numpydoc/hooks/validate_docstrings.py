@@ -79,7 +79,7 @@ class AstValidator(validate.Validator):
 
     @property
     def source_file_def_line(self) -> int:
-        return self.node.lineno if not self.is_module else 0
+        return self.node.lineno if not self.is_module else 1
 
     @property
     def signature_parameters(self) -> Tuple[str]:
@@ -183,7 +183,7 @@ class DocstringVisitor(ast.NodeVisitor):
         )
         self.findings.extend(
             [
-                [self.filepath, name, check, description]
+                [f'{self.filepath}:{report["file_line"]}', name, check, description]
                 for check, description in report["errors"]
                 if not self._ignore_issue(node, check)
             ]
