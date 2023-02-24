@@ -224,7 +224,7 @@ def parse_config(filepath: os.PathLike = None) -> dict:
     dict
         Config options for the numpydoc validation hook.
     """
-    filename = filepath or "setup.cfg"
+    filename = Path(filepath or "setup.cfg").expanduser()
     options = {"exclusions": [], "overrides": {}}
     config = configparser.ConfigParser()
     if Path(filename).exists():
