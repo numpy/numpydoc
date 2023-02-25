@@ -36,7 +36,7 @@ class AstValidator(validate.Validator):
         self.clean_doc: str = ast.get_docstring(self.node, clean=True)
         self.doc: docscrape.NumpyDocString = docscrape.NumpyDocString(self.raw_doc)
 
-        self._source_file: os.PathLike = os.path.abspath(filename)
+        self._source_file: os.PathLike = Path(filename).resolve()
         self._name: str = obj_name
 
         self.is_class: bool = isinstance(ast_node, ast.ClassDef)
@@ -131,7 +131,7 @@ class DocstringVisitor(ast.NodeVisitor):
     def __init__(self, filepath: str, config: dict) -> None:
         self.config: dict = config
         self.filepath: str = filepath
-        self.module_name: str = os.path.splitext(os.path.basename(self.filepath))[0]
+        self.module_name: str = Path(self.filepath).stem
         self.stack: list[str] = []
         self.findings: list = []
 
