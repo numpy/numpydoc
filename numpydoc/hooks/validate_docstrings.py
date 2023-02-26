@@ -299,7 +299,7 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
     with open(filepath) as file:
         numpydoc_ignore_comments = {}
         last_declaration = 1
-        declarations = ["async def", "def", "class"]
+        declarations = ["def", "class"]
         for token in tokenize.generate_tokens(file.readline):
             if token.type == tokenize.NAME and token.string in declarations:
                 last_declaration = token.start[0]
