@@ -32,6 +32,15 @@ the class/method/function with name "__init__" to not have a docstring)::
     override_SS05 = ^((Process|Assess|Access) )
     override_GL08 = ^(__init__)$
 
+For more fine-tuned control, you can also include inline comments to tell the
+validation hook to ignore certain checks::
+
+    class SomeClass:  # numpydoc ignore=EX01,SA01,ES01
+        """This is the docstring for SomeClass."""
+
+        def __init__(self):  # numpydoc ignore=GL08
+            pass
+
 If any issues are found when commiting, a report is printed out and the
 commit is stopped::
 
