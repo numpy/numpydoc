@@ -3,6 +3,7 @@
 import argparse
 import ast
 import configparser
+from nis import match
 import os
 import re
 import sys
@@ -296,12 +297,17 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
         module_node = ast.parse(file.read(), filepath)
 
     with open(filepath) as file:
-        numpydoc_ignore_comments = {
-            token.start[0]: rules.group(1).split(",")
-            for token in tokenize.generate_tokens(file.readline)
-            if token.type == tokenize.COMMENT
-            and (rules := re.match(IGNORE_COMMENT_PATTERN, token.string))
-        }
+        numpydoc_ignore_comments = {}
+        last_declaration = 1
+        declarations = ["async def", "def", "class"]
+        for token in tokenize.generate_tokens(file.readline):
+            if token.type == tokenize.NAME and token.string in declarations:
+                last_declaration = token.start[0]
+            if token.type == tokenize.COMMENT:
+                match = re.match(IGNORE_COMMENT_PATTERN, token.string)
+                if match:
+                    rules = match.group(1).split(",")
+                    numpydoc_ignore_comments[last_declaration] = rules
 
     docstring_visitor = DocstringVisitor(
         filepath=str(filepath),
