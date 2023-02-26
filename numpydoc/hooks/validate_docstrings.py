@@ -6,12 +6,17 @@ import configparser
 import os
 import re
 import sys
+import tokenize
 from pathlib import Path
 from typing import Sequence, Tuple, Union
 
 from tabulate import tabulate
 
 from .. import docscrape, validate
+
+
+# inline comments that can suppress individual checks per line
+IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 
 
 class AstValidator(validate.Validator):
@@ -126,10 +131,19 @@ class DocstringVisitor(ast.NodeVisitor):
         The absolute or relative path to the file to inspect.
     config : dict
         Configuration options for reviewing flagged issues.
+    numpydoc_ignore_comments : dict
+        A mapping of line number to checks to ignore.
+        Derived from comments in the source code.
     """
 
-    def __init__(self, filepath: str, config: dict) -> None:
+    def __init__(
+        self,
+        filepath: str,
+        config: dict,
+        numpydoc_ignore_comments: dict,
+    ) -> None:
         self.config: dict = config
+        self.numpydoc_ignore_comments = numpydoc_ignore_comments
         self.filepath: str = filepath
         self.module_name: str = Path(self.filepath).stem
         self.stack: list[str] = []
@@ -153,19 +167,27 @@ class DocstringVisitor(ast.NodeVisitor):
         """
         if check in self.config["exclusions"]:
             return True
+
         if self.config["overrides"]:
             try:
                 if check == "GL08":
                     pattern = self.config["overrides"].get("GL08")
-                    if pattern:
-                        return re.match(pattern, node.name)
+                    if pattern and re.match(pattern, node.name):
+                        return True
             except AttributeError:  # ast.Module nodes don't have a name
                 pass
 
             if check == "SS05":
                 pattern = self.config["overrides"].get("SS05")
-                if pattern:
-                    return re.match(pattern, ast.get_docstring(node)) is not None
+                if pattern and re.match(pattern, ast.get_docstring(node)) is not None:
+                    return True
+
+        try:
+            if check in self.numpydoc_ignore_comments[getattr(node, "lineno", 1)]:
+                return True
+        except KeyError:
+            pass
+
         return False
 
     def _get_numpydoc_issues(self, node: ast.AST) -> None:
@@ -273,7 +295,19 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
     with open(filepath) as file:
         module_node = ast.parse(file.read(), filepath)
 
-    docstring_visitor = DocstringVisitor(filepath=str(filepath), config=config)
+    with open(filepath) as file:
+        numpydoc_ignore_comments = {
+            token.start[0]: rules.group(1).split(",")
+            for token in tokenize.generate_tokens(file.readline)
+            if token.type == tokenize.COMMENT
+            and (rules := re.match(IGNORE_COMMENT_PATTERN, token.string))
+        }
+
+    docstring_visitor = DocstringVisitor(
+        filepath=str(filepath),
+        config=config,
+        numpydoc_ignore_comments=numpydoc_ignore_comments,
+    )
     docstring_visitor.visit(module_node)
 
     return docstring_visitor.findings
