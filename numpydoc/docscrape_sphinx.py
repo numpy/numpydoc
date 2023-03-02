@@ -11,6 +11,7 @@ import sphinx
 from sphinx.jinja2glue import BuiltinTemplateLoader
 
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc, ObjDoc
+from .docscrape import get_doc_object as get_doc_object_orig
 from .xref import make_xref
 
 
@@ -407,20 +408,10 @@ class SphinxObjDoc(SphinxDocString, ObjDoc):
         ObjDoc.__init__(self, obj, doc=doc, config=config)
 
 
-# TODO: refactor to use docscrape.get_doc_object
 def get_doc_object(obj, what=None, doc=None, config=None, builder=None):
-    if what is None:
-        if inspect.isclass(obj):
-            what = "class"
-        elif inspect.ismodule(obj):
-            what = "module"
-        elif isinstance(obj, Callable):
-            what = "function"
-        else:
-            what = "object"
-
     if config is None:
         config = {}
+
     template_dirs = [os.path.join(os.path.dirname(__file__), "templates")]
     if builder is not None:
         template_loader = BuiltinTemplateLoader()
@@ -430,11 +421,12 @@ def get_doc_object(obj, what=None, doc=None, config=None, builder=None):
     template_env = SandboxedEnvironment(loader=template_loader)
     config["template"] = template_env.get_template("numpydoc_docstring.rst")
 
-    if what == "class":
-        return SphinxClassDoc(obj, func_doc=SphinxFunctionDoc, doc=doc, config=config)
-    elif what in ("function", "method"):
-        return SphinxFunctionDoc(obj, doc=doc, config=config)
-    else:
-        if doc is None:
-            doc = pydoc.getdoc(obj)
-        return SphinxObjDoc(obj, doc, config=config)
+    return get_doc_object_orig(
+        obj,
+        what=what,
+        doc=doc,
+        config=config,
+        class_doc=SphinxClassDoc,
+        func_doc=SphinxFunctionDoc,
+        obj_doc=SphinxObjDoc,
+    )
