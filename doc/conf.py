@@ -100,14 +100,6 @@ html_theme_options = {
 import packaging
 import pydata_sphinx_theme
 
-if packaging.version.parse(pydata_sphinx_theme.__version__) >= packaging.version.parse(
-    "0.9.0"
-):
-    html_theme_options["navbar_end"].insert(
-        0,
-    )
-
-
 html_sidebars = {
     "**": [],
 }
