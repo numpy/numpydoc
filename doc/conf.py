@@ -92,13 +92,6 @@ html_theme_options = {
         },
     ],
 }
-# NOTE: The following is required for supporting of older sphinx toolchains.
-#       The "theme-switcher" templated should be added directly to navbar_end
-#       above and the following lines removed when the minimum supported
-#       version of pydata_sphinx_theme is 0.9.0
-# Add version switcher for versions of pydata_sphinx_theme that support it
-import packaging
-import pydata_sphinx_theme
 
 html_sidebars = {
     "**": [],
