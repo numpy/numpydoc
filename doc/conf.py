@@ -81,9 +81,16 @@ pygments_style = "sphinx"
 
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
-    "github_url": "https://github.com/numpy/numpydoc",
     "show_prev_next": False,
-    "navbar_end": ["search-field.html", "navbar-icon-links.html"],
+    "navbar_end": ["theme-switcher", "search-field.html", "navbar-icon-links.html"],
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/numpy/numpydoc",
+            "icon": "fab fa-github-square",
+            "type": "fontawesome",
+        },
+    ],
 }
 # NOTE: The following is required for supporting of older sphinx toolchains.
 #       The "theme-switcher" templated should be added directly to navbar_end
@@ -96,7 +103,7 @@ import pydata_sphinx_theme
 if packaging.version.parse(pydata_sphinx_theme.__version__) >= packaging.version.parse(
     "0.9.0"
 ):
-    html_theme_options["navbar_end"].insert(0, "theme-switcher")
+    html_theme_options["navbar_end"].insert(0, )
 
 
 html_sidebars = {
