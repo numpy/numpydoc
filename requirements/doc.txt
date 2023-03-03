@@ -1,5 +1,4 @@
 numpy>=1.21
 matplotlib>=3.5
 pydata-sphinx-theme>=0.11
-# TODO: Remove <6 here and in actions when pydata-sphinx-theme handles sphinx 6
-sphinx>=5.2,<6
+sphinx>=5.2
