@@ -26,6 +26,13 @@ jobs:
             "sphinx==6.0",
             "sphinx>6.0",
           ]
+    exclude:
+      - os: Ubuntu
+        python-version: "3.7"
+        sphinx-version: "sphinx==6.0"
+      - os: Ubuntu
+        python-version: "3.7"
+        sphinx-version: "sphinx>6.0"
     steps:
       - uses: actions/checkout@v3
 
