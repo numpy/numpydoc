@@ -28,7 +28,7 @@ def find_project_root(srcs: Sequence[str]):
     --------
     black.find_project_root :
         This function was adapted from
-        `Black <https://github.com/psf/black/blob/main/black.py>`_.
+        `Black <https://github.com/psf/black/blob/main/src/black/files.py>`_.
     """
     if not srcs:
         return Path(".").resolve(), "current directory"
