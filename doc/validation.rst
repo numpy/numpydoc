@@ -6,7 +6,9 @@ Docstring Validation using Pre-Commit Hook
 ------------------------------------------
 
 To enable validation of docstrings as you commit files, add the
-following to your ``.pre-commit-config.yaml`` file::
+following to your ``.pre-commit-config.yaml`` file:
+
+.. code-block:: yaml
 
     - repo: https://github.com/numpy/numpydoc
       rev: <version>
@@ -16,7 +18,7 @@ following to your ``.pre-commit-config.yaml`` file::
 After installing ``numpydoc``, run the following to see available
 command line options for this hook:
 
-.. code-block::
+.. code-block:: bash
 
     $ python -m numpydoc.hooks.validate_docstrings --help
 
@@ -47,7 +49,9 @@ the class/method/function with name "__init__" to not have a docstring).
     override_GL08 = ^(__init__)$
 
 For more fine-tuned control, you can also include inline comments to tell the
-validation hook to ignore certain checks::
+validation hook to ignore certain checks:
+
+.. code-block:: python
 
     class SomeClass:  # numpydoc ignore=EX01,SA01,ES01
         """This is the docstring for SomeClass."""
