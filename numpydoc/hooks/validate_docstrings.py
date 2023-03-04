@@ -19,6 +19,7 @@ from typing import Sequence, Tuple, Union
 from tabulate import tabulate
 
 from .. import docscrape, validate
+from .utils import find_project_root
 
 
 # inline comments that can suppress individual checks per line
@@ -252,7 +253,8 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
         either a pyproject.toml file specifying a
         [tool.numpydoc_validation] section or a setup.cfg file
         specifying a [tool:numpydoc_validation] section.
-        For example, ``~/my_project``.
+        For example, ``~/my_project``. If not provided, the hook
+        will try to find the project root directory.
 
     Returns
     -------
@@ -260,7 +262,7 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
         Config options for the numpydoc validation hook.
     """
     options = {"exclusions": [], "overrides": {}}
-    dir_path = Path(dir_path or ".").expanduser().resolve()
+    dir_path = Path(dir_path).expanduser().resolve()
 
     toml_path = dir_path / "pyproject.toml"
     cfg_path = dir_path / "setup.cfg"
@@ -348,7 +350,8 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
 def main(argv: Union[Sequence[str], None] = None) -> int:
     """Run the numpydoc validation hook."""
 
-    config_options = parse_config()
+    project_root_from_cwd, config_file = find_project_root(["."])
+    config_options = parse_config(project_root_from_cwd)
     ignored_checks = (
         "\n  "
         + "\n  ".join(
@@ -371,11 +374,12 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         "--config",
         type=str,
         help=(
-            "Path to a directory containing a pyproject.toml or setup.cfg file\n"
-            "if not in the current directory. If both are present, only\n"
-            "pyproject.toml will be used. Options must be placed under\n"
-            "[tool:numpydoc_validation] for setup.cfg files and\n"
-            "[tool.numpydoc_validation] for pyproject.toml files."
+            "Path to a directory containing a pyproject.toml or setup.cfg file.\n"
+            "The hook will look for it in the root project directory.\n"
+            "If both are present, only pyproject.toml will be used.\n"
+            "Options must be placed under\n"
+            "    - [tool:numpydoc_validation] for setup.cfg files and\n"
+            "    - [tool.numpydoc_validation] for pyproject.toml files."
         ),
     )
     parser.add_argument(
@@ -384,17 +388,17 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         nargs="*",
         help=(
             f"""Check codes to ignore.{
-                ' Currently ignoring the following from setup.cfg:'
-                f'{ignored_checks}'
-                'Values provided here will be in addition to the above.'
+                ' Currently ignoring the following from '
+                f'{Path(project_root_from_cwd) / config_file}: {ignored_checks}'
+                'Values provided here will be in addition to the above, unless an alternate config is provided.'
                 if config_options["exclusions"] else ''
             }"""
         ),
     )
 
     args = parser.parse_args(argv)
-    if args.config:  # an alternative config file was provided
-        config_options = parse_config(args.config)
+    project_root, _ = find_project_root(args.files)
+    config_options = parse_config(args.config or project_root)
     config_options["exclusions"].extend(args.ignore or [])
 
     findings = []
