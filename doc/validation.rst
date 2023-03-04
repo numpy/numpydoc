@@ -20,12 +20,26 @@ command line options for this hook:
 
     $ python -m numpydoc.hooks.validate_docstrings --help
 
-Using a ``setup.cfg`` file provides additional customization.
-Options must be placed under the ``[tool:numpydoc_validation]`` section.
+Using a config file provides additional customization. Both
+``pyproject.toml`` and ``setup.cfg`` are supported; however, if the
+project contains both you must use the ``pyproject.toml`` file.
 The example below configures the pre-commit hook to ignore three checks
 and specifies exceptions to the checks ``SS05`` (allow docstrings to
 start with "Process ", "Assess ", or "Access ") and ``GL08`` (allow
-the class/method/function with name "__init__" to not have a docstring)::
+the class/method/function with name "__init__" to not have a docstring).
+
+``pyproject.toml``::
+
+    [tool.numpydoc_validation]
+    ignore = [
+        "EX01",
+        "SA01",
+        "ES01",
+    ]
+    override_SS05 = '^((Process|Assess|Access) )'
+    override_GL08 = '^(__init__)$'
+
+``setup.cfg``::
 
     [tool:numpydoc_validation]
     ignore = EX01,SA01,ES01
@@ -42,7 +56,7 @@ validation hook to ignore certain checks::
             pass
 
 If any issues are found when commiting, a report is printed out and the
-commit is stopped::
+commit is halted::
 
     numpydoc-validation......................................................Failed
     - hook id: numpydoc-validation

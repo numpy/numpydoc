@@ -53,7 +53,12 @@ setup(
     author_email="pav@iki.fi",
     url="https://numpydoc.readthedocs.io",
     license="BSD",
-    install_requires=["sphinx>=4.2", "Jinja2>=2.10", "tabulate>=0.8.10"],
+    install_requires=[
+        "sphinx>=4.2",
+        "Jinja2>=2.10",
+        "tabulate>=0.8.10",
+        "tomli>=1.1.0;python_version<'3.11'",
+    ],
     python_requires=">=3.7",
     extras_require={
         "testing": [

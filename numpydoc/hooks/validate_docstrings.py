@@ -3,11 +3,16 @@
 import argparse
 import ast
 import configparser
-from nis import match
 import os
 import re
 import sys
 import tokenize
+
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+
 from pathlib import Path
 from typing import Sequence, Tuple, Union
 
@@ -232,26 +237,46 @@ class DocstringVisitor(ast.NodeVisitor):
             _ = self.stack.pop()
 
 
-def parse_config(filepath: os.PathLike = None) -> dict:
+def parse_config(dir_path: os.PathLike = None) -> dict:
     """
-    Parse config information from a .cfg file.
+    Parse config information from a pyproject.toml or setup.cfg file.
+
+    This function looks in the provided directory path first for a
+    pyproject.toml file. If it finds that, it won't look for a setup.cfg
+    file.
 
     Parameters
     ----------
-    filepath : os.PathLike
-        An absolute or relative path to a .cfg file specifying
-        a [tool:numpydoc_validation] section.
+    dir_path : os.PathLike
+        An absolute or relative path to a directory containing
+        either a pyproject.toml file specifying a
+        [tool.numpydoc_validation] section or a setup.cfg file
+        specifying a [tool:numpydoc_validation] section.
+        For example, ``~/my_project``.
 
     Returns
     -------
     dict
         Config options for the numpydoc validation hook.
     """
-    filename = Path(filepath or "setup.cfg").expanduser()
     options = {"exclusions": [], "overrides": {}}
-    config = configparser.ConfigParser()
-    if Path(filename).exists():
-        config.read(filename)
+    dir_path = Path(dir_path or ".").expanduser().resolve()
+
+    toml_path = dir_path / "pyproject.toml"
+    cfg_path = dir_path / "setup.cfg"
+
+    if toml_path.is_file():
+        with open(toml_path, "rb") as toml_file:
+            pyproject_toml = tomllib.load(toml_file)
+            config = pyproject_toml.get("tool", {}).get("numpydoc_validation", {})
+            options["exclusions"] = config.get("ignore", [])
+            for check in ["SS05", "GL08"]:
+                regex = config.get(f"override_{check}")
+                if regex:
+                    options["overrides"][check] = re.compile(regex)
+    elif cfg_path.is_file():
+        config = configparser.ConfigParser()
+        config.read(cfg_path)
         numpydoc_validation_config_section = "tool:numpydoc_validation"
         try:
             try:
@@ -274,6 +299,7 @@ def parse_config(filepath: os.PathLike = None) -> dict:
                 pass
         except configparser.NoSectionError:
             pass
+
     return options
 
 
@@ -345,8 +371,11 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         "--config",
         type=str,
         help=(
-            "Path to a .cfg file if not in the current directory. "
-            "Options must be placed under [tool:numpydoc_validation]."
+            "Path to a directory containing a pyproject.toml or setup.cfg file\n"
+            "if not in the current directory. If both are present, only\n"
+            "pyproject.toml will be used. Options must be placed under\n"
+            "[tool:numpydoc_validation] for setup.cfg files and\n"
+            "[tool.numpydoc_validation] for pyproject.toml files."
         ),
     )
     parser.add_argument(
@@ -366,7 +395,6 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
     args = parser.parse_args(argv)
     if args.config:  # an alternative config file was provided
         config_options = parse_config(args.config)
-
     config_options["exclusions"].extend(args.ignore or [])
 
     findings = []
