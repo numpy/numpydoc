@@ -33,7 +33,7 @@ class AstValidator(validate.Validator):
     ----------
     ast_node : ast.AST
         The node under inspection.
-    filename : path-like
+    filename : os.PathLike
         The file where the node is defined.
     obj_name : str
         A name for the node to use in the listing of issues for the file as a whole.
