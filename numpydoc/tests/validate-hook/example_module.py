@@ -24,3 +24,7 @@ class MyClass:
         *args
         """
         pass
+
+    def process(self):
+        """Process stuff."""
+        pass
