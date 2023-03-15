@@ -522,7 +522,7 @@ class GoodDocStrings:
             Default is explicitly documented.
         c : {"Thing 1", "Thing 2"}
             Which thing.
-            
+
         See Also
         --------
         related : Something related.
