@@ -522,6 +522,40 @@ class GoodDocStrings:
             Default is explicitly documented.
         c : {"Thing 1", "Thing 2"}
             Which thing.
+            
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
+
+    def parameter_with_wrong_types_as_substrings(self, a, b, c, d, e, f):
+        r"""
+        Ensure PR06 doesn't fail when non-preferable types are substrings.
+
+        While PR06 checks for parameter types which contain non-preferable type
+        names like integer (int), string (str), and boolean (bool), PR06 should
+        not fail if those types are used only as susbtrings in, for example,
+        custom type names.
+
+        Parameters
+        ----------
+        a : Myint
+           Some text.
+        b : intClass
+           Some text.
+        c : Mystring
+           Some text.
+        d : stringClass
+           Some text.
+        e : Mybool
+           Some text.
+        f : boolClass
+           Some text.
 
         See Also
         --------
@@ -538,7 +572,6 @@ class BadGenericDocStrings:
     """Everything here has a bad docstring"""
 
     def func(self):
-
         """Some function.
 
         With several mistakes in the docstring.
@@ -1220,6 +1253,7 @@ class TestValidator:
             "valid_options_in_parameter_description_sets",
             "parameters_with_trailing_underscores",
             "optional_params",
+            "parameter_with_wrong_types_as_substrings",
         ],
     )
     def test_good_functions(self, capsys, func):

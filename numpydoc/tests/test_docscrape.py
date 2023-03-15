@@ -1,6 +1,7 @@
 from collections import namedtuple
 from copy import deepcopy
 import re
+import sys
 import textwrap
 import warnings
 
@@ -1442,7 +1443,6 @@ def test_nonstandard_property():
             obj._set_axis(self.axis, value)
 
     class Dummy:
-
         attr = SpecialProperty(doc="test attribute")
 
     doc = get_doc_object(Dummy)
@@ -1622,6 +1622,26 @@ def test__error_location_no_name_attr():
     msg = "Potentially wrong underline length.*Foo.*"
     with pytest.raises(ValueError, match=msg):
         nds._error_location(msg=msg)
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 8), reason="cached_property was added in 3.8"
+)
+def test_class_docstring_cached_property():
+    """Ensure that properties marked with the `cached_property` decorator
+    are listed in the Methods section. See gh-432."""
+    from functools import cached_property
+
+    class Foo:
+        _x = [1, 2, 3]
+
+        @cached_property
+        def val(self):
+            return self._x
+
+    class_docstring = get_doc_object(Foo)
+    assert len(class_docstring["Attributes"]) == 1
+    assert class_docstring["Attributes"][0].name == "val"
 
 
 if __name__ == "__main__":
