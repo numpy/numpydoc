@@ -13,8 +13,8 @@ with open(os.path.join("numpydoc", "_version.py")) as fid:
 if version is None:
     raise RuntimeError("Could not determine version")
 
-if sys.version_info < (3, 7):
-    raise RuntimeError("Python version >= 3.7 required.")
+if sys.version_info < (3, 8):
+    raise RuntimeError("Python version >= 3.8 required.")
 
 
 def read(fname):
@@ -42,7 +42,6 @@ setup(
         "Topic :: Documentation",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
@@ -54,7 +53,7 @@ setup(
     url="https://numpydoc.readthedocs.io",
     license="BSD",
     install_requires=["sphinx>=5", "Jinja2>=2.10"],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     extras_require={
         "testing": [
             req
