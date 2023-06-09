@@ -1,7 +1,6 @@
 from collections import namedtuple
 from copy import deepcopy
 import re
-import sys
 import textwrap
 import warnings
 
@@ -1624,9 +1623,6 @@ def test__error_location_no_name_attr():
         nds._error_location(msg=msg)
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 8), reason="cached_property was added in 3.8"
-)
 def test_class_docstring_cached_property():
     """Ensure that properties marked with the `cached_property` decorator
     are listed in the Methods section. See gh-432."""
