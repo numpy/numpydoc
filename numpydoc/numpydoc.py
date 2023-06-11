@@ -30,8 +30,8 @@ from sphinx.addnodes import pending_xref, desc_content
 from sphinx.util import logging
 from sphinx.errors import ExtensionError
 
-if sphinx.__version__ < "4.2":
-    raise RuntimeError("Sphinx 4.2 or newer is required")
+if sphinx.__version__ < "5":
+    raise RuntimeError("Sphinx 5 or newer is required")
 
 from .docscrape_sphinx import get_doc_object
 from .validate import validate, ERROR_MSGS
