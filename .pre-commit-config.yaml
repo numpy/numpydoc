@@ -17,7 +17,7 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
       - id: black
 
@@ -29,12 +29,12 @@ repos:
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/adamchainz/blacken-docs
-    rev: 1.13.0
+    rev: 1.14.0
     hooks:
       - id: blacken-docs
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
+    rev: v3.7.0
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
