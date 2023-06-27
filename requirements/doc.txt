@@ -1,4 +1,4 @@
-numpy>=1.21
+numpy>=1.22
 matplotlib>=3.5
-pydata-sphinx-theme>=0.11
-sphinx>=5.2
+pydata-sphinx-theme>=0.13
+sphinx>=6
