@@ -2,6 +2,83 @@
 Validation
 ==========
 
+Docstring Validation using Pre-Commit Hook
+------------------------------------------
+
+To enable validation of docstrings as you commit files, add the
+following to your ``.pre-commit-config.yaml`` file:
+
+.. code-block:: yaml
+
+    - repo: https://github.com/numpy/numpydoc
+      rev: <version>
+      hooks:
+        - id: numpydoc-validation
+
+After installing ``numpydoc``, run the following to see available
+command line options for this hook:
+
+.. code-block:: bash
+
+    $ python -m numpydoc.hooks.validate_docstrings --help
+
+Using a config file provides additional customization. Both
+``pyproject.toml`` and ``setup.cfg`` are supported; however, if the
+project contains both you must use the ``pyproject.toml`` file.
+The example below configures the pre-commit hook to ignore three checks
+and specifies exceptions to the checks ``SS05`` (allow docstrings to
+start with "Process ", "Assess ", or "Access ") and ``GL08`` (allow
+the class/method/function with name "__init__" to not have a docstring).
+
+``pyproject.toml``::
+
+    [tool.numpydoc_validation]
+    ignore = [
+        "EX01",
+        "SA01",
+        "ES01",
+    ]
+    override_SS05 = '^((Process|Assess|Access) )'
+    override_GL08 = '^(__init__)$'
+
+``setup.cfg``::
+
+    [tool:numpydoc_validation]
+    ignore = EX01,SA01,ES01
+    override_SS05 = ^((Process|Assess|Access) )
+    override_GL08 = ^(__init__)$
+
+For more fine-tuned control, you can also include inline comments to tell the
+validation hook to ignore certain checks:
+
+.. code-block:: python
+
+    class SomeClass:  # numpydoc ignore=EX01,SA01,ES01
+        """This is the docstring for SomeClass."""
+
+        def __init__(self):  # numpydoc ignore=GL08
+            pass
+
+If any issues are found when commiting, a report is printed out and the
+commit is halted:
+
+.. code-block:: output
+
+    numpydoc-validation......................................................Failed
+    - hook id: numpydoc-validation
+    - exit code: 1
+
+    +----------------------+----------------------+---------+--------------------------------------+
+    | file                 | item                 | check   | description                          |
+    +======================+======================+=========+======================================+
+    | src/pkg/utils.py:1   | utils                | GL08    | The object does not have a docstring |
+    | src/pkg/utils.py:90  | utils.normalize      | PR04    | Parameter "field" has no type        |
+    | src/pkg/module.py:12 | module.MyClass       | GL08    | The object does not have a docstring |
+    | src/pkg/module.py:33 | module.MyClass.parse | RT03    | Return value has no description      |
+    +----------------------+----------------------+---------+--------------------------------------+
+
+See below for a full listing of checks.
+
 Docstring Validation using Python
 ---------------------------------
 

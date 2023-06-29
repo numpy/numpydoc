@@ -450,7 +450,7 @@ def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
     return errs
 
 
-def validate(obj_name):
+def validate(obj_name, validator_cls=None, **validator_kwargs):
     """
     Validate the docstring.
 
@@ -461,6 +461,11 @@ def validate(obj_name):
         'pandas.read_csv'. The string must include the full, unabbreviated
         package/module names, i.e. 'pandas.read_csv', not 'pd.read_csv' or
         'read_csv'.
+    validator_cls : Validator, optional
+        The Validator class to use. By default, :class:`Validator` will be used.
+    **validator_kwargs
+        Keyword arguments to pass to ``validator_cls`` upon initialization.
+        Note that ``obj_name`` will be passed as a named argument as well.
 
     Returns
     -------
@@ -493,10 +498,13 @@ def validate(obj_name):
     they are validated, are not documented more than in the source code of this
     function.
     """
-    if isinstance(obj_name, str):
-        doc = Validator(get_doc_object(Validator._load_obj(obj_name)))
+    if not validator_cls:
+        if isinstance(obj_name, str):
+            doc = Validator(get_doc_object(Validator._load_obj(obj_name)))
+        else:
+            doc = Validator(obj_name)
     else:
-        doc = Validator(obj_name)
+        doc = validator_cls(obj_name=obj_name, **validator_kwargs)
 
     errs = []
     if not doc.raw_doc:
