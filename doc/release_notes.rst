@@ -17,6 +17,12 @@ Release notes
    For release notes (sparsely) kept prior to 1.0.0, look at the `releases page
    on GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
+1.6.0rc0
+--------
+
+Release date: 29 June 2023
+
+Requires Python 3.8+ and Sphinx 5+.
 
 1.5.0
 -----
