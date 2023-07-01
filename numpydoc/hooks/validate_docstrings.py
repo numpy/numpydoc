@@ -176,11 +176,6 @@ class DocstringVisitor(ast.NodeVisitor):
         if check not in self.config["checks"]:
             return True
 
-        if self.config["exclude"] and re.search(
-            self.config["exclude"], ".".join(self.stack)
-        ):
-            return True
-
         if self.config["overrides"]:
             try:
                 pattern = self.config["overrides"][check]
@@ -233,7 +228,13 @@ class DocstringVisitor(ast.NodeVisitor):
             self.stack.append(
                 self.module_name if isinstance(node, ast.Module) else node.name
             )
-            self._get_numpydoc_issues(node)
+
+            if not (
+                self.config["exclude"]
+                and re.search(self.config["exclude"], ".".join(self.stack))
+            ):
+                self._get_numpydoc_issues(node)
+
             self.generic_visit(node)
             _ = self.stack.pop()
 
