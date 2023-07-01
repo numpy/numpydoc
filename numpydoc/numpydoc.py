@@ -34,6 +34,7 @@ if sphinx.__version__ < "5":
     raise RuntimeError("Sphinx 5 or newer is required")
 
 from .docscrape_sphinx import get_doc_object
+from .utils import get_validation_checks
 from .validate import validate, ERROR_MSGS
 from .xref import DEFAULT_LINKS
 from . import __version__
@@ -310,17 +311,9 @@ def update_config(app, config=None):
 
     # Processing to determine whether numpydoc_validation_checks is treated
     # as a blocklist or allowlist
-    valid_error_codes = set(ERROR_MSGS.keys())
-    if "all" in config.numpydoc_validation_checks:
-        block = deepcopy(config.numpydoc_validation_checks)
-        config.numpydoc_validation_checks = valid_error_codes - block
-    # Ensure that the validation check set contains only valid error codes
-    invalid_error_codes = config.numpydoc_validation_checks - valid_error_codes
-    if invalid_error_codes:
-        raise ValueError(
-            f"Unrecognized validation code(s) in numpydoc_validation_checks "
-            f"config value: {invalid_error_codes}"
-        )
+    config.numpydoc_validation_checks = get_validation_checks(
+        config.numpydoc_validation_checks
+    )
 
     # Generate the regexp for docstrings to ignore during validation
     if isinstance(config.numpydoc_validation_exclude, str):
