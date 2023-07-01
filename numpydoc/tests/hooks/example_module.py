@@ -28,3 +28,7 @@ class MyClass:
     def process(self):
         """Process stuff."""
         pass
+
+
+class NewClass:
+    pass
