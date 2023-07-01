@@ -182,14 +182,6 @@ class DocstringVisitor(ast.NodeVisitor):
             return True
 
         if self.config["overrides"]:
-            try:
-                if check == "GL08":
-                    pattern = self.config["overrides"].get("GL08")
-                    if pattern and re.match(pattern, node.name):
-                        return True
-            except AttributeError:  # ast.Module nodes don't have a name
-                pass
-
             if check == "SS05":
                 pattern = self.config["overrides"].get("SS05")
                 if pattern and re.match(pattern, ast.get_docstring(node)) is not None:
@@ -278,8 +270,15 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
             pyproject_toml = tomllib.load(toml_file)
             config = pyproject_toml.get("tool", {}).get("numpydoc_validation", {})
             options["checks"] = set(config.get("checks", options["checks"]))
-            options["exclude"] = set(config.get("exclude", options["exclude"]))
-            for check in ["SS05", "GL08"]:
+
+            global_exclusions = config.get("exclude", options["exclude"])
+            options["exclude"] = set(
+                global_exclusions
+                if isinstance(global_exclusions, list)
+                else [global_exclusions]
+            )
+
+            for check in ["SS05"]:
                 regex = config.get(f"override_{check}")
                 if regex:
                     options["overrides"][check] = re.compile(regex)
@@ -309,12 +308,6 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
             try:
                 options["overrides"]["SS05"] = re.compile(
                     config.get(numpydoc_validation_config_section, "override_SS05")
-                )
-            except configparser.NoOptionError:
-                pass
-            try:
-                options["overrides"]["GL08"] = re.compile(
-                    config.get(numpydoc_validation_config_section, "override_GL08")
                 )
             except configparser.NoOptionError:
                 pass
