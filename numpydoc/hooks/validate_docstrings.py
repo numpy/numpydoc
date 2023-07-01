@@ -133,19 +133,14 @@ class DocstringVisitor(ast.NodeVisitor):
         The absolute or relative path to the file to inspect.
     config : dict
         Configuration options for reviewing flagged issues.
-    numpydoc_ignore_comments : dict
-        A mapping of line number to checks to ignore.
-        Derived from comments in the source code.
     """
 
     def __init__(
         self,
         filepath: str,
         config: dict,
-        numpydoc_ignore_comments: dict,
     ) -> None:
         self.config: dict = config
-        self.numpydoc_ignore_comments = numpydoc_ignore_comments
         self.filepath: str = filepath
         self.module_name: str = Path(self.filepath).stem
         self.stack: list[str] = []
@@ -177,12 +172,6 @@ class DocstringVisitor(ast.NodeVisitor):
                     return True
             except KeyError:
                 pass
-
-        try:
-            if check in self.numpydoc_ignore_comments[getattr(node, "lineno", 1)]:
-                return True
-        except KeyError:
-            pass
 
         return False
 
@@ -346,11 +335,7 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
     with open(filepath) as file:
         module_node = ast.parse(file.read(), filepath)
 
-    docstring_visitor = DocstringVisitor(
-        filepath=str(filepath),
-        config=config,
-        numpydoc_ignore_comments=validate.extract_ignore_validation_comments(filepath),
-    )
+    docstring_visitor = DocstringVisitor(filepath=str(filepath), config=config)
     docstring_visitor.visit(module_node)
 
     return docstring_visitor.findings
