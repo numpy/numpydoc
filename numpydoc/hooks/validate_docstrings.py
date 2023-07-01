@@ -20,6 +20,7 @@ from tabulate import tabulate
 
 from .. import docscrape, validate
 from .utils import find_project_root
+from ..utils import get_validation_checks
 
 
 # inline comments that can suppress individual checks per line
@@ -172,7 +173,7 @@ class DocstringVisitor(ast.NodeVisitor):
         bool
             Whether the issue should be exluded from the report.
         """
-        if check in self.config["exclusions"]:
+        if check not in self.config["checks"]:
             return True
 
         if self.config["overrides"]:
@@ -261,7 +262,7 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
     dict
         Config options for the numpydoc validation hook.
     """
-    options = {"exclusions": [], "overrides": {}}
+    options = {"checks": {"all"}, "overrides": {}}
     dir_path = Path(dir_path).expanduser().resolve()
 
     toml_path = dir_path / "pyproject.toml"
@@ -271,7 +272,7 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
         with open(toml_path, "rb") as toml_file:
             pyproject_toml = tomllib.load(toml_file)
             config = pyproject_toml.get("tool", {}).get("numpydoc_validation", {})
-            options["exclusions"] = config.get("ignore", [])
+            options["checks"] = set(config.get("checks", options["checks"]))
             for check in ["SS05", "GL08"]:
                 regex = config.get(f"override_{check}")
                 if regex:
@@ -282,9 +283,10 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
         numpydoc_validation_config_section = "tool:numpydoc_validation"
         try:
             try:
-                options["exclusions"] = config.get(
-                    numpydoc_validation_config_section, "ignore"
-                ).split(",")
+                options["checks"] = set(
+                    config.get(numpydoc_validation_config_section, "checks").split(",")
+                    or options["checks"]
+                )
             except configparser.NoOptionError:
                 pass
             try:
@@ -302,6 +304,7 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
         except configparser.NoSectionError:
             pass
 
+    options["checks"] = get_validation_checks(options["checks"])
     return options
 
 
@@ -357,7 +360,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         + "\n  ".join(
             [
                 f"- {check}: {validate.ERROR_MSGS[check]}"
-                for check in config_options["exclusions"]
+                for check in set(validate.ERROR_MSGS.keys()) - config_options["checks"]
             ]
         )
         + "\n"
@@ -391,7 +394,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
                 ' Currently ignoring the following from '
                 f'{Path(project_root_from_cwd) / config_file}: {ignored_checks}'
                 'Values provided here will be in addition to the above, unless an alternate config is provided.'
-                if config_options["exclusions"] else ''
+                if config_options["checks"] else ''
             }"""
         ),
     )
@@ -399,7 +402,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
     args = parser.parse_args(argv)
     project_root, _ = find_project_root(args.files)
     config_options = parse_config(args.config or project_root)
-    config_options["exclusions"].extend(args.ignore or [])
+    config_options["checks"] -= set(args.ignore or [])
 
     findings = []
     for file in args.files:

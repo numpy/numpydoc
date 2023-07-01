@@ -121,7 +121,8 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
             inspect.cleandoc(
                 """
                 [tool.numpydoc_validation]
-                ignore = [
+                checks = [
+                    "all",
                     "EX01",
                     "SA01",
                     "ES01",
@@ -162,7 +163,7 @@ def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
             inspect.cleandoc(
                 """
                 [tool:numpydoc_validation]
-                ignore = EX01,SA01,ES01
+                checks = all,EX01,SA01,ES01
                 override_SS05 = ^((Process|Assess|Access) )
                 override_GL08 = ^(__init__)$
                 """
