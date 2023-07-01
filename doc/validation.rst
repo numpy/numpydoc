@@ -25,11 +25,15 @@ command line options for this hook:
 Using a config file provides additional customization. Both ``pyproject.toml``
 and ``setup.cfg`` are supported; however, if the project contains both
 you must use the ``pyproject.toml`` file. The example below configures
-the pre-commit hook to ignore three checks (using the same logic as the
-:ref:`validation during Sphinx build <_validation_during_sphinx_build>`)
-and specifies exceptions to the checks ``SS05`` (allow docstrings to
-start with "Process ", "Assess ", or "Access ") and ``GL08`` (allow
-the class/method/function with name "__init__" to not have a docstring).
+the pre-commit hook as follows:
+
+* ``checks``: Run all checks except ``EX01``, ``SA01``, and ``ES01`` (using the
+  same logic as the :ref:`validation during Sphinx build
+  <_validation_during_sphinx_build>`).
+* ``exclude``: Don't report any issues on anything matching the regular
+  regular expressions ``\.undocumented_method$`` or ``\.__repr__$``.
+* ``override_SS05``: Allow docstrings to start with "Process ", "Assess ",
+  or "Access ".
 
 ``pyproject.toml``::
 
@@ -40,6 +44,10 @@ the class/method/function with name "__init__" to not have a docstring).
         "SA01",
         "ES01",
     ]
+    exclude = [
+        '\.undocumented_method$',
+        '\.__repr__$',
+    ]
     override_SS05 = '^((Process|Assess|Access) )'
     override_GL08 = '^(__init__)$'
 
@@ -47,6 +55,7 @@ the class/method/function with name "__init__" to not have a docstring).
 
     [tool:numpydoc_validation]
     checks = all,EX01,SA01,ES01
+    exclude = \.undocumented_method$,\.__repr__$
     override_SS05 = ^((Process|Assess|Access) )
     override_GL08 = ^(__init__)$
 
