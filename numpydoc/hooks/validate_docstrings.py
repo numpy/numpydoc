@@ -6,7 +6,6 @@ import configparser
 import os
 import re
 import sys
-import tokenize
 
 try:
     import tomllib
@@ -20,11 +19,6 @@ from tabulate import tabulate
 
 from .. import docscrape, validate
 from .utils import find_project_root
-from ..utils import get_validation_checks
-
-
-# inline comments that can suppress individual checks per line
-IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 
 
 class AstValidator(validate.Validator):
@@ -171,7 +165,7 @@ class DocstringVisitor(ast.NodeVisitor):
         Return
         ------
         bool
-            Whether the issue should be exluded from the report.
+            Whether the issue should be excluded from the report.
         """
         if check not in self.config["checks"]:
             return True
@@ -328,7 +322,7 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
         except configparser.NoSectionError:
             pass
 
-    options["checks"] = get_validation_checks(options["checks"])
+    options["checks"] = validate.get_validation_checks(options["checks"])
     options["exclude"] = compile_regex(options["exclude"])
     return options
 
@@ -352,23 +346,10 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
     with open(filepath) as file:
         module_node = ast.parse(file.read(), filepath)
 
-    with open(filepath) as file:
-        numpydoc_ignore_comments = {}
-        last_declaration = 1
-        declarations = ["def", "class"]
-        for token in tokenize.generate_tokens(file.readline):
-            if token.type == tokenize.NAME and token.string in declarations:
-                last_declaration = token.start[0]
-            if token.type == tokenize.COMMENT:
-                match = re.match(IGNORE_COMMENT_PATTERN, token.string)
-                if match:
-                    rules = match.group(1).split(",")
-                    numpydoc_ignore_comments[last_declaration] = rules
-
     docstring_visitor = DocstringVisitor(
         filepath=str(filepath),
         config=config,
-        numpydoc_ignore_comments=numpydoc_ignore_comments,
+        numpydoc_ignore_comments=validate.extract_ignore_validation_comments(filepath),
     )
     docstring_visitor.visit(module_node)
 

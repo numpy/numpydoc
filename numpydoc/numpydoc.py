@@ -34,8 +34,7 @@ if sphinx.__version__ < "5":
     raise RuntimeError("Sphinx 5 or newer is required")
 
 from .docscrape_sphinx import get_doc_object
-from .utils import get_validation_checks
-from .validate import validate, ERROR_MSGS
+from .validate import validate, ERROR_MSGS, get_validation_checks
 from .xref import DEFAULT_LINKS
 from . import __version__
 
