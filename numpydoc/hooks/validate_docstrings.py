@@ -176,6 +176,11 @@ class DocstringVisitor(ast.NodeVisitor):
         if check not in self.config["checks"]:
             return True
 
+        if self.config["exclude"] and re.search(
+            self.config["exclude"], ".".join(self.stack)
+        ):
+            return True
+
         if self.config["overrides"]:
             try:
                 if check == "GL08":
@@ -262,7 +267,7 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
     dict
         Config options for the numpydoc validation hook.
     """
-    options = {"checks": {"all"}, "overrides": {}}
+    options = {"checks": {"all"}, "exclude": set(), "overrides": {}}
     dir_path = Path(dir_path).expanduser().resolve()
 
     toml_path = dir_path / "pyproject.toml"
@@ -273,6 +278,7 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
             pyproject_toml = tomllib.load(toml_file)
             config = pyproject_toml.get("tool", {}).get("numpydoc_validation", {})
             options["checks"] = set(config.get("checks", options["checks"]))
+            options["exclude"] = set(config.get("exclude", options["exclude"]))
             for check in ["SS05", "GL08"]:
                 regex = config.get(f"override_{check}")
                 if regex:
@@ -284,8 +290,19 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
         try:
             try:
                 options["checks"] = set(
-                    config.get(numpydoc_validation_config_section, "checks").split(",")
+                    config.get(numpydoc_validation_config_section, "checks")
+                    .rstrip(",")
+                    .split(",")
                     or options["checks"]
+                )
+            except configparser.NoOptionError:
+                pass
+            try:
+                options["exclude"] = set(
+                    config.get(numpydoc_validation_config_section, "exclude")
+                    .rstrip(",")
+                    .split(",")
+                    or options["exclude"]
                 )
             except configparser.NoOptionError:
                 pass
@@ -305,6 +322,11 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
             pass
 
     options["checks"] = get_validation_checks(options["checks"])
+    options["exclude"] = (
+        re.compile(r"|".join(exp for exp in options["exclude"]))
+        if options["exclude"]
+        else None
+    )
     return options
 
 
