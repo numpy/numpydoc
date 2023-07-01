@@ -62,17 +62,6 @@ the pre-commit hook as follows:
     exclude = \.undocumented_method$,\.__repr__$
     override_SS05 = ^Process,^Assess,^Access
 
-For more fine-tuned control, you can also include inline comments to tell the
-validation hook to ignore certain checks:
-
-.. code-block:: python
-
-    class SomeClass:  # numpydoc ignore=EX01,SA01,ES01
-        """This is the docstring for SomeClass."""
-
-        def __init__(self):  # numpydoc ignore=GL08
-            pass
-
 If any issues are found when commiting, a report is printed out and the
 commit is halted:
 
@@ -159,3 +148,17 @@ The full mapping of validation checks is given below.
 .. literalinclude:: ../numpydoc/validate.py
    :start-after: start-err-msg
    :end-before: end-err-msg
+
+Ignoring Validation Checks with Inline Comments
+-----------------------------------------------
+
+For more fine-tuned control, you can also include inline comments
+to ignore certain checks:
+
+.. code-block:: python
+
+    class SomeClass:  # numpydoc ignore=EX01,SA01,ES01
+        """This is the docstring for SomeClass."""
+
+        def __init__(self):  # numpydoc ignore=GL08
+            pass
