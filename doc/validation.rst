@@ -33,7 +33,8 @@ the pre-commit hook as follows:
 * ``exclude``: Don't report any issues on anything matching the regular
   regular expressions ``\.undocumented_method$`` or ``\.__repr__$``.
 * ``override_SS05``: Allow docstrings to start with "Process ", "Assess ",
-  or "Access ".
+  or "Access ". To override different checks, add a field for each code in
+  the form of ``override_<code>``.
 
 ``pyproject.toml``::
 
@@ -48,16 +49,18 @@ the pre-commit hook as follows:
         '\.undocumented_method$',
         '\.__repr__$',
     ]
-    override_SS05 = '^((Process|Assess|Access) )'
-    override_GL08 = '^(__init__)$'
+    override_SS05 = [
+        '^Process',
+        '^Assess',
+        '^Access',
+    ]
 
 ``setup.cfg``::
 
     [tool:numpydoc_validation]
     checks = all,EX01,SA01,ES01
     exclude = \.undocumented_method$,\.__repr__$
-    override_SS05 = ^((Process|Assess|Access) )
-    override_GL08 = ^(__init__)$
+    override_SS05 = ^Process,^Assess,^Access
 
 For more fine-tuned control, you can also include inline comments to tell the
 validation hook to ignore certain checks:
