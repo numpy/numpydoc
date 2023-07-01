@@ -182,10 +182,12 @@ class DocstringVisitor(ast.NodeVisitor):
             return True
 
         if self.config["overrides"]:
-            if check == "SS05":
-                pattern = self.config["overrides"].get("SS05")
-                if pattern and re.match(pattern, ast.get_docstring(node)) is not None:
+            try:
+                pattern = self.config["overrides"][check]
+                if re.search(pattern, ast.get_docstring(node)) is not None:
                     return True
+            except KeyError:
+                pass
 
         try:
             if check in self.numpydoc_ignore_comments[getattr(node, "lineno", 1)]:
@@ -265,6 +267,20 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
     toml_path = dir_path / "pyproject.toml"
     cfg_path = dir_path / "setup.cfg"
 
+    def compile_regex(expressions):
+        return (
+            re.compile(r"|".join(exp for exp in expressions if exp))
+            if expressions
+            else None
+        )
+
+    def extract_check_overrides(options, config_items):
+        for option, value in config_items:
+            if option.startswith("override_"):
+                _, check = option.split("_")
+                if value:
+                    options["overrides"][check.upper()] = compile_regex(value)
+
     if toml_path.is_file():
         with open(toml_path, "rb") as toml_file:
             pyproject_toml = tomllib.load(toml_file)
@@ -278,10 +294,8 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
                 else [global_exclusions]
             )
 
-            for check in ["SS05"]:
-                regex = config.get(f"override_{check}")
-                if regex:
-                    options["overrides"][check] = re.compile(regex)
+            extract_check_overrides(options, config.items())
+
     elif cfg_path.is_file():
         config = configparser.ConfigParser()
         config.read(cfg_path)
@@ -305,21 +319,16 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
                 )
             except configparser.NoOptionError:
                 pass
-            try:
-                options["overrides"]["SS05"] = re.compile(
-                    config.get(numpydoc_validation_config_section, "override_SS05")
-                )
-            except configparser.NoOptionError:
-                pass
+
+            extract_check_overrides(
+                options, config.items(numpydoc_validation_config_section)
+            )
+
         except configparser.NoSectionError:
             pass
 
     options["checks"] = get_validation_checks(options["checks"])
-    options["exclude"] = (
-        re.compile(r"|".join(exp for exp in options["exclude"]))
-        if options["exclude"]
-        else None
-    )
+    options["exclude"] = compile_regex(options["exclude"])
     return options
 
 
