@@ -578,7 +578,8 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
     else:
         doc = validator_cls(obj_name=obj_name, **validator_kwargs)
 
-    # module docstring will be lineno 0, which we change to 1 for readability of the output
+    # lineno is only 0 if we have a module docstring in the file and we are
+    # validating that, so we change to 1 for readability of the output
     ignore_validation_comments = extract_ignore_validation_comments(
         doc.source_file_name
     ).get(doc.source_file_def_line or 1, [])
