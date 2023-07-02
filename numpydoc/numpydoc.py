@@ -207,7 +207,19 @@ def mangle_docstrings(app, what, name, obj, options, lines):
                 # TODO: Currently, all validation checks are run and only those
                 # selected via config are reported. It would be more efficient to
                 # only run the selected checks.
-                errors = validate(doc)["errors"]
+                report = validate(doc)
+                errors = [
+                    err
+                    for err in report["errors"]
+                    if not (
+                        (
+                            overrides := app.config.numpydoc_validation_overrides.get(
+                                err[0]
+                            )
+                        )
+                        and re.search(overrides, report["docstring"])
+                    )
+                ]
                 if {err[0] for err in errors} & app.config.numpydoc_validation_checks:
                     msg = (
                         f"[numpydoc] Validation warnings while processing "
@@ -285,6 +297,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value("numpydoc_xref_ignore", set(), True)
     app.add_config_value("numpydoc_validation_checks", set(), True)
     app.add_config_value("numpydoc_validation_exclude", set(), False)
+    app.add_config_value("numpydoc_validation_overrides", dict(), False)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
@@ -326,6 +339,11 @@ def update_config(app, config=None):
             r"|".join(exp for exp in config.numpydoc_validation_exclude)
         )
         config.numpydoc_validation_excluder = exclude_expr
+
+    for check, patterns in config.numpydoc_validation_overrides.items():
+        config.numpydoc_validation_overrides[check] = re.compile(
+            r"|".join(exp for exp in patterns)
+        )
 
 
 # ------------------------------------------------------------------------------
