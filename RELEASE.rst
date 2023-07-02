@@ -46,7 +46,7 @@ Process
 - Publish on PyPi::
 
     git clean -fxd
-    pip install build wheel twine
+    pip install --upgrade build wheel twine
     python -m build --sdist --wheel
     twine upload -s dist/*
 
