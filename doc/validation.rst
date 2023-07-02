@@ -97,9 +97,11 @@ This will validate that the docstring can be built.
 For an exhaustive validation of the formatting of the docstring, use the
 ``--validate`` parameter. This will report the errors detected, such as
 incorrect capitalization, wrong order of the sections, and many other
-issues.
+issues. Note that this will honor :ref:`inline ignore comments <inline_ignore_comments>`,
+but will not look for any configuration like the pre-commit hook or Sphinx
+extension do.
 
-.. _validation_during_sphinx_build
+.. _validation_during_sphinx_build:
 
 Docstring Validation during Sphinx Build
 ----------------------------------------
@@ -148,6 +150,8 @@ The full mapping of validation checks is given below.
 .. literalinclude:: ../numpydoc/validate.py
    :start-after: start-err-msg
    :end-before: end-err-msg
+
+.. _inline_ignore_comments:
 
 Ignoring Validation Checks with Inline Comments
 -----------------------------------------------
