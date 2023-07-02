@@ -142,8 +142,8 @@ numpydoc_validation_overrides : dict
     A dictionary mapping :ref:`validation checks <validation_checks>` to a
     container of strings using :py:mod:`re` syntax specifying patterns to
     ignore for docstring validation.
-    For example, to skip the ``SS02`` check for docstrings starting with
-    the word ``Process``::
+    For example, the following skips the ``SS02`` check for docstrings
+    starting with the word ``Process``::
 
         numpydoc_validation_overrides = {"SS02": [r'^Process ']}
 
