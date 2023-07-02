@@ -65,6 +65,11 @@ setup(
             for req in read("requirements/test.txt").split("\n")
             if not req.startswith("#")
         ],
+        "doc": [
+            req
+            for req in read("requirements/doc.txt").split("\n")
+            if not req.startswith("#")
+        ],
     },
     package_data={
         "numpydoc": [
