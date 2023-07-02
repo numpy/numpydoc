@@ -7,7 +7,7 @@ with all the detected errors.
 """
 
 from copy import deepcopy
-from typing import Set
+from typing import Dict, List, Set
 import ast
 import collections
 import importlib
@@ -111,7 +111,7 @@ IGNORE_STARTS = (" ", "* ", "- ")
 IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 
 
-def extract_ignore_validation_comments(filepath: os.PathLike) -> dict[int, list[str]]:
+def extract_ignore_validation_comments(filepath: os.PathLike) -> Dict[int, List[str]]:
     """
     Extract inline comments indicating certain validation checks should be ignored.
 
