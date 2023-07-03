@@ -274,7 +274,7 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
             global_exclusions = config.get("exclude", options["exclude"])
             options["exclude"] = set(
                 global_exclusions
-                if isinstance(global_exclusions, list)
+                if not isinstance(global_exclusions, str)
                 else [global_exclusions]
             )
 
