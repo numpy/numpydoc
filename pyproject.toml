@@ -72,6 +72,8 @@ packages = [
     'numpydoc',
     'numpydoc.hooks',
 ]
+[tool.setuptools.dynamic.version]
+attr = 'numpydoc.__version__'
 
 [tool.setuptools.package-data]
 numpydoc = [

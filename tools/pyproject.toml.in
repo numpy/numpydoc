@@ -53,6 +53,9 @@ packages = [
 ]
 include-package-data = false
 
+[tool.setuptools.dynamic]
+version = {attr = "numpydoc.__version__"}
+
 [tool.setuptools.package-data]
 numpydoc = [
     "tests/test_*.py",
