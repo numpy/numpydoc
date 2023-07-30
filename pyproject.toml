@@ -50,6 +50,7 @@ file = 'LICENSE.txt'
 
 [project.urls]
 Homepage = 'https://numpydoc.readthedocs.io'
+Source = 'https://github.com/numpy/numpydoc/'
 
 [project.optional-dependencies]
 doc = [
