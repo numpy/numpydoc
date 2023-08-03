@@ -1,2 +1,2 @@
 pre-commit>=3.3
-rtoml
+tomli; python_version < '3.11'
