@@ -355,6 +355,45 @@ class SphinxDocString(NumpyDocString):
         else:
             return self._str_section("Examples")
 
+    def _apply_param_role(self, rendered):
+        """Replace every instance of parameters in single backticks with the
+        parameter role specified in the configuration.
+
+        Parameters
+        ----------
+        rendered : str
+            The rendered string template as computed in __str__
+        """
+        # TODO: the parameter role should be configured, use :emphasis: for testing
+        role = ":emphasis:"
+
+        # Construct a regex for finding parameter names enclosed in single
+        # backticks
+        # TODO: Add [^_] to the end of the expression to filter out sphinx
+        # external link syntax?
+        regex = re.compile(
+            "|".join(
+                f"`{p.name}`[^_]"
+                for p in self["Parameters"]
+                if not p.name.startswith("*")  # Ignore *args, **kwargs
+            )
+        )
+
+        # Define a function to replace single-backticked params with the
+        # default role
+        # TODO: Simplify this with smarter regex?
+        def repl(m):
+            s = m.group()
+            start_idx = m.start()
+            # If the opening backtick is preceded by a ":" or "`", it's already
+            # a role or literal markup, respectively, and should not be changed
+            if start_idx != 0:
+                if m.string[start_idx - 1] in {":", "`"}:
+                    return s
+            return f"{role}{s}"
+
+        return regex.sub(repl, rendered)
+
     def __str__(self, indent=0, func_role="obj"):
         ns = {
             "signature": self._str_signature(),
@@ -381,6 +420,10 @@ class SphinxDocString(NumpyDocString):
         ns = {k: "\n".join(v) for k, v in ns.items()}
 
         rendered = self.template.render(**ns)
+        # Only attempt parameter role mapping if the docstring object *has*
+        # parameters
+        if self["Parameters"]:
+            rendered = self._apply_param_role(rendered)
         return "\n".join(self._str_indent(rendered.split("\n"), indent))
 
 
