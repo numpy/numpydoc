@@ -43,6 +43,10 @@ Homepage = 'https://numpydoc.readthedocs.io'
 Source = 'https://github.com/numpy/numpydoc/'
 
 [project.optional-dependencies]
+developer = [
+    'pre-commit>=3.3',
+    "tomli; python_version < '3.11'",
+]
 doc = [
     'numpy>=1.22',
     'matplotlib>=3.5',
