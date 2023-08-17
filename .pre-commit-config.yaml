@@ -3,7 +3,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9 # frozen: v4.4.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -17,24 +17,24 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 193ee766ca496871f93621d6b58d57a6564ff81b # frozen: 23.7.0
     hooks:
       - id: black
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.7.1
+    rev: 672abe14d309fc28817d45b6be25ea976a92222a # frozen: v3.0.2
     hooks:
       - id: prettier
         files: \.(html|md|toml|yml|yaml)
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/adamchainz/blacken-docs
-    rev: 1.14.0
+    rev: 960ead214cd1184149d366c6d27ca6c369ce46b6 # frozen: 1.16.0
     hooks:
       - id: blacken-docs
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.7.0
+    rev: b3e813e5d60a472ba815a45d107bbdf106405973 # frozen: v3.10.1
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
