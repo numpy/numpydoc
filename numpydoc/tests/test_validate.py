@@ -1,10 +1,75 @@
 import pytest
 import warnings
-import numpydoc.validate
+
+from numpydoc import validate
 import numpydoc.tests
 
 
-validate_one = numpydoc.validate.validate
+validate_one = validate.validate
+
+ALL_CHECKS = set(validate.ERROR_MSGS.keys())
+
+
+@pytest.mark.parametrize(
+    ["checks", "expected"],
+    [
+        [{"all"}, ALL_CHECKS],
+        [set(), set()],
+        [{"EX01"}, {"EX01"}],
+        [{"EX01", "SA01"}, {"EX01", "SA01"}],
+        [{"all", "EX01", "SA01"}, ALL_CHECKS - {"EX01", "SA01"}],
+        [{"all", "PR01"}, ALL_CHECKS - {"PR01"}],
+    ],
+)
+def test_utils_get_validation_checks(checks, expected):
+    """Ensure check selection is working."""
+    assert validate.get_validation_checks(checks) == expected
+
+
+@pytest.mark.parametrize(
+    "checks",
+    [
+        {"every"},
+        {None},
+        {"SM10"},
+        {"EX01", "SM10"},
+    ],
+)
+def test_get_validation_checks_validity(checks):
+    """Ensure that invalid checks are flagged."""
+    with pytest.raises(ValueError, match="Unrecognized validation code"):
+        _ = validate.get_validation_checks(checks)
+
+
+@pytest.mark.parametrize(
+    ["file_contents", "expected"],
+    [
+        ["class MyClass:\n    pass", {}],
+        ["class MyClass:  # numpydoc ignore=EX01\n    pass", {1: ["EX01"]}],
+        [
+            "class MyClass:  # numpydoc ignore= EX01,SA01\n    pass",
+            {1: ["EX01", "SA01"]},
+        ],
+        [
+            "class MyClass:\n    def my_method():  # numpydoc ignore:EX01\n        pass",
+            {2: ["EX01"]},
+        ],
+        [
+            "class MyClass:\n    def my_method():  # numpydoc ignore: EX01,PR01\n        pass",
+            {2: ["EX01", "PR01"]},
+        ],
+        [
+            "class MyClass:  # numpydoc ignore=GL08\n    def my_method():  # numpydoc ignore:EX01,PR01\n        pass",
+            {1: ["GL08"], 2: ["EX01", "PR01"]},
+        ],
+    ],
+)
+def test_extract_ignore_validation_comments(tmp_path, file_contents, expected):
+    """Test that extraction of validation ignore comments is working."""
+    filepath = tmp_path / "ignore_comments.py"
+    with open(filepath, "w") as file:
+        file.write(file_contents)
+    assert validate.extract_ignore_validation_comments(filepath) == expected
 
 
 class GoodDocStrings:

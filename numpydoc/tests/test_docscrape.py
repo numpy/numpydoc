@@ -1576,6 +1576,7 @@ def test_xref():
             # numpydoc.update_config fails if this config option not present
             self.numpydoc_validation_checks = set()
             self.numpydoc_validation_exclude = set()
+            self.numpydoc_validation_overrides = dict()
 
     xref_aliases_complete = deepcopy(DEFAULT_LINKS)
     for key in xref_aliases:

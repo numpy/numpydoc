@@ -6,7 +6,6 @@ import configparser
 import os
 import re
 import sys
-import tokenize
 
 try:
     import tomllib
@@ -20,10 +19,6 @@ from tabulate import tabulate
 
 from .. import docscrape, validate
 from .utils import find_project_root
-
-
-# inline comments that can suppress individual checks per line
-IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 
 
 class AstValidator(validate.Validator):
@@ -138,19 +133,14 @@ class DocstringVisitor(ast.NodeVisitor):
         The absolute or relative path to the file to inspect.
     config : dict
         Configuration options for reviewing flagged issues.
-    numpydoc_ignore_comments : dict
-        A mapping of line number to checks to ignore.
-        Derived from comments in the source code.
     """
 
     def __init__(
         self,
         filepath: str,
         config: dict,
-        numpydoc_ignore_comments: dict,
     ) -> None:
         self.config: dict = config
-        self.numpydoc_ignore_comments = numpydoc_ignore_comments
         self.filepath: str = filepath
         self.module_name: str = Path(self.filepath).stem
         self.stack: list[str] = []
@@ -170,30 +160,18 @@ class DocstringVisitor(ast.NodeVisitor):
         Return
         ------
         bool
-            Whether the issue should be exluded from the report.
+            Whether the issue should be excluded from the report.
         """
-        if check in self.config["exclusions"]:
+        if check not in self.config["checks"]:
             return True
 
         if self.config["overrides"]:
             try:
-                if check == "GL08":
-                    pattern = self.config["overrides"].get("GL08")
-                    if pattern and re.match(pattern, node.name):
-                        return True
-            except AttributeError:  # ast.Module nodes don't have a name
-                pass
-
-            if check == "SS05":
-                pattern = self.config["overrides"].get("SS05")
-                if pattern and re.match(pattern, ast.get_docstring(node)) is not None:
+                pattern = self.config["overrides"][check]
+                if re.search(pattern, ast.get_docstring(node)) is not None:
                     return True
-
-        try:
-            if check in self.numpydoc_ignore_comments[getattr(node, "lineno", 1)]:
-                return True
-        except KeyError:
-            pass
+            except KeyError:
+                pass
 
         return False
 
@@ -233,7 +211,13 @@ class DocstringVisitor(ast.NodeVisitor):
             self.stack.append(
                 self.module_name if isinstance(node, ast.Module) else node.name
             )
-            self._get_numpydoc_issues(node)
+
+            if not (
+                self.config["exclude"]
+                and re.search(self.config["exclude"], ".".join(self.stack))
+            ):
+                self._get_numpydoc_issues(node)
+
             self.generic_visit(node)
             _ = self.stack.pop()
 
@@ -261,47 +245,74 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
     dict
         Config options for the numpydoc validation hook.
     """
-    options = {"exclusions": [], "overrides": {}}
+    options = {"checks": {"all"}, "exclude": set(), "overrides": {}}
     dir_path = Path(dir_path).expanduser().resolve()
 
     toml_path = dir_path / "pyproject.toml"
     cfg_path = dir_path / "setup.cfg"
 
+    def compile_regex(expressions):
+        return (
+            re.compile(r"|".join(exp for exp in expressions if exp))
+            if expressions
+            else None
+        )
+
+    def extract_check_overrides(options, config_items):
+        for option, value in config_items:
+            if option.startswith("override_"):
+                _, check = option.split("_")
+                if value:
+                    options["overrides"][check.upper()] = compile_regex(value)
+
     if toml_path.is_file():
         with open(toml_path, "rb") as toml_file:
             pyproject_toml = tomllib.load(toml_file)
             config = pyproject_toml.get("tool", {}).get("numpydoc_validation", {})
-            options["exclusions"] = config.get("ignore", [])
-            for check in ["SS05", "GL08"]:
-                regex = config.get(f"override_{check}")
-                if regex:
-                    options["overrides"][check] = re.compile(regex)
+            options["checks"] = set(config.get("checks", options["checks"]))
+
+            global_exclusions = config.get("exclude", options["exclude"])
+            options["exclude"] = set(
+                global_exclusions
+                if not isinstance(global_exclusions, str)
+                else [global_exclusions]
+            )
+
+            extract_check_overrides(options, config.items())
+
     elif cfg_path.is_file():
         config = configparser.ConfigParser()
         config.read(cfg_path)
         numpydoc_validation_config_section = "tool:numpydoc_validation"
         try:
             try:
-                options["exclusions"] = config.get(
-                    numpydoc_validation_config_section, "ignore"
-                ).split(",")
-            except configparser.NoOptionError:
-                pass
-            try:
-                options["overrides"]["SS05"] = re.compile(
-                    config.get(numpydoc_validation_config_section, "override_SS05")
+                options["checks"] = set(
+                    config.get(numpydoc_validation_config_section, "checks")
+                    .rstrip(",")
+                    .split(",")
+                    or options["checks"]
                 )
             except configparser.NoOptionError:
                 pass
             try:
-                options["overrides"]["GL08"] = re.compile(
-                    config.get(numpydoc_validation_config_section, "override_GL08")
+                options["exclude"] = set(
+                    config.get(numpydoc_validation_config_section, "exclude")
+                    .rstrip(",")
+                    .split(",")
+                    or options["exclude"]
                 )
             except configparser.NoOptionError:
                 pass
+
+            extract_check_overrides(
+                options, config.items(numpydoc_validation_config_section)
+            )
+
         except configparser.NoSectionError:
             pass
 
+    options["checks"] = validate.get_validation_checks(options["checks"])
+    options["exclude"] = compile_regex(options["exclude"])
     return options
 
 
@@ -324,24 +335,7 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
     with open(filepath) as file:
         module_node = ast.parse(file.read(), filepath)
 
-    with open(filepath) as file:
-        numpydoc_ignore_comments = {}
-        last_declaration = 1
-        declarations = ["def", "class"]
-        for token in tokenize.generate_tokens(file.readline):
-            if token.type == tokenize.NAME and token.string in declarations:
-                last_declaration = token.start[0]
-            if token.type == tokenize.COMMENT:
-                match = re.match(IGNORE_COMMENT_PATTERN, token.string)
-                if match:
-                    rules = match.group(1).split(",")
-                    numpydoc_ignore_comments[last_declaration] = rules
-
-    docstring_visitor = DocstringVisitor(
-        filepath=str(filepath),
-        config=config,
-        numpydoc_ignore_comments=numpydoc_ignore_comments,
-    )
+    docstring_visitor = DocstringVisitor(filepath=str(filepath), config=config)
     docstring_visitor.visit(module_node)
 
     return docstring_visitor.findings
@@ -357,7 +351,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         + "\n  ".join(
             [
                 f"- {check}: {validate.ERROR_MSGS[check]}"
-                for check in config_options["exclusions"]
+                for check in set(validate.ERROR_MSGS.keys()) - config_options["checks"]
             ]
         )
         + "\n"
@@ -391,7 +385,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
                 ' Currently ignoring the following from '
                 f'{Path(project_root_from_cwd) / config_file}: {ignored_checks}'
                 'Values provided here will be in addition to the above, unless an alternate config is provided.'
-                if config_options["exclusions"] else ''
+                if config_options["checks"] else ''
             }"""
         ),
     )
@@ -399,7 +393,7 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
     args = parser.parse_args(argv)
     project_root, _ = find_project_root(args.files)
     config_options = parse_config(args.config or project_root)
-    config_options["exclusions"].extend(args.ignore or [])
+    config_options["checks"] -= set(args.ignore or [])
 
     findings = []
     for file in args.files:
