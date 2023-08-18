@@ -41,6 +41,33 @@ def test_get_validation_checks_validity(checks):
         _ = validate.get_validation_checks(checks)
 
 
+class _DummyList(list):
+    """Dummy list class to test validation."""
+
+
+def test_no_file():
+    """Test that validation can be done on functions made on the fly."""
+    # Just a smoke test for now, <list> will have a None filename
+    validate.validate("numpydoc.tests.test_validate._DummyList.clear")
+    # This does something like decorator.FunctionMaker.make
+    src = """\
+def func():
+    '''Do something.'''
+    return 1
+"""
+    evaldict = {}
+    exec(compile(src, "<string>", "single"), evaldict)
+    func = evaldict["func"]
+    func.__source__ = src
+    func.__module__ = "numpydoc.tests.test_validate"
+    assert func() == 1
+    # This should get past the comment reading at least. A properly
+    # wrapped function *would* have source code, too. We could add such
+    # a test later
+    with pytest.raises(OSError, match="could not get source code"):
+        validate.validate(validate.get_doc_object(func))
+
+
 @pytest.mark.parametrize(
     ["file_contents", "expected"],
     [

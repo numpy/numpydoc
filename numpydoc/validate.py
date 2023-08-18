@@ -7,7 +7,7 @@ with all the detected errors.
 """
 
 from copy import deepcopy
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Optional
 import ast
 import collections
 import importlib
@@ -111,7 +111,9 @@ IGNORE_STARTS = (" ", "* ", "- ")
 IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 
 
-def extract_ignore_validation_comments(filepath: os.PathLike) -> Dict[int, List[str]]:
+def extract_ignore_validation_comments(
+    filepath: Optional[os.PathLike],
+) -> Dict[int, List[str]]:
     """
     Extract inline comments indicating certain validation checks should be ignored.
 
@@ -125,8 +127,12 @@ def extract_ignore_validation_comments(filepath: os.PathLike) -> Dict[int, List[
     dict[int, list[str]]
         Mapping of line number to a list of checks to ignore.
     """
-    with open(filepath) as file:
-        numpydoc_ignore_comments = {}
+    numpydoc_ignore_comments = {}
+    try:
+        file = open(filepath)
+    except (OSError, TypeError):  # can be None, nonexistent, or unreadable
+        return numpydoc_ignore_comments
+    with file:
         last_declaration = 1
         declarations = ["def", "class"]
         for token in tokenize.generate_tokens(file.readline):
