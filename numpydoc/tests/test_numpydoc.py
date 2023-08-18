@@ -23,6 +23,7 @@ class MockConfig:
     numpydoc_attributes_as_param_list = True
     numpydoc_validation_checks = set()
     numpydoc_validation_exclude = set()
+    numpydoc_validation_overrides = dict()
 
 
 class MockBuilder:
@@ -210,6 +211,39 @@ def test_mangle_docstring_validation_exclude():
     # Validation is skipped due to exclude pattern matching fn name, therefore
     # no warnings expected
     assert warning.getvalue() == ""
+
+
+@pytest.mark.parametrize("overrides", [{}, {"SS02"}, {"SS02", "SS03"}])
+def test_mangle_docstrings_overrides(overrides):
+    def process_something_noop_function():
+        """Process something."""
+
+    app = MockApp()
+    app.config.numpydoc_validation_checks = {"all"}
+    app.config.numpydoc_validation_overrides = {
+        check: [r"^Process "]  # overrides are regex on docstring content
+        for check in overrides
+    }
+    update_config(app)
+
+    # Setup for catching warnings
+    status, warning = StringIO(), StringIO()
+    logging.setup(app, status, warning)
+
+    # Run mangle docstrings on process_something_noop_function
+    mangle_docstrings(
+        app,
+        "function",
+        process_something_noop_function.__name__,
+        process_something_noop_function,
+        None,
+        process_something_noop_function.__doc__.split("\n"),
+    )
+
+    findings = warning.getvalue()
+    assert " EX01: " in findings  # should always be there
+    for check in overrides:
+        assert f" {check}: " not in findings
 
 
 def test_update_config_invalid_validation_set():

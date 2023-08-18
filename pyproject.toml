@@ -50,8 +50,8 @@ developer = [
 doc = [
     'numpy>=1.22',
     'matplotlib>=3.5',
-    'pydata-sphinx-theme>=0.13',
-    'sphinx>=6',
+    'pydata-sphinx-theme>=0.13.3',
+    'sphinx>=7',
 ]
 test = [
     'pytest',
