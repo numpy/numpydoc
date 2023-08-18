@@ -10,6 +10,7 @@ from copy import deepcopy
 from typing import Dict, List, Set, Optional
 import ast
 import collections
+import functools
 import importlib
 import inspect
 import os
@@ -111,6 +112,12 @@ IGNORE_STARTS = (" ", "* ", "- ")
 IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 
 
+# This function gets called once per function/method to be validated.
+# We have to balance memory usage with performance here. It shouldn't be too
+# bad to store these `dict`s (they should be rare), but to be safe let's keep
+# the limit low-ish. This was set by looking at scipy, numpy, matplotlib,
+# and pandas and they had between ~500 and ~1300 .py files as of 2023-08-16.
+@functools.lru_cache(maxsize=2000)
 def extract_ignore_validation_comments(
     filepath: Optional[os.PathLike],
 ) -> Dict[int, List[str]]:
