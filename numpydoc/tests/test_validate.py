@@ -41,6 +41,16 @@ def test_get_validation_checks_validity(checks):
         _ = validate.get_validation_checks(checks)
 
 
+class _DummyList(list):
+    """Dummy list class to test validation."""
+
+
+def test_no_file():
+    """Test that validation can be done on functions made on the fly."""
+    # Just a smoke test for now, <list> will have a None filename
+    validate.validate("numpydoc.tests.test_validate._DummyList.clear")
+
+
 @pytest.mark.parametrize(
     ["file_contents", "expected"],
     [
