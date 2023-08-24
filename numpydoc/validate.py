@@ -295,7 +295,17 @@ class Validator:
         Number of line where the object is defined in its file.
         """
         try:
-            return inspect.getsourcelines(self.code_obj)[-1]
+            sourcelines = inspect.getsourcelines(self.code_obj)
+            # getsourcelines will return the line of the first decorator found for the
+            # current function. We have to find the def declaration after that.
+            def_lines = [
+                i
+                for i, x in enumerate(
+                    [re.match("^ *(def|class)", s) for s in sourcelines[0]]
+                )
+                if x is not None
+            ]
+            return sourcelines[-1] + def_lines[0]
         except (OSError, TypeError):
             # In some cases the object is something complex like a cython
             # object that can't be easily introspected. An it's better to
