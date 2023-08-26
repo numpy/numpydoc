@@ -6,8 +6,12 @@ from copy import deepcopy
 
 from docutils import nodes
 
-from numpydoc.numpydoc import mangle_docstrings, _clean_text_signature, \
-    update_config, clean_backrefs
+from numpydoc.numpydoc import (
+    mangle_docstrings,
+    _clean_text_signature,
+    update_config,
+    clean_backrefs,
+)
 from numpydoc.xref import DEFAULT_LINKS
 from sphinx.ext.autodoc import ALL
 from sphinx.util import logging
@@ -272,7 +276,8 @@ def test_clean_backrefs():
     inline_ref = nodes.inline(rawsource="", text="", ids=["id1"])
     inline_ref += nodes.reference(rawsource="", text="[1]", refid="r123-1")
     citation = nodes.citation(
-        rawsource="", docname="index", backrefs=["id1"], ids=["r123-1"])
+        rawsource="", docname="index", backrefs=["id1"], ids=["r123-1"]
+    )
     citation += nodes.label("1")
     citation += nodes.paragraph(rawsource="", text="Author. Title.")
     par += inline_ref
