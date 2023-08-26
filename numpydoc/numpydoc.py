@@ -24,7 +24,7 @@ from collections.abc import Callable
 import hashlib
 import itertools
 
-from docutils.nodes import citation, Text, section, comment, reference
+from docutils.nodes import citation, Text, section, comment, reference, inline
 import sphinx
 from sphinx.addnodes import pending_xref, desc_content
 from sphinx.util import logging
@@ -147,6 +147,10 @@ def clean_backrefs(app, doc, docname):
     # only::latex directive has resulted in citation backrefs without reference
     known_ref_ids = set()
     for ref in _traverse_or_findall(doc, reference, descend=True):
+        for id_ in ref["ids"]:
+            known_ref_ids.add(id_)
+    # some extensions produce backrefs to inline elements
+    for ref in _traverse_or_findall(doc, inline, descend=True):
         for id_ in ref["ids"]:
             known_ref_ids.add(id_)
     for citation_node in _traverse_or_findall(doc, citation, descend=True):

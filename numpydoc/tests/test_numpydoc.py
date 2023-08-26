@@ -3,7 +3,15 @@ from collections import defaultdict
 from io import StringIO
 from pathlib import PosixPath
 from copy import deepcopy
-from numpydoc.numpydoc import mangle_docstrings, _clean_text_signature, update_config
+
+from docutils import nodes
+
+from numpydoc.numpydoc import (
+    mangle_docstrings,
+    _clean_text_signature,
+    update_config,
+    clean_backrefs,
+)
 from numpydoc.xref import DEFAULT_LINKS
 from sphinx.ext.autodoc import ALL
 from sphinx.util import logging
@@ -260,6 +268,22 @@ def test_update_config_exclude_str():
     app.config.numpydoc_validation_exclude = "shouldnt-be-a-str"
     with pytest.raises(ValueError, match=r"\['shouldnt-be-a-str'\]"):
         update_config(app)
+
+
+def test_clean_backrefs():
+    """Check ids are not cleaned from inline backrefs."""
+    par = nodes.paragraph(rawsource="", text="")
+    inline_ref = nodes.inline(rawsource="", text="", ids=["id1"])
+    inline_ref += nodes.reference(rawsource="", text="[1]", refid="r123-1")
+    citation = nodes.citation(
+        rawsource="", docname="index", backrefs=["id1"], ids=["r123-1"]
+    )
+    citation += nodes.label("1")
+    citation += nodes.paragraph(rawsource="", text="Author. Title.")
+    par += inline_ref
+    par += citation
+    clean_backrefs(app=MockApp(), doc=par, docname="index")
+    assert "id1" in citation["backrefs"]
 
 
 if __name__ == "__main__":
