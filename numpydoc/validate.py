@@ -298,14 +298,14 @@ class Validator:
             sourcelines = inspect.getsourcelines(self.code_obj)
             # getsourcelines will return the line of the first decorator found for the
             # current function. We have to find the def declaration after that.
-            def_lines = [
+            def_line = next(
                 i
                 for i, x in enumerate(
-                    [re.match("^ *(def|class) ", s) for s in sourcelines[0]]
+                    re.match("^ *(def|class) ", s) for s in sourcelines[0]
                 )
                 if x is not None
-            ]
-            return sourcelines[-1] + def_lines[0]
+            )
+            return sourcelines[-1] + def_line
         except (OSError, TypeError):
             # In some cases the object is something complex like a cython
             # object that can't be easily introspected. An it's better to
