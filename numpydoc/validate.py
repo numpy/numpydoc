@@ -301,7 +301,7 @@ class Validator:
             def_lines = [
                 i
                 for i, x in enumerate(
-                    [re.match("^ *(def|class)", s) for s in sourcelines[0]]
+                    [re.match("^ *(def|class) ", s) for s in sourcelines[0]]
                 )
                 if x is not None
             ]
