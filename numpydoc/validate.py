@@ -280,7 +280,13 @@ class Validator:
         File name where the object is implemented (e.g. pandas/core/frame.py).
         """
         try:
-            fname = inspect.getsourcefile(self.code_obj)
+            if isinstance(self.code_obj, property):
+                fname = inspect.getsourcefile(self.code_obj.fget)
+            elif isinstance(self.code_obj, functools.cached_property):
+                fname = inspect.getsourcefile(self.code_obj.func)
+            else:
+                fname = inspect.getsourcefile(self.code_obj)
+
         except TypeError:
             # In some cases the object is something complex like a cython
             # object that can't be easily introspected. An it's better to
@@ -295,7 +301,12 @@ class Validator:
         Number of line where the object is defined in its file.
         """
         try:
-            sourcelines = inspect.getsourcelines(self.code_obj)
+            if isinstance(self.code_obj, property):
+                sourcelines = inspect.getsourcelines(self.code_obj.fget)
+            elif isinstance(self.code_obj, functools.cached_property):
+                sourcelines = inspect.getsourcelines(self.code_obj.func)
+            else:
+                sourcelines = inspect.getsourcelines(self.code_obj)
             # getsourcelines will return the line of the first decorator found for the
             # current function. We have to find the def declaration after that.
             def_line = next(
