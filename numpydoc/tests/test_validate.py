@@ -1,7 +1,8 @@
 import pytest
 import sys
 import warnings
-from inspect import getsourcelines
+from functools import cached_property
+from inspect import getsourcelines, getsourcefile
 
 from numpydoc import validate
 import numpydoc.tests
@@ -1541,14 +1542,28 @@ class DecoratorClass:
     """
     Class and methods with decorators.
 
-    `DecoratorClass` has two decorators, `DecoratorClass.test_no_decorator` has no
-    decorator and `DecoratorClass.test_three_decorators` has three decorators.
+    * `DecoratorClass` has two decorators.
+    * `DecoratorClass.test_no_decorator` has no decorator.
+    * `DecoratorClass.test_property` has a `@property` decorator.
+    * `DecoratorClass.test_cached_property` has a `@cached_property` decorator.
+    * `DecoratorClass.test_three_decorators` has three decorators.
+
     `Validator.source_file_def_line` should return the `def` or `class` line number, not
     the line of the first decorator.
     """
 
     def test_no_decorator(self):
         """Test method without decorators."""
+        pass
+
+    @property
+    def test_property(self):
+        """Test property method."""
+        pass
+
+    @cached_property
+    def test_cached_property(self):
+        """Test property method."""
         pass
 
     @decorator
@@ -1577,7 +1592,7 @@ class TestValidatorClass:
             numpydoc.validate.Validator._load_obj(invalid_name)
 
     # inspect.getsourcelines does not return class decorators for Python 3.8. This was
-    # fixed starting with 3.9: https://github.com/python/cpython/issues/60060
+    # fixed starting with 3.9: https://github.com/python/cpython/issues/60060.
     @pytest.mark.parametrize(
         ["decorated_obj", "def_line"],
         [
@@ -1589,6 +1604,14 @@ class TestValidatorClass:
             [
                 "numpydoc.tests.test_validate.DecoratorClass.test_no_decorator",
                 getsourcelines(DecoratorClass.test_no_decorator)[-1],
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_property",
+                getsourcelines(DecoratorClass.test_property.fget)[-1] + 1,
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_cached_property",
+                getsourcelines(DecoratorClass.test_cached_property.func)[-1] + 1,
             ],
             [
                 "numpydoc.tests.test_validate.DecoratorClass.test_three_decorators",
@@ -1603,3 +1626,24 @@ class TestValidatorClass:
             )
         )
         assert doc.source_file_def_line == def_line
+
+    @pytest.mark.parametrize(
+        ["property", "file_name"],
+        [
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_property",
+                getsourcefile(DecoratorClass.test_property.fget),
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_cached_property",
+                getsourcefile(DecoratorClass.test_cached_property.func),
+            ],
+        ],
+    )
+    def test_source_file_name_with_properties(self, property, file_name):
+        doc = numpydoc.validate.Validator(
+            numpydoc.docscrape.get_doc_object(
+                numpydoc.validate.Validator._load_obj(property)
+            )
+        )
+        assert doc.source_file_name == file_name
