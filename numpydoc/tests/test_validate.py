@@ -1,4 +1,5 @@
 import pytest
+import sys
 import warnings
 from inspect import getsourcelines
 
@@ -1575,12 +1576,15 @@ class TestValidatorClass:
         with pytest.raises(AttributeError, match=msg):
             numpydoc.validate.Validator._load_obj(invalid_name)
 
+    # inspect.getsourcelines does not return class decorators for Python 3.8. This was
+    # fixed starting with 3.9: https://github.com/python/cpython/issues/60060
     @pytest.mark.parametrize(
         ["decorated_obj", "def_line"],
         [
             [
                 "numpydoc.tests.test_validate.DecoratorClass",
-                getsourcelines(DecoratorClass)[-1] + 2,
+                getsourcelines(DecoratorClass)[-1]
+                + (2 if sys.version_info.minor > 8 else 0),
             ],
             [
                 "numpydoc.tests.test_validate.DecoratorClass.test_no_decorator",
