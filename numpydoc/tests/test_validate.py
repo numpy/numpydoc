@@ -1,5 +1,7 @@
 import pytest
+import sys
 import warnings
+from inspect import getsourcelines
 
 from numpydoc import validate
 import numpydoc.tests
@@ -1528,6 +1530,35 @@ class TestValidator:
             assert msg in " ".join(err[1] for err in result["errors"])
 
 
+def decorator(x):
+    """Test decorator."""
+    return x
+
+
+@decorator
+@decorator
+class DecoratorClass:
+    """
+    Class and methods with decorators.
+
+    `DecoratorClass` has two decorators, `DecoratorClass.test_no_decorator` has no
+    decorator and `DecoratorClass.test_three_decorators` has three decorators.
+    `Validator.source_file_def_line` should return the `def` or `class` line number, not
+    the line of the first decorator.
+    """
+
+    def test_no_decorator(self):
+        """Test method without decorators."""
+        pass
+
+    @decorator
+    @decorator
+    @decorator
+    def test_three_decorators(self):
+        """Test method with three decorators."""
+        pass
+
+
 class TestValidatorClass:
     @pytest.mark.parametrize("invalid_name", ["unknown_mod", "unknown_mod.MyClass"])
     def test_raises_for_invalid_module_name(self, invalid_name):
@@ -1544,3 +1575,31 @@ class TestValidatorClass:
         msg = f"'{obj_name}' has no attribute '{invalid_attr_name}'"
         with pytest.raises(AttributeError, match=msg):
             numpydoc.validate.Validator._load_obj(invalid_name)
+
+    # inspect.getsourcelines does not return class decorators for Python 3.8. This was
+    # fixed starting with 3.9: https://github.com/python/cpython/issues/60060
+    @pytest.mark.parametrize(
+        ["decorated_obj", "def_line"],
+        [
+            [
+                "numpydoc.tests.test_validate.DecoratorClass",
+                getsourcelines(DecoratorClass)[-1]
+                + (2 if sys.version_info.minor > 8 else 0),
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_no_decorator",
+                getsourcelines(DecoratorClass.test_no_decorator)[-1],
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_three_decorators",
+                getsourcelines(DecoratorClass.test_three_decorators)[-1] + 3,
+            ],
+        ],
+    )
+    def test_source_file_def_line_with_decorators(self, decorated_obj, def_line):
+        doc = numpydoc.validate.Validator(
+            numpydoc.docscrape.get_doc_object(
+                numpydoc.validate.Validator._load_obj(decorated_obj)
+            )
+        )
+        assert doc.source_file_def_line == def_line
