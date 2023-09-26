@@ -17,12 +17,67 @@ Release notes
    For release notes (sparsely) kept prior to 1.0.0, look at the `releases page
    on GitHub <https://github.com/numpy/numpydoc/releases>`__.
 
-1.6.0rc2
---------
+1.6.0
+-----
 
 Release date: 21 August 2023
 
 Requires Python 3.8+ and Sphinx 5+.
+
+`Full Changelog <https://github.com/numpy/numpydoc/compare/v1.5.0...v1.6.0>`__
+
+Closed issues
+~~~~~~~~~~~~~
+
+-  ``numpydoc ignore`` inline comment not recognized when using decorators `#495 <https://github.com/numpy/numpydoc/issues/495>`__
+-  Align pre-commit and Sphinx rule override syntax `#466 <https://github.com/numpy/numpydoc/issues/466>`__
+-  Use pyproject.toml `#473 <https://github.com/numpy/numpydoc/issues/473>`__
+-  rtd is failing `#471 <https://github.com/numpy/numpydoc/issues/471>`__
+-  circleci-artifacts-redirector-action error `#469 <https://github.com/numpy/numpydoc/issues/469>`__
+-  Incorporate a pre-commit hook for numpydoc validation `#450 <https://github.com/numpy/numpydoc/issues/450>`__
+-  PR06 fails when offending type name is used only as a substring `#446 <https://github.com/numpy/numpydoc/issues/446>`__
+-  style of ``[1]`` is strange in numpydoc docs `#443 <https://github.com/numpy/numpydoc/issues/443>`__
+-  Double click on function parameter selects parameter type as well `#427 <https://github.com/numpy/numpydoc/issues/427>`__
+
+Merged pull requests
+~~~~~~~~~~~~~~~~~~~~
+
+-  Bump actions/checkout from 3 to 4 `#504 <https://github.com/numpy/numpydoc/pull/504>`__ (`dependabot[bot] <https://github.com/apps/dependabot>`__)
+-  [pre-commit.ci] pre-commit autoupdate `#501 <https://github.com/numpy/numpydoc/pull/501>`__ (`pre-commit-ci[bot] <https://github.com/apps/pre-commit-ci>`__)
+-  BUG: validator now handles properties `#500 <https://github.com/numpy/numpydoc/pull/500>`__ (`sdiebolt <https://github.com/sdiebolt>`__)
+-  Fix clean_backref for extensions that have backrefs to inline elements. `#499 <https://github.com/numpy/numpydoc/pull/499>`__ (`mcmtroffaes <https://github.com/mcmtroffaes>`__)
+-  BUG: validator now handles decorators `#496 <https://github.com/numpy/numpydoc/pull/496>`__ (`sdiebolt <https://github.com/sdiebolt>`__)
+-  TST: Test no-file for source `#493 <https://github.com/numpy/numpydoc/pull/493>`__ (`larsoner <https://github.com/larsoner>`__)
+-  Use label-check and attach-next-milestone-action `#492 <https://github.com/numpy/numpydoc/pull/492>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Remove old linter check (using precommit bot now) `#491 <https://github.com/numpy/numpydoc/pull/491>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Update pydata-sphinx-theme `#490 <https://github.com/numpy/numpydoc/pull/490>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Use dependabot to update actions `#489 <https://github.com/numpy/numpydoc/pull/489>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Add config for pre-commit bot `#488 <https://github.com/numpy/numpydoc/pull/488>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Update pre-commits `#487 <https://github.com/numpy/numpydoc/pull/487>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Sync updates to generate_requirements.py from scikit-image `#485 <https://github.com/numpy/numpydoc/pull/485>`__ (`mwtoews <https://github.com/mwtoews>`__)
+-  Generate requirements files from pyproject.toml `#483 <https://github.com/numpy/numpydoc/pull/483>`__ (`mwtoews <https://github.com/mwtoews>`__)
+-  Add Source to project.urls table `#480 <https://github.com/numpy/numpydoc/pull/480>`__ (`mwtoews <https://github.com/mwtoews>`__)
+-  Align behavior of pre-commit hook and Sphinx extension `#476 <https://github.com/numpy/numpydoc/pull/476>`__ (`stefmolin <https://github.com/stefmolin>`__)
+-  Fix dynamic version specification. `#477 <https://github.com/numpy/numpydoc/pull/477>`__ (`stefmolin <https://github.com/stefmolin>`__)
+-  Update year `#475 <https://github.com/numpy/numpydoc/pull/475>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Use pyproject.toml `#474 <https://github.com/numpy/numpydoc/pull/474>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Install package on rtd `#472 <https://github.com/numpy/numpydoc/pull/472>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Add token for artifact redirector `#470 <https://github.com/numpy/numpydoc/pull/470>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Use rtd template (old method is deprecated) `#468 <https://github.com/numpy/numpydoc/pull/468>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Update doc requirements `#465 <https://github.com/numpy/numpydoc/pull/465>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Update pre-commit hooks `#464 <https://github.com/numpy/numpydoc/pull/464>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Drop Python 3.7 `#462 <https://github.com/numpy/numpydoc/pull/462>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Require Sphinx 5+ `#461 <https://github.com/numpy/numpydoc/pull/461>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  Pre-commit hook for running numpydoc validation `#454 <https://github.com/numpy/numpydoc/pull/454>`__ (`stefmolin <https://github.com/stefmolin>`__)
+-  MAINT: Compatibility with pydata-sphinx-theme `#453 <https://github.com/numpy/numpydoc/pull/453>`__ (`larsoner <https://github.com/larsoner>`__)
+-  MAINT: Refactoring ``get_doc_object`` `#452 <https://github.com/numpy/numpydoc/pull/452>`__ (`F3eQnxN3RriK <https://github.com/F3eQnxN3RriK>`__)
+-  Update blacken-docs repo after owner transfer. `#451 <https://github.com/numpy/numpydoc/pull/451>`__ (`stefmolin <https://github.com/stefmolin>`__)
+-  Update pre-commit `#449 <https://github.com/numpy/numpydoc/pull/449>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+-  MAINT: Fix CIs for sphinx 6 `#448 <https://github.com/numpy/numpydoc/pull/448>`__ (`larsoner <https://github.com/larsoner>`__)
+-  Change PR06 logic to only fail when type is used standalone `#447 <https://github.com/numpy/numpydoc/pull/447>`__ (`amoeba <https://github.com/amoeba>`__)
+-  Fix release notes `#442 <https://github.com/numpy/numpydoc/pull/442>`__ (`jarrodmillman <https://github.com/jarrodmillman>`__)
+
+\* *This Changelog was automatically generated by* `github_changelog_generator <https://github.com/github-changelog-generator/github-changelog-generator>`__
 
 1.5.0
 -----
