@@ -136,7 +136,7 @@ def extract_ignore_validation_comments(
     """
     numpydoc_ignore_comments = {}
     try:
-        file = open(filepath)
+        file = open(filepath, encoding="utf-8")
     except (OSError, TypeError):  # can be None, nonexistent, or unreadable
         return numpydoc_ignore_comments
     with file:
