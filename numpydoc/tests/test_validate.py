@@ -1,7 +1,8 @@
 import pytest
 import sys
 import warnings
-from functools import cached_property
+from contextlib import nullcontext
+from functools import cached_property, partial
 from inspect import getsourcelines, getsourcefile
 
 from numpydoc import validate
@@ -83,6 +84,27 @@ def test_extract_ignore_validation_comments(tmp_path, file_contents, expected):
     with open(filepath, "w") as file:
         file.write(file_contents)
     assert validate.extract_ignore_validation_comments(filepath) == expected
+
+
+@pytest.mark.parametrize("assumed_encoding", ("latin-1", "utf-8"))
+def test_non_utf8_encoding(tmp_path, assumed_encoding):
+    """Test handling of different source file encodings."""
+    filepath = tmp_path / "ignore_comments.py"
+    file_contents = "class MýÇlåss:\n    pass"
+    actual_encoding = "latin-1"
+    with open(filepath, "wb") as file:
+        file.write(file_contents.encode(actual_encoding))
+    if assumed_encoding == actual_encoding:
+        context = nullcontext
+    else:
+        context = partial(
+            pytest.raises,
+            UnicodeDecodeError,
+            match="can't decode byte 0xfd in position 7: invalid start byte",
+        )
+    with context():
+        result = validate.extract_ignore_validation_comments(filepath, assumed_encoding)
+        assert result == {}
 
 
 class GoodDocStrings:
