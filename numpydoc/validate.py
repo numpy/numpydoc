@@ -120,6 +120,7 @@ IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 @functools.lru_cache(maxsize=2000)
 def extract_ignore_validation_comments(
     filepath: Optional[os.PathLike],
+    encoding: str = "utf-8",
 ) -> Dict[int, List[str]]:
     """
     Extract inline comments indicating certain validation checks should be ignored.
@@ -136,7 +137,7 @@ def extract_ignore_validation_comments(
     """
     numpydoc_ignore_comments = {}
     try:
-        file = open(filepath)
+        file = open(filepath, encoding=encoding)
     except (OSError, TypeError):  # can be None, nonexistent, or unreadable
         return numpydoc_ignore_comments
     with file:
