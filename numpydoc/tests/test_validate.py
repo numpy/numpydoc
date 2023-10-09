@@ -96,7 +96,7 @@ def test_extract_ignore_validation_comments(tmp_path, file_contents, expected):
 @pytest.mark.parametrize(
     ("classname", "actual_encoding"),
     (
-        pytest.param("MÿClass", "cp1252", id="cp12542_file"),
+        pytest.param("MÿClass", "cp1252", id="cp1252_file"),
         pytest.param("My\u0081Class", "utf-8", id="utf8_file"),
     ),
 )
