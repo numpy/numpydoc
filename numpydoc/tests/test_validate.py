@@ -1,7 +1,8 @@
 import pytest
 import sys
 import warnings
-from functools import cached_property
+from contextlib import nullcontext
+from functools import cached_property, partial
 from inspect import getsourcelines, getsourcefile
 
 from numpydoc import validate
@@ -83,6 +84,50 @@ def test_extract_ignore_validation_comments(tmp_path, file_contents, expected):
     with open(filepath, "w") as file:
         file.write(file_contents)
     assert validate.extract_ignore_validation_comments(filepath) == expected
+
+
+@pytest.mark.parametrize(
+    "assumed_encoding",
+    (
+        pytest.param("utf-8", id="utf8_codec"),
+        pytest.param("cp1252", id="cp1252_codec"),
+    ),
+)
+@pytest.mark.parametrize(
+    ("classname", "actual_encoding"),
+    (
+        pytest.param("MÿClass", "cp1252", id="cp1252_file"),
+        pytest.param("My\u0081Class", "utf-8", id="utf8_file"),
+    ),
+)
+def test_encodings(tmp_path, classname, actual_encoding, assumed_encoding):
+    """Test handling of different source file encodings."""
+    # write file as bytes with `actual_encoding`
+    filepath = tmp_path / "ignore_comments.py"
+    file_contents = f"class {classname}:\n    pass"
+    with open(filepath, "wb") as file:
+        file.write(file_contents.encode(actual_encoding))
+    # this should fail on the ÿ in MÿClass. It represents the (presumed rare) case where
+    # a user's editor saved the source file in cp1252 (or anything other than utf-8).
+    if actual_encoding == "cp1252" and assumed_encoding == "utf-8":
+        context = partial(
+            pytest.raises,
+            UnicodeDecodeError,
+            match="can't decode byte 0xff in position 7: invalid start byte",
+        )
+    # this is the more likely case: file was utf-8 encoded, but Python on Windows uses
+    # the system codepage to read the file. This case is fixed by numpy/numpydoc#510
+    elif actual_encoding == "utf-8" and assumed_encoding == "cp1252":
+        context = partial(
+            pytest.raises,
+            UnicodeDecodeError,
+            match="can't decode byte 0x81 in position 9: character maps to <undefined>",
+        )
+    else:
+        context = nullcontext
+    with context():
+        result = validate.extract_ignore_validation_comments(filepath, assumed_encoding)
+        assert result == {}
 
 
 class GoodDocStrings:
