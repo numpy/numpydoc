@@ -101,7 +101,7 @@ A top section before
     mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
     lines = [x.strip() for x in lines]
     assert "samefile" in lines
-    app.config.numpydoc_show_inherited_class_members = defaultdict(lambda: False)
+    app.config.numpydoc_show_inherited_class_members = defaultdict(bool)
     lines = p.split("\n")
     mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
     lines = [x.strip() for x in lines]
