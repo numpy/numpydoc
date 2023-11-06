@@ -3,7 +3,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9 # frozen: v4.4.0
+    rev: c4a0b883114b00d8d76b479c820ce7950211c99b  # frozen: v4.5.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -17,7 +17,7 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/psf/black
-    rev: e87737140f32d3cd7c44ede75f02dcd58e55820e # frozen: 23.9.1
+    rev: 744d23b34800c06e10272149b70752396e90eeb8  # frozen: 23.10.1
     hooks:
       - id: black
 
@@ -34,7 +34,7 @@ repos:
       - id: blacken-docs
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: ffb735bf0dc786a3a1e6b08043440b0bdef5bef8 # frozen: v3.13.0
+    rev: 1bbebc88c6925a4e56fd5446b830b12c38c1c24a  # frozen: v3.15.0
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
