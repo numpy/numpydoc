@@ -851,11 +851,11 @@ def test_see_also(prefix):
 
             if func == "func_h":
                 assert role == "meth"
-            elif func == "baz.obj_q" or func == "~baz.obj_r":
+            elif func in ("baz.obj_q", "~baz.obj_r"):
                 assert role == "obj"
             elif func == "class_j":
                 assert role == "class"
-            elif func in ["func_h1", "func_h2"]:
+            elif func in ("func_h1", "func_h2"):
                 assert role == "meth"
             else:
                 assert role is None, str([func, role])
@@ -866,7 +866,7 @@ def test_see_also(prefix):
                 assert desc == ["some other func over", "multiple lines"]
             elif func == "class_j":
                 assert desc == ["fubar", "foobar"]
-            elif func in ["func_f2", "func_g2", "func_h2", "func_j2"]:
+            elif func in ("func_f2", "func_g2", "func_h2", "func_j2"):
                 assert desc == ["description of multiple"], str(
                     [desc, ["description of multiple"]]
                 )
