@@ -404,7 +404,7 @@ def match_items(lines, content_old):
     This function tries to match the lines in ``lines`` with the items (source
     file references and line numbers) in ``content_old``. The
     ``mangle_docstrings`` function changes the actual docstrings, but doesn't
-    keep track of where each line came from. The manging does many operations
+    keep track of where each line came from. The mangling does many operations
     on the original lines, which are hard to track afterwards.
 
     Many of the line changes come from deleting or inserting blank lines. This

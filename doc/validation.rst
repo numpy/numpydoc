@@ -72,7 +72,7 @@ the pre-commit hook as follows:
 In addition to the above, :ref:`inline ignore comments <inline_ignore_comments>`
 can be used to ignore findings on a case by case basis.
 
-If any issues are found when commiting, a report is printed out, and the
+If any issues are found when committing, a report is printed out, and the
 commit is halted:
 
 .. code-block:: output
