@@ -26,7 +26,7 @@ repos:
     hooks:
       - id: prettier
         entry: env PRETTIER_LEGACY_CLI=1 prettier # temporary fix for https://github.com/prettier/prettier/issues/15742
-        files: \.(html|md|toml|yml|yaml)
+        files: \.(html|md|yml|yaml)
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/adamchainz/blacken-docs
