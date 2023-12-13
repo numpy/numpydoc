@@ -763,4 +763,4 @@ This document itself was written in ReStructuredText.
 .. _flake8: https://pypi.python.org/pypi/flake8/
 .. _vim-flake8: https://github.com/nvie/vim-flake8
 .. _SciPy: https://www.scipy.org
-.. _numpy-discussion list: https://scipy.org/scipylib/mailing-lists.html
+.. _numpy-discussion list: https://mail.python.org/mailman3/lists/numpy-discussion.python.org/
