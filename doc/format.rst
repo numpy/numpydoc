@@ -175,8 +175,9 @@ respective types.
   y
       Description of parameter `y` (with type not specified).
 
-Enclose variables in single backticks.  The colon must be preceded
-by a space, or omitted if the type is absent.
+The colon must be preceded by a space, or omitted if the type is absent.
+When referring to a parameter in the description field or elsewhere within
+the same function or class docstring, enclose its name in single backticks.
 
 For the parameter types, be as precise as possible.  Below are a
 few examples of parameters and their types.
@@ -549,6 +550,8 @@ not explicitly imported, `.. plot::` can be used directly if
 Documenting classes
 -------------------
 
+.. _classdoc:
+
 Class docstring
 ```````````````
 Use the same sections as outlined above (all except :ref:`Returns <returns>`
@@ -562,10 +565,12 @@ section, may be used to describe non-method attributes of the class::
   Attributes
   ----------
   x : float
-      The X coordinate.
+      Description of attribute `x`.
   y : float
-      The Y coordinate.
+      Description of attribute `y`.
 
+When referring to an attribute in the description field or elsewhere within
+the same class docstring, enclose its name in single backticks.
 Attributes that are properties and have their own docstrings can be
 simply listed by name::
 
@@ -606,6 +611,8 @@ becomes useful to have an additional **Methods** section:
 
       """
 
+When referring to a method in the description field or elsewhere within
+the same class docstring, enclose its name in single backticks.
 If it is necessary to explain a private method (use with care!), it can
 be referred to in the :ref:`Extended Summary <extended_summary>` or the
 :ref:`Notes <notes>` section.
@@ -690,11 +697,13 @@ belong in docstrings.
 Other points to keep in mind
 ----------------------------
 * Equations : as discussed in the :ref:`Notes <notes>` section above, LaTeX
-  formatting should be kept to a minimum.  Often it's possible to show equations as
-  Python code or pseudo-code instead, which is much more readable in a
-  terminal.  For inline display use double backticks (like ``y = np.sin(x)``).
-  For display with blank lines above and below, use a double colon and indent
-  the code, like::
+  formatting should be kept to a minimum.  Often it's possible to show
+  equations as Python code or pseudo-code instead, which is much more readable
+  in a terminal.  For inline display of code (other than individual
+  :ref:`Parameters <params>`, :ref:`class members <classdoc>`, and linked
+  modules,functions, and classes; see "Links" below), use double backticks,
+  like ````y = np.sin(x)````. For display with blank lines above and below,
+  use a double colon and indent the code, like::
 
     end of previous sentence::
 
@@ -717,7 +726,9 @@ Other points to keep in mind
   (i.e. scalar types, sequence types), those arguments can be documented
   with type `array_like`.
 
-* Links : If you need to include hyperlinks in your docstring, note that
+* Links : Sphinx will automatically create hyperlinks to module, function,
+  and class documentation if a recognized name is included within single
+  backticks (e.g. `numpy`). If you need to include other hyperlinks, note that
   some docstring sections are not parsed as standard reST, and in these
   sections, numpydoc may become confused by hyperlink targets such as::
 
@@ -729,17 +740,27 @@ Other points to keep in mind
 
       `Example <http://www.example.com>`_
 
-
 Common reST concepts
 --------------------
 For paragraphs, indentation is significant and indicates indentation in the
 output. New paragraphs are marked with a blank line.
 
-Use ``*italics*``, ``**bold**`` and ````monospace```` if needed in any
-explanations
-(but not for variable names and doctest code or multi-line code).
-Variable, module, function, and class names should be written between
-single back-ticks (```numpy```).
+Use ``*italics*``, ``**bold**`` if needed in any explanations.
+
+Use of backticks in reST is a common point of confusion it is different from
+markdown:
+
+- Module, function, and class names should be enclosed within ```single
+  backticks```. These are intended to render as hyperlinks (e.g. `numpy`). If
+  the hyperlinks do not render as intended, [insert reference to documentation
+  here].
+- References to parameters, attributes, and methods defined within the same
+  docstring should be enclosed within ```single backticks```. These are
+  currently rendered in *italics*, but there are plans to render a
+  ``monospaced`` hyperlink to the relevant definition in a future version of
+  numpydoc.
+- All other text that is intended to render in ``monospaced`` font should be
+  enclosed within ````double backticks````.
 
 A more extensive example of reST markup can be found in `this example
 document <http://docutils.sourceforge.net/docs/user/rst/demo.txt>`_;
