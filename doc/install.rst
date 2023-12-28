@@ -5,7 +5,7 @@ Getting started
 Installation
 ============
 
-This extension requires Python 3.7+, sphinx 4.2+ and is available from:
+This extension requires Python 3.8+, sphinx 5+ and is available from:
 
 * `numpydoc on PyPI <http://pypi.python.org/pypi/numpydoc>`_
 * `numpydoc on GitHub <https://github.com/numpy/numpydoc/>`_
@@ -48,10 +48,6 @@ numpydoc_citation_re : str
   should be mangled to avoid conflicts due to
   duplication across the documentation.  Defaults
   to ``[\w-]+``.
-numpydoc_use_blockquotes : bool
-  Until version 0.8, parameter definitions were shown as blockquotes, rather
-  than in a definition list.  If your styling requires blockquotes, switch
-  this config option to True.  This option will be removed in version 0.10.
 numpydoc_attributes_as_param_list : bool
   Whether to format the Attributes section of a class page in the same way
   as the Parameter section. If it's False, the Attributes section will be
@@ -142,3 +138,17 @@ numpydoc_validation_exclude : set
     validation.
     Only has an effect when docstring validation is activated, i.e.
     ``numpydoc_validation_checks`` is not an empty set.
+numpydoc_validation_overrides : dict
+    A dictionary mapping :ref:`validation checks <validation_checks>` to a
+    container of strings using :py:mod:`re` syntax specifying patterns to
+    ignore for docstring validation.
+    For example, the following skips the ``SS02`` check for docstrings
+    starting with the word ``Process``::
+
+        numpydoc_validation_overrides = {"SS02": [r'^Process ']}
+
+    The default is an empty dictionary meaning no overrides.
+    Only has an effect when docstring validation is activated, i.e.
+    ``numpydoc_validation_checks`` is not an empty set. Use
+    :ref:`inline ignore comments <inline_ignore_comments>` to turn off
+    specific checks for parts of your code.

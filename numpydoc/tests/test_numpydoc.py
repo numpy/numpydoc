@@ -3,7 +3,15 @@ from collections import defaultdict
 from io import StringIO
 from pathlib import PosixPath
 from copy import deepcopy
-from numpydoc.numpydoc import mangle_docstrings, _clean_text_signature, update_config
+
+from docutils import nodes
+
+from numpydoc.numpydoc import (
+    mangle_docstrings,
+    _clean_text_signature,
+    update_config,
+    clean_backrefs,
+)
 from numpydoc.xref import DEFAULT_LINKS
 from sphinx.ext.autodoc import ALL
 from sphinx.util import logging
@@ -11,7 +19,6 @@ from sphinx.util import logging
 
 class MockConfig:
     numpydoc_use_plots = False
-    numpydoc_use_blockquotes = True
     numpydoc_show_class_members = True
     numpydoc_show_inherited_class_members = True
     numpydoc_class_members_toctree = True
@@ -24,6 +31,7 @@ class MockConfig:
     numpydoc_attributes_as_param_list = True
     numpydoc_validation_checks = set()
     numpydoc_validation_exclude = set()
+    numpydoc_validation_overrides = dict()
 
 
 class MockBuilder:
@@ -93,7 +101,7 @@ A top section before
     mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
     lines = [x.strip() for x in lines]
     assert "samefile" in lines
-    app.config.numpydoc_show_inherited_class_members = defaultdict(lambda: False)
+    app.config.numpydoc_show_inherited_class_members = defaultdict(bool)
     lines = p.split("\n")
     mangle_docstrings(app, "class", "pathlib.PosixPath", PosixPath, {}, lines)
     lines = [x.strip() for x in lines]
@@ -213,6 +221,39 @@ def test_mangle_docstring_validation_exclude():
     assert warning.getvalue() == ""
 
 
+@pytest.mark.parametrize("overrides", [{}, {"SS02"}, {"SS02", "SS03"}])
+def test_mangle_docstrings_overrides(overrides):
+    def process_something_noop_function():
+        """Process something."""
+
+    app = MockApp()
+    app.config.numpydoc_validation_checks = {"all"}
+    app.config.numpydoc_validation_overrides = {
+        check: [r"^Process "]  # overrides are regex on docstring content
+        for check in overrides
+    }
+    update_config(app)
+
+    # Setup for catching warnings
+    status, warning = StringIO(), StringIO()
+    logging.setup(app, status, warning)
+
+    # Run mangle docstrings on process_something_noop_function
+    mangle_docstrings(
+        app,
+        "function",
+        process_something_noop_function.__name__,
+        process_something_noop_function,
+        None,
+        process_something_noop_function.__doc__.split("\n"),
+    )
+
+    findings = warning.getvalue()
+    assert " EX01: " in findings  # should always be there
+    for check in overrides:
+        assert f" {check}: " not in findings
+
+
 def test_update_config_invalid_validation_set():
     app = MockApp()
     # Results in {'a', 'l'} instead of {"all"}
@@ -227,6 +268,22 @@ def test_update_config_exclude_str():
     app.config.numpydoc_validation_exclude = "shouldnt-be-a-str"
     with pytest.raises(ValueError, match=r"\['shouldnt-be-a-str'\]"):
         update_config(app)
+
+
+def test_clean_backrefs():
+    """Check ids are not cleaned from inline backrefs."""
+    par = nodes.paragraph(rawsource="", text="")
+    inline_ref = nodes.inline(rawsource="", text="", ids=["id1"])
+    inline_ref += nodes.reference(rawsource="", text="[1]", refid="r123-1")
+    citation = nodes.citation(
+        rawsource="", docname="index", backrefs=["id1"], ids=["r123-1"]
+    )
+    citation += nodes.label("1")
+    citation += nodes.paragraph(rawsource="", text="Author. Title.")
+    par += inline_ref
+    par += citation
+    clean_backrefs(app=MockApp(), doc=par, docname="index")
+    assert "id1" in citation["backrefs"]
 
 
 if __name__ == "__main__":

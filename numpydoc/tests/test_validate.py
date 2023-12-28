@@ -1,10 +1,133 @@
 import pytest
+import sys
 import warnings
-import numpydoc.validate
+from contextlib import nullcontext
+from functools import cached_property, partial
+from inspect import getsourcelines, getsourcefile
+
+from numpydoc import validate
 import numpydoc.tests
 
 
-validate_one = numpydoc.validate.validate
+validate_one = validate.validate
+
+ALL_CHECKS = set(validate.ERROR_MSGS.keys())
+
+
+@pytest.mark.parametrize(
+    ["checks", "expected"],
+    [
+        [{"all"}, ALL_CHECKS],
+        [set(), set()],
+        [{"EX01"}, {"EX01"}],
+        [{"EX01", "SA01"}, {"EX01", "SA01"}],
+        [{"all", "EX01", "SA01"}, ALL_CHECKS - {"EX01", "SA01"}],
+        [{"all", "PR01"}, ALL_CHECKS - {"PR01"}],
+    ],
+)
+def test_utils_get_validation_checks(checks, expected):
+    """Ensure check selection is working."""
+    assert validate.get_validation_checks(checks) == expected
+
+
+@pytest.mark.parametrize(
+    "checks",
+    [
+        {"every"},
+        {None},
+        {"SM10"},
+        {"EX01", "SM10"},
+    ],
+)
+def test_get_validation_checks_validity(checks):
+    """Ensure that invalid checks are flagged."""
+    with pytest.raises(ValueError, match="Unrecognized validation code"):
+        _ = validate.get_validation_checks(checks)
+
+
+class _DummyList(list):
+    """Dummy list class to test validation."""
+
+
+def test_no_file():
+    """Test that validation can be done on functions made on the fly."""
+    # Just a smoke test for now, <list> will have a None filename
+    validate.validate("numpydoc.tests.test_validate._DummyList.clear")
+
+
+@pytest.mark.parametrize(
+    ["file_contents", "expected"],
+    [
+        ["class MyClass:\n    pass", {}],
+        ["class MyClass:  # numpydoc ignore=EX01\n    pass", {1: ["EX01"]}],
+        [
+            "class MyClass:  # numpydoc ignore= EX01,SA01\n    pass",
+            {1: ["EX01", "SA01"]},
+        ],
+        [
+            "class MyClass:\n    def my_method():  # numpydoc ignore:EX01\n        pass",
+            {2: ["EX01"]},
+        ],
+        [
+            "class MyClass:\n    def my_method():  # numpydoc ignore: EX01,PR01\n        pass",
+            {2: ["EX01", "PR01"]},
+        ],
+        [
+            "class MyClass:  # numpydoc ignore=GL08\n    def my_method():  # numpydoc ignore:EX01,PR01\n        pass",
+            {1: ["GL08"], 2: ["EX01", "PR01"]},
+        ],
+    ],
+)
+def test_extract_ignore_validation_comments(tmp_path, file_contents, expected):
+    """Test that extraction of validation ignore comments is working."""
+    filepath = tmp_path / "ignore_comments.py"
+    with open(filepath, "w") as file:
+        file.write(file_contents)
+    assert validate.extract_ignore_validation_comments(filepath) == expected
+
+
+@pytest.mark.parametrize(
+    "assumed_encoding",
+    (
+        pytest.param("utf-8", id="utf8_codec"),
+        pytest.param("cp1252", id="cp1252_codec"),
+    ),
+)
+@pytest.mark.parametrize(
+    ("classname", "actual_encoding"),
+    (
+        pytest.param("MÿClass", "cp1252", id="cp1252_file"),
+        pytest.param("My\u0081Class", "utf-8", id="utf8_file"),
+    ),
+)
+def test_encodings(tmp_path, classname, actual_encoding, assumed_encoding):
+    """Test handling of different source file encodings."""
+    # write file as bytes with `actual_encoding`
+    filepath = tmp_path / "ignore_comments.py"
+    file_contents = f"class {classname}:\n    pass"
+    with open(filepath, "wb") as file:
+        file.write(file_contents.encode(actual_encoding))
+    # this should fail on the ÿ in MÿClass. It represents the (presumed rare) case where
+    # a user's editor saved the source file in cp1252 (or anything other than utf-8).
+    if actual_encoding == "cp1252" and assumed_encoding == "utf-8":
+        context = partial(
+            pytest.raises,
+            UnicodeDecodeError,
+            match="can't decode byte 0xff in position 7: invalid start byte",
+        )
+    # this is the more likely case: file was utf-8 encoded, but Python on Windows uses
+    # the system codepage to read the file. This case is fixed by numpy/numpydoc#510
+    elif actual_encoding == "utf-8" and assumed_encoding == "cp1252":
+        context = partial(
+            pytest.raises,
+            UnicodeDecodeError,
+            match="can't decode byte 0x81 in position 9: character maps to <undefined>",
+        )
+    else:
+        context = nullcontext
+    with context():
+        result = validate.extract_ignore_validation_comments(filepath, assumed_encoding)
+        assert result == {}
 
 
 class GoodDocStrings:
@@ -482,12 +605,69 @@ class GoodDocStrings:
         >>> result = 1 + 1
         """
 
+    def parameters_with_trailing_underscores(self, str_):
+        r"""
+        Ensure PR01 and PR02 errors are not raised with trailing underscores.
+
+        Parameters with trailing underscores need to be escaped to render
+        properly in the documentation since trailing underscores are used to
+        create links. Doing so without also handling the change in the validation
+        logic makes it impossible to both pass validation and render correctly.
+
+        Parameters
+        ----------
+        str\_ : str
+           Some text.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
+
+    def parameter_with_wrong_types_as_substrings(self, a, b, c, d, e, f):
+        r"""
+        Ensure PR06 doesn't fail when non-preferable types are substrings.
+
+        While PR06 checks for parameter types which contain non-preferable type
+        names like integer (int), string (str), and boolean (bool), PR06 should
+        not fail if those types are used only as susbtrings in, for example,
+        custom type names.
+
+        Parameters
+        ----------
+        a : Myint
+           Some text.
+        b : intClass
+           Some text.
+        c : Mystring
+           Some text.
+        d : stringClass
+           Some text.
+        e : Mybool
+           Some text.
+        f : boolClass
+           Some text.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
+
 
 class BadGenericDocStrings:
     """Everything here has a bad docstring"""
 
     def func(self):
-
         """Some function.
 
         With several mistakes in the docstring.
@@ -1120,6 +1300,8 @@ class TestValidator:
             "other_parameters",
             "warnings",
             "valid_options_in_parameter_description_sets",
+            "parameters_with_trailing_underscores",
+            "parameter_with_wrong_types_as_substrings",
         ],
     )
     def test_good_functions(self, capsys, func):
@@ -1394,6 +1576,49 @@ class TestValidator:
             assert msg in " ".join(err[1] for err in result["errors"])
 
 
+def decorator(x):
+    """Test decorator."""
+    return x
+
+
+@decorator
+@decorator
+class DecoratorClass:
+    """
+    Class and methods with decorators.
+
+    * `DecoratorClass` has two decorators.
+    * `DecoratorClass.test_no_decorator` has no decorator.
+    * `DecoratorClass.test_property` has a `@property` decorator.
+    * `DecoratorClass.test_cached_property` has a `@cached_property` decorator.
+    * `DecoratorClass.test_three_decorators` has three decorators.
+
+    `Validator.source_file_def_line` should return the `def` or `class` line number, not
+    the line of the first decorator.
+    """
+
+    def test_no_decorator(self):
+        """Test method without decorators."""
+        pass
+
+    @property
+    def test_property(self):
+        """Test property method."""
+        pass
+
+    @cached_property
+    def test_cached_property(self):
+        """Test property method."""
+        pass
+
+    @decorator
+    @decorator
+    @decorator
+    def test_three_decorators(self):
+        """Test method with three decorators."""
+        pass
+
+
 class TestValidatorClass:
     @pytest.mark.parametrize("invalid_name", ["unknown_mod", "unknown_mod.MyClass"])
     def test_raises_for_invalid_module_name(self, invalid_name):
@@ -1410,3 +1635,60 @@ class TestValidatorClass:
         msg = f"'{obj_name}' has no attribute '{invalid_attr_name}'"
         with pytest.raises(AttributeError, match=msg):
             numpydoc.validate.Validator._load_obj(invalid_name)
+
+    # inspect.getsourcelines does not return class decorators for Python 3.8. This was
+    # fixed starting with 3.9: https://github.com/python/cpython/issues/60060.
+    @pytest.mark.parametrize(
+        ["decorated_obj", "def_line"],
+        [
+            [
+                "numpydoc.tests.test_validate.DecoratorClass",
+                getsourcelines(DecoratorClass)[-1]
+                + (2 if sys.version_info.minor > 8 else 0),
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_no_decorator",
+                getsourcelines(DecoratorClass.test_no_decorator)[-1],
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_property",
+                getsourcelines(DecoratorClass.test_property.fget)[-1] + 1,
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_cached_property",
+                getsourcelines(DecoratorClass.test_cached_property.func)[-1] + 1,
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_three_decorators",
+                getsourcelines(DecoratorClass.test_three_decorators)[-1] + 3,
+            ],
+        ],
+    )
+    def test_source_file_def_line_with_decorators(self, decorated_obj, def_line):
+        doc = numpydoc.validate.Validator(
+            numpydoc.docscrape.get_doc_object(
+                numpydoc.validate.Validator._load_obj(decorated_obj)
+            )
+        )
+        assert doc.source_file_def_line == def_line
+
+    @pytest.mark.parametrize(
+        ["property", "file_name"],
+        [
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_property",
+                getsourcefile(DecoratorClass.test_property.fget),
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_cached_property",
+                getsourcefile(DecoratorClass.test_cached_property.func),
+            ],
+        ],
+    )
+    def test_source_file_name_with_properties(self, property, file_name):
+        doc = numpydoc.validate.Validator(
+            numpydoc.docscrape.get_doc_object(
+                numpydoc.validate.Validator._load_obj(property)
+            )
+        )
+        assert doc.source_file_name == file_name

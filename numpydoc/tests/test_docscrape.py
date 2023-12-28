@@ -851,11 +851,11 @@ def test_see_also(prefix):
 
             if func == "func_h":
                 assert role == "meth"
-            elif func == "baz.obj_q" or func == "~baz.obj_r":
+            elif func in ("baz.obj_q", "~baz.obj_r"):
                 assert role == "obj"
             elif func == "class_j":
                 assert role == "class"
-            elif func in ["func_h1", "func_h2"]:
+            elif func in ("func_h1", "func_h2"):
                 assert role == "meth"
             else:
                 assert role is None, str([func, role])
@@ -866,7 +866,7 @@ def test_see_also(prefix):
                 assert desc == ["some other func over", "multiple lines"]
             elif func == "class_j":
                 assert desc == ["fubar", "foobar"]
-            elif func in ["func_f2", "func_g2", "func_h2", "func_j2"]:
+            elif func in ("func_f2", "func_g2", "func_h2", "func_j2"):
                 assert desc == ["description of multiple"], str(
                     [desc, ["description of multiple"]]
                 )
@@ -980,6 +980,21 @@ doc8 = NumpyDocString(
 )
 
 
+def test_returns_with_roles_no_names():
+    """Make sure colons that are part of sphinx roles are not misinterpreted
+    as type separator in returns section. See gh-428."""
+    docstring = NumpyDocString(
+        """
+        Returns
+        -------
+        str or :class:`NumpyDocString`
+        """
+    )
+    expected = "str or :class:`NumpyDocString`"  # not "str or : class:...
+    assert docstring["Returns"][0].type == expected
+    assert expected in str(docstring)
+
+
 def test_trailing_colon():
     assert doc8["Parameters"][0].name == "data"
 
@@ -1057,52 +1072,6 @@ def test_plot_examples():
         config=cfg,
     )
     assert str(doc).count("plot::") == 1, str(doc)
-
-
-def test_use_blockquotes():
-    cfg = dict(use_blockquotes=True)
-    doc = SphinxDocString(
-        """
-    Parameters
-    ----------
-    abc : def
-        ghi
-    jkl
-        mno
-
-    Returns
-    -------
-    ABC : DEF
-        GHI
-    JKL
-        MNO
-    """,
-        config=cfg,
-    )
-    line_by_line_compare(
-        str(doc),
-        """
-    :Parameters:
-
-        **abc** : def
-
-            ghi
-
-        **jkl**
-
-            mno
-
-    :Returns:
-
-        **ABC** : DEF
-
-            GHI
-
-        JKL
-
-            MNO
-    """,
-    )
 
 
 def test_class_members():
@@ -1473,7 +1442,6 @@ def test_nonstandard_property():
             obj._set_axis(self.axis, value)
 
     class Dummy:
-
         attr = SpecialProperty(doc="test attribute")
 
     doc = get_doc_object(Dummy)
@@ -1608,6 +1576,7 @@ def test_xref():
             # numpydoc.update_config fails if this config option not present
             self.numpydoc_validation_checks = set()
             self.numpydoc_validation_exclude = set()
+            self.numpydoc_validation_overrides = dict()
 
     xref_aliases_complete = deepcopy(DEFAULT_LINKS)
     for key in xref_aliases:
@@ -1653,6 +1622,23 @@ def test__error_location_no_name_attr():
     msg = "Potentially wrong underline length.*Foo.*"
     with pytest.raises(ValueError, match=msg):
         nds._error_location(msg=msg)
+
+
+def test_class_docstring_cached_property():
+    """Ensure that properties marked with the `cached_property` decorator
+    are listed in the Methods section. See gh-432."""
+    from functools import cached_property
+
+    class Foo:
+        _x = [1, 2, 3]
+
+        @cached_property
+        def val(self):
+            return self._x
+
+    class_docstring = get_doc_object(Foo)
+    assert len(class_docstring["Attributes"]) == 1
+    assert class_docstring["Attributes"][0].name == "val"
 
 
 if __name__ == "__main__":

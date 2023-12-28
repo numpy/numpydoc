@@ -2,32 +2,39 @@ version: 2
 jobs:
   build_docs:
     docker:
-      - image: circleci/python:3.7-stretch
+      - image: "cimg/python:3.11"
     steps:
       - checkout
       - run:
-          name: Set BASH_ENV
-          command: |
-            echo "set -e" >> $BASH_ENV;
-            echo "export PATH=~/.local/bin:$PATH" >> $BASH_ENV;
-            sudo apt update
-            sudo apt install dvipng texlive-fonts-recommended texlive-latex-recommended texlive-latex-extra texlive-generic-extra latexmk texlive-xetex
+          name: Update apt-get
+          command: sudo apt-get update
+      - run:
+          name: Install TeX
+          command: sudo apt install dvipng texlive-fonts-recommended texlive-latex-recommended texlive-latex-extra latexmk texlive-xetex
       - restore_cache:
           keys:
             - pip-cache
       - run:
           name: Get dependencies and install
           command: |
-            pip install --user -q --upgrade pip setuptools
-            pip install --user -q --upgrade numpy matplotlib sphinx pydata-sphinx-theme
-            pip install --user -e .
+            python3 -m venv venv
+            source venv/bin/activate
+            python -m pip install --upgrade pip wheel setuptools
+            python -m pip install --upgrade -r requirements/doc.txt
+            python -m pip list
       - save_cache:
           key: pip-cache
           paths:
             - ~/.cache/pip
       - run:
-          name: make html
+          name: Install
           command: |
+            source venv/bin/activate
+            pip install -e .
+      - run:
+          name: Build docs
+          command: |
+            source venv/bin/activate
             make -C doc html
       - store_artifacts:
           path: doc/_build/html/
@@ -35,6 +42,7 @@ jobs:
       - run:
           name: make tinybuild
           command: |
+            source venv/bin/activate
             make -C numpydoc/tests/tinybuild html
       - store_artifacts:
           path: numpydoc/tests/tinybuild/_build/html/

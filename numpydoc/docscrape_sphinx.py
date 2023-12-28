@@ -11,6 +11,7 @@ import sphinx
 from sphinx.jinja2glue import BuiltinTemplateLoader
 
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc, ObjDoc
+from .docscrape import get_doc_object as get_doc_object_orig
 from .xref import make_xref
 
 
@@ -26,7 +27,6 @@ class SphinxDocString(NumpyDocString):
 
     def load_config(self, config):
         self.use_plots = config.get("use_plots", False)
-        self.use_blockquotes = config.get("use_blockquotes", False)
         self.class_members_toctree = config.get("class_members_toctree", True)
         self.attributes_as_param_list = config.get("attributes_as_param_list", True)
         self.xref_param_type = config.get("xref_param_type", False)
@@ -84,8 +84,6 @@ class SphinxDocString(NumpyDocString):
                 if not param.desc:
                     out += self._str_indent([".."], 8)
                 else:
-                    if self.use_blockquotes:
-                        out += [""]
                     out += self._str_indent(param.desc, 8)
                 out += [""]
         return out
@@ -180,8 +178,7 @@ class SphinxDocString(NumpyDocString):
         """Generate RST for a listing of parameters or similar
 
         Parameter names are displayed as bold text, and descriptions
-        are in blockquotes.  Descriptions may therefore contain block
-        markup as well.
+        are in definition lists.
 
         Parameters
         ----------
@@ -217,9 +214,7 @@ class SphinxDocString(NumpyDocString):
                     parts.append(param_type)
                 out += self._str_indent([" : ".join(parts)])
 
-                if desc and self.use_blockquotes:
-                    out += [""]
-                elif not desc:
+                if not desc:
                     # empty definition
                     desc = [".."]
                 out += self._str_indent(desc, 8)
@@ -413,20 +408,10 @@ class SphinxObjDoc(SphinxDocString, ObjDoc):
         ObjDoc.__init__(self, obj, doc=doc, config=config)
 
 
-# TODO: refactor to use docscrape.get_doc_object
 def get_doc_object(obj, what=None, doc=None, config=None, builder=None):
-    if what is None:
-        if inspect.isclass(obj):
-            what = "class"
-        elif inspect.ismodule(obj):
-            what = "module"
-        elif isinstance(obj, Callable):
-            what = "function"
-        else:
-            what = "object"
-
     if config is None:
         config = {}
+
     template_dirs = [os.path.join(os.path.dirname(__file__), "templates")]
     if builder is not None:
         template_loader = BuiltinTemplateLoader()
@@ -436,11 +421,12 @@ def get_doc_object(obj, what=None, doc=None, config=None, builder=None):
     template_env = SandboxedEnvironment(loader=template_loader)
     config["template"] = template_env.get_template("numpydoc_docstring.rst")
 
-    if what == "class":
-        return SphinxClassDoc(obj, func_doc=SphinxFunctionDoc, doc=doc, config=config)
-    elif what in ("function", "method"):
-        return SphinxFunctionDoc(obj, doc=doc, config=config)
-    else:
-        if doc is None:
-            doc = pydoc.getdoc(obj)
-        return SphinxObjDoc(obj, doc, config=config)
+    return get_doc_object_orig(
+        obj,
+        what=what,
+        doc=doc,
+        config=config,
+        class_doc=SphinxClassDoc,
+        func_doc=SphinxFunctionDoc,
+        obj_doc=SphinxObjDoc,
+    )

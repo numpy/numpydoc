@@ -5,13 +5,20 @@ Analyze docstrings to detect errors.
 Call ``validate(object_name_to_validate)`` to get a dictionary
 with all the detected errors.
 """
+
+from copy import deepcopy
+from typing import Dict, List, Set, Optional
 import ast
 import collections
+import functools
 import importlib
 import inspect
+import os
 import pydoc
 import re
 import textwrap
+import tokenize
+
 from .docscrape import get_doc_object
 
 
@@ -100,6 +107,85 @@ ERROR_MSGS = {
 
 # Ignore these when evaluating end-of-line-"." checks
 IGNORE_STARTS = (" ", "* ", "- ")
+
+# inline comments that can suppress individual checks per line
+IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
+
+
+# This function gets called once per function/method to be validated.
+# We have to balance memory usage with performance here. It shouldn't be too
+# bad to store these `dict`s (they should be rare), but to be safe let's keep
+# the limit low-ish. This was set by looking at scipy, numpy, matplotlib,
+# and pandas and they had between ~500 and ~1300 .py files as of 2023-08-16.
+@functools.lru_cache(maxsize=2000)
+def extract_ignore_validation_comments(
+    filepath: Optional[os.PathLike],
+    encoding: str = "utf-8",
+) -> Dict[int, List[str]]:
+    """
+    Extract inline comments indicating certain validation checks should be ignored.
+
+    Parameters
+    ----------
+    filepath : os.PathLike
+        Path to the file being inspected.
+
+    Returns
+    -------
+    dict[int, list[str]]
+        Mapping of line number to a list of checks to ignore.
+    """
+    numpydoc_ignore_comments = {}
+    try:
+        file = open(filepath, encoding=encoding)
+    except (OSError, TypeError):  # can be None, nonexistent, or unreadable
+        return numpydoc_ignore_comments
+    with file:
+        last_declaration = 1
+        declarations = ["def", "class"]
+        for token in tokenize.generate_tokens(file.readline):
+            if token.type == tokenize.NAME and token.string in declarations:
+                last_declaration = token.start[0]
+            if token.type == tokenize.COMMENT:
+                match = re.match(IGNORE_COMMENT_PATTERN, token.string)
+                if match:
+                    rules = match.group(1).split(",")
+                    numpydoc_ignore_comments[last_declaration] = rules
+    return numpydoc_ignore_comments
+
+
+def get_validation_checks(validation_checks: Set[str]) -> Set[str]:
+    """
+    Get the set of validation checks to report on.
+
+    Parameters
+    ----------
+    validation_checks : set[str]
+        A set of validation checks to report on. If the set is ``{"all"}``,
+        all checks will be reported. If the set contains just specific checks,
+        only those will be reported on. If the set contains both ``"all"`` and
+        specific checks, all checks except those included in the set will be
+        reported on.
+
+    Returns
+    -------
+    set[str]
+        The set of validation checks to report on.
+    """
+    valid_error_codes = set(ERROR_MSGS.keys())
+    if "all" in validation_checks:
+        block = deepcopy(validation_checks)
+        validation_checks = valid_error_codes - block
+
+    # Ensure that the validation check set contains only valid error codes
+    invalid_error_codes = validation_checks - valid_error_codes
+    if invalid_error_codes:
+        raise ValueError(
+            f"Unrecognized validation code(s) in numpydoc_validation_checks "
+            f"config value: {invalid_error_codes}"
+        )
+
+    return validation_checks
 
 
 def error(code, **kwargs):
@@ -195,7 +281,13 @@ class Validator:
         File name where the object is implemented (e.g. pandas/core/frame.py).
         """
         try:
-            fname = inspect.getsourcefile(self.code_obj)
+            if isinstance(self.code_obj, property):
+                fname = inspect.getsourcefile(self.code_obj.fget)
+            elif isinstance(self.code_obj, functools.cached_property):
+                fname = inspect.getsourcefile(self.code_obj.func)
+            else:
+                fname = inspect.getsourcefile(self.code_obj)
+
         except TypeError:
             # In some cases the object is something complex like a cython
             # object that can't be easily introspected. An it's better to
@@ -210,7 +302,22 @@ class Validator:
         Number of line where the object is defined in its file.
         """
         try:
-            return inspect.getsourcelines(self.code_obj)[-1]
+            if isinstance(self.code_obj, property):
+                sourcelines = inspect.getsourcelines(self.code_obj.fget)
+            elif isinstance(self.code_obj, functools.cached_property):
+                sourcelines = inspect.getsourcelines(self.code_obj.func)
+            else:
+                sourcelines = inspect.getsourcelines(self.code_obj)
+            # getsourcelines will return the line of the first decorator found for the
+            # current function. We have to find the def declaration after that.
+            def_line = next(
+                i
+                for i, x in enumerate(
+                    re.match("^ *(def|class) ", s) for s in sourcelines[0]
+                )
+                if x is not None
+            )
+            return sourcelines[-1] + def_line
         except (OSError, TypeError):
             # In some cases the object is something complex like a cython
             # object that can't be easily introspected. An it's better to
@@ -330,7 +437,7 @@ class Validator:
     def parameter_mismatches(self):
         errs = []
         signature_params = self.signature_parameters
-        all_params = tuple(self.doc_all_parameters)
+        all_params = tuple(param.replace("\\", "") for param in self.doc_all_parameters)
         missing = set(signature_params) - set(all_params)
         if missing:
             errs.append(error("PR01", missing_params=str(missing)))
@@ -450,7 +557,7 @@ def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
     return errs
 
 
-def validate(obj_name):
+def validate(obj_name, validator_cls=None, **validator_kwargs):
     """
     Validate the docstring.
 
@@ -461,6 +568,11 @@ def validate(obj_name):
         'pandas.read_csv'. The string must include the full, unabbreviated
         package/module names, i.e. 'pandas.read_csv', not 'pd.read_csv' or
         'read_csv'.
+    validator_cls : Validator, optional
+        The Validator class to use. By default, :class:`Validator` will be used.
+    **validator_kwargs
+        Keyword arguments to pass to ``validator_cls`` upon initialization.
+        Note that ``obj_name`` will be passed as a named argument as well.
 
     Returns
     -------
@@ -493,14 +605,24 @@ def validate(obj_name):
     they are validated, are not documented more than in the source code of this
     function.
     """
-    if isinstance(obj_name, str):
-        doc = Validator(get_doc_object(Validator._load_obj(obj_name)))
+    if not validator_cls:
+        if isinstance(obj_name, str):
+            doc = Validator(get_doc_object(Validator._load_obj(obj_name)))
+        else:
+            doc = Validator(obj_name)
     else:
-        doc = Validator(obj_name)
+        doc = validator_cls(obj_name=obj_name, **validator_kwargs)
+
+    # lineno is only 0 if we have a module docstring in the file and we are
+    # validating that, so we change to 1 for readability of the output
+    ignore_validation_comments = extract_ignore_validation_comments(
+        doc.source_file_name
+    ).get(doc.source_file_def_line or 1, [])
 
     errs = []
     if not doc.raw_doc:
-        errs.append(error("GL08"))
+        if "GL08" not in ignore_validation_comments:
+            errs.append(error("GL08"))
         return {
             "type": doc.type,
             "docstring": doc.clean_doc,
@@ -584,7 +706,7 @@ def validate(obj_name):
                     ("string", "str"),
                 ]
                 for wrong_type, right_type in common_type_errors:
-                    if wrong_type in doc.parameter_type(param):
+                    if wrong_type in set(re.split(r"\W", doc.parameter_type(param))):
                         errs.append(
                             error(
                                 "PR06",
@@ -622,6 +744,9 @@ def validate(obj_name):
 
     if not doc.examples:
         errs.append(error("EX01"))
+
+    errs = [err for err in errs if err[0] not in ignore_validation_comments]
+
     return {
         "type": doc.type,
         "docstring": doc.clean_doc,
