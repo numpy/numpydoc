@@ -1348,7 +1348,6 @@ class TestValidator:
         assert isinstance(errors, list)
         assert errors
 
-    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     @pytest.mark.parametrize(
         "klass,func,msgs",
         [
