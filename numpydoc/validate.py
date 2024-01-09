@@ -521,9 +521,9 @@ class Validator:
         if tree:
             returns = get_returns_not_on_nested_functions(tree[0])
             return_values = [r.value for r in returns]
-            # Replace NameConstant nodes valued None for None.
+            # Replace Constant nodes valued None for None.
             for i, v in enumerate(return_values):
-                if isinstance(v, ast.NameConstant) and v.value is None:
+                if isinstance(v, ast.Constant) and v.value is None:
                     return_values[i] = None
             return any(return_values)
         else:
