@@ -373,9 +373,11 @@ class SphinxDocString(NumpyDocString):
             "notes": self._str_section("Notes"),
             "references": self._str_references(),
             "examples": self._str_examples(),
-            "attributes": self._str_param_list("Attributes", fake_autosummary=True)
-            if self.attributes_as_param_list
-            else self._str_member_list("Attributes"),
+            "attributes": (
+                self._str_param_list("Attributes", fake_autosummary=True)
+                if self.attributes_as_param_list
+                else self._str_member_list("Attributes")
+            ),
             "methods": self._str_member_list("Methods"),
         }
         ns = {k: "\n".join(v) for k, v in ns.items()}

@@ -16,6 +16,7 @@ It will:
 .. [1] https://github.com/numpy/numpydoc
 
 """
+
 from copy import deepcopy
 import re
 import pydoc

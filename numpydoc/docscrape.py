@@ -1,6 +1,7 @@
 """Extract reference documentation from the NumPy source tree.
 
 """
+
 import inspect
 import textwrap
 import re
