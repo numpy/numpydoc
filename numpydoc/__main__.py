@@ -1,6 +1,7 @@
 """
 Implementing `python -m numpydoc` functionality.
 """
+
 import sys
 import argparse
 import ast
