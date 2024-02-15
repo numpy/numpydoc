@@ -1641,6 +1641,21 @@ def test_class_docstring_cached_property():
     assert class_docstring["Attributes"][0].name == "val"
 
 
+def test_named_tuple_no_duplicate_attributes():
+    """
+    Ensure that attributes of namedtuples are not duplicated in the docstring.
+
+    See gh-257
+    """
+    from collections import namedtuple
+
+    foo = namedtuple("Foo", ("bar", "baz"))
+
+    # Create the SphinxClassDoc object via get_doc_object
+    sds = get_doc_object(foo)
+    assert sds["Attributes"] == []
+
+
 if __name__ == "__main__":
     import pytest
 
