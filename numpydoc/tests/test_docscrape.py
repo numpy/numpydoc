@@ -1641,6 +1641,63 @@ def test_class_docstring_cached_property():
     assert class_docstring["Attributes"][0].name == "val"
 
 
+def test_namedtuple_no_duplicate_attributes():
+    """
+    Ensure that attributes of namedtuples are not duplicated in the docstring.
+
+    See gh-257
+    """
+    from collections import namedtuple
+
+    foo = namedtuple("Foo", ("bar", "baz"))
+
+    # Create the SphinxClassDoc object via get_doc_object
+    sds = get_doc_object(foo)
+    assert sds["Attributes"] == []
+
+
+def test_namedtuple_class_docstring():
+    """Ensure that class docstring is preserved when inheriting from namedtuple.
+
+    See gh-257
+    """
+    from collections import namedtuple
+
+    foo = namedtuple("Foo", ("bar", "baz"))
+
+    class MyFoo(foo):
+        """MyFoo's class docstring"""
+
+    # Create the SphinxClassDoc object via get_doc_object
+    sds = get_doc_object(MyFoo)
+    assert sds["Summary"] == ["MyFoo's class docstring"]
+
+    # Example dataclass where constructor params are documented explicit.
+    # Parameter names/descriptions should be included in the docstring, but
+    # should not result in a duplicated `Attributes` section
+    class MyFooWithParams(foo):
+        """
+        MyFoo's class docstring
+
+        Parameters
+        ----------
+        bar : str
+           The bar attribute
+        baz : str
+           The baz attribute
+        """
+
+        bar: str
+        baz: str
+
+    sds = get_doc_object(MyFooWithParams)
+    assert "MyFoo's class docstring" in sds["Summary"]
+    assert len(sds["Attributes"]) == 0
+    assert len(sds["Parameters"]) == 2
+    assert sds["Parameters"][0].desc[0] == "The bar attribute"
+    assert sds["Parameters"][1].desc[0] == "The baz attribute"
+
+
 if __name__ == "__main__":
     import pytest
 
