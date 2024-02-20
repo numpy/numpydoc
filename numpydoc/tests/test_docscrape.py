@@ -1694,6 +1694,8 @@ def test_namedtuple_class_docstring():
     assert "MyFoo's class docstring" in sds["Summary"]
     assert len(sds["Attributes"]) == 0
     assert len(sds["Parameters"]) == 2
+    assert sds["Parameters"][0].desc[0] == "The bar attribute"
+    assert sds["Parameters"][1].desc[0] == "The baz attribute"
 
 
 if __name__ == "__main__":
