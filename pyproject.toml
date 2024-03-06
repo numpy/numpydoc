@@ -26,8 +26,7 @@ classifiers = [
     'Programming Language :: Python :: 3.12',
 ]
 dependencies = [
-    'sphinx>=5',
-    'Jinja2>=2.10',
+    'sphinx>=6',
     'tabulate>=0.8.10',
     "tomli>=1.1.0;python_version<'3.11'",
 ]
