@@ -116,7 +116,7 @@ IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 # We have to balance memory usage with performance here. It shouldn't be too
 # bad to store these `dict`s (they should be rare), but to be safe let's keep
 # the limit low-ish. This was set by looking at scipy, numpy, matplotlib,
-# and pandas and they had between ~500 and ~1300 .py files as of 2023-08-16.
+# and pandas, and they had between ~500 and ~1300 .py files as of 2023-08-16.
 @functools.lru_cache(maxsize=2000)
 def extract_ignore_validation_comments(
     filepath: Optional[os.PathLike],
@@ -212,7 +212,7 @@ def error(code, **kwargs):
     message : str
         Error message with variables replaced.
     """
-    return (code, ERROR_MSGS[code].format(**kwargs))
+    return code, ERROR_MSGS[code].format(**kwargs)
 
 
 class Validator:
@@ -290,11 +290,17 @@ class Validator:
 
         except TypeError:
             # In some cases the object is something complex like a cython
-            # object that can't be easily introspected. An it's better to
+            # object that can't be easily introspected. And it's better to
             # return the source code file of the object as None, than crash
             pass
         else:
             return fname
+
+    # When calling validate, files are parsed twice
+    @staticmethod
+    @functools.lru_cache(maxsize=4000)
+    def _getsourcelines(obj):
+        return inspect.getsourcelines(obj)
 
     @property
     def source_file_def_line(self):
@@ -303,11 +309,11 @@ class Validator:
         """
         try:
             if isinstance(self.code_obj, property):
-                sourcelines = inspect.getsourcelines(self.code_obj.fget)
+                sourcelines = self._getsourcelines(self.code_obj.fget)
             elif isinstance(self.code_obj, functools.cached_property):
-                sourcelines = inspect.getsourcelines(self.code_obj.func)
+                sourcelines = self._getsourcelines(self.code_obj.func)
             else:
-                sourcelines = inspect.getsourcelines(self.code_obj)
+                sourcelines = self._getsourcelines(self.code_obj)
             # getsourcelines will return the line of the first decorator found for the
             # current function. We have to find the def declaration after that.
             def_line = next(
@@ -320,7 +326,7 @@ class Validator:
             return sourcelines[-1] + def_line
         except (OSError, TypeError):
             # In some cases the object is something complex like a cython
-            # object that can't be easily introspected. An it's better to
+            # object that can't be easily introspected. And it's better to
             # return the line number as None, than crash
             pass
 
@@ -613,7 +619,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
     else:
         doc = validator_cls(obj_name=obj_name, **validator_kwargs)
 
-    # lineno is only 0 if we have a module docstring in the file and we are
+    # lineno is only 0 if we have a module docstring in the file, and we are
     # validating that, so we change to 1 for readability of the output
     ignore_validation_comments = extract_ignore_validation_comments(
         doc.source_file_name
