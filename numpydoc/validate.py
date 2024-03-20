@@ -7,7 +7,7 @@ with all the detected errors.
 """
 
 from copy import deepcopy
-from typing import Dict, List, Set, Optional
+from typing import Dict, List, Set, Optional, Any
 import ast
 import collections
 import functools
@@ -299,7 +299,7 @@ class Validator:
     # When calling validate, files are parsed twice
     @staticmethod
     @functools.lru_cache(maxsize=4000)
-    def _getsourcelines(obj):
+    def _getsourcelines(obj: Any):
         return inspect.getsourcelines(obj)
 
     @property
