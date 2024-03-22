@@ -23,5 +23,5 @@ Sphinx, and adds the code description directives ``np:function``,
     install
     format
     validation
-    release_notes
+    release/index
     example
