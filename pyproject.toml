@@ -62,6 +62,11 @@ test = [
 [project.scripts]
 validate-docstrings = 'numpydoc.hooks.validate_docstrings:main'
 
+[tool.changelist]
+title_template = "{version}"
+# Profiles that are excluded from the contributor list.
+ignored_user_logins = ["dependabot[bot]", "pre-commit-ci[bot]"]
+
 [tool.setuptools]
 include-package-data = false
 packages = [
