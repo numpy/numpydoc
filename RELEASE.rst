@@ -36,11 +36,11 @@ Process
 - Commit changes::
 
     git add numpydoc/_version.py ${LOG}
-    git commit -m 'Designate <version> release'
+    git commit -m "Designate ${VERSION} release"
 
 - Add the version number (e.g., `v1.2.0`) as a tag in git::
 
-    git tag -s [-u <key-id>] v<version> -m 'signed <version> tag'
+    git tag -s v${VERSION} -m "signed ${VERSION} tag"
 
   If you do not have a gpg key, use -u instead; it is important for
   Debian packaging that the tags are annotated
