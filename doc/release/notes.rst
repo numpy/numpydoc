@@ -1,7 +1,7 @@
-1.7.0rc0
-========
+1.7.0
+=====
 
-We're happy to announce the release of numpydoc 1.7.0rc0!
+We're happy to announce the release of numpydoc 1.7.0!
 
 Enhancements
 ------------
@@ -20,6 +20,8 @@ Documentation
 - DOC: Fix typos found by codespell (`#514 <https://github.com/numpy/numpydoc/pull/514>`_).
 - DOC: Update link to mailing list (`#518 <https://github.com/numpy/numpydoc/pull/518>`_).
 - Add Python 3.12 to classifiers (`#529 <https://github.com/numpy/numpydoc/pull/529>`_).
+- Update release process (`#534 <https://github.com/numpy/numpydoc/pull/534>`_).
+- Update release process (`#535 <https://github.com/numpy/numpydoc/pull/535>`_).
 
 Maintenance
 -----------
@@ -63,5 +65,4 @@ Contributors
 - Ross Barnowski (`@rossbar <https://github.com/rossbar>`_)
 - Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
 
-_These lists are automatically generated, and may not be complete or may contain
-duplicates._
+_These lists are automatically generated, and may not be complete or may contain duplicates._
