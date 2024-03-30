@@ -50,10 +50,10 @@ jobs:
 
       - name: Make sure CLI works
         run: |
-          python -m numpydoc numpydoc.tests.test_main._capture_stdout
-          echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
-          python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
-          echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
+          numpydoc render numpydoc.tests.test_main._capture_stdout
+          echo '! numpydoc render numpydoc.tests.test_main._invalid_docstring' | bash
+          numpydoc validate numpydoc.tests.test_main._capture_stdout
+          echo '! numpydoc validate numpydoc.tests.test_main._docstring_with_errors' | bash
 
       - name: Setup for doc build
         run: |
@@ -101,10 +101,10 @@ jobs:
 
       - name: Make sure CLI works
         run: |
-          python -m numpydoc numpydoc.tests.test_main._capture_stdout
-          echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
-          python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
-          echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
+          numpydoc render numpydoc.tests.test_main._capture_stdout
+          echo '! numpydoc render numpydoc.tests.test_main._invalid_docstring' | bash
+          numpydoc validate numpydoc.tests.test_main._capture_stdout
+          echo '! numpydoc validate numpydoc.tests.test_main._docstring_with_errors' | bash
 
       - name: Setup for doc build
         run: |
