@@ -13,7 +13,7 @@ except ImportError:
     import tomli as tomllib
 
 from pathlib import Path
-from typing import Any, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from tabulate import tabulate
 
@@ -341,7 +341,22 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
     return docstring_visitor.findings
 
 
-def get_parser(parent=None):
+def get_parser(
+    parent: Union[argparse.ArgumentParser, None] = None,
+) -> argparse.ArgumentParser:
+    """
+    Build an argument parser.
+
+    Parameters
+    ----------
+    parent : argparse.ArgumentParser
+        A parent parser to use, if this should be a subparser.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        The argument parser.
+    """
     project_root_from_cwd, config_file = find_project_root(["."])
     config_options = parse_config(project_root_from_cwd)
     ignored_checks = (
@@ -402,10 +417,10 @@ def get_parser(parent=None):
 
 
 def run_hook(
-    files: list[str],
+    files: List[str],
     *,
-    config: Union[dict[str, Any], None] = None,
-    ignore: Union[list[str], None] = None,
+    config: Union[Dict[str, Any], None] = None,
+    ignore: Union[List[str], None] = None,
 ) -> int:
     """
     Run the numpydoc validation hook.

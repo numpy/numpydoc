@@ -2,14 +2,14 @@
 
 import argparse
 import ast
-from typing import Sequence, Union
+from typing import List, Sequence, Union
 
 from .docscrape_sphinx import get_doc_object
 from .hooks import validate_docstrings
 from .validate import Validator, validate
 
 
-def render_object(import_path: str, config: Union[list[str], None] = None) -> int:
+def render_object(import_path: str, config: Union[List[str], None] = None) -> int:
     """Test numpydoc docstring generation for a given object."""
     # TODO: Move Validator._load_obj to a better place than validate
     print(get_doc_object(Validator._load_obj(import_path), config=dict(config or [])))
