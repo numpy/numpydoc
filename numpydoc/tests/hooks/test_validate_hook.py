@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from numpydoc.hooks.validate_docstrings import main
+from numpydoc.hooks.validate_docstrings import get_parser, run_hook
 
 
 @pytest.fixture
@@ -18,6 +18,11 @@ def example_module(request):
         / "example_module.py"
     )
     return str(fullpath.relative_to(request.config.rootdir))
+
+
+def hook_main(args):
+    parser = get_parser()
+    return run_hook(**vars(parser.parse_args(args)))
 
 
 @pytest.mark.parametrize("config", [None, "fake_dir"])
@@ -76,7 +81,7 @@ def test_validate_hook(example_module, config, capsys):
     if config:
         args.append(f"--{config=}")
 
-    return_code = main(args)
+    return_code = hook_main(args)
     assert return_code == 1
     assert capsys.readouterr().err.rstrip() == expected
 
@@ -109,7 +114,8 @@ def test_validate_hook_with_ignore(example_module, capsys):
         """
     )
 
-    return_code = main([example_module, "--ignore", "ES01", "SA01", "EX01"])
+    return_code = hook_main([example_module, "--ignore", "ES01", "SA01", "EX01"])
+
     assert return_code == 1
     assert capsys.readouterr().err.rstrip() == expected
 
@@ -157,7 +163,7 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
         """
     )
 
-    return_code = main([example_module, "--config", str(tmp_path)])
+    return_code = hook_main([example_module, "--config", str(tmp_path)])
     assert return_code == 1
     assert capsys.readouterr().err.rstrip() == expected
 
@@ -196,7 +202,7 @@ def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
         """
     )
 
-    return_code = main([example_module, "--config", str(tmp_path)])
+    return_code = hook_main([example_module, "--config", str(tmp_path)])
     assert return_code == 1
     assert capsys.readouterr().err.rstrip() == expected
 
@@ -205,7 +211,7 @@ def test_validate_hook_help(capsys):
     """Test that help section is displaying."""
 
     with pytest.raises(SystemExit):
-        return_code = main(["--help"])
+        return_code = hook_main(["--help"])
         assert return_code == 0
 
     out = capsys.readouterr().out
@@ -255,7 +261,7 @@ def test_validate_hook_exclude_option_pyproject(example_module, tmp_path, capsys
         """
     )
 
-    return_code = main([example_module, "--config", str(tmp_path)])
+    return_code = hook_main([example_module, "--config", str(tmp_path)])
     assert return_code == 1
     assert capsys.readouterr().err.rstrip() == expected
 
@@ -292,6 +298,6 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
         """
     )
 
-    return_code = main([example_module, "--config", str(tmp_path)])
+    return_code = hook_main([example_module, "--config", str(tmp_path)])
     assert return_code == 1
     assert capsys.readouterr().err.rstrip() == expected
