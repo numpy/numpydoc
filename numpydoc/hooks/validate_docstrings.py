@@ -13,7 +13,7 @@ except ImportError:
     import tomli as tomllib
 
 from pathlib import Path
-from typing import Sequence, Tuple, Union
+from typing import Any, Tuple, Union
 
 from tabulate import tabulate
 
@@ -341,9 +341,7 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
     return docstring_visitor.findings
 
 
-def main(argv: Union[Sequence[str], None] = None) -> int:
-    """Run the numpydoc validation hook."""
-
+def get_parser(parent=None):
     project_root_from_cwd, config_file = find_project_root(["."])
     config_options = parse_config(project_root_from_cwd)
     ignored_checks = (
@@ -357,10 +355,21 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         + "\n"
     )
 
-    parser = argparse.ArgumentParser(
-        description="Run numpydoc validation on files with option to ignore individual checks.",
-        formatter_class=argparse.RawTextHelpFormatter,
+    description = (
+        "Run numpydoc validation on files with option to ignore individual checks."
     )
+    if parent is None:
+        parser = argparse.ArgumentParser(
+            description=description,
+            formatter_class=argparse.RawTextHelpFormatter,
+        )
+    else:
+        parser = parent.add_parser(
+            "lint",
+            description=description,
+            help="validate all docstrings in file(s) using the abstract syntax tree",
+        )
+
     parser.add_argument(
         "files", type=str, nargs="+", help="File(s) to run numpydoc validation on."
     )
@@ -389,14 +398,38 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
             }"""
         ),
     )
+    return parser
 
-    args = parser.parse_args(argv)
-    project_root, _ = find_project_root(args.files)
-    config_options = parse_config(args.config or project_root)
-    config_options["checks"] -= set(args.ignore or [])
+
+def run_hook(
+    files: list[str],
+    *,
+    config: Union[dict[str, Any], None] = None,
+    ignore: Union[list[str], None] = None,
+) -> int:
+    """
+    Run the numpydoc validation hook.
+
+    Parameters
+    ----------
+    files : list[str]
+        The absolute or relative paths to the files to inspect.
+    config : Union[dict[str, Any], None], optional
+        Configuration options for reviewing flagged issues.
+    ignore : Union[list[str], None], optional
+        Checks to ignore in the results.
+
+    Returns
+    -------
+    int
+        The return status: 1 if issues were found, 0 otherwise.
+    """
+    project_root, _ = find_project_root(files)
+    config_options = parse_config(config or project_root)
+    config_options["checks"] -= set(ignore or [])
 
     findings = []
-    for file in args.files:
+    for file in files:
         findings.extend(process_file(file, config_options))
 
     if findings:
@@ -411,7 +444,3 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         )
         return 1
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

@@ -60,7 +60,7 @@ test = [
 ]
 
 [project.scripts]
-validate-docstrings = 'numpydoc.hooks.validate_docstrings:main'
+numpydoc = 'numpydoc.cli:main'
 
 [tool.changelist]
 title_template = "{version}"
