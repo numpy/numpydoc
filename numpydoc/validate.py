@@ -112,6 +112,13 @@ IGNORE_STARTS = (" ", "* ", "- ")
 IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 
 
+def _unwrap(obj):
+    """Iteratively traverse obj.__wrapped__ until first non-wrapped obj found."""
+    while hasattr(obj, "__wrapped__"):
+        obj = obj.__wrapped__
+    return obj
+
+
 # This function gets called once per function/method to be validated.
 # We have to balance memory usage with performance here. It shouldn't be too
 # bad to store these `dict`s (they should be rare), but to be safe let's keep
@@ -273,7 +280,7 @@ class Validator:
 
     @property
     def is_generator_function(self):
-        return inspect.isgeneratorfunction(self.obj)
+        return inspect.isgeneratorfunction(_unwrap(self.obj))
 
     @property
     def source_file_name(self):
