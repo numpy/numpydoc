@@ -87,6 +87,7 @@ jobs:
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install --pre -r requirements/test.txt -r requirements/doc.txt
           python -m pip install codecov
+          python -m pip install 'sphinx!=7.3.*'
           python -m pip list
 
       - name: Install
