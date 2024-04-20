@@ -279,7 +279,9 @@ b : int
     The number of bananas.
 
 """
-    assert_raises(ValueError, NumpyDocString, doc_text)
+    doc = NumpyDocString(doc_text)
+    assert len(doc["Returns"]) == 1
+    assert len(doc["Yields"]) == 2
 
 
 def test_section_twice():
