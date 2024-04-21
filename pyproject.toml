@@ -87,6 +87,6 @@ numpydoc = [
 
 [tool.pytest.ini_options]
 addopts = '''
---showlocals --doctest-modules -ra --cov-report= --cov=numpydoc
+--showlocals --doctest-modules --cov-report= --cov=numpydoc
 --junit-xml=junit-results.xml --ignore=doc/ --ignore=tools/'''
 junit_family = 'xunit2'
