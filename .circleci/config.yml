@@ -21,7 +21,6 @@ jobs:
             source venv/bin/activate
             python -m pip install --upgrade pip wheel setuptools
             python -m pip install --upgrade -r requirements/doc.txt
-            python -m pip install 'sphinx!=7.3.*'
             python -m pip list
       - save_cache:
           key: pip-cache
