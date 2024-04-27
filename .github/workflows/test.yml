@@ -18,7 +18,7 @@ jobs:
         os: [Ubuntu]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         sphinx-version:
-          ["sphinx==6.0", "sphinx==6.2", "sphinx==7.0", "'sphinx>=7.2,<7.3'"]
+          ["sphinx==6.0", "sphinx==6.2", "sphinx==7.0", "sphinx>=7.3"]
     steps:
       - uses: actions/checkout@v4
 
@@ -84,7 +84,6 @@ jobs:
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install --pre -r requirements/test.txt -r requirements/doc.txt
           python -m pip install codecov
-          python -m pip install 'sphinx!=7.3.*'
           python -m pip list
 
       - name: Install
