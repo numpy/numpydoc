@@ -19,6 +19,10 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         sphinx-version:
           ["sphinx==6.0", "sphinx==6.2", "sphinx==7.0", "sphinx>=7.3"]
+        include:
+          - os: Windows
+            python-version: "3.12"
+            sphinx-version: "sphinx" # version shouldn't really matter here
     steps:
       - uses: actions/checkout@v4
 
