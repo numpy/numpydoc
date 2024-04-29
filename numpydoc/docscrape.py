@@ -394,12 +394,8 @@ class NumpyDocString(Mapping):
         sections = list(self._read_sections())
         section_names = {section for section, content in sections}
 
-        has_returns = "Returns" in section_names
         has_yields = "Yields" in section_names
         # We could do more tests, but we are not. Arbitrarily.
-        if has_returns and has_yields:
-            msg = "Docstring contains both a Returns and Yields section."
-            raise ValueError(msg)
         if not has_yields and "Receives" in section_names:
             msg = "Docstring contains a Receives section but not Yields."
             raise ValueError(msg)

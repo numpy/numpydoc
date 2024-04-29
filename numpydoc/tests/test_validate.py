@@ -1,11 +1,12 @@
 import pytest
-import sys
 import warnings
 from contextlib import nullcontext
-from functools import cached_property, partial
+from functools import cached_property, partial, wraps
 from inspect import getsourcelines, getsourcefile
 
 from numpydoc import validate
+from numpydoc.validate import Validator
+from numpydoc.docscrape import get_doc_object
 import numpydoc.tests
 
 
@@ -1636,15 +1637,12 @@ class TestValidatorClass:
         with pytest.raises(AttributeError, match=msg):
             numpydoc.validate.Validator._load_obj(invalid_name)
 
-    # inspect.getsourcelines does not return class decorators for Python 3.8. This was
-    # fixed starting with 3.9: https://github.com/python/cpython/issues/60060.
     @pytest.mark.parametrize(
         ["decorated_obj", "def_line"],
         [
             [
                 "numpydoc.tests.test_validate.DecoratorClass",
-                getsourcelines(DecoratorClass)[-1]
-                + (2 if sys.version_info.minor > 8 else 0),
+                getsourcelines(DecoratorClass)[-1] + 2,
             ],
             [
                 "numpydoc.tests.test_validate.DecoratorClass.test_no_decorator",
@@ -1692,3 +1690,43 @@ class TestValidatorClass:
             )
         )
         assert doc.source_file_name == file_name
+
+
+def test_is_generator_validation_with_decorator():
+    """Ensure that the check for a Yields section when an object is a generator
+    (YD01) works with decorated generators."""
+
+    def tinsel(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    def foo():
+        """A simple generator"""
+        yield from range(10)
+
+    @tinsel
+    def bar():
+        """Generator wrapped once"""
+        yield from range(10)
+
+    @tinsel
+    @tinsel
+    @tinsel
+    def baz():
+        """Generator wrapped multiple times"""
+        yield from range(10)
+
+    # foo without wrapper is a generator
+    v = Validator(get_doc_object(foo))
+    assert v.is_generator_function
+
+    # Wrapped once
+    v = Validator(get_doc_object(bar))
+    assert v.is_generator_function
+
+    # Wrapped multiple times
+    v = Validator(get_doc_object(baz))
+    assert v.is_generator_function
