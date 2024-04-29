@@ -147,8 +147,8 @@ def test_lint(capsys, args):
     assert return_status == expected_status
 
 
-def test_validate_hook_help(capsys):
-    """Test that help section is displaying."""
+def test_lint_help(capsys):
+    """Test that lint help section is displaying."""
 
     with pytest.raises(SystemExit):
         return_code = numpydoc.cli.main(["lint", "--help"])
