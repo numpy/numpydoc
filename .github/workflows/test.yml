@@ -66,11 +66,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install texlive texlive-latex-extra latexmk dvipng
+        if: runner.os == 'Linux'
 
       - name: Build documentation
         run: |
           make -C doc html SPHINXOPTS="-nT"
           make -C doc latexpdf SPHINXOPTS="-nT"
+        if: runner.os == 'Linux'
 
   prerelease:
     runs-on: ${{ matrix.os }}-latest
