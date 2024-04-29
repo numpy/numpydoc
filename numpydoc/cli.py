@@ -2,11 +2,12 @@
 
 import argparse
 import ast
+from pathlib import Path
 from typing import List, Sequence, Union
 
 from .docscrape_sphinx import get_doc_object
-from .hooks import validate_docstrings
-from .validate import Validator, validate
+from .hooks import utils, validate_docstrings
+from .validate import ERROR_MSGS, Validator, validate
 
 
 def render_object(import_path: str, config: Union[List[str], None] = None) -> int:
@@ -26,8 +27,15 @@ def validate_object(import_path: str) -> int:
     return exit_status
 
 
-def main(argv: Union[Sequence[str], None] = None) -> int:
-    """CLI for numpydoc."""
+def get_parser() -> argparse.ArgumentParser:
+    """
+    Build an argument parser.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        The argument parser.
+    """
     ap = argparse.ArgumentParser(prog="numpydoc", description=__doc__)
     subparsers = ap.add_subparsers(title="subcommands")
 
@@ -38,8 +46,8 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
 
     render = subparsers.add_parser(
         "render",
-        description="Test numpydoc docstring generation for a given object.",
-        help="generate the docstring with numpydoc",
+        description="Generate an expanded RST-version of the docstring.",
+        help="generate the RST docstring with numpydoc",
     )
     render.add_argument("import_path", help="e.g. numpy.ndarray")
     render.add_argument(
@@ -54,16 +62,65 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
 
     validate = subparsers.add_parser(
         "validate",
-        description="Validate the docstring with numpydoc.",
-        help="validate the object and report errors",
+        description="Validate an object's docstring against the numpydoc standard.",
+        help="validate the object's docstring and report errors",
     )
     validate.add_argument("import_path", help="e.g. numpy.ndarray")
     validate.set_defaults(func=validate_object)
 
-    lint_parser = validate_docstrings.get_parser(parent=subparsers)
+    project_root_from_cwd, config_file = utils.find_project_root(["."])
+    config_options = validate_docstrings.parse_config(project_root_from_cwd)
+    ignored_checks = [
+        f"- {check}: {ERROR_MSGS[check]}"
+        for check in set(ERROR_MSGS.keys()) - config_options["checks"]
+    ]
+    ignored_checks_text = "\n  " + "\n  ".join(ignored_checks) + "\n"
+
+    lint_parser = subparsers.add_parser(
+        "lint",
+        description="Run numpydoc validation on files with option to ignore individual checks.",
+        help="validate all docstrings in file(s) using the abstract syntax tree",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    lint_parser.add_argument(
+        "files", type=str, nargs="+", help="File(s) to run numpydoc validation on."
+    )
+    lint_parser.add_argument(
+        "--config",
+        type=str,
+        help=(
+            "Path to a directory containing a pyproject.toml or setup.cfg file.\n"
+            "The hook will look for it in the root project directory.\n"
+            "If both are present, only pyproject.toml will be used.\n"
+            "Options must be placed under\n"
+            "    - [tool:numpydoc_validation] for setup.cfg files and\n"
+            "    - [tool.numpydoc_validation] for pyproject.toml files."
+        ),
+    )
+    lint_parser.add_argument(
+        "--ignore",
+        type=str,
+        nargs="*",
+        help=(
+            f"""Check codes to ignore.{
+                ' Currently ignoring the following from '
+                f'{Path(project_root_from_cwd) / config_file}: {ignored_checks_text}'
+                'Values provided here will be in addition to the above, unless an alternate config is provided.'
+                if ignored_checks else ''
+            }"""
+        ),
+    )
     lint_parser.set_defaults(func=validate_docstrings.run_hook)
 
+    return ap
+
+
+def main(argv: Union[Sequence[str], None] = None) -> int:
+    """CLI for numpydoc."""
+    ap = get_parser()
+
     args = vars(ap.parse_args(argv))
+
     try:
         func = args.pop("func")
         return func(**args)

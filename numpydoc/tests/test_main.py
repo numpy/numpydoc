@@ -145,3 +145,15 @@ def test_lint(capsys, args):
     err = capsys.readouterr().err.strip("\n\r")
     assert err == expected
     assert return_status == expected_status
+
+
+def test_validate_hook_help(capsys):
+    """Test that help section is displaying."""
+
+    with pytest.raises(SystemExit):
+        return_code = numpydoc.cli.main(["lint", "--help"])
+        assert return_code == 0
+
+    out = capsys.readouterr().out
+    assert "--ignore" in out
+    assert "--config" in out
