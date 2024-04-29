@@ -23,6 +23,9 @@ jobs:
           - os: Windows
             python-version: "3.12"
             sphinx-version: "sphinx" # version shouldn't really matter here
+    defaults:
+      run:
+        shell: bash -euo pipefail
     steps:
       - uses: actions/checkout@v4
 
