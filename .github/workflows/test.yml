@@ -19,6 +19,13 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         sphinx-version:
           ["sphinx==6.0", "sphinx==6.2", "sphinx==7.0", "sphinx>=7.3"]
+        include:
+          - os: Windows
+            python-version: "3.12"
+            sphinx-version: "sphinx" # version shouldn't really matter here
+    defaults:
+      run:
+        shell: bash -eo pipefail {0}
     steps:
       - uses: actions/checkout@v4
 
@@ -59,11 +66,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install texlive texlive-latex-extra latexmk dvipng
+        if: runner.os == 'Linux'
 
       - name: Build documentation
         run: |
           make -C doc html SPHINXOPTS="-nT"
           make -C doc latexpdf SPHINXOPTS="-nT"
+        if: runner.os == 'Linux'
 
   prerelease:
     runs-on: ${{ matrix.os }}-latest
