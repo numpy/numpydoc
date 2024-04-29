@@ -64,5 +64,8 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
     lint_parser.set_defaults(func=validate_docstrings.run_hook)
 
     args = vars(ap.parse_args(argv))
-    func = args.pop("func", render_object)
-    return func(**args)
+    try:
+        func = args.pop("func")
+        return func(**args)
+    except KeyError:
+        ap.exit(status=2, message=ap.format_help())
