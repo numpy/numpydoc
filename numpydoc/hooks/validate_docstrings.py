@@ -1,6 +1,5 @@
 """Run numpydoc validation on contents of a file."""
 
-import argparse
 import ast
 import configparser
 import os
@@ -13,7 +12,7 @@ except ImportError:
     import tomli as tomllib
 
 from pathlib import Path
-from typing import Sequence, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from tabulate import tabulate
 
@@ -341,62 +340,35 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
     return docstring_visitor.findings
 
 
-def main(argv: Union[Sequence[str], None] = None) -> int:
-    """Run the numpydoc validation hook."""
+def run_hook(
+    files: List[str],
+    *,
+    config: Union[Dict[str, Any], None] = None,
+    ignore: Union[List[str], None] = None,
+) -> int:
+    """
+    Run the numpydoc validation hook.
 
-    project_root_from_cwd, config_file = find_project_root(["."])
-    config_options = parse_config(project_root_from_cwd)
-    ignored_checks = (
-        "\n  "
-        + "\n  ".join(
-            [
-                f"- {check}: {validate.ERROR_MSGS[check]}"
-                for check in set(validate.ERROR_MSGS.keys()) - config_options["checks"]
-            ]
-        )
-        + "\n"
-    )
+    Parameters
+    ----------
+    files : list[str]
+        The absolute or relative paths to the files to inspect.
+    config : Union[dict[str, Any], None], optional
+        Configuration options for reviewing flagged issues.
+    ignore : Union[list[str], None], optional
+        Checks to ignore in the results.
 
-    parser = argparse.ArgumentParser(
-        description="Run numpydoc validation on files with option to ignore individual checks.",
-        formatter_class=argparse.RawTextHelpFormatter,
-    )
-    parser.add_argument(
-        "files", type=str, nargs="+", help="File(s) to run numpydoc validation on."
-    )
-    parser.add_argument(
-        "--config",
-        type=str,
-        help=(
-            "Path to a directory containing a pyproject.toml or setup.cfg file.\n"
-            "The hook will look for it in the root project directory.\n"
-            "If both are present, only pyproject.toml will be used.\n"
-            "Options must be placed under\n"
-            "    - [tool:numpydoc_validation] for setup.cfg files and\n"
-            "    - [tool.numpydoc_validation] for pyproject.toml files."
-        ),
-    )
-    parser.add_argument(
-        "--ignore",
-        type=str,
-        nargs="*",
-        help=(
-            f"""Check codes to ignore.{
-                ' Currently ignoring the following from '
-                f'{Path(project_root_from_cwd) / config_file}: {ignored_checks}'
-                'Values provided here will be in addition to the above, unless an alternate config is provided.'
-                if config_options["checks"] else ''
-            }"""
-        ),
-    )
-
-    args = parser.parse_args(argv)
-    project_root, _ = find_project_root(args.files)
-    config_options = parse_config(args.config or project_root)
-    config_options["checks"] -= set(args.ignore or [])
+    Returns
+    -------
+    int
+        The return status: 1 if issues were found, 0 otherwise.
+    """
+    project_root, _ = find_project_root(files)
+    config_options = parse_config(config or project_root)
+    config_options["checks"] -= set(ignore or [])
 
     findings = []
-    for file in args.files:
+    for file in files:
         findings.extend(process_file(file, config_options))
 
     if findings:
@@ -411,7 +383,3 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
         )
         return 1
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
