@@ -1,18 +1,15 @@
-"""Extract reference documentation from the NumPy source tree.
+"""Extract reference documentation from the NumPy source tree."""
 
-"""
-
+import copy
 import inspect
-import textwrap
-import re
 import pydoc
-from warnings import warn
+import re
+import sys
+import textwrap
 from collections import namedtuple
 from collections.abc import Callable, Mapping
-import copy
-import sys
-
 from functools import cached_property
+from warnings import warn
 
 
 def strip_blank_lines(l):

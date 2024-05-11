@@ -1,5 +1,6 @@
 import pytest
-from numpydoc.xref import make_xref, DEFAULT_LINKS
+
+from numpydoc.xref import DEFAULT_LINKS, make_xref
 
 # Use the default numpydoc link mapping
 xref_aliases = DEFAULT_LINKS
@@ -99,7 +100,7 @@ tuple(float, float)
 
 dict[tuple(str, str), int]
 :class:`python:dict`\[:class:`python:tuple`\(:class:`python:str`, :class:`python:str`), :class:`python:int`]
-"""  # noqa: E501
+"""
 
 data_ignore_obj = r"""
 (...) array_like, float, optional
@@ -194,7 +195,7 @@ tuple(float, float)
 
 dict[tuple(str, str), int]
 :class:`python:dict`\[:class:`python:tuple`\(:class:`python:str`, :class:`python:str`), :class:`python:int`]
-"""  # noqa: E501
+"""
 
 xref_ignore = {"or", "in", "of", "default", "optional"}
 

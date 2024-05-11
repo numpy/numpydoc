@@ -2,8 +2,8 @@
 
 import itertools
 import os
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 
 def find_project_root(srcs: Sequence[str]):
@@ -31,7 +31,7 @@ def find_project_root(srcs: Sequence[str]):
         `Black <https://github.com/psf/black/blob/main/src/black/files.py>`_.
     """
     if not srcs:
-        return Path(".").resolve(), "current directory"
+        return Path().resolve(), "current directory"
 
     common_path = Path(
         os.path.commonpath([Path(src).expanduser().resolve() for src in srcs])

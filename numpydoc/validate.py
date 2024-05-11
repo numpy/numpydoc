@@ -6,8 +6,6 @@ Call ``validate(object_name_to_validate)`` to get a dictionary
 with all the detected errors.
 """
 
-from copy import deepcopy
-from typing import Dict, List, Set, Optional, Any
 import ast
 import collections
 import functools
@@ -18,9 +16,10 @@ import pydoc
 import re
 import textwrap
 import tokenize
+from copy import deepcopy
+from typing import Any, Dict, List, Optional, Set
 
 from .docscrape import get_doc_object
-
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
 DIRECTIVE_PATTERN = re.compile(
@@ -252,10 +251,10 @@ class Validator:
 
         Examples
         --------
-        >>> Validator._load_obj('datetime.datetime')
+        >>> Validator._load_obj("datetime.datetime")
         <class 'datetime.datetime'>
         """
-        for maxsplit in range(0, name.count(".") + 1):
+        for maxsplit in range(name.count(".") + 1):
             module, *func_parts = name.rsplit(".", maxsplit)
             try:
                 obj = importlib.import_module(module)

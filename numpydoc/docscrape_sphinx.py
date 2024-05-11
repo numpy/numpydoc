@@ -1,19 +1,16 @@
-import re
 import inspect
-import textwrap
-import pydoc
-from collections.abc import Callable
 import os
+import pydoc
+import re
+import textwrap
 
 from jinja2 import FileSystemLoader
 from jinja2.sandbox import SandboxedEnvironment
-import sphinx
 from sphinx.jinja2glue import BuiltinTemplateLoader
 
-from .docscrape import NumpyDocString, FunctionDoc, ClassDoc, ObjDoc
+from .docscrape import ClassDoc, FunctionDoc, NumpyDocString, ObjDoc
 from .docscrape import get_doc_object as get_doc_object_orig
 from .xref import make_xref
-
 
 IMPORT_MATPLOTLIB_RE = r"\b(import +matplotlib|from +matplotlib +import)\b"
 

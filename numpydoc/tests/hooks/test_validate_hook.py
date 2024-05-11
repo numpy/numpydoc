@@ -8,7 +8,7 @@ import pytest
 from numpydoc.hooks.validate_docstrings import run_hook
 
 
-@pytest.fixture
+@pytest.fixture()
 def example_module(request):
     fullpath = (
         Path(request.config.rootdir)

@@ -33,7 +33,7 @@ def _capture_stdout(func_name, *args, **kwargs):
 
     Examples
     --------
-    >>> _capture_stdout(print, 'hello world')
+    >>> _capture_stdout(print, "hello world")
     'hello world'
     """
     f = io.StringIO()
@@ -53,7 +53,6 @@ def _docstring_with_errors():
     ----------
     made_up_param : str
     """
-    pass
 
 
 def _invalid_docstring():
@@ -64,7 +63,6 @@ def _invalid_docstring():
     --------
     : this is invalid
     """
-    pass
 
 
 def test_renders_package_docstring():
