@@ -17,24 +17,22 @@ It will:
 
 """
 
-from copy import deepcopy
-import re
-import pydoc
-import inspect
-from collections.abc import Callable
 import hashlib
+import inspect
 import itertools
+import pydoc
+import re
+from collections.abc import Callable
+from copy import deepcopy
 
-from docutils.nodes import citation, Text, section, comment, reference, inline
-import sphinx
-from sphinx.addnodes import pending_xref, desc_content
+from docutils.nodes import Text, citation, comment, inline, reference, section
+from sphinx.addnodes import desc_content, pending_xref
 from sphinx.util import logging
-from sphinx.errors import ExtensionError
 
-from .docscrape_sphinx import get_doc_object
-from .validate import validate, ERROR_MSGS, get_validation_checks
-from .xref import DEFAULT_LINKS
 from . import __version__
+from .docscrape_sphinx import get_doc_object
+from .validate import get_validation_checks, validate
+from .xref import DEFAULT_LINKS
 
 logger = logging.getLogger(__name__)
 
@@ -248,10 +246,10 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
         return "", ""
 
     if not (isinstance(obj, Callable) or hasattr(obj, "__argspec_is_invalid_")):
-        return
+        return None
 
     if not hasattr(obj, "__doc__"):
-        return
+        return None
     doc = get_doc_object(obj, config={"show_class_members": False})
     sig = doc["Signature"] or _clean_text_signature(
         getattr(obj, "__text_signature__", None)
@@ -275,7 +273,7 @@ def _clean_text_signature(sig):
 
 def setup(app, get_doc_object_=get_doc_object):
     if not hasattr(app, "add_config_value"):
-        return  # probably called by nose, better bail out
+        return None  # probably called by nose, better bail out
 
     global get_doc_object
     get_doc_object = get_doc_object_
@@ -417,12 +415,18 @@ def match_items(lines, content_old):
 
     Examples
     --------
-    >>> lines = ['', 'A', '', 'B', '   ', '', 'C', 'D']
-    >>> lines_old = ['a', '', '', 'b', '', 'c']
-    >>> items_old = [('file1.py', 0), ('file1.py', 1), ('file1.py', 2),
-    ...              ('file2.py', 0), ('file2.py', 1), ('file2.py', 2)]
+    >>> lines = ["", "A", "", "B", "   ", "", "C", "D"]
+    >>> lines_old = ["a", "", "", "b", "", "c"]
+    >>> items_old = [
+    ...     ("file1.py", 0),
+    ...     ("file1.py", 1),
+    ...     ("file1.py", 2),
+    ...     ("file2.py", 0),
+    ...     ("file2.py", 1),
+    ...     ("file2.py", 2),
+    ... ]
     >>> content_old = ViewList(lines_old, items=items_old)
-    >>> match_items(lines, content_old) # doctest: +NORMALIZE_WHITESPACE
+    >>> match_items(lines, content_old)  # doctest: +NORMALIZE_WHITESPACE
     [('file1.py', 0), ('file1.py', 0), ('file2.py', 0), ('file2.py', 0),
      ('file2.py', 2), ('file2.py', 2), ('file2.py', 2), ('file2.py', 2)]
     >>> # first 2 ``lines`` are matched to 'a', second 2 to 'b', rest to 'c'

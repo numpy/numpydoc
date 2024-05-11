@@ -2,8 +2,9 @@
 
 import argparse
 import ast
+from collections.abc import Sequence
 from pathlib import Path
-from typing import List, Sequence, Union
+from typing import List, Union
 
 from .docscrape_sphinx import get_doc_object
 from .hooks import utils, validate_docstrings

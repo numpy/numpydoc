@@ -8,7 +8,7 @@ import pytest
 from numpydoc.hooks.validate_docstrings import run_hook
 
 
-@pytest.fixture
+@pytest.fixture()
 def example_module(request):
     fullpath = (
         Path(request.config.rootdir)
@@ -39,35 +39,35 @@ def test_validate_hook(example_module, config, capsys):
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
         | numpydoc/tests/hooks/example_module.py:4  | example_module.some_function        | EX01    | No examples section found                          |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:9  | example_module.MyClass              | ES01    | No extended summary found                          |
+        | numpydoc/tests/hooks/example_module.py:8  | example_module.MyClass              | ES01    | No extended summary found                          |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:9  | example_module.MyClass              | SA01    | See Also section not found                         |
+        | numpydoc/tests/hooks/example_module.py:8  | example_module.MyClass              | SA01    | See Also section not found                         |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:9  | example_module.MyClass              | EX01    | No examples section found                          |
+        | numpydoc/tests/hooks/example_module.py:8  | example_module.MyClass              | EX01    | No examples section found                          |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:12 | example_module.MyClass.__init__     | GL08    | The object does not have a docstring               |
+        | numpydoc/tests/hooks/example_module.py:11 | example_module.MyClass.__init__     | GL08    | The object does not have a docstring               |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | ES01    | No extended summary found                          |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | ES01    | No extended summary found                          |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented             |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented             |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description               |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description               |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | SA01    | See Also section not found                         |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | SA01    | See Also section not found                         |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | EX01    | No examples section found                          |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | EX01    | No examples section found                          |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:28 | example_module.MyClass.process      | SS05    | Summary must start with infinitive verb, not third |
+        | numpydoc/tests/hooks/example_module.py:26 | example_module.MyClass.process      | SS05    | Summary must start with infinitive verb, not third |
         |                                           |                                     |         | person (e.g. use "Generate" instead of             |
         |                                           |                                     |         | "Generates")                                       |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:28 | example_module.MyClass.process      | ES01    | No extended summary found                          |
+        | numpydoc/tests/hooks/example_module.py:26 | example_module.MyClass.process      | ES01    | No extended summary found                          |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:28 | example_module.MyClass.process      | SA01    | See Also section not found                         |
+        | numpydoc/tests/hooks/example_module.py:26 | example_module.MyClass.process      | SA01    | See Also section not found                         |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:28 | example_module.MyClass.process      | EX01    | No examples section found                          |
+        | numpydoc/tests/hooks/example_module.py:26 | example_module.MyClass.process      | EX01    | No examples section found                          |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:33 | example_module.NewClass             | GL08    | The object does not have a docstring               |
+        | numpydoc/tests/hooks/example_module.py:30 | example_module.NewClass             | GL08    | The object does not have a docstring               |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
         """
     )
@@ -90,17 +90,17 @@ def test_validate_hook_with_ignore(example_module, capsys):
         +===========================================+=====================================+=========+====================================================+
         | numpydoc/tests/hooks/example_module.py:4  | example_module.some_function        | PR01    | Parameters {'name'} not documented                 |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:12 | example_module.MyClass.__init__     | GL08    | The object does not have a docstring               |
+        | numpydoc/tests/hooks/example_module.py:11 | example_module.MyClass.__init__     | GL08    | The object does not have a docstring               |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented             |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented             |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description               |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description               |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:28 | example_module.MyClass.process      | SS05    | Summary must start with infinitive verb, not third |
+        | numpydoc/tests/hooks/example_module.py:26 | example_module.MyClass.process      | SS05    | Summary must start with infinitive verb, not third |
         |                                           |                                     |         | person (e.g. use "Generate" instead of             |
         |                                           |                                     |         | "Generates")                                       |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:33 | example_module.NewClass             | GL08    | The object does not have a docstring               |
+        | numpydoc/tests/hooks/example_module.py:30 | example_module.NewClass             | GL08    | The object does not have a docstring               |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
         """
     )
@@ -145,11 +145,11 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
         +===========================================+=====================================+=========+========================================+
         | numpydoc/tests/hooks/example_module.py:4  | example_module.some_function        | PR01    | Parameters {'name'} not documented     |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description   |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description   |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:33 | example_module.NewClass             | GL08    | The object does not have a docstring   |
+        | numpydoc/tests/hooks/example_module.py:30 | example_module.NewClass             | GL08    | The object does not have a docstring   |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
         """
     )
@@ -184,11 +184,11 @@ def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
         +===========================================+=====================================+=========+========================================+
         | numpydoc/tests/hooks/example_module.py:4  | example_module.some_function        | PR01    | Parameters {'name'} not documented     |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description   |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description   |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:33 | example_module.NewClass             | GL08    | The object does not have a docstring   |
+        | numpydoc/tests/hooks/example_module.py:30 | example_module.NewClass             | GL08    | The object does not have a docstring   |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
         """
     )
@@ -235,7 +235,7 @@ def test_validate_hook_exclude_option_pyproject(example_module, tmp_path, capsys
         +===========================================+==============================+=========+======================================+
         | numpydoc/tests/hooks/example_module.py:4  | example_module.some_function | PR01    | Parameters {'name'} not documented   |
         +-------------------------------------------+------------------------------+---------+--------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:33 | example_module.NewClass      | GL08    | The object does not have a docstring |
+        | numpydoc/tests/hooks/example_module.py:30 | example_module.NewClass      | GL08    | The object does not have a docstring |
         +-------------------------------------------+------------------------------+---------+--------------------------------------+
         """
     )
@@ -270,9 +270,9 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
         +===========================================+=====================================+=========+========================================+
         | numpydoc/tests/hooks/example_module.py:4  | example_module.some_function        | PR01    | Parameters {'name'} not documented     |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR01    | Parameters {'**kwargs'} not documented |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
-        | numpydoc/tests/hooks/example_module.py:18 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description   |
+        | numpydoc/tests/hooks/example_module.py:17 | example_module.MyClass.do_something | PR07    | Parameter "*args" has no description   |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------+
         """
     )

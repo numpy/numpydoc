@@ -1,24 +1,22 @@
-from collections import namedtuple
-from copy import deepcopy
 import re
 import textwrap
 import warnings
+from collections import namedtuple
+from copy import deepcopy
 
 import jinja2
+import pytest
+from pytest import warns as assert_warns
 
-from numpydoc.numpydoc import update_config
-from numpydoc.xref import DEFAULT_LINKS
-from numpydoc.docscrape import NumpyDocString, FunctionDoc, ClassDoc, ParseError
+from numpydoc.docscrape import ClassDoc, FunctionDoc, NumpyDocString
 from numpydoc.docscrape_sphinx import (
-    SphinxDocString,
     SphinxClassDoc,
+    SphinxDocString,
     SphinxFunctionDoc,
     get_doc_object,
 )
-import pytest
-from pytest import raises as assert_raises
-from pytest import warns as assert_warns
-
+from numpydoc.numpydoc import update_config
+from numpydoc.xref import DEFAULT_LINKS
 
 doc_txt = """\
   numpy.multivariate_normal(mean, cov, shape=None, spam=None)
@@ -316,11 +314,9 @@ That should break...
 
         def spam(self, a, b):
             """Spam\n\nSpam spam."""
-            pass
 
         def ham(self, c, d):
             """Cheese\n\nNo cheese."""
-            pass
 
     def dummy_func(arg):
         """
@@ -897,8 +893,6 @@ def test_see_also_print():
         func_d
         """
 
-        pass
-
     s = str(FunctionDoc(Dummy, role="func"))
     assert ":func:`func_a`, :func:`func_b`" in s
     assert "    some relationship" in s
@@ -940,8 +934,6 @@ This should be ignored and warned about
         ----
         This class has a nope section.
         """
-
-        pass
 
     with pytest.warns(UserWarning, match="Unknown section Mope") as record:
         NumpyDocString(doc_text)
@@ -1085,11 +1077,9 @@ def test_class_members():
 
         def spam(self, a, b):
             """Spam\n\nSpam spam."""
-            pass
 
         def ham(self, c, d):
             """Cheese\n\nNo cheese."""
-            pass
 
         @property
         def spammity(self):
@@ -1098,8 +1088,6 @@ def test_class_members():
 
         class Ignorable:
             """local class, to be ignored"""
-
-            pass
 
     for cls in (ClassDoc, SphinxClassDoc):
         doc = cls(Dummy, config=dict(show_class_members=False))
@@ -1128,11 +1116,9 @@ def test_class_members():
 
         def ham(self, c, d):
             """Cheese\n\nNo cheese.\nOverloaded Dummy.ham"""
-            pass
 
         def bar(self, a, b):
             """Bar\n\nNo bar"""
-            pass
 
     for cls in (ClassDoc, SphinxClassDoc):
         doc = cls(
@@ -1274,7 +1260,7 @@ def test_class_members_doc_sphinx():
         @property
         def an_attribute(self):
             """Test attribute"""
-            return None
+            return
 
         @property
         def no_docstring(self):
@@ -1288,12 +1274,12 @@ def test_class_members_doc_sphinx():
         def multiline_sentence(self):
             """This is a
             sentence. It spans multiple lines."""
-            return None
+            return
 
         @property
         def midword_period(self):
             """The sentence for numpy.org."""
-            return None
+            return
 
         @property
         def no_period(self):
@@ -1302,7 +1288,7 @@ def test_class_members_doc_sphinx():
 
             Apparently.
             """
-            return None
+            return
 
     doc = SphinxClassDoc(Foo, class_doc_txt)
     line_by_line_compare(
@@ -1378,7 +1364,7 @@ def test_class_attributes_as_member_list():
         @property
         def an_attribute(self):
             """Test attribute"""
-            return None
+            return
 
     attr_doc = """:Attributes:
 

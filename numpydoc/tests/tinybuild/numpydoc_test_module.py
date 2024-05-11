@@ -37,7 +37,6 @@ class MyClass:
 
     def example(self, x):
         """Example method."""
-        pass
 
 
 def my_function(*args, **kwargs):
@@ -61,4 +60,4 @@ def my_function(*args, **kwargs):
     ----------
     .. [3] https://numpydoc.readthedocs.io
     """
-    return None
+    return
