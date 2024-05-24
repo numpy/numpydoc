@@ -117,7 +117,7 @@ def test_validate_perfect_docstring():
     assert exit_status == 0
 
 
-@pytest.mark.parametrize("args", [[], ["--ignore", "ES01", "SA01", "EX01"]])
+@pytest.mark.parametrize("args", [[], ["--ignore", "ES01,SA01,EX01"]])
 def test_lint(capsys, args):
     argv = ["lint", "numpydoc/__main__.py"] + args
     if args:

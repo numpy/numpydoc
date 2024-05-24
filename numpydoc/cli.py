@@ -2,6 +2,7 @@
 
 import argparse
 import ast
+import re
 from collections.abc import Sequence
 from pathlib import Path
 from typing import List, Union
@@ -100,8 +101,6 @@ def get_parser() -> argparse.ArgumentParser:
     )
     lint_parser.add_argument(
         "--ignore",
-        type=str,
-        nargs="*",
         help=(
             f"""Check codes to ignore.{
                 ' Currently ignoring the following from '
@@ -110,6 +109,7 @@ def get_parser() -> argparse.ArgumentParser:
                 if ignored_checks else ''
             }"""
         ),
+        action="append",
     )
     lint_parser.set_defaults(func=validate_docstrings.run_hook)
 
@@ -121,6 +121,13 @@ def main(argv: Union[Sequence[str], None] = None) -> int:
     ap = get_parser()
 
     args = vars(ap.parse_args(argv))
+
+    # Parse --ignored=SA01,EX01
+    ignored_checks = []
+    if args.get("ignore", None) is not None:
+        for checks in args["ignore"]:
+            ignored_checks += re.split("\\W+", checks)
+        args["ignore"] = ignored_checks
 
     try:
         func = args.pop("func")
