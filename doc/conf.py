@@ -139,6 +139,6 @@ latex_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
-    "numpy": ("https://numpy.org/devdocs/", None),
+    "numpy": ("https://numpy.org/docs/stable/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
 }

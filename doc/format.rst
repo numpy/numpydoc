@@ -699,7 +699,7 @@ Other points to keep in mind
 * Equations : as discussed in the :ref:`Notes <notes>` section above, LaTeX
   formatting should be kept to a minimum.  Often it's possible to show
   equations as Python code or pseudo-code instead, which is much more readable
-  in a terminal.  For inline display of code use double backticks,
+  in a terminal.  For inline display of code, use double backticks
   like ````y = np.sin(x)````. For display with blank lines above and below,
   use a double colon and indent the code, like::
 
@@ -724,12 +724,13 @@ Other points to keep in mind
   (i.e. scalar types, sequence types), those arguments can be documented
   with type `array_like`.
 
-* Links : Sphinx will automatically create hyperlinks to module, function,
-  and class documentation if a recognized name is included within single
-  backticks (e.g. ```numpy``` renders as `numpy`). If you need to include
-  other hyperlinks, note that some docstring sections are not parsed as
-  standard reST, and in these sections, numpydoc may become confused by
-  hyperlink targets such as::
+* Links : Depending on project settings, hyperlinks to documentation of
+  modules, classes, functions, methods, and attributes should automatically
+  be created if a recognized name is included within single backticks (e.g.
+  ```numpy``` renders as :any:`numpy`). If you need to include other
+  hyperlinks, note that some docstring sections are not parsed as standard
+  reST, and in these sections, numpydoc may become confused by hyperlink
+  targets such as::
 
       .. _Example: http://www.example.com
 
@@ -750,18 +751,18 @@ Use of backticks in reST is a common point of confusion because it is different
 from markdown. In most flavors of markdown, single backticks are used for
 monospaced font; in reST, *double* backticks are for ``monospaced font``,
 whereas the behavior of single backticks is defined by the default role. This
-leads to the following recommendations:
+leads to the following style recommendations:
 
-- Module, function, and class names should render as hyperlinks in monospaced
-  font (e.g. `numpy`), and depending on project settings, it may be sufficient
-  to enclose them in single backticks. If the hyperlink does not render as
-  intended, explicitly include the appropriate role and/or namespace.
-- References to parameters, attributes, and methods defined within the same
-  docstring should also render as hyperlinks in monospaced font. Unless the
-  default role is reconfigured, the recommendation is to enclosed these within
-  ```single backticks```. These typically render as broken links (commonly
-  in *italics*), but there are plans to render a ``monospaced`` hyperlink in
-  a future version of numpydoc.
+- Module, class, function, method, and attribute names should render as
+  hyperlinks in monospaced font (e.g. :any:`numpy`); depending on project
+  settings, this may be accomplished simply be enclosing them in single
+  backticks. If the hyperlink does not render as intended, explicitly
+  include the appropriate role and/or namespace.
+- This guide continues to recommended that parameter names be enclosed within
+  single backticks. Currently, this may cause parameter names to render
+  improperly and cause warnings, but numpydoc will soon release a feature
+  that causes them to render as monospaced hyperlinks to the parameter
+  documentation.
 - All other text that is intended to render in ``monospaced`` font should be
   enclosed within ````double backticks````.
 
