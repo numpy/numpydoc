@@ -12,9 +12,9 @@ import os
 import sys
 from datetime import date
 
-import numpydoc
-
 from intersphinx_registry import get_intersphinx_mapping
+
+import numpydoc
 
 # for example.py
 sys.path.insert(0, os.path.abspath("."))
