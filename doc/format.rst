@@ -176,8 +176,8 @@ respective types.
       Description of parameter `y` (with type not specified).
 
 The colon must be preceded by a space, or omitted if the type is absent.
-When referring to a parameter in the description field or elsewhere within
-the same function or class docstring, enclose its name in single backticks.
+When referring to a parameter anywhere within the docstring, enclose its
+name in single backticks.
 
 For the parameter types, be as precise as possible.  Below are a
 few examples of parameters and their types.
@@ -569,8 +569,8 @@ section, may be used to describe non-method attributes of the class::
   y : float
       Description of attribute `y`.
 
-When referring to an attribute in the description field or elsewhere within
-the same class docstring, enclose its name in single backticks.
+When referring to an attribute anywhere within the docstring, enclose its
+name in single backticks.
 Attributes that are properties and have their own docstrings can be
 simply listed by name::
 
@@ -611,8 +611,8 @@ becomes useful to have an additional **Methods** section:
 
       """
 
-When referring to a method in the description field or elsewhere within
-the same class docstring, enclose its name in single backticks.
+When referring to a method anywhere within the docstring, enclose its
+name in single backticks.
 If it is necessary to explain a private method (use with care!), it can
 be referred to in the :ref:`Extended Summary <extended_summary>` or the
 :ref:`Notes <notes>` section.
@@ -728,9 +728,10 @@ Other points to keep in mind
 
 * Links : Sphinx will automatically create hyperlinks to module, function,
   and class documentation if a recognized name is included within single
-  backticks (e.g. `numpy`). If you need to include other hyperlinks, note that
-  some docstring sections are not parsed as standard reST, and in these
-  sections, numpydoc may become confused by hyperlink targets such as::
+  backticks (e.g. ```numpy``` renders as `numpy`). If you need to include
+  other hyperlinks, note that some docstring sections are not parsed as
+  standard reST, and in these sections, numpydoc may become confused by
+  hyperlink targets such as::
 
       .. _Example: http://www.example.com
 
@@ -747,18 +748,22 @@ output. New paragraphs are marked with a blank line.
 
 Use ``*italics*``, ``**bold**`` if needed in any explanations.
 
-Use of backticks in reST is a common point of confusion it is different from
-markdown:
+Use of backticks in reST is a common point of confusion because it is different
+from markdown. In most flavors of markdown, single backticks are used for
+monospaced font; in reST, *double* backticks are for ``monospaced font``,
+whereas the behavior of single backticks is defined by the default role. This
+leads to the following recommendations:
 
-- Module, function, and class names should be enclosed within ```single
-  backticks```. These are intended to render as hyperlinks (e.g. `numpy`). If
-  the hyperlinks do not render as intended, [insert reference to documentation
-  here].
+- Module, function, and class names should render as hyperlinks in monospaced
+  font (e.g. `numpy`), and depending on project settings, it may be sufficient
+  to enclose them in single backticks. If the hyperlink does not render as
+  intended, explicitly include the appropriate role and/or namespace.
 - References to parameters, attributes, and methods defined within the same
-  docstring should be enclosed within ```single backticks```. These are
-  currently rendered in *italics*, but there are plans to render a
-  ``monospaced`` hyperlink to the relevant definition in a future version of
-  numpydoc.
+  docstring should also render as hyperlinks in monospaced font. Unless the
+  default role is reconfigured, the recommendation is to enclosed these within
+  ```single backticks```. These typically render as broken links (commonly
+  in *italics*), but there are plans to render a ``monospaced`` hyperlink in
+  a future version of numpydoc.
 - All other text that is intended to render in ``monospaced`` font should be
   enclosed within ````double backticks````.
 
