@@ -53,6 +53,7 @@ doc = [
     'matplotlib>=3.5',
     'pydata-sphinx-theme>=0.13.3',
     'sphinx>=7',
+    'intersphinx_registry',
 ]
 test = [
     'pytest',

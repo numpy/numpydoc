@@ -12,6 +12,8 @@ import os
 import sys
 from datetime import date
 
+from intersphinx_registry import get_intersphinx_mapping
+
 import numpydoc
 
 # for example.py
@@ -136,9 +138,6 @@ latex_documents = [
 
 # -- Intersphinx setup ----------------------------------------------------
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "sklearn": ("https://scikit-learn.org/stable/", None),
-}
+# Example configuration for intersphinx: refer to several Python libraries.
+
+intersphinx_mapping = get_intersphinx_mapping(packages=["python", "numpy", "sklearn"])
