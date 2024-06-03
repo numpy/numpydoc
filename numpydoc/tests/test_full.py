@@ -1,13 +1,12 @@
 import os.path as op
 import re
 import shutil
-from packaging import version
 
 import pytest
-import sphinx
+from docutils import __version__ as docutils_version
+from packaging import version
 from sphinx.application import Sphinx
 from sphinx.util.docutils import docutils_namespace
-from docutils import __version__ as docutils_version
 
 
 # Test framework adapted from sphinx-gallery (BSD 3-clause)

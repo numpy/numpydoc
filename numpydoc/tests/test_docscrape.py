@@ -1,24 +1,22 @@
-from collections import namedtuple
-from copy import deepcopy
 import re
 import textwrap
 import warnings
+from collections import namedtuple
+from copy import deepcopy
 
 import jinja2
+import pytest
+from pytest import warns as assert_warns
 
-from numpydoc.numpydoc import update_config
-from numpydoc.xref import DEFAULT_LINKS
-from numpydoc.docscrape import NumpyDocString, FunctionDoc, ClassDoc, ParseError
+from numpydoc.docscrape import ClassDoc, FunctionDoc, NumpyDocString
 from numpydoc.docscrape_sphinx import (
-    SphinxDocString,
     SphinxClassDoc,
+    SphinxDocString,
     SphinxFunctionDoc,
     get_doc_object,
 )
-import pytest
-from pytest import raises as assert_raises
-from pytest import warns as assert_warns
-
+from numpydoc.numpydoc import update_config
+from numpydoc.xref import DEFAULT_LINKS
 
 doc_txt = """\
   numpy.multivariate_normal(mean, cov, shape=None, spam=None)
@@ -279,7 +277,9 @@ b : int
     The number of bananas.
 
 """
-    assert_raises(ValueError, NumpyDocString, doc_text)
+    doc = NumpyDocString(doc_text)
+    assert len(doc["Returns"]) == 1
+    assert len(doc["Yields"]) == 2
 
 
 def test_section_twice():
@@ -314,11 +314,9 @@ That should break...
 
         def spam(self, a, b):
             """Spam\n\nSpam spam."""
-            pass
 
         def ham(self, c, d):
             """Cheese\n\nNo cheese."""
-            pass
 
     def dummy_func(arg):
         """
@@ -895,8 +893,6 @@ def test_see_also_print():
         func_d
         """
 
-        pass
-
     s = str(FunctionDoc(Dummy, role="func"))
     assert ":func:`func_a`, :func:`func_b`" in s
     assert "    some relationship" in s
@@ -938,8 +934,6 @@ This should be ignored and warned about
         ----
         This class has a nope section.
         """
-
-        pass
 
     with pytest.warns(UserWarning, match="Unknown section Mope") as record:
         NumpyDocString(doc_text)
@@ -1083,11 +1077,9 @@ def test_class_members():
 
         def spam(self, a, b):
             """Spam\n\nSpam spam."""
-            pass
 
         def ham(self, c, d):
             """Cheese\n\nNo cheese."""
-            pass
 
         @property
         def spammity(self):
@@ -1096,8 +1088,6 @@ def test_class_members():
 
         class Ignorable:
             """local class, to be ignored"""
-
-            pass
 
     for cls in (ClassDoc, SphinxClassDoc):
         doc = cls(Dummy, config=dict(show_class_members=False))
@@ -1126,11 +1116,9 @@ def test_class_members():
 
         def ham(self, c, d):
             """Cheese\n\nNo cheese.\nOverloaded Dummy.ham"""
-            pass
 
         def bar(self, a, b):
             """Bar\n\nNo bar"""
-            pass
 
     for cls in (ClassDoc, SphinxClassDoc):
         doc = cls(
@@ -1272,7 +1260,7 @@ def test_class_members_doc_sphinx():
         @property
         def an_attribute(self):
             """Test attribute"""
-            return None
+            return
 
         @property
         def no_docstring(self):
@@ -1286,12 +1274,12 @@ def test_class_members_doc_sphinx():
         def multiline_sentence(self):
             """This is a
             sentence. It spans multiple lines."""
-            return None
+            return
 
         @property
         def midword_period(self):
             """The sentence for numpy.org."""
-            return None
+            return
 
         @property
         def no_period(self):
@@ -1300,7 +1288,7 @@ def test_class_members_doc_sphinx():
 
             Apparently.
             """
-            return None
+            return
 
     doc = SphinxClassDoc(Foo, class_doc_txt)
     line_by_line_compare(
@@ -1376,7 +1364,7 @@ def test_class_attributes_as_member_list():
         @property
         def an_attribute(self):
             """Test attribute"""
-            return None
+            return
 
     attr_doc = """:Attributes:
 
@@ -1639,6 +1627,63 @@ def test_class_docstring_cached_property():
     class_docstring = get_doc_object(Foo)
     assert len(class_docstring["Attributes"]) == 1
     assert class_docstring["Attributes"][0].name == "val"
+
+
+def test_namedtuple_no_duplicate_attributes():
+    """
+    Ensure that attributes of namedtuples are not duplicated in the docstring.
+
+    See gh-257
+    """
+    from collections import namedtuple
+
+    foo = namedtuple("Foo", ("bar", "baz"))
+
+    # Create the SphinxClassDoc object via get_doc_object
+    sds = get_doc_object(foo)
+    assert sds["Attributes"] == []
+
+
+def test_namedtuple_class_docstring():
+    """Ensure that class docstring is preserved when inheriting from namedtuple.
+
+    See gh-257
+    """
+    from collections import namedtuple
+
+    foo = namedtuple("Foo", ("bar", "baz"))
+
+    class MyFoo(foo):
+        """MyFoo's class docstring"""
+
+    # Create the SphinxClassDoc object via get_doc_object
+    sds = get_doc_object(MyFoo)
+    assert sds["Summary"] == ["MyFoo's class docstring"]
+
+    # Example dataclass where constructor params are documented explicit.
+    # Parameter names/descriptions should be included in the docstring, but
+    # should not result in a duplicated `Attributes` section
+    class MyFooWithParams(foo):
+        """
+        MyFoo's class docstring
+
+        Parameters
+        ----------
+        bar : str
+           The bar attribute
+        baz : str
+           The baz attribute
+        """
+
+        bar: str
+        baz: str
+
+    sds = get_doc_object(MyFooWithParams)
+    assert "MyFoo's class docstring" in sds["Summary"]
+    assert len(sds["Attributes"]) == 0
+    assert len(sds["Parameters"]) == 2
+    assert sds["Parameters"][0].desc[0] == "The bar attribute"
+    assert sds["Parameters"][1].desc[0] == "The baz attribute"
 
 
 if __name__ == "__main__":

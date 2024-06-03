@@ -1,19 +1,16 @@
-import re
 import inspect
-import textwrap
-import pydoc
-from collections.abc import Callable
 import os
+import pydoc
+import re
+import textwrap
 
 from jinja2 import FileSystemLoader
 from jinja2.sandbox import SandboxedEnvironment
-import sphinx
 from sphinx.jinja2glue import BuiltinTemplateLoader
 
-from .docscrape import NumpyDocString, FunctionDoc, ClassDoc, ObjDoc
+from .docscrape import ClassDoc, FunctionDoc, NumpyDocString, ObjDoc
 from .docscrape import get_doc_object as get_doc_object_orig
 from .xref import make_xref
-
 
 IMPORT_MATPLOTLIB_RE = r"\b(import +matplotlib|from +matplotlib +import)\b"
 
@@ -373,9 +370,11 @@ class SphinxDocString(NumpyDocString):
             "notes": self._str_section("Notes"),
             "references": self._str_references(),
             "examples": self._str_examples(),
-            "attributes": self._str_param_list("Attributes", fake_autosummary=True)
-            if self.attributes_as_param_list
-            else self._str_member_list("Attributes"),
+            "attributes": (
+                self._str_param_list("Attributes", fake_autosummary=True)
+                if self.attributes_as_param_list
+                else self._str_member_list("Attributes")
+            ),
             "methods": self._str_member_list("Methods"),
         }
         ns = {k: "\n".join(v) for k, v in ns.items()}

@@ -127,4 +127,3 @@ def foo(var1, var2, *args, long_var_name="hi", only_seldom_used_keyword=0, **kwa
     # separate following codes (according to PEP257).
     # But for function, method and module, there should be no blank lines
     # after closing the docstring.
-    pass

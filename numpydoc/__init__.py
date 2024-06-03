@@ -2,6 +2,7 @@
 This package provides the numpydoc Sphinx extension for handling docstrings
 formatted according to the NumPy documentation format.
 """
+
 from ._version import __version__
 
 

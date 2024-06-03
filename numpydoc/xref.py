@@ -16,11 +16,7 @@ import re
 
 QUALIFIED_NAME_RE = re.compile(
     # e.g int, numpy.array, ~numpy.array, .class_in_current_module
-    r"^"
-    r"[~\.]?"
-    r"[a-zA-Z_]\w*"
-    r"(?:\.[a-zA-Z_]\w*)*"
-    r"$"
+    r"^" r"[~\.]?" r"[a-zA-Z_]\w*" r"(?:\.[a-zA-Z_]\w*)*" r"$"
 )
 
 CONTAINER_SPLIT_RE = re.compile(

@@ -6,8 +6,6 @@ Call ``validate(object_name_to_validate)`` to get a dictionary
 with all the detected errors.
 """
 
-from copy import deepcopy
-from typing import Dict, List, Set, Optional
 import ast
 import collections
 import functools
@@ -18,9 +16,10 @@ import pydoc
 import re
 import textwrap
 import tokenize
+from copy import deepcopy
+from typing import Any, Dict, List, Optional, Set
 
 from .docscrape import get_doc_object
-
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
 DIRECTIVE_PATTERN = re.compile(
@@ -112,11 +111,18 @@ IGNORE_STARTS = (" ", "* ", "- ")
 IGNORE_COMMENT_PATTERN = re.compile("(?:.* numpydoc ignore[=|:] ?)(.+)")
 
 
+def _unwrap(obj):
+    """Iteratively traverse obj.__wrapped__ until first non-wrapped obj found."""
+    while hasattr(obj, "__wrapped__"):
+        obj = obj.__wrapped__
+    return obj
+
+
 # This function gets called once per function/method to be validated.
 # We have to balance memory usage with performance here. It shouldn't be too
 # bad to store these `dict`s (they should be rare), but to be safe let's keep
 # the limit low-ish. This was set by looking at scipy, numpy, matplotlib,
-# and pandas and they had between ~500 and ~1300 .py files as of 2023-08-16.
+# and pandas, and they had between ~500 and ~1300 .py files as of 2023-08-16.
 @functools.lru_cache(maxsize=2000)
 def extract_ignore_validation_comments(
     filepath: Optional[os.PathLike],
@@ -212,7 +218,7 @@ def error(code, **kwargs):
     message : str
         Error message with variables replaced.
     """
-    return (code, ERROR_MSGS[code].format(**kwargs))
+    return code, ERROR_MSGS[code].format(**kwargs)
 
 
 class Validator:
@@ -245,10 +251,10 @@ class Validator:
 
         Examples
         --------
-        >>> Validator._load_obj('datetime.datetime')
+        >>> Validator._load_obj("datetime.datetime")
         <class 'datetime.datetime'>
         """
-        for maxsplit in range(0, name.count(".") + 1):
+        for maxsplit in range(name.count(".") + 1):
             module, *func_parts = name.rsplit(".", maxsplit)
             try:
                 obj = importlib.import_module(module)
@@ -273,7 +279,7 @@ class Validator:
 
     @property
     def is_generator_function(self):
-        return inspect.isgeneratorfunction(self.obj)
+        return inspect.isgeneratorfunction(_unwrap(self.obj))
 
     @property
     def source_file_name(self):
@@ -290,11 +296,17 @@ class Validator:
 
         except TypeError:
             # In some cases the object is something complex like a cython
-            # object that can't be easily introspected. An it's better to
+            # object that can't be easily introspected. And it's better to
             # return the source code file of the object as None, than crash
             pass
         else:
             return fname
+
+    # When calling validate, files are parsed twice
+    @staticmethod
+    @functools.lru_cache(maxsize=4000)
+    def _getsourcelines(obj: Any):
+        return inspect.getsourcelines(obj)
 
     @property
     def source_file_def_line(self):
@@ -303,11 +315,11 @@ class Validator:
         """
         try:
             if isinstance(self.code_obj, property):
-                sourcelines = inspect.getsourcelines(self.code_obj.fget)
+                sourcelines = self._getsourcelines(self.code_obj.fget)
             elif isinstance(self.code_obj, functools.cached_property):
-                sourcelines = inspect.getsourcelines(self.code_obj.func)
+                sourcelines = self._getsourcelines(self.code_obj.func)
             else:
-                sourcelines = inspect.getsourcelines(self.code_obj)
+                sourcelines = self._getsourcelines(self.code_obj)
             # getsourcelines will return the line of the first decorator found for the
             # current function. We have to find the def declaration after that.
             def_line = next(
@@ -320,7 +332,7 @@ class Validator:
             return sourcelines[-1] + def_line
         except (OSError, TypeError):
             # In some cases the object is something complex like a cython
-            # object that can't be easily introspected. An it's better to
+            # object that can't be easily introspected. And it's better to
             # return the line number as None, than crash
             pass
 
@@ -521,9 +533,9 @@ class Validator:
         if tree:
             returns = get_returns_not_on_nested_functions(tree[0])
             return_values = [r.value for r in returns]
-            # Replace NameConstant nodes valued None for None.
+            # Replace Constant nodes valued None for None.
             for i, v in enumerate(return_values):
-                if isinstance(v, ast.NameConstant) and v.value is None:
+                if isinstance(v, ast.Constant) and v.value is None:
                     return_values[i] = None
             return any(return_values)
         else:
@@ -613,7 +625,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
     else:
         doc = validator_cls(obj_name=obj_name, **validator_kwargs)
 
-    # lineno is only 0 if we have a module docstring in the file and we are
+    # lineno is only 0 if we have a module docstring in the file, and we are
     # validating that, so we change to 1 for readability of the output
     ignore_validation_comments = extract_ignore_validation_comments(
         doc.source_file_name

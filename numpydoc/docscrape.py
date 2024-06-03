@@ -1,17 +1,15 @@
-"""Extract reference documentation from the NumPy source tree.
+"""Extract reference documentation from the NumPy source tree."""
 
-"""
+import copy
 import inspect
-import textwrap
-import re
 import pydoc
-from warnings import warn
+import re
+import sys
+import textwrap
 from collections import namedtuple
 from collections.abc import Callable, Mapping
-import copy
-import sys
-
 from functools import cached_property
+from warnings import warn
 
 
 def strip_blank_lines(l):
@@ -393,12 +391,8 @@ class NumpyDocString(Mapping):
         sections = list(self._read_sections())
         section_names = {section for section, content in sections}
 
-        has_returns = "Returns" in section_names
         has_yields = "Yields" in section_names
         # We could do more tests, but we are not. Arbitrarily.
-        if has_returns and has_yields:
-            msg = "Docstring contains both a Returns and Yields section."
-            raise ValueError(msg)
         if not has_yields and "Receives" in section_names:
             msg = "Docstring contains a Receives section but not Yields."
             raise ValueError(msg)
@@ -705,6 +699,7 @@ class ClassDoc(NumpyDocString):
             for name, func in inspect.getmembers(self._cls)
             if (
                 not name.startswith("_")
+                and not self._should_skip_member(name, self._cls)
                 and (
                     func is None
                     or isinstance(func, (property, cached_property))
@@ -713,6 +708,19 @@ class ClassDoc(NumpyDocString):
                 and self._is_show_member(name)
             )
         ]
+
+    @staticmethod
+    def _should_skip_member(name, klass):
+        if (
+            # Namedtuples should skip everything in their ._fields as the
+            # docstrings for each of the members is: "Alias for field number X"
+            issubclass(klass, tuple)
+            and hasattr(klass, "_asdict")
+            and hasattr(klass, "_fields")
+            and name in klass._fields
+        ):
+            return True
+        return False
 
     def _is_show_member(self, name):
         if self.show_inherited_members:

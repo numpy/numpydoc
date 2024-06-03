@@ -1,13 +1,14 @@
-import pytest
-import sys
 import warnings
 from contextlib import nullcontext
-from functools import cached_property, partial
-from inspect import getsourcelines, getsourcefile
+from functools import cached_property, partial, wraps
+from inspect import getsourcefile, getsourcelines
 
-from numpydoc import validate
+import pytest
+
 import numpydoc.tests
-
+from numpydoc import validate
+from numpydoc.docscrape import get_doc_object
+from numpydoc.validate import Validator
 
 validate_one = validate.validate
 
@@ -149,7 +150,6 @@ class GoodDocStrings:
     def one_liner(self):
         """Allow one liner docstrings (including quotes)."""
         # This should fail, but not because of the position of the quotes
-        pass
 
     def plot(self, kind, color="blue", **kwargs):
         """
@@ -163,7 +163,7 @@ class GoodDocStrings:
         kind : str
             Kind of matplotlib plot, e.g.::
 
-                'foo'
+                "foo"
 
         color : str, default 'blue'
             Color name or rgb code.
@@ -179,7 +179,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def swap(self, arr, i, j, *args, **kwargs):
         """
@@ -205,7 +204,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def sample(self):
         """
@@ -229,7 +227,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def random_letters(self):
         """
@@ -255,7 +252,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def sample_values(self):
         """
@@ -277,7 +273,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def head(self):
         """
@@ -413,7 +408,6 @@ class GoodDocStrings:
         >>> s * 2
         50
         """
-        pass
 
     def mode(self, axis, numeric_only):
         """
@@ -445,7 +439,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def good_imports(self):
         """
@@ -465,7 +458,6 @@ class GoodDocStrings:
         >>> datetime.MAXYEAR
         9999
         """
-        pass
 
     def no_returns(self):
         """
@@ -482,7 +474,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def empty_returns(self):
         """
@@ -507,7 +498,7 @@ class GoodDocStrings:
         if True:
             return
         else:
-            return None
+            return
 
     def warnings(self):
         """
@@ -528,7 +519,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def multiple_variables_on_one_line(self, matrix, a, b, i, j):
         """
@@ -554,7 +544,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def other_parameters(self, param1, param2):
         """
@@ -581,7 +570,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def valid_options_in_parameter_description_sets(self, bar):
         """
@@ -627,7 +615,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def parameter_with_wrong_types_as_substrings(self, a, b, c, d, e, f):
         r"""
@@ -661,7 +648,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
 
 class BadGenericDocStrings:
@@ -692,7 +678,6 @@ class BadGenericDocStrings:
 
         Verb in third-person of the present simple, should be infinitive.
         """
-        pass
 
     def astype1(self, dtype):
         """
@@ -700,7 +685,6 @@ class BadGenericDocStrings:
 
         Does not start with verb.
         """
-        pass
 
     def astype2(self, dtype):
         """
@@ -708,7 +692,6 @@ class BadGenericDocStrings:
 
         Missing dot at the end.
         """
-        pass
 
     def astype3(self, dtype):
         """
@@ -717,7 +700,6 @@ class BadGenericDocStrings:
 
         Summary is too verbose and doesn't fit in a single line.
         """
-        pass
 
     def two_linebreaks_between_sections(self, foo):
         """
@@ -731,7 +713,6 @@ class BadGenericDocStrings:
         foo : str
             Description of foo parameter.
         """
-        pass
 
     def linebreak_at_end_of_docstring(self, foo):
         """
@@ -745,7 +726,6 @@ class BadGenericDocStrings:
             Description of foo parameter.
 
         """
-        pass
 
     def plot(self, kind, **kwargs):
         """
@@ -769,7 +749,6 @@ class BadGenericDocStrings:
         kind: str
             kind of matplotlib plot
         """
-        pass
 
     def unknown_section(self):
         """
@@ -791,7 +770,7 @@ class BadGenericDocStrings:
 
         Examples
         --------
-        >>> print('So far Examples is good, as it goes before Parameters')
+        >>> print("So far Examples is good, as it goes before Parameters")
         So far Examples is good, as it goes before Parameters
 
         See Also
@@ -834,7 +813,6 @@ class BadGenericDocStrings:
             .. deprecated 0.00.0
 
         """
-        pass
 
 
 class WarnGenericFormat:
@@ -851,7 +829,6 @@ class WarnGenericFormat:
         a, b : int
             Foo bar baz.
         """
-        pass
 
 
 class BadSummaries:
@@ -877,19 +854,16 @@ class BadSummaries:
         """Quotes are on the wrong line.
 
         Both opening and closing."""
-        pass
 
     def no_punctuation(self):
         """
         Has the right line but forgets punctuation
         """
-        pass
 
     def no_capitalization(self):
         """
         provides a lowercase summary.
         """
-        pass
 
     def no_infinitive(self):
         """
@@ -1021,7 +995,6 @@ class BadParameters:
         kind : str
             Foo bar baz.
         """
-        pass
 
     def integer_parameter(self, kind):
         """
@@ -1032,7 +1005,6 @@ class BadParameters:
         kind : integer
             Foo bar baz.
         """
-        pass
 
     def string_parameter(self, kind):
         """
@@ -1043,7 +1015,6 @@ class BadParameters:
         kind : string
             Foo bar baz.
         """
-        pass
 
     def boolean_parameter(self, kind):
         """
@@ -1054,7 +1025,6 @@ class BadParameters:
         kind : boolean
             Foo bar baz.
         """
-        pass
 
     def list_incorrect_parameter_type(self, kind):
         """
@@ -1065,7 +1035,6 @@ class BadParameters:
         kind : list of boolean, integer, float or string
             Foo bar baz.
         """
-        pass
 
     def bad_parameter_spacing(self, a, b):
         """
@@ -1076,7 +1045,6 @@ class BadParameters:
         a,  b : int
             Foo bar baz.
         """
-        pass
 
 
 class BadReturns:
@@ -1170,7 +1138,6 @@ class BadSeeAlso:
         --------
         Series.tail
         """
-        pass
 
     def desc_no_period(self):
         """
@@ -1182,7 +1149,6 @@ class BadSeeAlso:
         Series.iloc : Return a slice of the elements in the Series,
             which can also be used to return the first or last n
         """
-        pass
 
     def desc_first_letter_lowercase(self):
         """
@@ -1194,7 +1160,6 @@ class BadSeeAlso:
         Series.iloc : Return a slice of the elements in the Series,
             which can also be used to return the first or last n.
         """
-        pass
 
     def prefix_pandas(self):
         """
@@ -1205,7 +1170,6 @@ class BadSeeAlso:
         pandas.Series.rename : Alter Series index labels or name.
         DataFrame.head : The first `n` rows of the caller object.
         """
-        pass
 
 
 class BadExamples:
@@ -1213,28 +1177,25 @@ class BadExamples:
         """
         Examples
         --------
-        >>> 2+5
+        >>> 2 + 5
         7
         """
-        pass
 
     def indentation_is_not_a_multiple_of_four(self):
         """
         Examples
         --------
         >>> if 2 + 5:
-        ...   pass
+        ...     pass
         """
-        pass
 
     def missing_whitespace_after_comma(self):
         """
         Examples
         --------
         >>> import datetime
-        >>> value = datetime.date(2019,1,1)
+        >>> value = datetime.date(2019, 1, 1)
         """
-        pass
 
 
 class TestValidator:
@@ -1325,7 +1286,7 @@ class TestValidator:
     def test_bad_generic_functions(self, capsys, func):
         with pytest.warns(UserWarning):
             errors = validate_one(
-                self._import_path(klass="WarnGenericFormat", func=func)  # noqa:F821
+                self._import_path(klass="WarnGenericFormat", func=func)
             )
         assert "is too short" in w.msg
 
@@ -1343,7 +1304,7 @@ class TestValidator:
     )
     def test_bad_generic_functions(self, capsys, func):
         errors = validate_one(
-            self._import_path(klass="BadGenericDocStrings", func=func)  # noqa:F821
+            self._import_path(klass="BadGenericDocStrings", func=func)
         )["errors"]
         assert isinstance(errors, list)
         assert errors
@@ -1599,24 +1560,20 @@ class DecoratorClass:
 
     def test_no_decorator(self):
         """Test method without decorators."""
-        pass
 
     @property
     def test_property(self):
         """Test property method."""
-        pass
 
     @cached_property
     def test_cached_property(self):
         """Test property method."""
-        pass
 
     @decorator
     @decorator
     @decorator
     def test_three_decorators(self):
         """Test method with three decorators."""
-        pass
 
 
 class TestValidatorClass:
@@ -1636,15 +1593,12 @@ class TestValidatorClass:
         with pytest.raises(AttributeError, match=msg):
             numpydoc.validate.Validator._load_obj(invalid_name)
 
-    # inspect.getsourcelines does not return class decorators for Python 3.8. This was
-    # fixed starting with 3.9: https://github.com/python/cpython/issues/60060.
     @pytest.mark.parametrize(
         ["decorated_obj", "def_line"],
         [
             [
                 "numpydoc.tests.test_validate.DecoratorClass",
-                getsourcelines(DecoratorClass)[-1]
-                + (2 if sys.version_info.minor > 8 else 0),
+                getsourcelines(DecoratorClass)[-1] + 2,
             ],
             [
                 "numpydoc.tests.test_validate.DecoratorClass.test_no_decorator",
@@ -1692,3 +1646,43 @@ class TestValidatorClass:
             )
         )
         assert doc.source_file_name == file_name
+
+
+def test_is_generator_validation_with_decorator():
+    """Ensure that the check for a Yields section when an object is a generator
+    (YD01) works with decorated generators."""
+
+    def tinsel(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    def foo():
+        """A simple generator"""
+        yield from range(10)
+
+    @tinsel
+    def bar():
+        """Generator wrapped once"""
+        yield from range(10)
+
+    @tinsel
+    @tinsel
+    @tinsel
+    def baz():
+        """Generator wrapped multiple times"""
+        yield from range(10)
+
+    # foo without wrapper is a generator
+    v = Validator(get_doc_object(foo))
+    assert v.is_generator_function
+
+    # Wrapped once
+    v = Validator(get_doc_object(bar))
+    assert v.is_generator_function
+
+    # Wrapped multiple times
+    v = Validator(get_doc_object(baz))
+    assert v.is_generator_function

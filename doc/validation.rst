@@ -22,7 +22,7 @@ command line options for this hook:
 
 .. code-block:: bash
 
-    $ python -m numpydoc.hooks.validate_docstrings --help
+    $ numpydoc lint --help
 
 Using a config file provides additional customization. Both ``pyproject.toml``
 and ``setup.cfg`` are supported; however, if the project contains both
@@ -33,7 +33,7 @@ the pre-commit hook as follows:
   ``ES01`` (using the same logic as the :ref:`validation during Sphinx build
   <validation_during_sphinx_build>` for ``numpydoc_validation_checks``).
 * ``exclude``: Don't report issues on objects matching any of the regular
-  regular expressions ``\.undocumented_method$`` or ``\.__repr__$``. This
+  expressions ``\.undocumented_method$`` or ``\.__repr__$``. This
   maps to ``numpydoc_validation_exclude`` from the
   :ref:`Sphinx build configuration <validation_during_sphinx_build>`.
 * ``override_SS05``: Allow docstrings to start with "Process ", "Assess ",
@@ -52,6 +52,7 @@ the pre-commit hook as follows:
         "SA01",
         "ES01",
     ]
+    # remember to use single quotes for regex in TOML
     exclude = [  # don't report on objects that match any of these regex
         '\.undocumented_method$',
         '\.__repr__$',
@@ -102,12 +103,12 @@ can be called. For example, to do it for ``numpy.ndarray``, use:
 
 .. code-block:: bash
 
-    $ python -m numpydoc numpy.ndarray
+    $ numpydoc validate numpy.ndarray
 
 This will validate that the docstring can be built.
 
 For an exhaustive validation of the formatting of the docstring, use the
-``--validate`` parameter. This will report the errors detected, such as
+``validate`` subcommand. This will report the errors detected, such as
 incorrect capitalization, wrong order of the sections, and many other
 issues. Note that this will honor :ref:`inline ignore comments <inline_ignore_comments>`,
 but will not look for any configuration like the :ref:`pre-commit hook <pre_commit_hook>`
