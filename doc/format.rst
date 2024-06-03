@@ -699,9 +699,7 @@ Other points to keep in mind
 * Equations : as discussed in the :ref:`Notes <notes>` section above, LaTeX
   formatting should be kept to a minimum.  Often it's possible to show
   equations as Python code or pseudo-code instead, which is much more readable
-  in a terminal.  For inline display of code (other than individual
-  :ref:`Parameters <params>`, :ref:`class members <classdoc>`, and linked
-  modules,functions, and classes; see "Links" below), use double backticks,
+  in a terminal.  For inline display of code use double backticks,
   like ````y = np.sin(x)````. For display with blank lines above and below,
   use a double colon and indent the code, like::
 
