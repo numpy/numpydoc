@@ -753,18 +753,26 @@ monospaced font; in reST, *double* backticks are for ``monospaced font``,
 whereas the behavior of single backticks is defined by the default role. This
 leads to the following style recommendations:
 
-- Module, class, function, method, and attribute names should render as
-  hyperlinks in monospaced font (e.g. :any:`numpy`); depending on project
-  settings, this may be accomplished simply be enclosing them in single
-  backticks. If the hyperlink does not render as intended, explicitly
-  include the appropriate role and/or namespace.
+- Any object that can be linked to should be enclosed in single backticks. That
+  is to say : Module, class, function, method, and attribute names are some of
+  the objects that should be enclosed in single backticks. On a case by cases,
+  instances may also be included in single backticks, like :py:obj:`None`,
+  :py:obj:`True`, :py:obj:`False`.
+
+  These will typically render as hyperlinks in monospaced font (e.g.
+  :any:`numpy`) to the relevant object documentation; depending on project
+  settings. If the hyperlink does not render properly or point to the intended
+  object, explicitly include the appropriate role and/or namespace.
+
 - This guide continues to recommended that parameter names be enclosed within
   single backticks. Currently, this may cause parameter names to render
   improperly and cause warnings, but numpydoc will soon release a feature
   that causes them to render as monospaced hyperlinks to the parameter
   documentation.
-- All other text that is intended to render in ``monospaced`` font should be
-  enclosed within ````double backticks````.
+
+- All other text that is intended to render in ``monospaced`` font and is not
+  supposed to refer to another docs page should be enclosed within ````double
+  backticks````.
 
 A more extensive example of reST markup can be found in `this example
 document <http://docutils.sourceforge.net/docs/user/rst/demo.txt>`_;
