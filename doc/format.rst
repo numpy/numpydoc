@@ -753,9 +753,8 @@ monospaced font; in reST, *double* backticks are for ``monospaced font``,
 whereas the behavior of single backticks is defined by the default role. This
 leads to the following style recommendations:
 
-- Any object that can be linked to should be enclosed in single backticks. That
-  is to say : Module, class, function, method, and attribute names are some of
-  the objects that should be enclosed in single backticks. On a case by cases,
+- For example, module, class, function, method, and attribute names
+  should be enclosed in single backticks. On a case-by-case basis,
   instances may also be included in single backticks, like :py:obj:`None`,
   :py:obj:`True`, :py:obj:`False`.
 
