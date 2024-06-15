@@ -278,6 +278,12 @@ class Validator:
         return inspect.isfunction(self.obj)
 
     @property
+    def is_overload(self) -> bool:
+        # Not sure how to figure out when a function is overloaded
+        # without looking at its AST
+        return False
+
+    @property
     def is_generator_function(self):
         return inspect.isgeneratorfunction(_unwrap(self.obj))
 
@@ -633,7 +639,8 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
 
     errs = []
     if not doc.raw_doc:
-        if "GL08" not in ignore_validation_comments:
+        # Check if we are dealing with a `typing.overload` function
+        if "GL08" not in ignore_validation_comments and not doc.is_overload:
             errs.append(error("GL08"))
         return {
             "type": doc.type,
