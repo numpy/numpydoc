@@ -81,7 +81,7 @@ DEFAULT_LINKS = {
     "np.ndarray": "numpy.ndarray",
     "array-like": ":term:`numpy:array_like`",
     "array_like": ":term:`numpy:array_like`",
-    "ArrayLike": ":term:`numpy.typing.ArrayLike`",
+    "ArrayLike": "`numpy.typing.ArrayLike`",
     "scalar": ":ref:`scalar <numpy:arrays.scalars>`",
     "RandomState": "numpy.random.RandomState",
     "np.random.RandomState": "numpy.random.RandomState",
