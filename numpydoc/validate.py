@@ -23,7 +23,7 @@ from .docscrape import get_doc_object
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
 DIRECTIVE_PATTERN = re.compile(
-    r"^\s*\.\. ({})(?!::)".format("|".join(DIRECTIVES)), re.I | re.M
+    r"^\s*\.\. ({})(?!::)".format("|".join(DIRECTIVES)), re.IGNORECASE | re.MULTILINE
 )
 ALLOWED_SECTIONS = [
     "Parameters",

@@ -711,23 +711,22 @@ class ClassDoc(NumpyDocString):
 
     @staticmethod
     def _should_skip_member(name, klass):
-        if (
+        return (
             # Namedtuples should skip everything in their ._fields as the
             # docstrings for each of the members is: "Alias for field number X"
             issubclass(klass, tuple)
             and hasattr(klass, "_asdict")
             and hasattr(klass, "_fields")
             and name in klass._fields
-        ):
-            return True
-        return False
+        )
 
     def _is_show_member(self, name):
-        if self.show_inherited_members:
-            return True  # show all class members
-        if name not in self._cls.__dict__:
-            return False  # class member is inherited, we do not show it
-        return True
+        return (
+            # show all class members
+            self.show_inherited_members
+            # or class member is not inherited
+            or name in self._cls.__dict__
+        )
 
 
 def get_doc_object(

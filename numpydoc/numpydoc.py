@@ -58,7 +58,9 @@ def rename_references(app, what, name, obj, options, lines):
     references = set()
     for line in lines:
         line = line.strip()
-        m = re.match(r"^\.\. +\[(%s)\]" % app.config.numpydoc_citation_re, line, re.I)
+        m = re.match(
+            r"^\.\. +\[(%s)\]" % app.config.numpydoc_citation_re, line, re.IGNORECASE
+        )
         if m:
             references.add(m.group(1))
 
@@ -185,7 +187,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
     if what == "module":
         # Strip top title
         pattern = "^\\s*[#*=]{4,}\\n[a-z0-9 -]+\\n[#*=]{4,}\\s*"
-        title_re = re.compile(pattern, re.I | re.S)
+        title_re = re.compile(pattern, re.IGNORECASE | re.DOTALL)
         lines[:] = title_re.sub("", u_NL.join(lines)).split(u_NL)
     else:
         try:
