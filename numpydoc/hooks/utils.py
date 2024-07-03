@@ -31,7 +31,7 @@ def find_project_root(srcs: Sequence[str]):
         `Black <https://github.com/psf/black/blob/main/src/black/files.py>`_.
     """
     if not srcs:
-        return Path().resolve(), "current directory"
+        return Path.cwd(), "current directory"
 
     common_path = Path(
         os.path.commonpath([Path(src).expanduser().resolve() for src in srcs])
