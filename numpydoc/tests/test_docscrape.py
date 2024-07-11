@@ -1203,6 +1203,17 @@ class_doc_txt = """
     b
     c
 
+    Other Parameters
+    ----------------
+
+    another parameter : str
+        This parameter is less important.
+
+    Notes
+    -----
+
+    Some notes about the class.
+
     Examples
     --------
     For usage examples, see `ode`.
@@ -1222,10 +1233,6 @@ def test_class_members_doc():
         Aaa.
     jac : callable ``jac(t, y, *jac_args)``
         Bbb.
-
-    Examples
-    --------
-    For usage examples, see `ode`.
 
     Attributes
     ----------
@@ -1250,6 +1257,21 @@ def test_class_members_doc():
     a
     b
     c
+
+    Other Parameters
+    ----------------
+
+    another parameter : str
+        This parameter is less important.
+
+    Notes
+    -----
+
+    Some notes about the class.
+
+    Examples
+    --------
+    For usage examples, see `ode`.
 
     """,
     )
@@ -1304,10 +1326,6 @@ def test_class_members_doc_sphinx():
         **jac** : callable ``jac(t, y, *jac_args)``
             Bbb.
 
-    .. rubric:: Examples
-
-    For usage examples, see `ode`.
-
     :Attributes:
 
         **t** : float
@@ -1344,6 +1362,19 @@ def test_class_members_doc_sphinx():
     **b**
     **c**
     =====  ==========
+
+    .. rubric:: Other Parameters
+
+    **another parameter** : str
+        This parameter is less important.
+
+    .. rubric:: Notes
+
+    Some notes about the class.
+
+    .. rubric:: Examples
+
+    For usage examples, see `ode`.
 
     """,
     )
