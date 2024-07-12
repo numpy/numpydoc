@@ -1260,13 +1260,11 @@ def test_class_members_doc():
 
     Other Parameters
     ----------------
-
     another parameter : str
         This parameter is less important.
 
     Notes
     -----
-
     Some notes about the class.
 
     Examples
@@ -1363,10 +1361,10 @@ def test_class_members_doc_sphinx():
     **c**
     =====  ==========
 
-    .. rubric:: Other Parameters
+    :Other Parameters:
 
-    **another parameter** : str
-        This parameter is less important.
+        **another parameter** : str
+            This parameter is less important.
 
     .. rubric:: Notes
 
