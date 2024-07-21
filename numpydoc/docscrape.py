@@ -344,7 +344,7 @@ class NumpyDocString(Mapping):
 
     def _parse_index(self, section, content):
         """
-        .. index: default
+        .. index:: default
            :refguide: something, else, and more
 
         """
@@ -446,7 +446,7 @@ class NumpyDocString(Mapping):
         if error:
             raise ValueError(msg)
         else:
-            warn(msg)
+            warn(msg, stacklevel=3)
 
     # string conversion routines
 
