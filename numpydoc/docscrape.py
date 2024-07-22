@@ -120,17 +120,17 @@ class NumpyDocString(Mapping):
         "Summary": [""],
         "Extended Summary": [],
         "Parameters": [],
+        "Attributes": [],
+        "Methods": [],
         "Returns": [],
         "Yields": [],
         "Receives": [],
+        "Other Parameters": [],
         "Raises": [],
         "Warns": [],
-        "Other Parameters": [],
-        "Attributes": [],
-        "Methods": [],
+        "Warnings": [],
         "See Also": [],
         "Notes": [],
-        "Warnings": [],
         "References": "",
         "Examples": "",
         "index": {},
@@ -549,8 +549,10 @@ class NumpyDocString(Mapping):
         out += self._str_signature()
         out += self._str_summary()
         out += self._str_extended_summary()
+        out += self._str_param_list("Parameters")
+        for param_list in ("Attributes", "Methods"):
+            out += self._str_param_list(param_list)
         for param_list in (
-            "Parameters",
             "Returns",
             "Yields",
             "Receives",
@@ -563,8 +565,6 @@ class NumpyDocString(Mapping):
         out += self._str_see_also(func_role)
         for s in ("Notes", "References", "Examples"):
             out += self._str_section(s)
-        for param_list in ("Attributes", "Methods"):
-            out += self._str_param_list(param_list)
         out += self._str_index()
         return "\n".join(out)
 

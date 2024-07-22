@@ -359,6 +359,12 @@ class SphinxDocString(NumpyDocString):
             "summary": self._str_summary(),
             "extended_summary": self._str_extended_summary(),
             "parameters": self._str_param_list("Parameters"),
+            "attributes": (
+                self._str_param_list("Attributes", fake_autosummary=True)
+                if self.attributes_as_param_list
+                else self._str_member_list("Attributes")
+            ),
+            "methods": self._str_member_list("Methods"),
             "returns": self._str_returns("Returns"),
             "yields": self._str_returns("Yields"),
             "receives": self._str_returns("Receives"),
@@ -370,12 +376,6 @@ class SphinxDocString(NumpyDocString):
             "notes": self._str_section("Notes"),
             "references": self._str_references(),
             "examples": self._str_examples(),
-            "attributes": (
-                self._str_param_list("Attributes", fake_autosummary=True)
-                if self.attributes_as_param_list
-                else self._str_member_list("Attributes")
-            ),
-            "methods": self._str_member_list("Methods"),
         }
         ns = {k: "\n".join(v) for k, v in ns.items()}
 
