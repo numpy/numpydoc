@@ -1,7 +1,7 @@
-1.8.0rc1
+1.8.0rc2
 ========
 
-We're happy to announce the release of numpydoc 1.8.0rc1!
+We're happy to announce the release of numpydoc 1.8.0rc2!
 
 Enhancements
 ------------
@@ -41,6 +41,7 @@ Maintenance
 - Fix navbar for documentation pages (`#569 <https://github.com/numpy/numpydoc/pull/569>`_).
 - [pre-commit.ci] pre-commit autoupdate (`#570 <https://github.com/numpy/numpydoc/pull/570>`_).
 - docscrape: fixes from SciPy (`#576 <https://github.com/numpy/numpydoc/pull/576>`_).
+- MAINT: Remove scale to work around PyPI bug (`#578 <https://github.com/numpy/numpydoc/pull/578>`_).
 
 Contributors
 ------------
