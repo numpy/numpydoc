@@ -67,7 +67,7 @@ numpydoc = 'numpydoc.cli:main'
 [tool.changelist]
 title_template = "{version}"
 # Profiles that are excluded from the contributor list.
-ignored_user_logins = ["dependabot[bot]", "pre-commit-ci[bot]"]
+ignored_user_logins = ["dependabot[bot]", "pre-commit-ci[bot]", "web-flow"]
 
 [tool.ruff.lint]
 extend-select = [
