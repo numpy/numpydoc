@@ -2,6 +2,17 @@
 numpydoc -- Numpy's Sphinx extensions
 =====================================
 
+.. image:: https://readthedocs.org/projects/numpydoc/badge/?version=latest
+   :alt: Documentation Status
+   :scale: 100%
+   :target: https://numpydoc.readthedocs.io/en/latest/
+
+.. image:: https://codecov.io/gh/numpy/numpydoc/branch/main/graph/badge.svg
+   :target: https://app.codecov.io/gh/numpy/numpydoc/branch/main
+
+.. image:: https://github.com/numpy/numpydoc/actions/workflows/test.yml/badge.svg?branch=main
+   :target: https://github.com/numpy/numpydoc/actions/workflows/test.yml
+
 This package provides the ``numpydoc`` Sphinx extension for handling
 docstrings formatted according to the NumPy documentation format.
 The extension also adds the code description directives
