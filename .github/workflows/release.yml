@@ -1,11 +1,36 @@
 name: Build Wheel and Release
 on:
+  pull_request:
+    branches:
+      - main
   push:
     tags:
       - v*
 
 jobs:
+  sdist_wheel:
+    name: sdist and wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build wheels
+        run: |
+          git clean -fxd
+          pip install -U build twine wheel
+          python -m build --sdist --wheel
+      - run: twine check --strict dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
   pypi-publish:
+    needs: sdist_wheel
     name: upload release to PyPI
     if: github.repository_owner == 'numpy' && startsWith(github.ref, 'refs/tags/v') && github.actor == 'jarrodmillman' && always()
     runs-on: ubuntu-latest
@@ -15,20 +40,8 @@ jobs:
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v5
-        name: Install Python
-        with:
-          python-version: "3.12"
-
-      - name: Build wheels
-        run: |
-          git clean -fxd
-          pip install -U build twine wheel
-          python -m build --sdist --wheel
-
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+          name: dist
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
