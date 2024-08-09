@@ -1,7 +1,7 @@
-1.8.0rc2
-========
+1.8.0
+=====
 
-We're happy to announce the release of numpydoc 1.8.0rc2!
+We're happy to announce the release of numpydoc 1.8.0!
 
 Enhancements
 ------------
