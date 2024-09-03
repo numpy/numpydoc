@@ -61,6 +61,11 @@ class AstValidator(validate.Validator):
         return isinstance(self.node, (ast.FunctionDef, ast.AsyncFunctionDef))
 
     @property
+    def is_overload(self) -> bool:
+        decorators = getattr(self.node, "decorator_list", [])
+        return any(d.id == "overload" for d in decorators)
+
+    @property
     def is_generator_function(self) -> bool:
         if not self.is_function_or_method:
             return False
