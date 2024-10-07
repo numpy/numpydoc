@@ -3,7 +3,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # frozen: v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
@@ -18,14 +18,14 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: f12edd9c7be1c20cfa42420fd0e6df71e42b51ea  # frozen: v4.0.0-alpha.8
+    rev: f12edd9c7be1c20cfa42420fd0e6df71e42b51ea # frozen: v4.0.0-alpha.8
     hooks:
       - id: prettier
         types_or: [yaml, toml, markdown, css, scss, javascript, json]
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "75b98813cfb7e663870a28c74366a1e99d7bfe79"  # frozen: v0.6.9
+    rev: "75b98813cfb7e663870a28c74366a1e99d7bfe79" # frozen: v0.6.9
     hooks:
       - id: ruff
         args: ["--fix", "--show-fixes", "--exit-non-zero-on-fix"]
