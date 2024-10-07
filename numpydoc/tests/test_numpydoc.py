@@ -142,7 +142,7 @@ def test_clean_text_signature():
     assert _clean_text_signature("func($self, *args)") == "func(*args)"
 
 
-@pytest.fixture()
+@pytest.fixture
 def f():
     def _function_without_seealso_and_examples():
         """
