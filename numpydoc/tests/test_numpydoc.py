@@ -49,6 +49,7 @@ class MockApp:
         self.verbosity = 2
         self._warncount = 0
         self.warningiserror = False
+        self._exception_on_warning = False
 
 
 def test_mangle_docstrings_basic():
