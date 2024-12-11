@@ -183,6 +183,9 @@ inline comments:
         def __init__(self):  # numpydoc ignore=GL08
             pass
 
+Note, if the :ref:`class <_classdoc>` docstring properly documents the
+constructor, the ``GL08`` will be ignored by default.
+
 This is supported by the :ref:`CLI <validation_via_cli>`,
 :ref:`pre-commit hook <pre_commit_hook>`, and
 :ref:`Sphinx extension <validation_during_sphinx_build>`.
