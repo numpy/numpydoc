@@ -29,8 +29,6 @@ def test_validate_hook(example_module, config, capsys):
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
         | file                                      | item                                | check   | description                                        |
         +===========================================+=====================================+=========+====================================================+
-        | numpydoc/tests/hooks/example_module.py:1  | example_module                      | EX01    | No examples section found                          |
-        +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
         | numpydoc/tests/hooks/example_module.py:4  | example_module.some_function        | ES01    | No extended summary found                          |
         +-------------------------------------------+-------------------------------------+---------+----------------------------------------------------+
         | numpydoc/tests/hooks/example_module.py:4  | example_module.some_function        | PR01    | Parameters {'name'} not documented                 |
