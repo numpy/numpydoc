@@ -276,7 +276,7 @@ class Validator:
     @property
     def is_function_or_method(self):
         return inspect.isfunction(self.obj)
-    
+
     @property
     def is_mod(self):
         return inspect.ismodule(self.obj)
@@ -747,7 +747,6 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
             errs.append(error("YD01"))
 
     if not doc.is_mod:
-
         if not doc.see_also:
             errs.append(error("SA01"))
         else:
