@@ -9,6 +9,7 @@ This extension requires Python 3.9+, sphinx 6+ and is available from:
 
 * `numpydoc on PyPI <http://pypi.python.org/pypi/numpydoc>`_
 * `numpydoc on GitHub <https://github.com/numpy/numpydoc/>`_
+* `numpydoc on conda-forge <https://prefix.dev/channels/conda-forge/packages/numpydoc>`_
 
 `'numpydoc'` should be added to the ``extensions`` option in your Sphinx
 ``conf.py``. ``'sphinx.ext.autosummary'`` will automatically be loaded
