@@ -160,7 +160,7 @@ class SphinxDocString(NumpyDocString):
         display_param = f":obj:`{param} <{link_prefix}{param}>`"
         if obj_doc:
             # Overwrite desc. Take summary logic of autosummary
-            desc = re.split(r"\n\s*\n", obj_doc.strip(), 1)[0]
+            desc = re.split(r"\n\s*\n", obj_doc.strip(), maxsplit=1)[0]
             # XXX: Should this have DOTALL?
             #      It does not in autosummary
             m = re.search(r"^([A-Z].*?\.)(?:\s|$)", " ".join(desc.split()))
