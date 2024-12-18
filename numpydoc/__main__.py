@@ -1,5 +1,5 @@
 """
-Implementing `python -m numpydoc` functionality.
+Implementing `python -m numpydoc` functionality
 """
 
 from .cli import main

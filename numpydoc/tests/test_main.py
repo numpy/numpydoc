@@ -117,7 +117,7 @@ def test_validate_perfect_docstring():
     assert exit_status == 0
 
 
-@pytest.mark.parametrize("args", [[], ["--ignore", "ES01", "SA01", "EX01"]])
+@pytest.mark.parametrize("args", [[], ["--ignore", "SS03"]])
 def test_lint(capsys, args):
     argv = ["lint", "numpydoc/__main__.py"] + args
     if args:
@@ -126,15 +126,11 @@ def test_lint(capsys, args):
     else:
         expected = inspect.cleandoc(
             """
-            +------------------------+----------+---------+----------------------------+
-            | file                   | item     | check   | description                |
-            +========================+==========+=========+============================+
-            | numpydoc/__main__.py:1 | __main__ | ES01    | No extended summary found  |
-            +------------------------+----------+---------+----------------------------+
-            | numpydoc/__main__.py:1 | __main__ | SA01    | See Also section not found |
-            +------------------------+----------+---------+----------------------------+
-            | numpydoc/__main__.py:1 | __main__ | EX01    | No examples section found  |
-            +------------------------+----------+---------+----------------------------+
+            +------------------------+----------+---------+------------------------------------+
+            | file                   | item     | check   | description                        |
+            +========================+==========+=========+====================================+
+            | numpydoc/__main__.py:1 | __main__ | SS03    | Summary does not end with a period |
+            +------------------------+----------+---------+------------------------------------+
         """
         )
         expected_status = 1

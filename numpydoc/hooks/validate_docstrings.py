@@ -61,6 +61,10 @@ class AstValidator(validate.Validator):
         return isinstance(self.node, (ast.FunctionDef, ast.AsyncFunctionDef))
 
     @property
+    def is_mod(self) -> bool:
+        return self.is_module
+
+    @property
     def is_generator_function(self) -> bool:
         if not self.is_function_or_method:
             return False

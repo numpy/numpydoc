@@ -278,6 +278,10 @@ class Validator:
         return inspect.isfunction(self.obj)
 
     @property
+    def is_mod(self):
+        return inspect.ismodule(self.obj)
+
+    @property
     def is_generator_function(self):
         return inspect.isgeneratorfunction(_unwrap(self.obj))
 
@@ -690,7 +694,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         if doc.num_summary_lines > 1:
             errs.append(error("SS06"))
 
-    if not doc.extended_summary:
+    if not doc.is_mod and not doc.extended_summary:
         errs.append(("ES01", "No extended summary found"))
 
     # PR01: Parameters not documented
@@ -742,20 +746,21 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         if not doc.yields and doc.is_generator_function:
             errs.append(error("YD01"))
 
-    if not doc.see_also:
-        errs.append(error("SA01"))
-    else:
-        for rel_name, rel_desc in doc.see_also.items():
-            if rel_desc:
-                if not rel_desc.endswith("."):
-                    errs.append(error("SA02", reference_name=rel_name))
-                if rel_desc[0].isalpha() and not rel_desc[0].isupper():
-                    errs.append(error("SA03", reference_name=rel_name))
-            else:
-                errs.append(error("SA04", reference_name=rel_name))
+    if not doc.is_mod:
+        if not doc.see_also:
+            errs.append(error("SA01"))
+        else:
+            for rel_name, rel_desc in doc.see_also.items():
+                if rel_desc:
+                    if not rel_desc.endswith("."):
+                        errs.append(error("SA02", reference_name=rel_name))
+                    if rel_desc[0].isalpha() and not rel_desc[0].isupper():
+                        errs.append(error("SA03", reference_name=rel_name))
+                else:
+                    errs.append(error("SA04", reference_name=rel_name))
 
-    if not doc.examples:
-        errs.append(error("EX01"))
+        if not doc.examples:
+            errs.append(error("EX01"))
 
     errs = [err for err in errs if err[0] not in ignore_validation_comments]
 
