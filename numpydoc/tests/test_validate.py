@@ -1198,11 +1198,12 @@ class BadExamples:
         """
 
 
-class GoodConstructorInclusion:
+class ConstructorDocumentedInClassAndInit:
     """
     Class to test optional constructor docstring inclusion.
 
-    As the class docstring can define the constructor, a check should raise GL08 if a constructor docstring is defined.
+    A case where both the class docstring and the constructor docstring are
+    defined.
 
     Parameters
     ----------
@@ -1215,7 +1216,7 @@ class GoodConstructorInclusion:
 
     Examples
     --------
-    This is an example of how to use GoodConstructorInclusion.
+    This is an example of how to use ConstructorDocumentedInClassAndInit.
     """
 
     def __init__(self, param1: int) -> None:
@@ -1235,15 +1236,16 @@ class GoodConstructorInclusion:
 
         Examples
         --------
-        This is an example of how to use GoodConstructorInclusion.
+        This is an example of how to use ConstructorDocumentedInClassAndInit.
         """
 
 
-class GoodConstructorExclusion:
+class ConstructorDocumentedInClass:
     """
     Class to test optional constructor docstring exclusion.
 
-    As the class docstring can define the constructor, a check should not raise GL08 if no constructor docstring is defined.
+    Useful to ensure that validation of `__init__` does not signal GL08,
+    when the class docstring properly documents the `__init__` constructor.
 
     Parameters
     ----------
@@ -1256,14 +1258,14 @@ class GoodConstructorExclusion:
 
     Examples
     --------
-    This is an example of how to use GoodConstructorExclusion.
+    This is an example of how to use ConstructorDocumentedInClass.
     """
 
     def __init__(self, param1: int) -> None:
         pass
 
 
-class BadConstructorExclusion:
+class IncompleteConstructorDocumentedInClass:
     """
     Class to test undocumented constructor docstring.
 
@@ -1275,7 +1277,7 @@ class BadConstructorExclusion:
 
     Examples
     --------
-    This is an example of how to use BadConstructorExclusion.
+    This is an example of how to use IncompleteConstructorDocumentedInClass.
     """
 
     def __init__(self, param1: int):
@@ -1623,10 +1625,10 @@ class TestValidator:
     @pytest.mark.parametrize(
         "klass,exp_init_codes,exc_init_codes,exp_klass_codes",
         [
-            ("GoodConstructorExclusion", tuple(), ("GL08",), tuple()),
-            ("GoodConstructorInclusion", tuple(), ("GL08",), tuple()),
+            ("ConstructorDocumentedInClass", tuple(), ("GL08",), tuple()),
+            ("ConstructorDocumentedInClassAndInit", tuple(), ("GL08",), tuple()),
             (
-                "BadConstructorExclusion",
+                "IncompleteConstructorDocumentedInClass",
                 ("GL08",),
                 tuple(),
                 ("PR01"),  # Parameter not documented in class constructor
