@@ -558,7 +558,7 @@ Use the same sections as outlined above (all except :ref:`Returns <returns>`
 are applicable).  The constructor (``__init__``) should also be documented
 here, the :ref:`Parameters <params>` section of the docstring details the
 constructor's parameters. While repetition is unnecessary, a docstring for
-the class constructor (``__init__``) can be added optionally to provide
+the class constructor (``__init__``) can, optionally, be added to provide
 detailed initialization documentation.
 
 An **Attributes** section, located below the :ref:`Parameters <params>`
