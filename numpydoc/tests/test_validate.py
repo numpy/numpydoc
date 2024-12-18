@@ -1198,6 +1198,113 @@ class BadExamples:
         """
 
 
+class ConstructorDocumentedInClassAndInit:
+    """
+    Class to test constructor documented via class and constructor docstrings.
+
+    A case where both the class docstring and the constructor docstring are
+    defined.
+
+    Parameters
+    ----------
+    param1 : int
+        Description of param1.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClassAndInit.
+    """
+
+    def __init__(self, param1: int) -> None:
+        """
+        Constructor docstring with additional information.
+
+        Extended information.
+
+        Parameters
+        ----------
+        param1 : int
+            Description of param1 with extra details.
+
+        See Also
+        --------
+        otherclass : A class that does something else.
+
+        Examples
+        --------
+        This is an example of how to use ConstructorDocumentedInClassAndInit.
+        """
+
+
+class ConstructorDocumentedInClass:
+    """
+    Class to test constructor documented via class docstring.
+
+    Useful to ensure that validation of `__init__` does not signal GL08,
+    when the class docstring properly documents the `__init__` constructor.
+
+    Parameters
+    ----------
+    param1 : int
+        Description of param1.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClass.
+    """
+
+    def __init__(self, param1: int) -> None:
+        pass
+
+
+class ConstructorDocumentedInClassWithNoParameters:
+    """
+    Class to test constructor documented via class docstring with no parameters.
+
+    Useful to ensure that validation of `__init__` does not signal GL08,
+    when the class docstring properly documents the `__init__` constructor.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClassWithNoParameters.
+    """
+
+    def __init__(self) -> None:
+        pass
+
+
+class IncompleteConstructorDocumentedInClass:
+    """
+    Class to test an incomplete constructor docstring.
+
+    This class does not properly document parameters.
+    Unnecessary extended summary.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use IncompleteConstructorDocumentedInClass.
+    """
+
+    def __init__(self, param1: int):
+        pass
+
+
 class TestValidator:
     def _import_path(self, klass=None, func=None):
         """
@@ -1535,6 +1642,40 @@ class TestValidator:
             assert all("Unknown section" in str(ww.message) for ww in w)
         for msg in msgs:
             assert msg in " ".join(err[1] for err in result["errors"])
+
+    @pytest.mark.parametrize(
+        "klass,exp_init_codes,exc_init_codes,exp_klass_codes",
+        [
+            ("ConstructorDocumentedInClass", tuple(), ("GL08",), tuple()),
+            ("ConstructorDocumentedInClassAndInit", tuple(), ("GL08",), tuple()),
+            (
+                "ConstructorDocumentedInClassWithNoParameters",
+                tuple(),
+                ("GL08",),
+                tuple(),
+            ),
+            (
+                "IncompleteConstructorDocumentedInClass",
+                ("GL08",),
+                tuple(),
+                ("PR01"),  # Parameter not documented in class constructor
+            ),
+        ],
+    )
+    def test_constructor_docstrings(
+        self, klass, exp_init_codes, exc_init_codes, exp_klass_codes
+    ):
+        # First test the class docstring itself, checking expected_klass_codes match
+        result = validate_one(self._import_path(klass=klass))
+        for err in result["errors"]:
+            assert err[0] in exp_klass_codes
+
+        # Then test the constructor docstring
+        result = validate_one(self._import_path(klass=klass, func="__init__"))
+        for code in exp_init_codes:
+            assert code in " ".join(err[0] for err in result["errors"])
+        for code in exc_init_codes:
+            assert code not in " ".join(err[0] for err in result["errors"])
 
 
 def decorator(x):
