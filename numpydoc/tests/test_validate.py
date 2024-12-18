@@ -1200,7 +1200,7 @@ class BadExamples:
 
 class ConstructorDocumentedInClassAndInit:
     """
-    Class to test optional constructor docstring inclusion.
+    Class to test constructor documented via class and constructor docstrings.
 
     A case where both the class docstring and the constructor docstring are
     defined.
@@ -1242,7 +1242,7 @@ class ConstructorDocumentedInClassAndInit:
 
 class ConstructorDocumentedInClass:
     """
-    Class to test optional constructor docstring exclusion.
+    Class to test constructor documented via class docstring.
 
     Useful to ensure that validation of `__init__` does not signal GL08,
     when the class docstring properly documents the `__init__` constructor.
@@ -1265,10 +1265,31 @@ class ConstructorDocumentedInClass:
         pass
 
 
+class ConstructorDocumentedInClassWithNoParameters:
+    """
+    Class to test constructor documented via class docstring with no parameters.
+
+    Useful to ensure that validation of `__init__` does not signal GL08,
+    when the class docstring properly documents the `__init__` constructor.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClassWithNoParameters.
+    """
+
+    def __init__(self) -> None:
+        pass
+
+
 class IncompleteConstructorDocumentedInClass:
     """
-    Class to test undocumented constructor docstring.
+    Class to test an incomplete constructor docstring.
 
+    This class does not properly document parameters.
     Unnecessary extended summary.
 
     See Also
@@ -1627,6 +1648,12 @@ class TestValidator:
         [
             ("ConstructorDocumentedInClass", tuple(), ("GL08",), tuple()),
             ("ConstructorDocumentedInClassAndInit", tuple(), ("GL08",), tuple()),
+            (
+                "ConstructorDocumentedInClassWithNoParameters",
+                tuple(),
+                ("GL08",),
+                tuple(),
+            ),
             (
                 "IncompleteConstructorDocumentedInClass",
                 ("GL08",),
