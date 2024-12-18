@@ -183,8 +183,8 @@ inline comments:
         def __init__(self):  # numpydoc ignore=GL08
             pass
 
-Note, if the :ref:`class <classdoc>` docstring properly documents the
-constructor, the ``GL08`` will be ignored by default.
+Note that a properly formatted :ref:`class <classdoc>` docstring
+silences ``G08`` for an undocumented ``__init__`` constructor.
 
 This is supported by the :ref:`CLI <validation_via_cli>`,
 :ref:`pre-commit hook <pre_commit_hook>`, and
