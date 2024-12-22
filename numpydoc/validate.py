@@ -44,9 +44,8 @@ ALLOWED_SECTIONS = [
 # modify/remove
 # start-err-msg
 ERROR_MSGS = {
-    "GL01": "Docstring text (summary) should start in the line immediately "
-    "after the opening quotes (not in the same line, or leaving a "
-    "blank line in between)",
+    "GL01": "Docstring text (summary) should start right after, or on the "
+    "line following the opening quotes",
     "GL02": "Closing quotes should be placed in the line after the last text "
     "in the docstring (do not close the quotes in the same line as "
     "the text, or leave a blank line between the last text and the "
@@ -343,6 +342,7 @@ class Validator:
             for i, row in enumerate(self.raw_doc.split("\n")):
                 if row.strip():
                     break
+
         return i
 
     @property
@@ -645,7 +645,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
             "examples_errors": "",
         }
 
-    if doc.start_blank_lines != 1 and "\n" in doc.raw_doc:
+    if doc.start_blank_lines not in (0, 1) and "\n" in doc.raw_doc:
         errs.append(error("GL01"))
     if doc.end_blank_lines != 1 and "\n" in doc.raw_doc:
         errs.append(error("GL02"))
