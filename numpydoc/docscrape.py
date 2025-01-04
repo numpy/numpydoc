@@ -237,7 +237,8 @@ class NumpyDocString(Mapping):
                 if single_element_is_type:
                     arg_name, arg_type = "", header
                 else:
-                    arg_name, arg_type = header, ""
+                    arg_name = header
+                    arg_type = self._get_type_from_signature(header)
 
             desc = r.read_to_next_unindented_line()
             desc = dedent_lines(desc)
@@ -246,6 +247,9 @@ class NumpyDocString(Mapping):
             params.append(Parameter(arg_name, arg_type, desc))
 
         return params
+
+    def _get_type_from_signature(self, arg_name: str) -> str:
+        return ""
 
     # See also supports the following formats.
     #
@@ -577,6 +581,7 @@ def dedent_lines(lines):
 class FunctionDoc(NumpyDocString):
     def __init__(self, func, role="func", doc=None, config=None):
         self._f = func
+        self._signature = inspect.signature(func)
         self._role = role  # e.g. "func" or "meth"
 
         if doc is None:
@@ -609,6 +614,13 @@ class FunctionDoc(NumpyDocString):
 
         out += super().__str__(func_role=self._role)
         return out
+
+    def _get_type_from_signature(self, arg_name: str) -> str:
+        parameter = self._signature.parameters[arg_name.replace("*", "")]
+        if parameter.annotation == parameter.empty:
+            return ""
+        else:
+            return str(parameter.annotation)
 
 
 class ObjDoc(NumpyDocString):
@@ -644,6 +656,9 @@ class ClassDoc(NumpyDocString):
             if cls is None:
                 raise ValueError("No class or documentation string given")
             doc = pydoc.getdoc(cls)
+
+        if cls is not None:
+            self._signature = inspect.signature(cls.__init__)
 
         NumpyDocString.__init__(self, doc)
 
@@ -727,6 +742,16 @@ class ClassDoc(NumpyDocString):
             # or class member is not inherited
             or name in self._cls.__dict__
         )
+
+    def _get_type_from_signature(self, arg_name: str) -> str:
+        try:
+            parameter = self._signature.parameters[arg_name.replace("*", "")]
+            if parameter.annotation == parameter.empty:
+                return ""
+            else:
+                return str(parameter.annotation)
+        except AttributeError:
+            return ""
 
 
 def get_doc_object(
