@@ -1596,8 +1596,8 @@ def test_xref():
             self.numpydoc_validation_overrides = dict()
 
     xref_aliases_complete = deepcopy(DEFAULT_LINKS)
-    for key in xref_aliases:
-        xref_aliases_complete[key] = xref_aliases[key]
+    for key, val in xref_aliases.items():
+        xref_aliases_complete[key] = val
     config = Config(xref_aliases, xref_aliases_complete)
     app = namedtuple("config", "config")(config)
     update_config(app)
