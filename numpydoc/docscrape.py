@@ -9,6 +9,7 @@ import textwrap
 from collections import namedtuple
 from collections.abc import Callable, Mapping
 from functools import cached_property
+from typing import ForwardRef, get_type_hints
 from warnings import warn
 
 
@@ -666,7 +667,12 @@ class ClassDoc(NumpyDocString):
             doc = pydoc.getdoc(cls)
 
         if cls is not None:
-            self._signature = inspect.signature(cls.__init__)
+            try:
+                self._signature = inspect.signature(cls.__init__)
+            except ValueError:
+                self._signature = None
+        else:
+            self._signature = None
 
         NumpyDocString.__init__(self, doc)
 
@@ -752,14 +758,50 @@ class ClassDoc(NumpyDocString):
         )
 
     def _get_type_from_signature(self, arg_name: str) -> str:
-        try:
-            parameter = self._signature.parameters[arg_name.replace("*", "")]
-            if parameter.annotation == parameter.empty:
-                return ""
-            else:
-                return str(parameter.annotation)
-        except AttributeError:
+        if self._signature is None:
             return ""
+
+        arg_name = arg_name.replace("*", "")
+        try:
+            parameter = self._signature.parameters[arg_name]
+        except KeyError:
+            return self._find_type_hint(self._cls, arg_name)
+
+        if parameter.annotation == parameter.empty:
+            return ""
+        else:
+            return str(parameter.annotation)
+
+    @staticmethod
+    def _find_type_hint(cls: type, arg_name: str) -> str:
+        type_hints = get_type_hints(cls)
+        try:
+            annotation = type_hints[arg_name]
+        except KeyError:
+            try:
+                attr = getattr(cls, arg_name)
+            except AttributeError:
+                return ""
+
+            attr = attr.fget if isinstance(attr, property) else attr
+
+            if callable(attr):
+                try:
+                    signature = inspect.signature(attr)
+                except ValueError:
+                    return ""
+
+                if signature.return_annotation == signature.empty:
+                    return ""
+                else:
+                    return str(signature.return_annotation)
+            else:
+                return type(attr).__name__
+
+        try:
+            return str(annotation.__name__)
+        except AttributeError:
+            return str(annotation)
 
 
 def get_doc_object(
