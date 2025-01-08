@@ -639,7 +639,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
     if not doc.raw_doc:
         report_GL08: bool = True
         # Check if the object is a class and has a docstring in the constructor
-        if doc.name.endswith("__init__") and doc.is_function_or_method:
+        if doc.name.endswith(".__init__") and doc.is_function_or_method:
             cls_name = doc.code_obj.__qualname__.split(".")[0]
             cls = getattr(importlib.import_module(doc.code_obj.__module__), cls_name)
             cls_doc = Validator(get_doc_object(cls))
