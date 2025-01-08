@@ -581,7 +581,11 @@ def dedent_lines(lines):
 class FunctionDoc(NumpyDocString):
     def __init__(self, func, role="func", doc=None, config=None):
         self._f = func
-        self._signature = inspect.signature(func)
+        try:
+            self._signature = inspect.signature(func)
+        except ValueError:
+            self._signature = None
+
         self._role = role  # e.g. "func" or "meth"
 
         if doc is None:
@@ -616,7 +620,11 @@ class FunctionDoc(NumpyDocString):
         return out
 
     def _get_type_from_signature(self, arg_name: str) -> str:
+        if self._signature is None:
+            return ""
+
         parameter = self._signature.parameters[arg_name.replace("*", "")]
+
         if parameter.annotation == parameter.empty:
             return ""
         else:
