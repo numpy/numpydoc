@@ -646,7 +646,8 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
             and hasattr(doc, "code_obj")
         ):
             cls_name = doc.code_obj.__qualname__.split(".")[0]
-            cls = getattr(importlib.import_module(doc.code_obj.__module__), cls_name)
+            cls = Validator._load_obj(f"{doc.code_obj.__module__}.{cls_name}")
+            # cls = Validator._load_obj(f"{doc.name[:-9]}.{cls_name}") ## Alternative
             cls_doc = Validator(get_doc_object(cls))
 
             # Parameter_mismatches, PR01, PR02, PR03 are checked for the class docstring.
