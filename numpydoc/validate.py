@@ -637,7 +637,29 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
 
     errs = []
     if not doc.raw_doc:
-        if "GL08" not in ignore_validation_comments:
+        report_GL08: bool = True
+        # Check if the object is a class and has a docstring in the constructor
+        # Also check if code_obj is defined, as undefined for the AstValidator in validate_docstrings.py.
+        if (
+            doc.name.endswith(".__init__")
+            and doc.is_function_or_method
+            and hasattr(doc, "code_obj")
+        ):
+            cls_name = doc.code_obj.__qualname__.split(".")[0]
+            cls = Validator._load_obj(f"{doc.code_obj.__module__}.{cls_name}")
+            # cls = Validator._load_obj(f"{doc.name[:-9]}.{cls_name}") ## Alternative
+            cls_doc = Validator(get_doc_object(cls))
+
+            # Parameter_mismatches, PR01, PR02, PR03 are checked for the class docstring.
+            # If cls_doc has PR01, PR02, PR03 errors, i.e. invalid class docstring,
+            # then we also report missing constructor docstring, GL08.
+            report_GL08 = len(cls_doc.parameter_mismatches) > 0
+
+        # Check if GL08 is to be ignored:
+        if "GL08" in ignore_validation_comments:
+            report_GL08 = False
+        # Add GL08 error?
+        if report_GL08:
             errs.append(error("GL08"))
         return {
             "type": doc.type,
