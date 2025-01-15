@@ -9,7 +9,7 @@ import textwrap
 from collections import namedtuple
 from collections.abc import Callable, Mapping
 from functools import cached_property
-from typing import ForwardRef, get_type_hints
+from typing import get_type_hints
 from warnings import warn
 
 
