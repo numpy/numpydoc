@@ -24,7 +24,7 @@ jobs:
           pip install -U build twine wheel
           python -m build --sdist --wheel
       - run: twine check --strict dist/*
-      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: dist
           path: dist
@@ -44,4 +44,4 @@ jobs:
         with:
           name: dist
           path: dist
-      - uses: pypa/gh-action-pypi-publish@15c56dba361d8335944d31a2ecd17d700fc7bcbc # v1.12.2
+      - uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
