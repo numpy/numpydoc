@@ -49,6 +49,7 @@ class MockApp:
         self.verbosity = 2
         self._warncount = 0
         self.warningiserror = False
+        self._exception_on_warning = False
 
 
 def test_mangle_docstrings_basic():
@@ -142,7 +143,7 @@ def test_clean_text_signature():
     assert _clean_text_signature("func($self, *args)") == "func(*args)"
 
 
-@pytest.fixture()
+@pytest.fixture
 def f():
     def _function_without_seealso_and_examples():
         """

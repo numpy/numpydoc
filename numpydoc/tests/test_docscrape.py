@@ -1203,6 +1203,17 @@ class_doc_txt = """
     b
     c
 
+    Other Parameters
+    ----------------
+
+    another parameter : str
+        This parameter is less important.
+
+    Notes
+    -----
+
+    Some notes about the class.
+
     Examples
     --------
     For usage examples, see `ode`.
@@ -1222,10 +1233,6 @@ def test_class_members_doc():
         Aaa.
     jac : callable ``jac(t, y, *jac_args)``
         Bbb.
-
-    Examples
-    --------
-    For usage examples, see `ode`.
 
     Attributes
     ----------
@@ -1250,6 +1257,19 @@ def test_class_members_doc():
     a
     b
     c
+
+    Other Parameters
+    ----------------
+    another parameter : str
+        This parameter is less important.
+
+    Notes
+    -----
+    Some notes about the class.
+
+    Examples
+    --------
+    For usage examples, see `ode`.
 
     """,
     )
@@ -1304,10 +1324,6 @@ def test_class_members_doc_sphinx():
         **jac** : callable ``jac(t, y, *jac_args)``
             Bbb.
 
-    .. rubric:: Examples
-
-    For usage examples, see `ode`.
-
     :Attributes:
 
         **t** : float
@@ -1344,6 +1360,19 @@ def test_class_members_doc_sphinx():
     **b**
     **c**
     =====  ==========
+
+    :Other Parameters:
+
+        **another parameter** : str
+            This parameter is less important.
+
+    .. rubric:: Notes
+
+    Some notes about the class.
+
+    .. rubric:: Examples
+
+    For usage examples, see `ode`.
 
     """,
     )
@@ -1567,8 +1596,8 @@ def test_xref():
             self.numpydoc_validation_overrides = dict()
 
     xref_aliases_complete = deepcopy(DEFAULT_LINKS)
-    for key in xref_aliases:
-        xref_aliases_complete[key] = xref_aliases[key]
+    for key, val in xref_aliases.items():
+        xref_aliases_complete[key] = val
     config = Config(xref_aliases, xref_aliases_complete)
     app = namedtuple("config", "config")(config)
     update_config(app)

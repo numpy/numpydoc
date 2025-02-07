@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [Ubuntu]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         sphinx-version:
           ["sphinx==6.0", "sphinx==6.2", "sphinx==7.0", "sphinx>=7.3"]
         include:
@@ -37,14 +37,13 @@ jobs:
       - name: Setup environment
         run: |
           python -m pip install --upgrade pip wheel setuptools
-          python -m pip install -r requirements/test.txt -r requirements/doc.txt
           python -m pip install codecov
           python -m pip install ${{ matrix.sphinx-version }}
           python -m pip list
 
       - name: Install
         run: |
-          python -m pip install .
+          python -m pip install .[test,doc]
           pip list
 
       - name: Run test suite
@@ -79,7 +78,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu]
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
 
@@ -91,13 +90,12 @@ jobs:
       - name: Setup environment
         run: |
           python -m pip install --upgrade pip wheel setuptools
-          python -m pip install --pre -r requirements/test.txt -r requirements/doc.txt
           python -m pip install codecov
           python -m pip list
 
       - name: Install
         run: |
-          python -m pip install .
+          python -m pip install .[test,doc]
           pip list
 
       - name: Run test suite

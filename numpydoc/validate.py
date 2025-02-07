@@ -23,7 +23,7 @@ from .docscrape import get_doc_object
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
 DIRECTIVE_PATTERN = re.compile(
-    r"^\s*\.\. ({})(?!::)".format("|".join(DIRECTIVES)), re.I | re.M
+    r"^\s*\.\. ({})(?!::)".format("|".join(DIRECTIVES)), re.IGNORECASE | re.MULTILINE
 )
 ALLOWED_SECTIONS = [
     "Parameters",
@@ -276,6 +276,10 @@ class Validator:
     @property
     def is_function_or_method(self):
         return inspect.isfunction(self.obj)
+
+    @property
+    def is_mod(self):
+        return inspect.ismodule(self.obj)
 
     @property
     def is_generator_function(self):
@@ -633,7 +637,29 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
 
     errs = []
     if not doc.raw_doc:
-        if "GL08" not in ignore_validation_comments:
+        report_GL08: bool = True
+        # Check if the object is a class and has a docstring in the constructor
+        # Also check if code_obj is defined, as undefined for the AstValidator in validate_docstrings.py.
+        if (
+            doc.name.endswith(".__init__")
+            and doc.is_function_or_method
+            and hasattr(doc, "code_obj")
+        ):
+            cls_name = doc.code_obj.__qualname__.split(".")[0]
+            cls = Validator._load_obj(f"{doc.code_obj.__module__}.{cls_name}")
+            # cls = Validator._load_obj(f"{doc.name[:-9]}.{cls_name}") ## Alternative
+            cls_doc = Validator(get_doc_object(cls))
+
+            # Parameter_mismatches, PR01, PR02, PR03 are checked for the class docstring.
+            # If cls_doc has PR01, PR02, PR03 errors, i.e. invalid class docstring,
+            # then we also report missing constructor docstring, GL08.
+            report_GL08 = len(cls_doc.parameter_mismatches) > 0
+
+        # Check if GL08 is to be ignored:
+        if "GL08" in ignore_validation_comments:
+            report_GL08 = False
+        # Add GL08 error?
+        if report_GL08:
             errs.append(error("GL08"))
         return {
             "type": doc.type,
@@ -690,7 +716,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         if doc.num_summary_lines > 1:
             errs.append(error("SS06"))
 
-    if not doc.extended_summary:
+    if not doc.is_mod and not doc.extended_summary:
         errs.append(("ES01", "No extended summary found"))
 
     # PR01: Parameters not documented
@@ -742,20 +768,21 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         if not doc.yields and doc.is_generator_function:
             errs.append(error("YD01"))
 
-    if not doc.see_also:
-        errs.append(error("SA01"))
-    else:
-        for rel_name, rel_desc in doc.see_also.items():
-            if rel_desc:
-                if not rel_desc.endswith("."):
-                    errs.append(error("SA02", reference_name=rel_name))
-                if rel_desc[0].isalpha() and not rel_desc[0].isupper():
-                    errs.append(error("SA03", reference_name=rel_name))
-            else:
-                errs.append(error("SA04", reference_name=rel_name))
+    if not doc.is_mod:
+        if not doc.see_also:
+            errs.append(error("SA01"))
+        else:
+            for rel_name, rel_desc in doc.see_also.items():
+                if rel_desc:
+                    if not rel_desc.endswith("."):
+                        errs.append(error("SA02", reference_name=rel_name))
+                    if rel_desc[0].isalpha() and not rel_desc[0].isupper():
+                        errs.append(error("SA03", reference_name=rel_name))
+                else:
+                    errs.append(error("SA04", reference_name=rel_name))
 
-    if not doc.examples:
-        errs.append(error("EX01"))
+        if not doc.examples:
+            errs.append(error("EX01"))
 
     errs = [err for err in errs if err[0] not in ignore_validation_comments]
 

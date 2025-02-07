@@ -120,17 +120,17 @@ class NumpyDocString(Mapping):
         "Summary": [""],
         "Extended Summary": [],
         "Parameters": [],
+        "Attributes": [],
+        "Methods": [],
         "Returns": [],
         "Yields": [],
         "Receives": [],
+        "Other Parameters": [],
         "Raises": [],
         "Warns": [],
-        "Other Parameters": [],
-        "Attributes": [],
-        "Methods": [],
+        "Warnings": [],
         "See Also": [],
         "Notes": [],
-        "Warnings": [],
         "References": "",
         "Examples": "",
         "index": {},
@@ -344,7 +344,7 @@ class NumpyDocString(Mapping):
 
     def _parse_index(self, section, content):
         """
-        .. index: default
+        .. index:: default
            :refguide: something, else, and more
 
         """
@@ -446,7 +446,7 @@ class NumpyDocString(Mapping):
         if error:
             raise ValueError(msg)
         else:
-            warn(msg)
+            warn(msg, stacklevel=3)
 
     # string conversion routines
 
@@ -549,8 +549,10 @@ class NumpyDocString(Mapping):
         out += self._str_signature()
         out += self._str_summary()
         out += self._str_extended_summary()
+        out += self._str_param_list("Parameters")
+        for param_list in ("Attributes", "Methods"):
+            out += self._str_param_list(param_list)
         for param_list in (
-            "Parameters",
             "Returns",
             "Yields",
             "Receives",
@@ -563,8 +565,6 @@ class NumpyDocString(Mapping):
         out += self._str_see_also(func_role)
         for s in ("Notes", "References", "Examples"):
             out += self._str_section(s)
-        for param_list in ("Attributes", "Methods"):
-            out += self._str_param_list(param_list)
         out += self._str_index()
         return "\n".join(out)
 
@@ -711,23 +711,22 @@ class ClassDoc(NumpyDocString):
 
     @staticmethod
     def _should_skip_member(name, klass):
-        if (
+        return (
             # Namedtuples should skip everything in their ._fields as the
             # docstrings for each of the members is: "Alias for field number X"
             issubclass(klass, tuple)
             and hasattr(klass, "_asdict")
             and hasattr(klass, "_fields")
             and name in klass._fields
-        ):
-            return True
-        return False
+        )
 
     def _is_show_member(self, name):
-        if self.show_inherited_members:
-            return True  # show all class members
-        if name not in self._cls.__dict__:
-            return False  # class member is inherited, we do not show it
-        return True
+        return (
+            # show all class members
+            self.show_inherited_members
+            # or class member is not inherited
+            or name in self._cls.__dict__
+        )
 
 
 def get_doc_object(

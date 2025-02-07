@@ -24,6 +24,7 @@ classifiers = [
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
     'Topic :: Documentation',
 ]
 dependencies = [
@@ -67,7 +68,7 @@ numpydoc = 'numpydoc.cli:main'
 [tool.changelist]
 title_template = "{version}"
 # Profiles that are excluded from the contributor list.
-ignored_user_logins = ["dependabot[bot]", "pre-commit-ci[bot]"]
+ignored_user_logins = ["dependabot[bot]", "pre-commit-ci[bot]", "web-flow"]
 
 [tool.ruff.lint]
 extend-select = [

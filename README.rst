@@ -4,7 +4,6 @@ numpydoc -- Numpy's Sphinx extensions
 
 .. image:: https://readthedocs.org/projects/numpydoc/badge/?version=latest
    :alt: Documentation Status
-   :scale: 100%
    :target: https://numpydoc.readthedocs.io/en/latest/
 
 .. image:: https://codecov.io/gh/numpy/numpydoc/branch/main/graph/badge.svg
