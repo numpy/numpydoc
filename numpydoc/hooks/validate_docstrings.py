@@ -5,6 +5,7 @@ import configparser
 import os
 import re
 import sys
+import textwrap
 
 try:
     import tomllib
@@ -193,7 +194,7 @@ class DocstringVisitor(ast.NodeVisitor):
         )
         self.findings.extend(
             [
-                [f'{self.filepath}:{report["file_line"]}', name, check, description]
+                [f"{self.filepath}:{report['file_line']}", name, check, description]
                 for check, description in report["errors"]
                 if not self._ignore_issue(node, check)
             ]
@@ -371,19 +372,29 @@ def run_hook(
     config_options = parse_config(config or project_root)
     config_options["checks"] -= set(ignore or [])
 
-    findings = []
-    for file in files:
-        findings.extend(process_file(file, config_options))
+    indent = "\n" + " " * 9
 
-    if findings:
-        print(
-            tabulate(
-                findings,
-                headers=["file", "item", "check", "description"],
-                tablefmt="grid",
-                maxcolwidths=50,
-            ),
-            file=sys.stderr,
-        )
-        return 1
-    return 0
+    findings = False
+    for file in files:
+        if file_issues := process_file(file, config_options):
+            findings = True
+            last_line = None
+
+            for line, obj, check, description in file_issues:
+                if last_line == line:
+                    prefix = ""
+                else:
+                    prefix = f"\n{line}\nin {obj}\n"
+
+                print(
+                    prefix,
+                    *(
+                        textwrap.indent(text, f"  {check} - " if i == 0 else indent)
+                        for i, text in enumerate(textwrap.wrap(description, 60))
+                    ),
+                    sep="",
+                    file=sys.stderr,
+                )
+                last_line = line
+
+    return bool(findings)
