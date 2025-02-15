@@ -184,7 +184,7 @@ inline comments:
             pass
 
 Note that a properly formatted :ref:`class <classdoc>` docstring
-silences ``G08`` for an ``__init__`` constructor without a docstring.
+silences ``GL08`` for an ``__init__`` constructor without a docstring.
 
 This is supported by the :ref:`CLI <validation_via_cli>`,
 :ref:`pre-commit hook <pre_commit_hook>`, and
