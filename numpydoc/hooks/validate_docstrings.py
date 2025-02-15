@@ -15,8 +15,6 @@ except ImportError:
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
-from tabulate import tabulate
-
 from .. import docscrape, validate
 from .utils import find_project_root
 
