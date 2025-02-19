@@ -28,9 +28,9 @@ classifiers = [
     'Topic :: Documentation',
 ]
 dependencies = [
-    'sphinx>=6',
+    'sphinx>=7',
     'tabulate>=0.8.10',
-    "tomli>=1.1.0;python_version<'3.11'",
+    "tomli>=2.1.0;python_version<'3.11'",
 ]
 
 [[project.authors]]
@@ -50,9 +50,9 @@ developer = [
     "tomli; python_version < '3.11'",
 ]
 doc = [
-    'numpy>=1.22',
-    'matplotlib>=3.5',
-    'pydata-sphinx-theme>=0.13.3',
+    'numpy>=1.26',
+    'matplotlib>=3.8',
+    'pydata-sphinx-theme>=0.16.1',
     'sphinx>=7',
     'intersphinx_registry',
 ]
