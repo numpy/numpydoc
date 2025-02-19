@@ -53,7 +53,7 @@ doc = [
     'numpy>=1.26',
     'matplotlib>=3.8',
     'pydata-sphinx-theme>=0.16.1',
-    'sphinx>=8',
+    'sphinx>=7',
     'intersphinx_registry',
 ]
 test = [

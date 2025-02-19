@@ -17,8 +17,7 @@ jobs:
       matrix:
         os: [Ubuntu]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        sphinx-version:
-          ["sphinx==7.0", "sphinx==7.4", "sphinx==8.0", "sphinx>=8.2"]
+        sphinx-version: ["sphinx==7.0", "sphinx==7.3", "sphinx>=7.4"]
         include:
           - os: Windows
             python-version: "3.12"
