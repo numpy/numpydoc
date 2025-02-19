@@ -39,19 +39,6 @@ logger = logging.getLogger(__name__)
 HASH_LEN = 12
 
 
-def _traverse_or_findall(node, condition, **kwargs):
-    """Triage node.traverse (docutils <0.18.1) vs node.findall.
-
-    TODO: This check can be removed when the minimum supported docutils version
-    for numpydoc is docutils>=0.18.1
-    """
-    return (
-        node.findall(condition, **kwargs)
-        if hasattr(node, "findall")
-        else node.traverse(condition, **kwargs)
-    )
-
-
 def rename_references(app, what, name, obj, options, lines):
     # decorate reference numbers so that there are no duplicates
     # these are later undecorated in the doctree, in relabel_references
@@ -92,12 +79,8 @@ def _is_cite_in_numpydoc_docstring(citation_node):
             return False
 
     sibling_sections = itertools.chain(
-        _traverse_or_findall(
-            section_node,
-            is_docstring_section,
-            include_self=True,
-            descend=False,
-            siblings=True,
+        section_node.findall(
+            is_docstring_section, include_self=True, descend=False, siblings=True
         )
     )
     for sibling_section in sibling_sections:
@@ -116,7 +99,7 @@ def _is_cite_in_numpydoc_docstring(citation_node):
 
 def relabel_references(app, doc):
     # Change 'hash-ref' to 'ref' in label text
-    for citation_node in _traverse_or_findall(doc, citation):
+    for citation_node in doc.findall(citation):
         if not _is_cite_in_numpydoc_docstring(citation_node):
             continue
         label_node = citation_node[0]
@@ -136,7 +119,7 @@ def relabel_references(app, doc):
                     and node[0].astext() == f"[{ref_text}]"
                 )
 
-            for xref_node in _traverse_or_findall(ref.parent, matching_pending_xref):
+            for xref_node in ref.parent.findall(matching_pending_xref):
                 xref_node.replace(xref_node[0], Text(f"[{new_text}]"))
             ref.replace(ref_text, new_text.copy())
 
@@ -144,14 +127,14 @@ def relabel_references(app, doc):
 def clean_backrefs(app, doc, docname):
     # only::latex directive has resulted in citation backrefs without reference
     known_ref_ids = set()
-    for ref in _traverse_or_findall(doc, reference, descend=True):
+    for ref in doc.findall(reference, descend=True):
         for id_ in ref["ids"]:
             known_ref_ids.add(id_)
     # some extensions produce backrefs to inline elements
-    for ref in _traverse_or_findall(doc, inline, descend=True):
+    for ref in doc.findall(inline, descend=True):
         for id_ in ref["ids"]:
             known_ref_ids.add(id_)
-    for citation_node in _traverse_or_findall(doc, citation, descend=True):
+    for citation_node in doc.findall(citation, descend=True):
         # remove backrefs to non-existent refs
         citation_node["backrefs"] = [
             id_ for id_ in citation_node["backrefs"] if id_ in known_ref_ids
