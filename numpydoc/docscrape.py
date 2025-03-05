@@ -307,6 +307,10 @@ class NumpyDocString(Mapping):
                 self._error_location(f"Error parsing See Also entry {line!r}")
             role = m.group("role")
             name = m.group("name") if role else m.group("name2")
+
+            target_name = m.group("target_name")
+            if target_name is not None:
+                name += f" {target_name}"
             return name, role, m.end()
 
         rest = []
