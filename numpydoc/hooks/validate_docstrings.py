@@ -5,7 +5,6 @@ import configparser
 import os
 import re
 import sys
-import textwrap
 
 try:
     import tomllib
@@ -370,29 +369,12 @@ def run_hook(
     config_options = parse_config(config or project_root)
     config_options["checks"] -= set(ignore or [])
 
-    indent = "\n" + " " * 9
-
     findings = False
     for file in files:
         if file_issues := process_file(file, config_options):
             findings = True
-            last_line = None
 
             for line, obj, check, description in file_issues:
-                if last_line == line:
-                    prefix = ""
-                else:
-                    prefix = f"\n{line}\nin {obj}\n"
+                print(f"\n{line}: {check} {description}", file=sys.stderr)
 
-                print(
-                    prefix,
-                    *(
-                        textwrap.indent(text, f"  {check} - " if i == 0 else indent)
-                        for i, text in enumerate(textwrap.wrap(description, 60))
-                    ),
-                    sep="",
-                    file=sys.stderr,
-                )
-                last_line = line
-
-    return bool(findings)
+    return int(findings)
