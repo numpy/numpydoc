@@ -36,6 +36,7 @@ class MockConfig:
 
 class MockBuilder:
     config = MockConfig()
+    _translator = None
 
 
 class MockApp:
