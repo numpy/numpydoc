@@ -711,7 +711,12 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
             errs.append(error("SS03"))
         if doc.summary != doc.summary.lstrip():
             errs.append(error("SS04"))
-        elif doc.is_function_or_method and doc.summary.split(" ")[0][-1] == "s":
+        # Heuristic to check for infinitive verbs - shouldn't end in "s"
+        elif (
+            doc.is_function_or_method
+            and doc.summary.split(" ")[0][-1] == "s"
+            and doc.summary.split(" ")[0][-2] != "s"
+        ):
             errs.append(error("SS05"))
         if doc.num_summary_lines > 1:
             errs.append(error("SS06"))
