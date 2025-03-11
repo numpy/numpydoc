@@ -29,7 +29,6 @@ classifiers = [
 ]
 dependencies = [
     'sphinx>=6',
-    'tabulate>=0.8.10',
     "tomli>=1.1.0;python_version<'3.11'",
 ]
 

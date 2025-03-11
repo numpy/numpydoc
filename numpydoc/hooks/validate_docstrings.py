@@ -14,8 +14,6 @@ except ImportError:
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
-from tabulate import tabulate
-
 from .. import docscrape, validate
 from .utils import find_project_root
 
@@ -193,7 +191,7 @@ class DocstringVisitor(ast.NodeVisitor):
         )
         self.findings.extend(
             [
-                [f'{self.filepath}:{report["file_line"]}', name, check, description]
+                [f"{self.filepath}:{report['file_line']}", name, check, description]
                 for check, description in report["errors"]
                 if not self._ignore_issue(node, check)
             ]
@@ -371,19 +369,12 @@ def run_hook(
     config_options = parse_config(config or project_root)
     config_options["checks"] -= set(ignore or [])
 
-    findings = []
+    findings = False
     for file in files:
-        findings.extend(process_file(file, config_options))
+        if file_issues := process_file(file, config_options):
+            findings = True
 
-    if findings:
-        print(
-            tabulate(
-                findings,
-                headers=["file", "item", "check", "description"],
-                tablefmt="grid",
-                maxcolwidths=50,
-            ),
-            file=sys.stderr,
-        )
-        return 1
-    return 0
+            for line, obj, check, description in file_issues:
+                print(f"\n{line}: {check} {description}", file=sys.stderr)
+
+    return int(findings)

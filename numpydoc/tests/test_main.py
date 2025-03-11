@@ -124,15 +124,7 @@ def test_lint(capsys, args):
         expected = ""
         expected_status = 0
     else:
-        expected = inspect.cleandoc(
-            """
-            +------------------------+----------+---------+------------------------------------+
-            | file                   | item     | check   | description                        |
-            +========================+==========+=========+====================================+
-            | numpydoc/__main__.py:1 | __main__ | SS03    | Summary does not end with a period |
-            +------------------------+----------+---------+------------------------------------+
-        """
-        )
+        expected = "numpydoc/__main__.py:1: SS03 Summary does not end with a period"
         expected_status = 1
 
     return_status = numpydoc.cli.main(argv)
