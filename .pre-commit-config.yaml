@@ -3,38 +3,44 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # frozen: v5.0.0
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: debug-statements
+      - id: check-added-large-files
       - id: check-ast
-      - id: mixed-line-ending
-      - id: check-yaml
-        args: [--allow-multiple-documents]
+      - id: check-case-conflict
       - id: check-json
       - id: check-toml
-      - id: check-added-large-files
-
-  - repo: https://github.com/psf/black
-    rev: 22.6.0
-    hooks:
-      - id: black
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.7.1
+    rev: f12edd9c7be1c20cfa42420fd0e6df71e42b51ea # frozen: v4.0.0-alpha.8
     hooks:
       - id: prettier
-        files: \.(html|md|yml|yaml)
+        types_or: [yaml, toml, markdown, css, scss, javascript, json]
         args: [--prose-wrap=preserve]
 
-  - repo: https://github.com/asottile/blacken-docs
-    rev: v1.12.1
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "89c421dff2e1026ba12cdb9ebd731f4a83aa8021" # frozen: v0.8.6
     hooks:
-      - id: blacken-docs
+      - id: ruff
+        args: ["--fix", "--show-fixes", "--exit-non-zero-on-fix"]
+      - id: ruff-format
 
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.37.1
+  - repo: local
     hooks:
-      - id: pyupgrade
-        args: [--py37-plus]
+      - id: generate_requirements.py
+        name: generate_requirements.py
+        language: system
+        entry: python tools/generate_requirements.py
+        files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
+
+ci:
+  autofix_prs: false
+  autofix_commit_msg: |
+    '[pre-commit.ci 🤖] Apply code format tools to PR'
+  autoupdate_schedule: quarterly

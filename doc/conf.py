@@ -4,17 +4,17 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-from datetime import date
-import numpydoc
-
 # -- Path setup --------------------------------------------------------------
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-
 import os
 import sys
+from datetime import date
+
+from intersphinx_registry import get_intersphinx_mapping
+
+import numpydoc
 
 # for example.py
 sys.path.insert(0, os.path.abspath("."))
@@ -81,23 +81,17 @@ pygments_style = "sphinx"
 
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
-    "github_url": "https://github.com/numpy/numpydoc",
     "show_prev_next": False,
-    "navbar_end": ["search-field.html", "navbar-icon-links.html"],
+    "navbar_end": ["theme-switcher", "navbar-icon-links.html"],
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/numpy/numpydoc",
+            "icon": "fab fa-github-square",
+            "type": "fontawesome",
+        },
+    ],
 }
-# NOTE: The following is required for supporting of older sphinx toolchains.
-#       The "theme-switcher" templated should be added directly to navbar_end
-#       above and the following lines removed when the minimum supported
-#       version of pydata_sphinx_theme is 0.9.0
-# Add version switcher for versions of pydata_sphinx_theme that support it
-import packaging
-import pydata_sphinx_theme
-
-if packaging.version.parse(pydata_sphinx_theme.__version__) >= packaging.version.parse(
-    "0.9.0"
-):
-    html_theme_options["navbar_end"].insert(0, "theme-switcher")
-
 
 html_sidebars = {
     "**": [],
@@ -144,9 +138,6 @@ latex_documents = [
 
 # -- Intersphinx setup ----------------------------------------------------
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "numpy": ("https://numpy.org/devdocs/", None),
-    "sklearn": ("https://scikit-learn.org/stable/", None),
-}
+# Example configuration for intersphinx: refer to several Python libraries.
+
+intersphinx_mapping = get_intersphinx_mapping(packages=["python", "numpy", "sklearn"])

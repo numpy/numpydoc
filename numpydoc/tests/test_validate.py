@@ -1,10 +1,134 @@
-import pytest
 import warnings
-import numpydoc.validate
+from contextlib import nullcontext
+from functools import cached_property, partial, wraps
+from inspect import getsourcefile, getsourcelines
+
+import pytest
+
 import numpydoc.tests
+from numpydoc import validate
+from numpydoc.docscrape import get_doc_object
+from numpydoc.validate import Validator
+
+validate_one = validate.validate
+
+ALL_CHECKS = set(validate.ERROR_MSGS.keys())
 
 
-validate_one = numpydoc.validate.validate
+@pytest.mark.parametrize(
+    ["checks", "expected"],
+    [
+        [{"all"}, ALL_CHECKS],
+        [set(), set()],
+        [{"EX01"}, {"EX01"}],
+        [{"EX01", "SA01"}, {"EX01", "SA01"}],
+        [{"all", "EX01", "SA01"}, ALL_CHECKS - {"EX01", "SA01"}],
+        [{"all", "PR01"}, ALL_CHECKS - {"PR01"}],
+    ],
+)
+def test_utils_get_validation_checks(checks, expected):
+    """Ensure check selection is working."""
+    assert validate.get_validation_checks(checks) == expected
+
+
+@pytest.mark.parametrize(
+    "checks",
+    [
+        {"every"},
+        {None},
+        {"SM10"},
+        {"EX01", "SM10"},
+    ],
+)
+def test_get_validation_checks_validity(checks):
+    """Ensure that invalid checks are flagged."""
+    with pytest.raises(ValueError, match="Unrecognized validation code"):
+        _ = validate.get_validation_checks(checks)
+
+
+class _DummyList(list):
+    """Dummy list class to test validation."""
+
+
+def test_no_file():
+    """Test that validation can be done on functions made on the fly."""
+    # Just a smoke test for now, <list> will have a None filename
+    validate.validate("numpydoc.tests.test_validate._DummyList.clear")
+
+
+@pytest.mark.parametrize(
+    ["file_contents", "expected"],
+    [
+        ["class MyClass:\n    pass", {}],
+        ["class MyClass:  # numpydoc ignore=EX01\n    pass", {1: ["EX01"]}],
+        [
+            "class MyClass:  # numpydoc ignore= EX01,SA01\n    pass",
+            {1: ["EX01", "SA01"]},
+        ],
+        [
+            "class MyClass:\n    def my_method():  # numpydoc ignore:EX01\n        pass",
+            {2: ["EX01"]},
+        ],
+        [
+            "class MyClass:\n    def my_method():  # numpydoc ignore: EX01,PR01\n        pass",
+            {2: ["EX01", "PR01"]},
+        ],
+        [
+            "class MyClass:  # numpydoc ignore=GL08\n    def my_method():  # numpydoc ignore:EX01,PR01\n        pass",
+            {1: ["GL08"], 2: ["EX01", "PR01"]},
+        ],
+    ],
+)
+def test_extract_ignore_validation_comments(tmp_path, file_contents, expected):
+    """Test that extraction of validation ignore comments is working."""
+    filepath = tmp_path / "ignore_comments.py"
+    with open(filepath, "w") as file:
+        file.write(file_contents)
+    assert validate.extract_ignore_validation_comments(filepath) == expected
+
+
+@pytest.mark.parametrize(
+    "assumed_encoding",
+    (
+        pytest.param("utf-8", id="utf8_codec"),
+        pytest.param("cp1252", id="cp1252_codec"),
+    ),
+)
+@pytest.mark.parametrize(
+    ("classname", "actual_encoding"),
+    (
+        pytest.param("MÿClass", "cp1252", id="cp1252_file"),
+        pytest.param("My\u0081Class", "utf-8", id="utf8_file"),
+    ),
+)
+def test_encodings(tmp_path, classname, actual_encoding, assumed_encoding):
+    """Test handling of different source file encodings."""
+    # write file as bytes with `actual_encoding`
+    filepath = tmp_path / "ignore_comments.py"
+    file_contents = f"class {classname}:\n    pass"
+    with open(filepath, "wb") as file:
+        file.write(file_contents.encode(actual_encoding))
+    # this should fail on the ÿ in MÿClass. It represents the (presumed rare) case where
+    # a user's editor saved the source file in cp1252 (or anything other than utf-8).
+    if actual_encoding == "cp1252" and assumed_encoding == "utf-8":
+        context = partial(
+            pytest.raises,
+            UnicodeDecodeError,
+            match="can't decode byte 0xff in position 7: invalid start byte",
+        )
+    # this is the more likely case: file was utf-8 encoded, but Python on Windows uses
+    # the system codepage to read the file. This case is fixed by numpy/numpydoc#510
+    elif actual_encoding == "utf-8" and assumed_encoding == "cp1252":
+        context = partial(
+            pytest.raises,
+            UnicodeDecodeError,
+            match="can't decode byte 0x81 in position 9: character maps to <undefined>",
+        )
+    else:
+        context = nullcontext
+    with context():
+        result = validate.extract_ignore_validation_comments(filepath, assumed_encoding)
+        assert result == {}
 
 
 class GoodDocStrings:
@@ -26,7 +150,6 @@ class GoodDocStrings:
     def one_liner(self):
         """Allow one liner docstrings (including quotes)."""
         # This should fail, but not because of the position of the quotes
-        pass
 
     def plot(self, kind, color="blue", **kwargs):
         """
@@ -40,7 +163,7 @@ class GoodDocStrings:
         kind : str
             Kind of matplotlib plot, e.g.::
 
-                'foo'
+                "foo"
 
         color : str, default 'blue'
             Color name or rgb code.
@@ -56,7 +179,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def swap(self, arr, i, j, *args, **kwargs):
         """
@@ -82,7 +204,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def sample(self):
         """
@@ -106,7 +227,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def random_letters(self):
         """
@@ -132,7 +252,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def sample_values(self):
         """
@@ -154,7 +273,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def head(self):
         """
@@ -290,7 +408,6 @@ class GoodDocStrings:
         >>> s * 2
         50
         """
-        pass
 
     def mode(self, axis, numeric_only):
         """
@@ -322,7 +439,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def good_imports(self):
         """
@@ -342,7 +458,6 @@ class GoodDocStrings:
         >>> datetime.MAXYEAR
         9999
         """
-        pass
 
     def no_returns(self):
         """
@@ -359,7 +474,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def empty_returns(self):
         """
@@ -384,7 +498,7 @@ class GoodDocStrings:
         if True:
             return
         else:
-            return None
+            return
 
     def warnings(self):
         """
@@ -405,7 +519,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def multiple_variables_on_one_line(self, matrix, a, b, i, j):
         """
@@ -431,7 +544,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def other_parameters(self, param1, param2):
         """
@@ -458,7 +570,6 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
-        pass
 
     def valid_options_in_parameter_description_sets(self, bar):
         """
@@ -482,12 +593,67 @@ class GoodDocStrings:
         >>> result = 1 + 1
         """
 
+    def parameters_with_trailing_underscores(self, str_):
+        r"""
+        Ensure PR01 and PR02 errors are not raised with trailing underscores.
+
+        Parameters with trailing underscores need to be escaped to render
+        properly in the documentation since trailing underscores are used to
+        create links. Doing so without also handling the change in the validation
+        logic makes it impossible to both pass validation and render correctly.
+
+        Parameters
+        ----------
+        str\_ : str
+           Some text.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+
+    def parameter_with_wrong_types_as_substrings(self, a, b, c, d, e, f):
+        r"""
+        Ensure PR06 doesn't fail when non-preferable types are substrings.
+
+        While PR06 checks for parameter types which contain non-preferable type
+        names like integer (int), string (str), and boolean (bool), PR06 should
+        not fail if those types are used only as susbtrings in, for example,
+        custom type names.
+
+        Parameters
+        ----------
+        a : Myint
+           Some text.
+        b : intClass
+           Some text.
+        c : Mystring
+           Some text.
+        d : stringClass
+           Some text.
+        e : Mybool
+           Some text.
+        f : boolClass
+           Some text.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+
 
 class BadGenericDocStrings:
     """Everything here has a bad docstring"""
 
     def func(self):
-
         """Some function.
 
         With several mistakes in the docstring.
@@ -512,7 +678,6 @@ class BadGenericDocStrings:
 
         Verb in third-person of the present simple, should be infinitive.
         """
-        pass
 
     def astype1(self, dtype):
         """
@@ -520,7 +685,6 @@ class BadGenericDocStrings:
 
         Does not start with verb.
         """
-        pass
 
     def astype2(self, dtype):
         """
@@ -528,7 +692,6 @@ class BadGenericDocStrings:
 
         Missing dot at the end.
         """
-        pass
 
     def astype3(self, dtype):
         """
@@ -537,7 +700,6 @@ class BadGenericDocStrings:
 
         Summary is too verbose and doesn't fit in a single line.
         """
-        pass
 
     def two_linebreaks_between_sections(self, foo):
         """
@@ -551,7 +713,6 @@ class BadGenericDocStrings:
         foo : str
             Description of foo parameter.
         """
-        pass
 
     def linebreak_at_end_of_docstring(self, foo):
         """
@@ -565,7 +726,6 @@ class BadGenericDocStrings:
             Description of foo parameter.
 
         """
-        pass
 
     def plot(self, kind, **kwargs):
         """
@@ -589,7 +749,6 @@ class BadGenericDocStrings:
         kind: str
             kind of matplotlib plot
         """
-        pass
 
     def unknown_section(self):
         """
@@ -611,7 +770,7 @@ class BadGenericDocStrings:
 
         Examples
         --------
-        >>> print('So far Examples is good, as it goes before Parameters')
+        >>> print("So far Examples is good, as it goes before Parameters")
         So far Examples is good, as it goes before Parameters
 
         See Also
@@ -654,7 +813,6 @@ class BadGenericDocStrings:
             .. deprecated 0.00.0
 
         """
-        pass
 
 
 class WarnGenericFormat:
@@ -671,7 +829,6 @@ class WarnGenericFormat:
         a, b : int
             Foo bar baz.
         """
-        pass
 
 
 class BadSummaries:
@@ -697,19 +854,16 @@ class BadSummaries:
         """Quotes are on the wrong line.
 
         Both opening and closing."""
-        pass
 
     def no_punctuation(self):
         """
         Has the right line but forgets punctuation
         """
-        pass
 
     def no_capitalization(self):
         """
         provides a lowercase summary.
         """
-        pass
 
     def no_infinitive(self):
         """
@@ -841,7 +995,6 @@ class BadParameters:
         kind : str
             Foo bar baz.
         """
-        pass
 
     def integer_parameter(self, kind):
         """
@@ -852,7 +1005,6 @@ class BadParameters:
         kind : integer
             Foo bar baz.
         """
-        pass
 
     def string_parameter(self, kind):
         """
@@ -863,7 +1015,6 @@ class BadParameters:
         kind : string
             Foo bar baz.
         """
-        pass
 
     def boolean_parameter(self, kind):
         """
@@ -874,7 +1025,6 @@ class BadParameters:
         kind : boolean
             Foo bar baz.
         """
-        pass
 
     def list_incorrect_parameter_type(self, kind):
         """
@@ -885,7 +1035,6 @@ class BadParameters:
         kind : list of boolean, integer, float or string
             Foo bar baz.
         """
-        pass
 
     def bad_parameter_spacing(self, a, b):
         """
@@ -896,7 +1045,6 @@ class BadParameters:
         a,  b : int
             Foo bar baz.
         """
-        pass
 
 
 class BadReturns:
@@ -990,7 +1138,6 @@ class BadSeeAlso:
         --------
         Series.tail
         """
-        pass
 
     def desc_no_period(self):
         """
@@ -1002,7 +1149,6 @@ class BadSeeAlso:
         Series.iloc : Return a slice of the elements in the Series,
             which can also be used to return the first or last n
         """
-        pass
 
     def desc_first_letter_lowercase(self):
         """
@@ -1014,7 +1160,6 @@ class BadSeeAlso:
         Series.iloc : Return a slice of the elements in the Series,
             which can also be used to return the first or last n.
         """
-        pass
 
     def prefix_pandas(self):
         """
@@ -1025,7 +1170,6 @@ class BadSeeAlso:
         pandas.Series.rename : Alter Series index labels or name.
         DataFrame.head : The first `n` rows of the caller object.
         """
-        pass
 
 
 class BadExamples:
@@ -1033,27 +1177,131 @@ class BadExamples:
         """
         Examples
         --------
-        >>> 2+5
+        >>> 2 + 5
         7
         """
-        pass
 
     def indentation_is_not_a_multiple_of_four(self):
         """
         Examples
         --------
         >>> if 2 + 5:
-        ...   pass
+        ...     pass
         """
-        pass
 
     def missing_whitespace_after_comma(self):
         """
         Examples
         --------
         >>> import datetime
-        >>> value = datetime.date(2019,1,1)
+        >>> value = datetime.date(2019, 1, 1)
         """
+
+
+class ConstructorDocumentedInClassAndInit:
+    """
+    Class to test constructor documented via class and constructor docstrings.
+
+    A case where both the class docstring and the constructor docstring are
+    defined.
+
+    Parameters
+    ----------
+    param1 : int
+        Description of param1.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClassAndInit.
+    """
+
+    def __init__(self, param1: int) -> None:
+        """
+        Constructor docstring with additional information.
+
+        Extended information.
+
+        Parameters
+        ----------
+        param1 : int
+            Description of param1 with extra details.
+
+        See Also
+        --------
+        otherclass : A class that does something else.
+
+        Examples
+        --------
+        This is an example of how to use ConstructorDocumentedInClassAndInit.
+        """
+
+
+class ConstructorDocumentedInClass:
+    """
+    Class to test constructor documented via class docstring.
+
+    Useful to ensure that validation of `__init__` does not signal GL08,
+    when the class docstring properly documents the `__init__` constructor.
+
+    Parameters
+    ----------
+    param1 : int
+        Description of param1.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClass.
+    """
+
+    def __init__(self, param1: int) -> None:
+        pass
+
+
+class ConstructorDocumentedInClassWithNoParameters:
+    """
+    Class to test constructor documented via class docstring with no parameters.
+
+    Useful to ensure that validation of `__init__` does not signal GL08,
+    when the class docstring properly documents the `__init__` constructor.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClassWithNoParameters.
+    """
+
+    def __init__(self) -> None:
+        pass
+
+
+class IncompleteConstructorDocumentedInClass:
+    """
+    Class to test an incomplete constructor docstring.
+
+    This class does not properly document parameters.
+    Unnecessary extended summary.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use IncompleteConstructorDocumentedInClass.
+    """
+
+    def __init__(self, param1: int):
         pass
 
 
@@ -1120,6 +1368,8 @@ class TestValidator:
             "other_parameters",
             "warnings",
             "valid_options_in_parameter_description_sets",
+            "parameters_with_trailing_underscores",
+            "parameter_with_wrong_types_as_substrings",
         ],
     )
     def test_good_functions(self, capsys, func):
@@ -1143,7 +1393,7 @@ class TestValidator:
     def test_bad_generic_functions(self, capsys, func):
         with pytest.warns(UserWarning):
             errors = validate_one(
-                self._import_path(klass="WarnGenericFormat", func=func)  # noqa:F821
+                self._import_path(klass="WarnGenericFormat", func=func)
             )
         assert "is too short" in w.msg
 
@@ -1161,7 +1411,7 @@ class TestValidator:
     )
     def test_bad_generic_functions(self, capsys, func):
         errors = validate_one(
-            self._import_path(klass="BadGenericDocStrings", func=func)  # noqa:F821
+            self._import_path(klass="BadGenericDocStrings", func=func)
         )["errors"]
         assert isinstance(errors, list)
         assert errors
@@ -1393,6 +1643,79 @@ class TestValidator:
         for msg in msgs:
             assert msg in " ".join(err[1] for err in result["errors"])
 
+    @pytest.mark.parametrize(
+        "klass,exp_init_codes,exc_init_codes,exp_klass_codes",
+        [
+            ("ConstructorDocumentedInClass", tuple(), ("GL08",), tuple()),
+            ("ConstructorDocumentedInClassAndInit", tuple(), ("GL08",), tuple()),
+            (
+                "ConstructorDocumentedInClassWithNoParameters",
+                tuple(),
+                ("GL08",),
+                tuple(),
+            ),
+            (
+                "IncompleteConstructorDocumentedInClass",
+                ("GL08",),
+                tuple(),
+                ("PR01"),  # Parameter not documented in class constructor
+            ),
+        ],
+    )
+    def test_constructor_docstrings(
+        self, klass, exp_init_codes, exc_init_codes, exp_klass_codes
+    ):
+        # First test the class docstring itself, checking expected_klass_codes match
+        result = validate_one(self._import_path(klass=klass))
+        for err in result["errors"]:
+            assert err[0] in exp_klass_codes
+
+        # Then test the constructor docstring
+        result = validate_one(self._import_path(klass=klass, func="__init__"))
+        for code in exp_init_codes:
+            assert code in " ".join(err[0] for err in result["errors"])
+        for code in exc_init_codes:
+            assert code not in " ".join(err[0] for err in result["errors"])
+
+
+def decorator(x):
+    """Test decorator."""
+    return x
+
+
+@decorator
+@decorator
+class DecoratorClass:
+    """
+    Class and methods with decorators.
+
+    * `DecoratorClass` has two decorators.
+    * `DecoratorClass.test_no_decorator` has no decorator.
+    * `DecoratorClass.test_property` has a `@property` decorator.
+    * `DecoratorClass.test_cached_property` has a `@cached_property` decorator.
+    * `DecoratorClass.test_three_decorators` has three decorators.
+
+    `Validator.source_file_def_line` should return the `def` or `class` line number, not
+    the line of the first decorator.
+    """
+
+    def test_no_decorator(self):
+        """Test method without decorators."""
+
+    @property
+    def test_property(self):
+        """Test property method."""
+
+    @cached_property
+    def test_cached_property(self):
+        """Test property method."""
+
+    @decorator
+    @decorator
+    @decorator
+    def test_three_decorators(self):
+        """Test method with three decorators."""
+
 
 class TestValidatorClass:
     @pytest.mark.parametrize("invalid_name", ["unknown_mod", "unknown_mod.MyClass"])
@@ -1410,3 +1733,97 @@ class TestValidatorClass:
         msg = f"'{obj_name}' has no attribute '{invalid_attr_name}'"
         with pytest.raises(AttributeError, match=msg):
             numpydoc.validate.Validator._load_obj(invalid_name)
+
+    @pytest.mark.parametrize(
+        ["decorated_obj", "def_line"],
+        [
+            [
+                "numpydoc.tests.test_validate.DecoratorClass",
+                getsourcelines(DecoratorClass)[-1] + 2,
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_no_decorator",
+                getsourcelines(DecoratorClass.test_no_decorator)[-1],
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_property",
+                getsourcelines(DecoratorClass.test_property.fget)[-1] + 1,
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_cached_property",
+                getsourcelines(DecoratorClass.test_cached_property.func)[-1] + 1,
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_three_decorators",
+                getsourcelines(DecoratorClass.test_three_decorators)[-1] + 3,
+            ],
+        ],
+    )
+    def test_source_file_def_line_with_decorators(self, decorated_obj, def_line):
+        doc = numpydoc.validate.Validator(
+            numpydoc.docscrape.get_doc_object(
+                numpydoc.validate.Validator._load_obj(decorated_obj)
+            )
+        )
+        assert doc.source_file_def_line == def_line
+
+    @pytest.mark.parametrize(
+        ["property", "file_name"],
+        [
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_property",
+                getsourcefile(DecoratorClass.test_property.fget),
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_cached_property",
+                getsourcefile(DecoratorClass.test_cached_property.func),
+            ],
+        ],
+    )
+    def test_source_file_name_with_properties(self, property, file_name):
+        doc = numpydoc.validate.Validator(
+            numpydoc.docscrape.get_doc_object(
+                numpydoc.validate.Validator._load_obj(property)
+            )
+        )
+        assert doc.source_file_name == file_name
+
+
+def test_is_generator_validation_with_decorator():
+    """Ensure that the check for a Yields section when an object is a generator
+    (YD01) works with decorated generators."""
+
+    def tinsel(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    def foo():
+        """A simple generator"""
+        yield from range(10)
+
+    @tinsel
+    def bar():
+        """Generator wrapped once"""
+        yield from range(10)
+
+    @tinsel
+    @tinsel
+    @tinsel
+    def baz():
+        """Generator wrapped multiple times"""
+        yield from range(10)
+
+    # foo without wrapper is a generator
+    v = Validator(get_doc_object(foo))
+    assert v.is_generator_function
+
+    # Wrapped once
+    v = Validator(get_doc_object(bar))
+    assert v.is_generator_function
+
+    # Wrapped multiple times
+    v = Validator(get_doc_object(baz))
+    assert v.is_generator_function

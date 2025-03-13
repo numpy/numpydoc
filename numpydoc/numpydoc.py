@@ -16,27 +16,23 @@ It will:
 .. [1] https://github.com/numpy/numpydoc
 
 """
-from copy import deepcopy
-import re
-import pydoc
-import inspect
-from collections.abc import Callable
+
 import hashlib
+import inspect
 import itertools
+import pydoc
+import re
+from collections.abc import Callable
+from copy import deepcopy
 
-from docutils.nodes import citation, Text, section, comment, reference
-import sphinx
-from sphinx.addnodes import pending_xref, desc_content
+from docutils.nodes import Text, citation, comment, inline, reference, section
+from sphinx.addnodes import desc_content, pending_xref
 from sphinx.util import logging
-from sphinx.errors import ExtensionError
 
-if sphinx.__version__ < "4.2":
-    raise RuntimeError("Sphinx 4.2 or newer is required")
-
-from .docscrape_sphinx import get_doc_object
-from .validate import validate, ERROR_MSGS
-from .xref import DEFAULT_LINKS
 from . import __version__
+from .docscrape_sphinx import get_doc_object
+from .validate import get_validation_checks, validate
+from .xref import DEFAULT_LINKS
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +58,9 @@ def rename_references(app, what, name, obj, options, lines):
     references = set()
     for line in lines:
         line = line.strip()
-        m = re.match(r"^\.\. +\[(%s)\]" % app.config.numpydoc_citation_re, line, re.I)
+        m = re.match(
+            r"^\.\. +\[(%s)\]" % app.config.numpydoc_citation_re, line, re.IGNORECASE
+        )
         if m:
             references.add(m.group(1))
 
@@ -149,6 +147,10 @@ def clean_backrefs(app, doc, docname):
     for ref in _traverse_or_findall(doc, reference, descend=True):
         for id_ in ref["ids"]:
             known_ref_ids.add(id_)
+    # some extensions produce backrefs to inline elements
+    for ref in _traverse_or_findall(doc, inline, descend=True):
+        for id_ in ref["ids"]:
+            known_ref_ids.add(id_)
     for citation_node in _traverse_or_findall(doc, citation, descend=True):
         # remove backrefs to non-existent refs
         citation_node["backrefs"] = [
@@ -171,7 +173,6 @@ def mangle_docstrings(app, what, name, obj, options, lines):
 
     cfg = {
         "use_plots": app.config.numpydoc_use_plots,
-        "use_blockquotes": app.config.numpydoc_use_blockquotes,
         "show_class_members": app.config.numpydoc_show_class_members,
         "show_inherited_class_members": show_inherited_class_members,
         "class_members_toctree": app.config.numpydoc_class_members_toctree,
@@ -186,7 +187,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
     if what == "module":
         # Strip top title
         pattern = "^\\s*[#*=]{4,}\\n[a-z0-9 -]+\\n[#*=]{4,}\\s*"
-        title_re = re.compile(pattern, re.I | re.S)
+        title_re = re.compile(pattern, re.IGNORECASE | re.DOTALL)
         lines[:] = title_re.sub("", u_NL.join(lines)).split(u_NL)
     else:
         try:
@@ -208,7 +209,19 @@ def mangle_docstrings(app, what, name, obj, options, lines):
                 # TODO: Currently, all validation checks are run and only those
                 # selected via config are reported. It would be more efficient to
                 # only run the selected checks.
-                errors = validate(doc)["errors"]
+                report = validate(doc)
+                errors = [
+                    err
+                    for err in report["errors"]
+                    if not (
+                        (
+                            overrides := app.config.numpydoc_validation_overrides.get(
+                                err[0]
+                            )
+                        )
+                        and re.search(overrides, report["docstring"])
+                    )
+                ]
                 if {err[0] for err in errors} & app.config.numpydoc_validation_checks:
                     msg = (
                         f"[numpydoc] Validation warnings while processing "
@@ -235,10 +248,10 @@ def mangle_signature(app, what, name, obj, options, sig, retann):
         return "", ""
 
     if not (isinstance(obj, Callable) or hasattr(obj, "__argspec_is_invalid_")):
-        return
+        return None
 
     if not hasattr(obj, "__doc__"):
-        return
+        return None
     doc = get_doc_object(obj, config={"show_class_members": False})
     sig = doc["Signature"] or _clean_text_signature(
         getattr(obj, "__text_signature__", None)
@@ -262,7 +275,7 @@ def _clean_text_signature(sig):
 
 def setup(app, get_doc_object_=get_doc_object):
     if not hasattr(app, "add_config_value"):
-        return  # probably called by nose, better bail out
+        return None  # probably called by nose, better bail out
 
     global get_doc_object
     get_doc_object = get_doc_object_
@@ -274,7 +287,6 @@ def setup(app, get_doc_object_=get_doc_object):
     app.connect("doctree-read", relabel_references)
     app.connect("doctree-resolved", clean_backrefs)
     app.add_config_value("numpydoc_use_plots", None, False)
-    app.add_config_value("numpydoc_use_blockquotes", None, False)
     app.add_config_value("numpydoc_show_class_members", True, True)
     app.add_config_value(
         "numpydoc_show_inherited_class_members", True, True, types=(bool, dict)
@@ -287,6 +299,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value("numpydoc_xref_ignore", set(), True)
     app.add_config_value("numpydoc_validation_checks", set(), True)
     app.add_config_value("numpydoc_validation_exclude", set(), False)
+    app.add_config_value("numpydoc_validation_overrides", dict(), False)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
@@ -312,17 +325,9 @@ def update_config(app, config=None):
 
     # Processing to determine whether numpydoc_validation_checks is treated
     # as a blocklist or allowlist
-    valid_error_codes = set(ERROR_MSGS.keys())
-    if "all" in config.numpydoc_validation_checks:
-        block = deepcopy(config.numpydoc_validation_checks)
-        config.numpydoc_validation_checks = valid_error_codes - block
-    # Ensure that the validation check set contains only valid error codes
-    invalid_error_codes = config.numpydoc_validation_checks - valid_error_codes
-    if invalid_error_codes:
-        raise ValueError(
-            f"Unrecognized validation code(s) in numpydoc_validation_checks "
-            f"config value: {invalid_error_codes}"
-        )
+    config.numpydoc_validation_checks = get_validation_checks(
+        config.numpydoc_validation_checks
+    )
 
     # Generate the regexp for docstrings to ignore during validation
     if isinstance(config.numpydoc_validation_exclude, str):
@@ -336,6 +341,11 @@ def update_config(app, config=None):
             r"|".join(exp for exp in config.numpydoc_validation_exclude)
         )
         config.numpydoc_validation_excluder = exclude_expr
+
+    for check, patterns in config.numpydoc_validation_overrides.items():
+        config.numpydoc_validation_overrides[check] = re.compile(
+            r"|".join(exp for exp in patterns)
+        )
 
 
 # ------------------------------------------------------------------------------
@@ -392,7 +402,7 @@ def match_items(lines, content_old):
     This function tries to match the lines in ``lines`` with the items (source
     file references and line numbers) in ``content_old``. The
     ``mangle_docstrings`` function changes the actual docstrings, but doesn't
-    keep track of where each line came from. The manging does many operations
+    keep track of where each line came from. The mangling does many operations
     on the original lines, which are hard to track afterwards.
 
     Many of the line changes come from deleting or inserting blank lines. This
@@ -407,12 +417,18 @@ def match_items(lines, content_old):
 
     Examples
     --------
-    >>> lines = ['', 'A', '', 'B', '   ', '', 'C', 'D']
-    >>> lines_old = ['a', '', '', 'b', '', 'c']
-    >>> items_old = [('file1.py', 0), ('file1.py', 1), ('file1.py', 2),
-    ...              ('file2.py', 0), ('file2.py', 1), ('file2.py', 2)]
+    >>> lines = ["", "A", "", "B", "   ", "", "C", "D"]
+    >>> lines_old = ["a", "", "", "b", "", "c"]
+    >>> items_old = [
+    ...     ("file1.py", 0),
+    ...     ("file1.py", 1),
+    ...     ("file1.py", 2),
+    ...     ("file2.py", 0),
+    ...     ("file2.py", 1),
+    ...     ("file2.py", 2),
+    ... ]
     >>> content_old = ViewList(lines_old, items=items_old)
-    >>> match_items(lines, content_old) # doctest: +NORMALIZE_WHITESPACE
+    >>> match_items(lines, content_old)  # doctest: +NORMALIZE_WHITESPACE
     [('file1.py', 0), ('file1.py', 0), ('file2.py', 0), ('file2.py', 0),
      ('file2.py', 2), ('file2.py', 2), ('file2.py', 2), ('file2.py', 2)]
     >>> # first 2 ``lines`` are matched to 'a', second 2 to 'b', rest to 'c'

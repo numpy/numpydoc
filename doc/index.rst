@@ -1,3 +1,5 @@
+:html_theme.sidebar_secondary.remove: true
+
 =====================================
 numpydoc -- Numpy's Sphinx extensions
 =====================================
@@ -21,5 +23,5 @@ Sphinx, and adds the code description directives ``np:function``,
     install
     format
     validation
-    release_notes
+    release/index
     example
