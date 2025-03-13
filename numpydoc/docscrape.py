@@ -1,17 +1,15 @@
-"""Extract reference documentation from the NumPy source tree.
+"""Extract reference documentation from the NumPy source tree."""
 
-"""
+import copy
 import inspect
-import textwrap
-import re
 import pydoc
-from warnings import warn
+import re
+import sys
+import textwrap
 from collections import namedtuple
 from collections.abc import Callable, Mapping
-import copy
-import sys
-
 from functools import cached_property
+from warnings import warn
 
 
 def strip_blank_lines(l):
@@ -122,17 +120,17 @@ class NumpyDocString(Mapping):
         "Summary": [""],
         "Extended Summary": [],
         "Parameters": [],
+        "Attributes": [],
+        "Methods": [],
         "Returns": [],
         "Yields": [],
         "Receives": [],
+        "Other Parameters": [],
         "Raises": [],
         "Warns": [],
-        "Other Parameters": [],
-        "Attributes": [],
-        "Methods": [],
+        "Warnings": [],
         "See Also": [],
         "Notes": [],
-        "Warnings": [],
         "References": "",
         "Examples": "",
         "index": {},
@@ -346,7 +344,7 @@ class NumpyDocString(Mapping):
 
     def _parse_index(self, section, content):
         """
-        .. index: default
+        .. index:: default
            :refguide: something, else, and more
 
         """
@@ -393,12 +391,8 @@ class NumpyDocString(Mapping):
         sections = list(self._read_sections())
         section_names = {section for section, content in sections}
 
-        has_returns = "Returns" in section_names
         has_yields = "Yields" in section_names
         # We could do more tests, but we are not. Arbitrarily.
-        if has_returns and has_yields:
-            msg = "Docstring contains both a Returns and Yields section."
-            raise ValueError(msg)
         if not has_yields and "Receives" in section_names:
             msg = "Docstring contains a Receives section but not Yields."
             raise ValueError(msg)
@@ -452,7 +446,7 @@ class NumpyDocString(Mapping):
         if error:
             raise ValueError(msg)
         else:
-            warn(msg)
+            warn(msg, stacklevel=3)
 
     # string conversion routines
 
@@ -555,8 +549,10 @@ class NumpyDocString(Mapping):
         out += self._str_signature()
         out += self._str_summary()
         out += self._str_extended_summary()
+        out += self._str_param_list("Parameters")
+        for param_list in ("Attributes", "Methods"):
+            out += self._str_param_list(param_list)
         for param_list in (
-            "Parameters",
             "Returns",
             "Yields",
             "Receives",
@@ -569,8 +565,6 @@ class NumpyDocString(Mapping):
         out += self._str_see_also(func_role)
         for s in ("Notes", "References", "Examples"):
             out += self._str_section(s)
-        for param_list in ("Attributes", "Methods"):
-            out += self._str_param_list(param_list)
         out += self._str_index()
         return "\n".join(out)
 
@@ -705,6 +699,7 @@ class ClassDoc(NumpyDocString):
             for name, func in inspect.getmembers(self._cls)
             if (
                 not name.startswith("_")
+                and not self._should_skip_member(name, self._cls)
                 and (
                     func is None
                     or isinstance(func, (property, cached_property))
@@ -714,12 +709,24 @@ class ClassDoc(NumpyDocString):
             )
         ]
 
+    @staticmethod
+    def _should_skip_member(name, klass):
+        return (
+            # Namedtuples should skip everything in their ._fields as the
+            # docstrings for each of the members is: "Alias for field number X"
+            issubclass(klass, tuple)
+            and hasattr(klass, "_asdict")
+            and hasattr(klass, "_fields")
+            and name in klass._fields
+        )
+
     def _is_show_member(self, name):
-        if self.show_inherited_members:
-            return True  # show all class members
-        if name not in self._cls.__dict__:
-            return False  # class member is inherited, we do not show it
-        return True
+        return (
+            # show all class members
+            self.show_inherited_members
+            # or class member is not inherited
+            or name in self._cls.__dict__
+        )
 
 
 def get_doc_object(

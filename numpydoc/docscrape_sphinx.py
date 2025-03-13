@@ -1,19 +1,16 @@
-import re
 import inspect
-import textwrap
-import pydoc
-from collections.abc import Callable
 import os
+import pydoc
+import re
+import textwrap
 
 from jinja2 import FileSystemLoader
 from jinja2.sandbox import SandboxedEnvironment
-import sphinx
 from sphinx.jinja2glue import BuiltinTemplateLoader
 
-from .docscrape import NumpyDocString, FunctionDoc, ClassDoc, ObjDoc
+from .docscrape import ClassDoc, FunctionDoc, NumpyDocString, ObjDoc
 from .docscrape import get_doc_object as get_doc_object_orig
 from .xref import make_xref
-
 
 IMPORT_MATPLOTLIB_RE = r"\b(import +matplotlib|from +matplotlib +import)\b"
 
@@ -163,7 +160,7 @@ class SphinxDocString(NumpyDocString):
         display_param = f":obj:`{param} <{link_prefix}{param}>`"
         if obj_doc:
             # Overwrite desc. Take summary logic of autosummary
-            desc = re.split(r"\n\s*\n", obj_doc.strip(), 1)[0]
+            desc = re.split(r"\n\s*\n", obj_doc.strip(), maxsplit=1)[0]
             # XXX: Should this have DOTALL?
             #      It does not in autosummary
             m = re.search(r"^([A-Z].*?\.)(?:\s|$)", " ".join(desc.split()))
@@ -332,7 +329,7 @@ class SphinxDocString(NumpyDocString):
             out += [".. only:: latex", ""]
             items = []
             for line in self["References"]:
-                m = re.match(r".. \[([a-z0-9._-]+)\]", line, re.I)
+                m = re.match(r".. \[([a-z0-9._-]+)\]", line, re.IGNORECASE)
                 if m:
                     items.append(m.group(1))
             out += ["   " + ", ".join([f"[{item}]_" for item in items]), ""]
@@ -362,6 +359,12 @@ class SphinxDocString(NumpyDocString):
             "summary": self._str_summary(),
             "extended_summary": self._str_extended_summary(),
             "parameters": self._str_param_list("Parameters"),
+            "attributes": (
+                self._str_param_list("Attributes", fake_autosummary=True)
+                if self.attributes_as_param_list
+                else self._str_member_list("Attributes")
+            ),
+            "methods": self._str_member_list("Methods"),
             "returns": self._str_returns("Returns"),
             "yields": self._str_returns("Yields"),
             "receives": self._str_returns("Receives"),
@@ -373,10 +376,6 @@ class SphinxDocString(NumpyDocString):
             "notes": self._str_section("Notes"),
             "references": self._str_references(),
             "examples": self._str_examples(),
-            "attributes": self._str_param_list("Attributes", fake_autosummary=True)
-            if self.attributes_as_param_list
-            else self._str_member_list("Attributes"),
-            "methods": self._str_member_list("Methods"),
         }
         ns = {k: "\n".join(v) for k, v in ns.items()}
 

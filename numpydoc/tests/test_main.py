@@ -1,8 +1,11 @@
-import sys
+import inspect
 import io
+import sys
+
 import pytest
+
 import numpydoc
-import numpydoc.__main__
+import numpydoc.cli
 
 
 def _capture_stdout(func_name, *args, **kwargs):
@@ -30,7 +33,7 @@ def _capture_stdout(func_name, *args, **kwargs):
 
     Examples
     --------
-    >>> _capture_stdout(print, 'hello world')
+    >>> _capture_stdout(print, "hello world")
     'hello world'
     """
     f = io.StringIO()
@@ -50,7 +53,6 @@ def _docstring_with_errors():
     ----------
     made_up_param : str
     """
-    pass
 
 
 def _invalid_docstring():
@@ -61,45 +63,43 @@ def _invalid_docstring():
     --------
     : this is invalid
     """
-    pass
 
 
 def test_renders_package_docstring():
-    out = _capture_stdout(numpydoc.__main__.render_object, "numpydoc")
+    out = _capture_stdout(numpydoc.cli.render_object, "numpydoc")
     assert out.startswith("This package provides the numpydoc Sphinx")
 
 
-def test_renders_module_docstring():
-    out = _capture_stdout(numpydoc.__main__.render_object, "numpydoc.__main__")
-    assert out.startswith("Implementing `python -m numpydoc` functionality.")
+def test_renders_module_docstring(capsys):
+    numpydoc.cli.main(["render", "numpydoc.cli"])
+    out = capsys.readouterr().out.strip("\n\r")
+    assert out.startswith(numpydoc.cli.__doc__)
 
 
 def test_renders_function_docstring():
     out = _capture_stdout(
-        numpydoc.__main__.render_object, "numpydoc.tests.test_main._capture_stdout"
+        numpydoc.cli.render_object, "numpydoc.tests.test_main._capture_stdout"
     )
     assert out.startswith("Return stdout of calling")
 
 
 def test_render_object_returns_correct_exit_status():
-    exit_status = numpydoc.__main__.render_object(
-        "numpydoc.tests.test_main._capture_stdout"
-    )
+    exit_status = numpydoc.cli.render_object("numpydoc.tests.test_main._capture_stdout")
     assert exit_status == 0
 
     with pytest.raises(ValueError):
-        numpydoc.__main__.render_object("numpydoc.tests.test_main._invalid_docstring")
+        numpydoc.cli.render_object("numpydoc.tests.test_main._invalid_docstring")
 
 
 def test_validate_detects_errors():
     out = _capture_stdout(
-        numpydoc.__main__.validate_object,
+        numpydoc.cli.validate_object,
         "numpydoc.tests.test_main._docstring_with_errors",
     )
     assert "SS02" in out
     assert "Summary does not start with a capital letter" in out
 
-    exit_status = numpydoc.__main__.validate_object(
+    exit_status = numpydoc.cli.validate_object(
         "numpydoc.tests.test_main._docstring_with_errors"
     )
     assert exit_status > 0
@@ -107,11 +107,39 @@ def test_validate_detects_errors():
 
 def test_validate_perfect_docstring():
     out = _capture_stdout(
-        numpydoc.__main__.validate_object, "numpydoc.tests.test_main._capture_stdout"
+        numpydoc.cli.validate_object, "numpydoc.tests.test_main._capture_stdout"
     )
     assert out == ""
 
-    exit_status = numpydoc.__main__.validate_object(
+    exit_status = numpydoc.cli.validate_object(
         "numpydoc.tests.test_main._capture_stdout"
     )
     assert exit_status == 0
+
+
+@pytest.mark.parametrize("args", [[], ["--ignore", "SS03"]])
+def test_lint(capsys, args):
+    argv = ["lint", "numpydoc/__main__.py"] + args
+    if args:
+        expected = ""
+        expected_status = 0
+    else:
+        expected = "numpydoc/__main__.py:1: SS03 Summary does not end with a period"
+        expected_status = 1
+
+    return_status = numpydoc.cli.main(argv)
+    err = capsys.readouterr().err.strip("\n\r")
+    assert err == expected
+    assert return_status == expected_status
+
+
+def test_lint_help(capsys):
+    """Test that lint help section is displaying."""
+
+    with pytest.raises(SystemExit):
+        return_code = numpydoc.cli.main(["lint", "--help"])
+        assert return_code == 0
+
+    out = capsys.readouterr().out
+    assert "--ignore" in out
+    assert "--config" in out

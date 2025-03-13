@@ -1,20 +1,20 @@
-import pytest
 from collections import defaultdict
+from copy import deepcopy
 from io import StringIO
 from pathlib import PosixPath
-from copy import deepcopy
 
+import pytest
 from docutils import nodes
-
-from numpydoc.numpydoc import (
-    mangle_docstrings,
-    _clean_text_signature,
-    update_config,
-    clean_backrefs,
-)
-from numpydoc.xref import DEFAULT_LINKS
 from sphinx.ext.autodoc import ALL
 from sphinx.util import logging
+
+from numpydoc.numpydoc import (
+    _clean_text_signature,
+    clean_backrefs,
+    mangle_docstrings,
+    update_config,
+)
+from numpydoc.xref import DEFAULT_LINKS
 
 
 class MockConfig:
@@ -36,6 +36,7 @@ class MockConfig:
 
 class MockBuilder:
     config = MockConfig()
+    _translator = None
 
 
 class MockApp:
@@ -49,6 +50,7 @@ class MockApp:
         self.verbosity = 2
         self._warncount = 0
         self.warningiserror = False
+        self._exception_on_warning = False
 
 
 def test_mangle_docstrings_basic():
@@ -150,7 +152,6 @@ def f():
 
         Expect SA01 and EX01 errors if validation enabled.
         """
-        pass
 
     return _function_without_seealso_and_examples
 

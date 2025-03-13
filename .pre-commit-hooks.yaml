@@ -1,7 +1,7 @@
 - id: numpydoc-validation
   name: numpydoc-validation
   description: This hook validates that docstrings in committed files adhere to numpydoc standards.
-  entry: validate-docstrings
-  require_serial: true
+  entry: numpydoc lint
+  require_serial: false
   language: python
   types: [python]

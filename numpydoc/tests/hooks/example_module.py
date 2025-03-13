@@ -3,7 +3,6 @@
 
 def some_function(name):
     """Welcome to some function."""
-    pass
 
 
 class MyClass:
@@ -23,11 +22,9 @@ class MyClass:
         ----------
         *args
         """
-        pass
 
     def process(self):
         """Process stuff."""
-        pass
 
 
 class NewClass:

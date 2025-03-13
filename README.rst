@@ -4,7 +4,6 @@ numpydoc -- Numpy's Sphinx extensions
 
 .. image:: https://readthedocs.org/projects/numpydoc/badge/?version=latest
    :alt: Documentation Status
-   :scale: 100%
    :target: https://numpydoc.readthedocs.io/en/latest/
 
 .. image:: https://codecov.io/gh/numpy/numpydoc/branch/main/graph/badge.svg
@@ -18,7 +17,7 @@ docstrings formatted according to the NumPy documentation format.
 The extension also adds the code description directives
 ``np:function``, ``np-c:function``, etc.
 
-numpydoc requires Python 3.8+ and sphinx 5+.
+numpydoc requires Python 3.9+ and sphinx 6+.
 
 For usage information, please refer to the `documentation
 <https://numpydoc.readthedocs.io/>`_.
