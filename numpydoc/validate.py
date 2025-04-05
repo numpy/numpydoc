@@ -645,7 +645,9 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
             and doc.is_function_or_method
             and hasattr(doc, "code_obj")
         ):
-            cls_name = doc.code_obj.__qualname__.split(".")[0]
+            cls_name = ".".join(
+                doc.code_obj.__qualname__.split(".")[:-1]
+            )  # Collect all class depths before the constructor.
             cls = Validator._load_obj(f"{doc.code_obj.__module__}.{cls_name}")
             # cls = Validator._load_obj(f"{doc.name[:-9]}.{cls_name}") ## Alternative
             cls_doc = Validator(get_doc_object(cls))
