@@ -80,8 +80,7 @@ ERROR_MSGS = {
     "PR06": 'Parameter "{param_name}" type should use "{right_type}" instead '
     'of "{wrong_type}"',
     "PR07": 'Parameter "{param_name}" has no description',
-    "PR08": 'Parameter "{param_name}" description should start with a '
-    "capital letter",
+    "PR08": 'Parameter "{param_name}" description should start with a capital letter',
     "PR09": 'Parameter "{param_name}" description should finish with "."',
     "PR10": 'Parameter "{param_name}" requires a space before the colon '
     "separating the parameter name and type",

@@ -104,10 +104,11 @@ def get_parser() -> argparse.ArgumentParser:
         nargs="*",
         help=(
             f"""Check codes to ignore.{
-                ' Currently ignoring the following from '
-                f'{Path(project_root_from_cwd) / config_file}: {ignored_checks_text}'
-                'Values provided here will be in addition to the above, unless an alternate config is provided.'
-                if ignored_checks else ''
+                " Currently ignoring the following from "
+                f"{Path(project_root_from_cwd) / config_file}: {ignored_checks_text}"
+                "Values provided here will be in addition to the above, unless an alternate config is provided."
+                if ignored_checks
+                else ""
             }"""
         ),
     )

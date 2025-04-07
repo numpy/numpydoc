@@ -232,8 +232,7 @@ class NumpyDocString(Mapping):
                 # NOTE: param line with single element should never have a
                 # a " :" before the description line, so this should probably
                 # warn.
-                if header.endswith(" :"):
-                    header = header[:-2]
+                header = header.removesuffix(" :")
                 if single_element_is_type:
                     arg_name, arg_type = "", header
                 else:
