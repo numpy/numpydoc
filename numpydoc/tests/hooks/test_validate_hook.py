@@ -116,9 +116,7 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
                 ]
                 exclude = '\\.__init__$'
                 override_SS05 = [
-                    '^Process',
-                    '^Assess',
-                    '^Access',
+                    '^Creates',
                 ]
                 """
             )
@@ -154,7 +152,7 @@ def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
                 [tool:numpydoc_validation]
                 checks = all,EX01,SA01,ES01
                 exclude = \\.__init__$
-                override_SS05 = ^Process,^Assess,^Access
+                override_SS05 = ^Creates
                 """
             )
         )
@@ -198,9 +196,7 @@ def test_validate_hook_exclude_option_pyproject(example_module, tmp_path, capsys
                     '\.__init__$',
                 ]
                 override_SS05 = [
-                    '^Process',
-                    '^Assess',
-                    '^Access',
+                    '^Creates',
                 ]
                 """
             )
@@ -232,7 +228,7 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
                 [tool:numpydoc_validation]
                 checks = all,EX01,SA01,ES01
                 exclude = \\.NewClass$,\\.__init__$
-                override_SS05 = ^Process,^Assess,^Access
+                override_SS05 = ^Creates
                 """
             )
         )
