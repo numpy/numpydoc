@@ -714,6 +714,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         # Heuristic to check for infinitive verbs - shouldn't end in "s"
         elif (
             doc.is_function_or_method
+            and len(doc.summary.split(" ")[0]) > 1
             and doc.summary.split(" ")[0][-1] == "s"
             and doc.summary.split(" ")[0][-2] != "s"
         ):
