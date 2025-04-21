@@ -9,6 +9,7 @@ import textwrap
 from collections import namedtuple
 from collections.abc import Callable, Mapping
 from functools import cached_property
+from typing import get_type_hints
 from warnings import warn
 
 
@@ -236,7 +237,8 @@ class NumpyDocString(Mapping):
                 if single_element_is_type:
                     arg_name, arg_type = "", header
                 else:
-                    arg_name, arg_type = header, ""
+                    arg_name = header
+                    arg_type = self._get_type_from_signature(header)
 
             desc = r.read_to_next_unindented_line()
             desc = dedent_lines(desc)
@@ -245,6 +247,9 @@ class NumpyDocString(Mapping):
             params.append(Parameter(arg_name, arg_type, desc))
 
         return params
+
+    def _get_type_from_signature(self, arg_name: str) -> str:
+        return ""
 
     # See also supports the following formats.
     #
@@ -576,6 +581,11 @@ def dedent_lines(lines):
 class FunctionDoc(NumpyDocString):
     def __init__(self, func, role="func", doc=None, config=None):
         self._f = func
+        try:
+            self._signature = inspect.signature(func)
+        except ValueError:
+            self._signature = None
+
         self._role = role  # e.g. "func" or "meth"
 
         if doc is None:
@@ -608,6 +618,17 @@ class FunctionDoc(NumpyDocString):
 
         out += super().__str__(func_role=self._role)
         return out
+
+    def _get_type_from_signature(self, arg_name: str) -> str:
+        if self._signature is None:
+            return ""
+
+        parameter = self._signature.parameters[arg_name.replace("*", "")]
+
+        if parameter.annotation == parameter.empty:
+            return ""
+        else:
+            return str(parameter.annotation)
 
 
 class ObjDoc(NumpyDocString):
@@ -643,6 +664,14 @@ class ClassDoc(NumpyDocString):
             if cls is None:
                 raise ValueError("No class or documentation string given")
             doc = pydoc.getdoc(cls)
+
+        if cls is not None:
+            try:
+                self._signature = inspect.signature(cls.__init__)
+            except ValueError:
+                self._signature = None
+        else:
+            self._signature = None
 
         NumpyDocString.__init__(self, doc)
 
@@ -726,6 +755,52 @@ class ClassDoc(NumpyDocString):
             # or class member is not inherited
             or name in self._cls.__dict__
         )
+
+    def _get_type_from_signature(self, arg_name: str) -> str:
+        if self._signature is None:
+            return ""
+
+        arg_name = arg_name.replace("*", "")
+        try:
+            parameter = self._signature.parameters[arg_name]
+        except KeyError:
+            return self._find_type_hint(self._cls, arg_name)
+
+        if parameter.annotation == parameter.empty:
+            return ""
+        else:
+            return str(parameter.annotation)
+
+    @staticmethod
+    def _find_type_hint(cls: type, arg_name: str) -> str:
+        type_hints = get_type_hints(cls)
+        try:
+            annotation = type_hints[arg_name]
+        except KeyError:
+            try:
+                attr = getattr(cls, arg_name)
+            except AttributeError:
+                return ""
+
+            attr = attr.fget if isinstance(attr, property) else attr
+
+            if callable(attr):
+                try:
+                    signature = inspect.signature(attr)
+                except ValueError:
+                    return ""
+
+                if signature.return_annotation == signature.empty:
+                    return ""
+                else:
+                    return str(signature.return_annotation)
+            else:
+                return type(attr).__name__
+
+        try:
+            return str(annotation.__name__)
+        except AttributeError:
+            return str(annotation)
 
 
 def get_doc_object(
