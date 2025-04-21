@@ -110,6 +110,7 @@ doc_txt = """\
   some, other, funcs
   otherfunc : relationship
   :py:meth:`spyder.widgets.mixins.GetHelpMixin.show_object_info`
+  :py:meth:`int.bit_length <int.bit_length>`
 
   Examples
   --------
@@ -451,6 +452,8 @@ See Also
     relationship
 :py:meth:`spyder.widgets.mixins.GetHelpMixin.show_object_info`
     ..
+:py:meth:`int.bit_length <int.bit_length>`
+    ..
 
 Notes
 -----
@@ -641,6 +644,8 @@ of the one-dimensional normal distribution to higher dimensions.
     :obj:`otherfunc`
         relationship
     :py:meth:`spyder.widgets.mixins.GetHelpMixin.show_object_info`
+        ..
+    :py:meth:`int.bit_length <int.bit_length>`
         ..
 
 .. rubric:: Notes
