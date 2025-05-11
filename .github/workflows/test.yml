@@ -49,6 +49,7 @@ jobs:
       - name: Run test suite
         run: |
           pytest -v --pyargs numpydoc
+          pytest -v --pyargs numpydoc/tests/hooks
 
       - name: Test coverage
         run: |
@@ -95,12 +96,12 @@ jobs:
 
       - name: Install
         run: |
-          python -m pip install .[test,doc]
+          python -m pip install --pre .[test,doc]
           pip list
 
       - name: Run test suite
         run: |
-          pytest -v --pyargs .
+          pytest -v --pyargs numpydoc
 
       - name: Test coverage
         run: |

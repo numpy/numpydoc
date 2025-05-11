@@ -1305,6 +1305,69 @@ class IncompleteConstructorDocumentedInClass:
         pass
 
 
+class ConstructorDocumentedinEmbeddedClass:  # ignore Gl08, ES01
+    """
+    Class to test the initialisation behaviour of a embedded class.
+    """
+
+    class EmbeddedClass1:  # ignore GL08, ES01
+        """
+        An additional level for embedded class documentation checking.
+        """
+
+        class EmbeddedClass2:
+            """
+            This is an embedded class.
+
+            Extended summary.
+
+            Parameters
+            ----------
+            param1 : int
+                Description of param1.
+
+            See Also
+            --------
+            otherclass : A class that does something else.
+
+            Examples
+            --------
+            This is an example of how to use EmbeddedClass.
+            """
+
+            def __init__(self, param1: int) -> None:
+                pass
+
+
+class IncompleteConstructorDocumentedinEmbeddedClass:
+    """
+    Class to test the initialisation behaviour of a embedded class.
+    """
+
+    class EmbeddedClass1:
+        """
+        An additional level for embedded class documentation checking.
+        """
+
+        class EmbeddedClass2:
+            """
+            This is an embedded class.
+
+            Extended summary.
+
+            See Also
+            --------
+            otherclass : A class that does something else.
+
+            Examples
+            --------
+            This is an example of how to use EmbeddedClass.
+            """
+
+            def __init__(self, param1: int) -> None:
+                pass
+
+
 class TestValidator:
     def _import_path(self, klass=None, func=None):
         """
@@ -1660,6 +1723,18 @@ class TestValidator:
                 tuple(),
                 ("PR01"),  # Parameter not documented in class constructor
             ),
+            (
+                "ConstructorDocumentedinEmbeddedClass.EmbeddedClass1.EmbeddedClass2",
+                tuple(),
+                ("GL08",),
+                tuple(),
+            ),
+            (
+                "IncompleteConstructorDocumentedinEmbeddedClass.EmbeddedClass1.EmbeddedClass2",
+                ("GL08",),
+                tuple(),
+                ("PR01",),
+            ),
         ],
     )
     def test_constructor_docstrings(
@@ -1676,6 +1751,11 @@ class TestValidator:
             assert code in " ".join(err[0] for err in result["errors"])
         for code in exc_init_codes:
             assert code not in " ".join(err[0] for err in result["errors"])
+
+        if klass == "ConstructorDocumentedinEmbeddedClass":
+            raise NotImplementedError(
+                "Test for embedded class constructor docstring not implemented yet."
+            )
 
 
 def decorator(x):
