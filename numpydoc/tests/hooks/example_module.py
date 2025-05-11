@@ -23,8 +23,8 @@ class MyClass:
         *args
         """
 
-    def process(self):
-        """Process stuff."""
+    def create(self):
+        """Creates stuff."""
 
 
 class NewClass:
