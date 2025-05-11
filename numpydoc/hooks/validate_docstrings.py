@@ -33,7 +33,12 @@ class AstValidator(validate.Validator):
     """
 
     def __init__(
-        self, *, ast_node: ast.AST, filename: os.PathLike, obj_name: str
+        self,
+        *,
+        ast_node: ast.AST,
+        filename: os.PathLike,
+        obj_name: str,
+        ancestry: list[ast.AST],
     ) -> None:
         self.node: ast.AST = ast_node
         self.raw_doc: str = ast.get_docstring(self.node, clean=False) or ""
@@ -45,6 +50,8 @@ class AstValidator(validate.Validator):
 
         self.is_class: bool = isinstance(ast_node, ast.ClassDef)
         self.is_module: bool = isinstance(ast_node, ast.Module)
+
+        self.ancestry: list[ast.AST] = ancestry
 
     @staticmethod
     def _load_obj(name):
@@ -91,7 +98,7 @@ class AstValidator(validate.Validator):
 
     @property
     def signature_parameters(self) -> Tuple[str]:
-        def extract_signature(node):
+        def extract_signature(node, parent):
             args_node = node.args
             params = []
             for arg_type in ["posonlyargs", "args", "vararg", "kwonlyargs", "kwarg"]:
@@ -104,17 +111,21 @@ class AstValidator(validate.Validator):
                 else:
                     params.extend([arg.arg for arg in entries])
             params = tuple(params)
-            if params and params[0] in {"self", "cls"}:
+            if (
+                params
+                and params[0] in {"self", "cls"}
+                and isinstance(parent, ast.ClassDef)
+            ):
                 return params[1:]
             return params
 
         params = tuple()
         if self.is_function_or_method:
-            params = extract_signature(self.node)
+            params = extract_signature(self.node, self.ancestry[-1])
         elif self.is_class:
             for child in self.node.body:
                 if isinstance(child, ast.FunctionDef) and child.name == "__init__":
-                    params = extract_signature(child)
+                    params = extract_signature(child, self.node)
         return params
 
     @property
@@ -144,8 +155,22 @@ class DocstringVisitor(ast.NodeVisitor):
         self.config: dict = config
         self.filepath: str = filepath
         self.module_name: str = Path(self.filepath).stem
-        self.stack: list[str] = []
+        self.stack: list[ast.AST] = []
         self.findings: list = []
+
+    @property
+    def node_name(self) -> str:
+        """
+        Get the full name of the current node in the stack.
+
+        Returns
+        -------
+        str
+            The full name of the current node in the stack.
+        """
+        return ".".join(
+            [getattr(node, "name", self.module_name) for node in self.stack]
+        )
 
     def _ignore_issue(self, node: ast.AST, check: str) -> bool:
         """
@@ -185,9 +210,13 @@ class DocstringVisitor(ast.NodeVisitor):
         node : ast.AST
             The node under inspection.
         """
-        name = ".".join(self.stack)
+        name = self.node_name
         report = validate.validate(
-            name, AstValidator, ast_node=node, filename=self.filepath
+            name,
+            AstValidator,
+            ast_node=node,
+            filename=self.filepath,
+            ancestry=self.stack[:-1],
         )
         self.findings.extend(
             [
@@ -209,13 +238,11 @@ class DocstringVisitor(ast.NodeVisitor):
         if isinstance(
             node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
         ):
-            self.stack.append(
-                self.module_name if isinstance(node, ast.Module) else node.name
-            )
+            self.stack.append(node)
 
             if not (
                 self.config["exclude"]
-                and re.search(self.config["exclude"], ".".join(self.stack))
+                and re.search(self.config["exclude"], self.node_name)
             ):
                 self._get_numpydoc_issues(node)
 
