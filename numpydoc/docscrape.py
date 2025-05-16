@@ -632,12 +632,7 @@ class FunctionDoc(NumpyDocString):
             if parameter is None:
                 return ""
 
-        if parameter.annotation == parameter.empty:
-            return ""
-        elif type(parameter.annotation) == type:
-            return str(parameter.annotation.__name__)
-        else:
-            return str(parameter.annotation)
+        return _annotation_to_string(parameter.annotation)
 
     def _handle_combined_parameters(self, arg_names: str):
         arg_names = arg_names.split(',')
@@ -793,12 +788,7 @@ class ClassDoc(NumpyDocString):
         except KeyError:
             return self._handle_combined_parameters(arg_name, self._cls)
 
-        if parameter.annotation == parameter.empty:
-            return ""
-        elif type(parameter.annotation) == type:
-            return str(parameter.annotation.__name__)
-        else:
-            return str(parameter.annotation)
+        return _annotation_to_string(parameter.annotation)
 
     def _handle_combined_parameters(self, arg_names: str, cls: type):
         arg_names = arg_names.split(',')
@@ -831,10 +821,7 @@ class ClassDoc(NumpyDocString):
                 except ValueError:
                     return ""
 
-                if signature.return_annotation == signature.empty:
-                    return ""
-                else:
-                    return str(signature.return_annotation)
+                return _annotation_to_string(signature.return_annotation)
             else:
                 return type(attr).__name__
 
@@ -842,6 +829,15 @@ class ClassDoc(NumpyDocString):
             return str(annotation.__name__)
         else:
             return str(annotation)
+
+
+def _annotation_to_string(annotation) -> str:
+    if annotation == inspect.Signature.empty:
+        return ""
+    elif type(annotation) == type:
+        return str(annotation.__name__)
+    else:
+        return str(annotation)
 
 
 def get_doc_object(

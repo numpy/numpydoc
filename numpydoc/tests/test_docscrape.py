@@ -1831,6 +1831,22 @@ def test_type_hints_class_attributes(typ, expected):
     assert doc_bar["Attributes"][1].type == expected
 
 
+@pytest.mark.parametrize("typ,expected", type_hints)
+def test_type_hints_class_methods(typ, expected):
+    class Foo:
+        """Short description\n
+        Methods
+        -------
+        a
+            Description for a.
+        """
+
+        def a(self) -> typ: ...
+
+    doc = ClassDoc(Foo)
+    assert doc["Methods"][0].type == expected
+
+
 if __name__ == "__main__":
     import pytest
 
