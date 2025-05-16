@@ -1,5 +1,6 @@
 import re
 import textwrap
+import typing
 import warnings
 from collections import namedtuple
 from copy import deepcopy
@@ -1713,6 +1714,68 @@ def test_namedtuple_class_docstring():
     assert len(sds["Parameters"]) == 2
     assert sds["Parameters"][0].desc[0] == "The bar attribute"
     assert sds["Parameters"][1].desc[0] == "The baz attribute"
+
+
+T = typing.TypeVar("T")
+
+@pytest.mark.parametrize(
+    "typ,expected",
+    [
+        (int, "int"),
+        (str, "str"),
+        (float, "float"),
+        (complex, "complex"),
+        (None, "None"),
+        (bool, "bool"),
+        (list, "list"),
+        (list[int], "list[int]"),
+        (set, "set"),
+        (set[str], "set[str]"),
+        (frozenset, "frozenset"),
+        (frozenset[str], "frozenset[str]"),
+        (tuple, "tuple"),
+        (tuple[int], "tuple[int]"),
+        (tuple[int, float, complex], "tuple[int, float, complex]"),
+        (tuple[int, ...], "tuple[int, ...]"),
+        (range, "range"),
+        (dict, "dict"),
+        (dict[str, int], "dict[str, int]"),
+        (dict[str, dict[int, list[float]]], "dict[str, dict[int, list[float]]]"),
+        (typing.Union[int, float], "typing.Union[int, float]"),
+        (typing.Optional[str], "typing.Optional[str]"),
+        (typing.Callable[[], float], "typing.Callable[[], float]"),
+        (typing.Callable[[int, int], str], "typing.Callable[[int, int], str]"),
+        (typing.Callable[[int, Exception], None],
+         "typing.Callable[[int, Exception], NoneType]"),
+        (typing.Callable[..., typing.Awaitable[None]],
+         "typing.Callable[..., typing.Awaitable[NoneType]]"),
+        (typing.Callable[[T], T], "typing.Callable[[~T], ~T]"),
+        (typing.Any, "typing.Any"),
+        (typing.Literal["a", "b", "c"], "typing.Literal['a', 'b', 'c']"),
+        (typing.Annotated[float, "min=0", "max=42"], "typing.Annotated[float, 'min=0', 'max=42']"),
+        (typing.Annotated[dict[str, dict[str, list[typing.Union[float, tuple[int, complex]]]]],
+                          typing.Callable[[], typing.NoReturn], "help='description'"],
+         "typing.Annotated[dict[str, dict[str, list[typing.Union[float, tuple[int, complex]]]]], "
+         "typing.Callable[[], typing.NoReturn], \"help='description'\"]"),
+    ]
+)
+def test_type_hints_func(typ, expected):
+    def foo(a: typ, b: typ):
+        """Short description\n
+        Parameters
+        ----------
+        a
+            Description for a.
+
+        Other Parameters
+        ----------------
+        b
+            Description for b.
+        """
+
+    doc = FunctionDoc(foo)
+    assert doc["Parameters"][0].type == expected
+    assert doc["Other Parameters"][0].type == expected
 
 
 if __name__ == "__main__":

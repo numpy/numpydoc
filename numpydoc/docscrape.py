@@ -635,7 +635,10 @@ class FunctionDoc(NumpyDocString):
         if parameter.annotation == parameter.empty:
             return ""
         else:
-            return str(parameter.annotation)
+            if type(parameter.annotation) == type:
+                return str(parameter.annotation.__name__)
+            else:
+                return str(parameter.annotation)
 
     def _handle_combined_parameters(self, arg_names: str):
         arg_names = arg_names.split(',')
