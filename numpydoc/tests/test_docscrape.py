@@ -1875,6 +1875,86 @@ def test_type_hints_args_kwargs():
         assert doc["Parameters"][1].type == "float"
 
 
+def test_type_hints_combined_parameters_valid():
+    def foo(a: int, b: int, c: int, d: int):
+        """Short description\n
+        Parameters
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+
+    class Bar:
+        """Short description\n
+        Parameters
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+        def __init__(self, a: int, b: int, c: int, d: int): ...
+
+    for cls, obj in zip((FunctionDoc, ClassDoc), (foo, Bar)):
+        doc = cls(obj)
+        assert doc["Parameters"][0].type == "int"
+
+
+def test_type_hints_combined_parameters_invalid():
+    def foo(a: int, b: float, c: str, d: list):
+        """Short description\n
+        Parameters
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+
+    class Bar:
+        """Short description\n
+        Parameters
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+        def __init__(self, a: int, b: float, c: str, d: list): ...
+
+    for cls, obj in zip((FunctionDoc, ClassDoc), (foo, Bar)):
+        doc = cls(obj)
+        assert doc["Parameters"][0].type == ""
+
+
+def test_type_hints_combined_attributes_valid():
+    class Bar:
+        """Short description\n
+        Attributes
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+        a: int
+        b: int
+        c: int
+        d: int
+
+    doc = ClassDoc(Bar)
+    assert doc["Attributes"][0].type == "int"
+
+
+def test_type_hints_combined_attributes_invalid():
+    class Bar:
+        """Short description\n
+        Attributes
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+        a: int
+        b: float
+        c: str
+        d: list
+
+    doc = ClassDoc(Bar)
+    assert doc["Attributes"][0].type == ""
+
+
 if __name__ == "__main__":
     import pytest
 

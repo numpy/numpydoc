@@ -252,6 +252,25 @@ class NumpyDocString(Mapping):
     def _get_type_from_signature(self, arg_name: str) -> str:
         return ""
 
+    @staticmethod
+    def _handle_combined_parameters(arg_names: str, parameters: dict[str, inspect.Parameter]):
+        arg_names = arg_names.split(',')
+        try:
+            parameter1 = parameters[arg_names[0].strip()]
+        except KeyError:
+            return None
+
+        for arg_name in arg_names[1:]:
+            try:
+                parameter = parameters[arg_name.strip()]
+            except KeyError:
+                return None
+
+            if parameter.annotation != parameter1.annotation:
+                return None
+
+        return parameter1
+
     # See also supports the following formats.
     #
     # <FUNCNAME>
@@ -628,29 +647,11 @@ class FunctionDoc(NumpyDocString):
         try:
             parameter = self._signature.parameters[arg_name]
         except KeyError:
-            parameter = self._handle_combined_parameters(arg_name)
+            parameter = self._handle_combined_parameters(arg_name, self._signature.parameters)
             if parameter is None:
                 return ""
 
         return _annotation_to_string(parameter.annotation)
-
-    def _handle_combined_parameters(self, arg_names: str):
-        arg_names = arg_names.split(',')
-        try:
-            parameter1 = self._signature.parameters[arg_names[0].strip()]
-        except KeyError:
-            return None
-
-        for arg_name in arg_names[1:]:
-            try:
-                parameter = self._signature.parameters[arg_name.strip()]
-            except KeyError:
-                return None
-
-            if parameter.annotation != parameter1.annotation:
-                return None
-
-        return parameter1
 
 
 class ObjDoc(NumpyDocString):
@@ -786,18 +787,20 @@ class ClassDoc(NumpyDocString):
         try:
             parameter = self._signature.parameters[arg_name]
         except KeyError:
-            return self._handle_combined_parameters(arg_name, self._cls)
+            parameter = self._handle_combined_parameters(arg_name, self._signature.parameters)
+            if parameter is None:
+                return self._handle_combined_attributes(arg_name, self._cls)
 
         return _annotation_to_string(parameter.annotation)
 
-    def _handle_combined_parameters(self, arg_names: str, cls: type):
+    def _handle_combined_attributes(self, arg_names: str, cls: type):
         arg_names = arg_names.split(',')
-        hint1 = self._find_type_hint(cls, arg_names[0])
+        hint1 = self._find_type_hint(cls, arg_names[0].strip())
 
         for arg_name in arg_names[1:]:
-            hint = self._find_type_hint(cls, arg_name)
+            hint = self._find_type_hint(cls, arg_name.strip())
 
-            if hint != hint1:
+            if  hint != hint1:
                 return ""
 
         return hint1
