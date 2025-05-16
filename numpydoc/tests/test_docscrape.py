@@ -1718,6 +1718,10 @@ def test_namedtuple_class_docstring():
 
 T = typing.TypeVar("T")
 
+
+class CustomTypeClass: ...
+
+
 type_hints = [
     (None, "None"),
     (int, "int"),
@@ -1755,6 +1759,7 @@ type_hints = [
                       typing.Callable[[], typing.NoReturn], "help='description'"],
      "typing.Annotated[dict[str, dict[str, list[typing.Union[float, tuple[int, complex]]]]], "
      "typing.Callable[[], typing.NoReturn], \"help='description'\"]"),
+    (CustomTypeClass, "CustomTypeClass")
 ]
 
 @pytest.mark.parametrize("typ,expected", type_hints)
@@ -1846,8 +1851,8 @@ def test_type_hints_class_properties(typ, expected):
     assert doc_foo["Attributes"][0].type == expected
 
 
-@pytest.mark.parametrize("typ,expected", type_hints)
-def test_type_hints_class_methods(typ, expected):
+@pytest.mark.parametrize("typ,_", type_hints)
+def test_type_hints_class_methods(typ, _):
     class Foo:
         """Short description\n
         Methods
@@ -1859,7 +1864,7 @@ def test_type_hints_class_methods(typ, expected):
         def a(self) -> typ: ...
 
     doc = ClassDoc(Foo)
-    assert doc["Methods"][0].type == expected
+    assert doc["Methods"][0].type == "function"
 
 
 def test_type_hints_args_kwargs():
@@ -1968,6 +1973,26 @@ def test_type_hints_combined_attributes_invalid():
 
     doc = ClassDoc(Bar)
     assert doc["Attributes"][0].type == ""
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    ((42, "int"), (4.2, "float"), ("string", "str"), (True, "bool"), (None, "NoneType"),
+     ([1, 2, 3], "list"), ({'a': 42}, "dict"), (CustomTypeClass(), "CustomTypeClass"),
+     (CustomTypeClass, "type"))
+)
+def test_type_hints_implied_from_class_attribute(value, expected):
+    class Foo:
+        """Short description\n
+        Attributes
+        ----------
+        a
+            Description for a.
+        """
+        a = value
+
+    doc = ClassDoc(Foo)
+    assert doc["Attributes"][0].type == expected
 
 
 if __name__ == "__main__":

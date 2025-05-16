@@ -816,17 +816,14 @@ class ClassDoc(NumpyDocString):
             except AttributeError:
                 return ""
 
-            attr = attr.fget if isinstance(attr, property) else attr
-
-            if callable(attr):
+            if isinstance(attr, property):
                 try:
-                    signature = inspect.signature(attr)
+                    signature = inspect.signature(attr.fget)
                 except ValueError:
                     return ""
-
                 return _annotation_to_string(signature.return_annotation)
-            else:
-                return type(attr).__name__
+
+            return type(attr).__name__
 
         if type(annotation) == type:
             return str(annotation.__name__)
