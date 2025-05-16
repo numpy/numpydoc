@@ -1847,6 +1847,34 @@ def test_type_hints_class_methods(typ, expected):
     assert doc["Methods"][0].type == expected
 
 
+def test_type_hints_args_kwargs():
+    def foo(*args: int, **kwargs: float):
+        """Short description\n
+        Parameters
+        ----------
+        *args
+            Args description.
+        **kwargs
+            Kwargs description.
+        """
+
+    class Bar:
+        """Short description\n
+        Parameters
+        ----------
+        *args
+            Args description.
+        **kwargs
+            Kwargs description.
+        """
+        def __init__(self, *args: int, **kwargs: float): ...
+
+    for cls, obj in zip((FunctionDoc, ClassDoc), (foo, Bar)):
+        doc = cls(obj)
+        assert doc["Parameters"][0].type == "int"
+        assert doc["Parameters"][1].type == "float"
+
+
 if __name__ == "__main__":
     import pytest
 
