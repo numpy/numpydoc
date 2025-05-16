@@ -634,11 +634,10 @@ class FunctionDoc(NumpyDocString):
 
         if parameter.annotation == parameter.empty:
             return ""
+        elif type(parameter.annotation) == type:
+            return str(parameter.annotation.__name__)
         else:
-            if type(parameter.annotation) == type:
-                return str(parameter.annotation.__name__)
-            else:
-                return str(parameter.annotation)
+            return str(parameter.annotation)
 
     def _handle_combined_parameters(self, arg_names: str):
         arg_names = arg_names.split(',')
@@ -796,6 +795,8 @@ class ClassDoc(NumpyDocString):
 
         if parameter.annotation == parameter.empty:
             return ""
+        elif type(parameter.annotation) == type:
+            return str(parameter.annotation.__name__)
         else:
             return str(parameter.annotation)
 
@@ -813,7 +814,7 @@ class ClassDoc(NumpyDocString):
 
     @staticmethod
     def _find_type_hint(cls: type, arg_name: str) -> str:
-        type_hints = get_type_hints(cls)
+        type_hints = get_type_hints(cls, include_extras=True)
         try:
             annotation = type_hints[arg_name]
         except KeyError:
@@ -837,9 +838,9 @@ class ClassDoc(NumpyDocString):
             else:
                 return type(attr).__name__
 
-        try:
+        if type(annotation) == type:
             return str(annotation.__name__)
-        except AttributeError:
+        else:
             return str(annotation)
 
 
