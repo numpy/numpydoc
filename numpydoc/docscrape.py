@@ -624,12 +624,36 @@ class FunctionDoc(NumpyDocString):
         if self._signature is None:
             return ""
 
-        parameter = self._signature.parameters[arg_name.replace("*", "")]
+        arg_name = arg_name.replace("*", "")
+        try:
+            parameter = self._signature.parameters[arg_name]
+        except KeyError:
+            parameter = self._handle_combined_parameters(arg_name)
+            if parameter is None:
+                return ""
 
         if parameter.annotation == parameter.empty:
             return ""
         else:
             return str(parameter.annotation)
+
+    def _handle_combined_parameters(self, arg_names: str):
+        arg_names = arg_names.split(',')
+        try:
+            parameter1 = self._signature.parameters[arg_names[0].strip()]
+        except KeyError:
+            return None
+
+        for arg_name in arg_names[1:]:
+            try:
+                parameter = self._signature.parameters[arg_name.strip()]
+            except KeyError:
+                return None
+
+            if parameter.annotation != parameter1.annotation:
+                return None
+
+        return parameter1
 
 
 class ObjDoc(NumpyDocString):
@@ -765,12 +789,24 @@ class ClassDoc(NumpyDocString):
         try:
             parameter = self._signature.parameters[arg_name]
         except KeyError:
-            return self._find_type_hint(self._cls, arg_name)
+            return self._handle_combined_parameters(arg_name, self._cls)
 
         if parameter.annotation == parameter.empty:
             return ""
         else:
             return str(parameter.annotation)
+
+    def _handle_combined_parameters(self, arg_names: str, cls: type):
+        arg_names = arg_names.split(',')
+        hint1 = self._find_type_hint(cls, arg_names[0])
+
+        for arg_name in arg_names[1:]:
+            hint = self._find_type_hint(cls, arg_name)
+
+            if hint != hint1:
+                return ""
+
+        return hint1
 
     @staticmethod
     def _find_type_hint(cls: type, arg_name: str) -> str:
