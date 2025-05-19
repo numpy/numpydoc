@@ -825,10 +825,7 @@ class ClassDoc(NumpyDocString):
 
             return type(attr).__name__
 
-        if type(annotation) is type:
-            return str(annotation.__name__)
-        else:
-            return str(annotation)
+        return _annotation_to_string(annotation)
 
 
 def _annotation_to_string(annotation) -> str:
