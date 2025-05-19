@@ -1851,8 +1851,8 @@ def test_type_hints_class_properties(typ, expected):
     assert doc_foo["Attributes"][0].type == expected
 
 
-@pytest.mark.parametrize("typ,_", type_hints)
-def test_type_hints_class_methods(typ, _):
+@pytest.mark.parametrize("typ,__", type_hints)
+def test_type_hints_class_methods(typ, __):
     class Foo:
         """Short description\n
         Methods

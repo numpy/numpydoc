@@ -806,13 +806,13 @@ class ClassDoc(NumpyDocString):
         return hint1
 
     @staticmethod
-    def _find_type_hint(cls: type, arg_name: str) -> str:
-        type_hints = get_type_hints(cls, include_extras=True)
+    def _find_type_hint(obj: type, arg_name: str) -> str:
+        type_hints = get_type_hints(obj, include_extras=True)
         try:
             annotation = type_hints[arg_name]
         except KeyError:
             try:
-                attr = getattr(cls, arg_name)
+                attr = getattr(obj, arg_name)
             except AttributeError:
                 return ""
 
@@ -825,7 +825,7 @@ class ClassDoc(NumpyDocString):
 
             return type(attr).__name__
 
-        if type(annotation) == type:
+        if type(annotation) is type:
             return str(annotation.__name__)
         else:
             return str(annotation)
@@ -834,7 +834,7 @@ class ClassDoc(NumpyDocString):
 def _annotation_to_string(annotation) -> str:
     if annotation == inspect.Signature.empty:
         return ""
-    elif type(annotation) == type:
+    elif type(annotation) is type:
         return str(annotation.__name__)
     else:
         return str(annotation)
