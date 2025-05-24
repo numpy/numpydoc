@@ -43,10 +43,12 @@ file = 'LICENSE.txt'
 Homepage = 'https://numpydoc.readthedocs.io'
 Source = 'https://github.com/numpy/numpydoc/'
 
-[project.optional-dependencies]
-developer = [
+[dependency-groups]
+dev = [
     'pre-commit>=3.3',
     "tomli; python_version < '3.11'",
+    { include-group = "doc" },
+    { include-group = "test" }
 ]
 doc = [
     'numpy>=1.22',
