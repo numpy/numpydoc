@@ -31,14 +31,6 @@ repos:
         args: ["--fix", "--show-fixes", "--exit-non-zero-on-fix"]
       - id: ruff-format
 
-  - repo: local
-    hooks:
-      - id: generate_requirements.py
-        name: generate_requirements.py
-        language: system
-        entry: python tools/generate_requirements.py
-        files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
-
 ci:
   autofix_prs: false
   autofix_commit_msg: |

@@ -13,22 +13,15 @@ build:
     # nodejs: "19"
     # rust: "1.64"
     # golang: "1.19"
+  jobs:
+    install:
+      - python -m pip install --upgrade pip wheel setuptools
+      - python -m pip install . --group doc
 
 # Build documentation in the "doc/" directory with Sphinx
 sphinx:
   configuration: doc/conf.py
-
 # Optionally build your docs in additional formats such as PDF and ePub
 # formats:
 #    - pdf
 #    - epub
-
-# Optional but recommended, declare the Python requirements required
-# to build your documentation
-# See https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
-python:
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - doc
