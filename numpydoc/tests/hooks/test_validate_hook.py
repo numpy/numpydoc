@@ -1,6 +1,7 @@
 """Test the numpydoc validate pre-commit hook."""
 
 import inspect
+import os
 from pathlib import Path
 
 import pytest
@@ -40,8 +41,6 @@ def test_validate_hook(example_module, config, capsys):
 
         numpydoc/tests/hooks/example_module.py:8: EX01 No examples section found
 
-        numpydoc/tests/hooks/example_module.py:11: GL08 The object does not have a docstring
-
         numpydoc/tests/hooks/example_module.py:17: ES01 No extended summary found
 
         numpydoc/tests/hooks/example_module.py:17: PR01 Parameters {'**kwargs'} not documented
@@ -61,8 +60,24 @@ def test_validate_hook(example_module, config, capsys):
         numpydoc/tests/hooks/example_module.py:26: EX01 No examples section found
 
         numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
+
+        numpydoc/tests/hooks/example_module.py:31: SA01 See Also section not found
+
+        numpydoc/tests/hooks/example_module.py:31: EX01 No examples section found
+
+        numpydoc/tests/hooks/example_module.py:46: SA01 See Also section not found
+
+        numpydoc/tests/hooks/example_module.py:46: EX01 No examples section found
+
+        numpydoc/tests/hooks/example_module.py:58: ES01 No extended summary found
+
+        numpydoc/tests/hooks/example_module.py:58: PR01 Parameters {'name'} not documented
+
+        numpydoc/tests/hooks/example_module.py:58: SA01 See Also section not found
+
+        numpydoc/tests/hooks/example_module.py:58: EX01 No examples section found
         """
-    )
+    ).replace("/", os.sep)
 
     return_code = run_hook([example_module], config=config)
     assert return_code == 1
@@ -79,8 +94,6 @@ def test_validate_hook_with_ignore(example_module, capsys):
         """
         numpydoc/tests/hooks/example_module.py:4: PR01 Parameters {'name'} not documented
 
-        numpydoc/tests/hooks/example_module.py:11: GL08 The object does not have a docstring
-
         numpydoc/tests/hooks/example_module.py:17: PR01 Parameters {'**kwargs'} not documented
 
         numpydoc/tests/hooks/example_module.py:17: PR07 Parameter "*args" has no description
@@ -88,8 +101,10 @@ def test_validate_hook_with_ignore(example_module, capsys):
         numpydoc/tests/hooks/example_module.py:26: SS05 Summary must start with infinitive verb, not third person (e.g. use "Generate" instead of "Generates")
 
         numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
+
+        numpydoc/tests/hooks/example_module.py:58: PR01 Parameters {'name'} not documented
         """
-    )
+    ).replace("/", os.sep)
 
     return_code = run_hook([example_module], ignore=["ES01", "SA01", "EX01"])
 
@@ -132,7 +147,7 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
 
         numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
         """
-    )
+    ).replace("/", os.sep)
 
     return_code = run_hook([example_module], config=tmp_path)
     assert return_code == 1
@@ -167,7 +182,7 @@ def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
 
         numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
         """
-    )
+    ).replace("/", os.sep)
 
     return_code = run_hook([example_module], config=tmp_path)
     assert return_code == 1
@@ -208,7 +223,7 @@ def test_validate_hook_exclude_option_pyproject(example_module, tmp_path, capsys
 
         numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
         """
-    )
+    ).replace("/", os.sep)
 
     return_code = run_hook([example_module], config=tmp_path)
     assert return_code == 1
@@ -241,8 +256,11 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
 
         numpydoc/tests/hooks/example_module.py:17: PR07 Parameter "*args" has no description
         """
-    )
+    ).replace("/", os.sep)
 
     return_code = run_hook([example_module], config=tmp_path)
     assert return_code == 1
     assert capsys.readouterr().err.strip() == expected
+
+
+# def test_validate_hook_
