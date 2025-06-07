@@ -296,7 +296,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value("numpydoc_attributes_as_param_list", True, True)
     app.add_config_value("numpydoc_xref_param_type", False, True)
     app.add_config_value("numpydoc_xref_aliases", dict(), True)
-    app.add_config_value("numpydoc_xref_ignore", set(), True)
+    app.add_config_value("numpydoc_xref_ignore", set(), True, types=[set, str])
     app.add_config_value("numpydoc_validation_checks", set(), True)
     app.add_config_value("numpydoc_validation_exclude", set(), False)
     app.add_config_value("numpydoc_validation_overrides", dict(), False)
