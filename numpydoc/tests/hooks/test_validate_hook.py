@@ -41,6 +41,8 @@ def test_validate_hook(example_module, config, capsys):
 
         numpydoc/tests/hooks/example_module.py:8: EX01 No examples section found
 
+        numpydoc/tests/hooks/example_module.py:11: GL08 The object does not have a docstring
+
         numpydoc/tests/hooks/example_module.py:17: ES01 No extended summary found
 
         numpydoc/tests/hooks/example_module.py:17: PR01 Parameters {'**kwargs'} not documented
@@ -93,6 +95,8 @@ def test_validate_hook_with_ignore(example_module, capsys):
     expected = inspect.cleandoc(
         """
         numpydoc/tests/hooks/example_module.py:4: PR01 Parameters {'name'} not documented
+
+        numpydoc/tests/hooks/example_module.py:11: GL08 The object does not have a docstring
 
         numpydoc/tests/hooks/example_module.py:17: PR01 Parameters {'**kwargs'} not documented
 

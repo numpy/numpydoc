@@ -660,24 +660,20 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
                 # cls = Validator._load_obj(f"{doc.name[:-9]}.{cls_name}") ## Alternative
                 cls_doc = Validator(get_doc_object(cls))
             elif isinstance(doc, AstValidator):  # Supports class traversal for ASTs.
-                names = doc._name.split(".")
-
-                if len(names) > 2:  # i.e. module.class.__init__
-                    nested_cls_names = names[1:-1]  # class1,class2 etc.
-                    cls_name = names[-2]
-                    filename = doc.source_file_name  # from the AstValidator object
-
-                    # Use AST to find the class node...
-                    with open(filename) as file:
-                        module_node = ast.parse(file.read(), filename)
-
-                    # Recursively find each subclass from the module node.
-                    next_node = module_node
-                    for name in nested_cls_names:
-                        next_node = _find_class_node(next_node, name)
-                    # Get the documentation.
+                ancestry = doc.ancestry
+                if len(ancestry) > 2:  # e.g. module.class.__init__
+                    parent = doc.ancestry[-1]  # Get the parent
+                    cls_name = ".".join(
+                        [
+                            getattr(node, "name", node.__module__)
+                            for node in doc.ancestry
+                        ]
+                    )
                     cls_doc = AstValidator(
-                        ast_node=next_node, filename=filename, obj_name=cls_name
+                        ast_node=parent,
+                        filename=doc.source_file_name,
+                        obj_name=cls_name,
+                        ancestry=doc.ancestry[:-1],
                     )
                 else:
                     # Ignore edge case: __init__ functions that don't belong to a class.
