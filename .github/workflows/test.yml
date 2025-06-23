@@ -99,6 +99,11 @@ jobs:
           python -m pip install . --pre --group test --group doc
           pip list
 
+      - name: "Check File Existence"
+        uses: thebinaryfelix/check-file-existence-action@v1
+        with:
+          files: numpydoc/tests/hooks/test_validate_hook.py
+
       - name: Run test suite
         run: |
           pytest -v --pyargs numpydoc
