@@ -769,9 +769,9 @@ leads to the following style recommendations:
   enclosed within ````double backticks````.
 
 A more extensive example of reST markup can be found in `this example
-document <http://docutils.sourceforge.net/docs/user/rst/demo.txt>`_;
+document <https://docutils.sourceforge.net/docs/user/rst/demo.rst>`_;
 the `quick reference
-<http://docutils.sourceforge.net/docs/user/rst/quickref.html>`_ is
+<https://docutils.sourceforge.net/docs/user/rst/quickref.html>`_ is
 useful while editing.
 
 Line spacing and indentation are significant and should be carefully
