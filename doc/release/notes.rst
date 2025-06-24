@@ -1,3 +1,82 @@
+1.9.0
+=====
+
+We're happy to announce the release of numpydoc 1.9.0!
+
+Enhancements
+------------
+
+- ignore some errors at module level (`#593 <https://github.com/numpy/numpydoc/pull/593>`_).
+- Rework hook output to remove the table (`#611 <https://github.com/numpy/numpydoc/pull/611>`_).
+- Switch to storing AST nodes on the stack for more accurate method signature check and easy access to parent nodes (`#623 <https://github.com/numpy/numpydoc/pull/623>`_).
+
+Bug Fixes
+---------
+
+- MAINT: Changed class constructor __init__ GL08 reporting (`#592 <https://github.com/numpy/numpydoc/pull/592>`_).
+- BUG: Correct functionality of numpydoc SS05 (`#613 <https://github.com/numpy/numpydoc/pull/613>`_).
+- Specity the types of ``numpydoc_xref_ignore`` option (`#631 <https://github.com/numpy/numpydoc/pull/631>`_).
+
+Documentation
+-------------
+
+- DOC: Do not use types for *args, **kwargs (`#585 <https://github.com/numpy/numpydoc/pull/585>`_).
+- mention conda-forge in installation docs (`#595 <https://github.com/numpy/numpydoc/pull/595>`_).
+- Fix typo in validation.rst (`#605 <https://github.com/numpy/numpydoc/pull/605>`_).
+- Fix broken link in ``format.rst`` (`#628 <https://github.com/numpy/numpydoc/pull/628>`_).
+
+Maintenance
+-----------
+
+- CI: use hashes for actions' versions in publishing job (`#579 <https://github.com/numpy/numpydoc/pull/579>`_).
+- Bump the actions group with 2 updates (`#581 <https://github.com/numpy/numpydoc/pull/581>`_).
+- Bump pypa/gh-action-pypi-publish from 1.10.0 to 1.10.2 in the actions group (`#582 <https://github.com/numpy/numpydoc/pull/582>`_).
+- [pre-commit.ci] pre-commit autoupdate (`#583 <https://github.com/numpy/numpydoc/pull/583>`_).
+- MAINT: Add _exception_on_warning to MockApp (`#586 <https://github.com/numpy/numpydoc/pull/586>`_).
+- Bump the actions group across 1 directory with 2 updates (`#590 <https://github.com/numpy/numpydoc/pull/590>`_).
+- don't pass maxsplit as positional arg (`#596 <https://github.com/numpy/numpydoc/pull/596>`_).
+- [pre-commit.ci] pre-commit autoupdate (`#598 <https://github.com/numpy/numpydoc/pull/598>`_).
+- Add Python 3.13 support (`#599 <https://github.com/numpy/numpydoc/pull/599>`_).
+- Update readthedocs config (`#600 <https://github.com/numpy/numpydoc/pull/600>`_).
+- Bump the actions group with 2 updates (`#603 <https://github.com/numpy/numpydoc/pull/603>`_).
+- Bump the actions group with 3 updates (`#609 <https://github.com/numpy/numpydoc/pull/609>`_).
+- [pre-commit.ci] pre-commit autoupdate (`#614 <https://github.com/numpy/numpydoc/pull/614>`_).
+- Bump actions/download-artifact from 4.2.1 to 4.3.0 in the actions group (`#620 <https://github.com/numpy/numpydoc/pull/620>`_).
+- Bump scientific-python/circleci-artifacts-redirector-action from 1.0.0 to 1.1.0 in the actions group (`#627 <https://github.com/numpy/numpydoc/pull/627>`_).
+- Switch to dependency groups (`#626 <https://github.com/numpy/numpydoc/pull/626>`_).
+- Fix pip setup command in github workflow (`#629 <https://github.com/numpy/numpydoc/pull/629>`_).
+
+Contributors
+------------
+
+13 authors added to this release (alphabetically):
+
+- Brigitta Sipőcz (`@bsipocz <https://github.com/bsipocz>`_)
+- Daniel McCloy (`@drammock <https://github.com/drammock>`_)
+- Eric Larson (`@larsoner <https://github.com/larsoner>`_)
+- Gilles Peiffer (`@Peiffap <https://github.com/Peiffap>`_)
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Lucas Colley (`@lucascolley <https://github.com/lucascolley>`_)
+- Matt Gebert (`@mattgebert <https://github.com/mattgebert>`_)
+- Maxine Hartnett (`@maxinelasp <https://github.com/maxinelasp>`_)
+- Ross Barnowski (`@rossbar <https://github.com/rossbar>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+- Stefanie Molin (`@stefmolin <https://github.com/stefmolin>`_)
+- Tim Hoffmann (`@timhoffm <https://github.com/timhoffm>`_)
+- Yuki Kobayashi (`@koyuki7w <https://github.com/koyuki7w>`_)
+
+7 reviewers added to this release (alphabetically):
+
+- Charles Harris (`@charris <https://github.com/charris>`_)
+- Eric Larson (`@larsoner <https://github.com/larsoner>`_)
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Lucas Colley (`@lucascolley <https://github.com/lucascolley>`_)
+- Matt Gebert (`@mattgebert <https://github.com/mattgebert>`_)
+- Ross Barnowski (`@rossbar <https://github.com/rossbar>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+
+_These lists are automatically generated, and may not be complete or may contain duplicates._
+
 1.8.0
 =====
 
