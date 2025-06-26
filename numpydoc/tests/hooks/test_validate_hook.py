@@ -144,7 +144,7 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
     [(".*/example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
 )
 def test_validate_hook_with_toml_config_exclude_files(
-    example_module, tmp_path, capsys, regex, expected_code
+    example_module, regex, expected_code, tmp_path, capsys
 ):
     """
     Test that a file is correctly processed in the absence of config files
@@ -169,8 +169,7 @@ def test_validate_hook_with_toml_config_exclude_files(
                 exclude_files = [
                 """
                 + regex
-                + """
-                ]
+                + """]
                 """
             )
         )
