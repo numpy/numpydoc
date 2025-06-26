@@ -139,7 +139,13 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
     assert capsys.readouterr().err.strip() == expected
 
 
-def test_validate_hook_with_toml_config_exclude_files(example_module, tmp_path, capsys):
+@pytest.mark.parametrize(
+    "regex, expected_code",
+    [(".*/example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
+)
+def test_validate_hook_with_toml_config_exclude_files(
+    example_module, tmp_path, capsys, regex, expected_code
+):
     """
     Test that a file is correctly processed in the absence of config files
     with command line ignore options.
@@ -160,16 +166,17 @@ def test_validate_hook_with_toml_config_exclude_files(example_module, tmp_path, 
                 override_SS05 = [
                     '^Creates',
                 ]
-
                 exclude_files = [
-                    '.*/example.*\.py',
+                """
+                + regex
+                + """
                 ]
                 """
             )
         )
 
     return_code = run_hook([example_module], config=tmp_path)
-    assert return_code == 0  # Should report no findings.
+    assert return_code == expected_code  # Should not-report/report findings.
 
 
 def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
