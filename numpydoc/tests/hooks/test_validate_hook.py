@@ -168,14 +168,8 @@ def test_validate_hook_with_toml_config_exclude_files(example_module, tmp_path, 
             )
         )
 
-    expected = inspect.cleandoc(
-        """
-        """
-    )
-
     return_code = run_hook([example_module], config=tmp_path)
-    assert return_code == 1
-    assert capsys.readouterr().err.strip() == expected
+    assert return_code == 0  # Should report no findings.
 
 
 def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
