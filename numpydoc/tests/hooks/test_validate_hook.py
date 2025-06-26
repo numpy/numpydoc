@@ -139,6 +139,45 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
     assert capsys.readouterr().err.strip() == expected
 
 
+def test_validate_hook_with_toml_config_exclude_files(example_module, tmp_path, capsys):
+    """
+    Test that a file is correctly processed in the absence of config files
+    with command line ignore options.
+    """
+
+    with open(tmp_path / "pyproject.toml", "w") as config_file:
+        config_file.write(
+            inspect.cleandoc(
+                """
+                [tool.numpydoc_validation]
+                checks = [
+                    "all",
+                    "EX01",
+                    "SA01",
+                    "ES01",
+                ]
+                exclude = '\\.__init__$'
+                override_SS05 = [
+                    '^Creates',
+                ]
+
+                exclude_files = [
+                    '.*/example.*\.py',
+                ]
+                """
+            )
+        )
+
+    expected = inspect.cleandoc(
+        """
+        """
+    )
+
+    return_code = run_hook([example_module], config=tmp_path)
+    assert return_code == 1
+    assert capsys.readouterr().err.strip() == expected
+
+
 def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
     """
     Test that a file is correctly processed with the config coming from

@@ -36,6 +36,8 @@ the pre-commit hook as follows:
   expressions ``\.undocumented_method$`` or ``\.__repr__$``. This
   maps to ``numpydoc_validation_exclude`` from the
   :ref:`Sphinx build configuration <validation_during_sphinx_build>`.
+* ``exclude_files``: Exclude file paths matching the regular expressions
+    ``^tests/.*`` or ``^module/gui.*``.
 * ``override_SS05``: Allow docstrings to start with "Process ", "Assess ",
   or "Access ". To override different checks, add a field for each code in
   the form of ``override_<code>`` with a collection of regular expression(s)
@@ -56,6 +58,10 @@ the pre-commit hook as follows:
     exclude = [  # don't report on objects that match any of these regex
         '\.undocumented_method$',
         '\.__repr__$',
+    ]
+    exclude_files = [ # don't process filepaths that match these regex
+        '^tests/.*',
+        '^module/gui.*',
     ]
     override_SS05 = [  # override SS05 to allow docstrings starting with these words
         '^Process ',
