@@ -22,6 +22,7 @@ import inspect
 import itertools
 import pydoc
 import re
+import sys
 from collections.abc import Callable
 from copy import deepcopy
 
@@ -197,10 +198,25 @@ def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
             excluder = app.config.numpydoc_validation_files_excluder
             module = getattr(obj, "__module__", None)
             if module:
-                # Perform the exclusion check solely on the module if there's no __path__.
-                path = getattr(obj, "__path__", module)
-                exclude_from_validation = excluder.search(path) if excluder else False
-                if exclude_from_validation:
+                # Check if module is a string
+                if isinstance(module, str):
+                    if module in sys.modules:
+                        module_obj = sys.modules[module]
+                        path = (
+                            module_obj.__file__
+                            if hasattr(module_obj, "__file__")
+                            else None
+                        )
+                    else:
+                        # Just filter the module string as the path.
+                        path = module
+                # Check if module is module instance:
+                elif module.__class__.__name__ == "module":
+                    path = getattr(module, "__path__", None)
+                else:
+                    path = None
+
+                if path and excluder and excluder.search(path):
                     # Skip validation for this object.
                     return
 

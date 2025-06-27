@@ -299,7 +299,7 @@ def test_clean_backrefs():
         ),
         (
             [
-                r"^test_numpydoc$",
+                r"^.*test_numpydoc\.py$",
             ],
             False,
         ),
@@ -329,7 +329,6 @@ def test_mangle_skip_exclude_files(exclude_files, has_warnings):
     logging.setup(app, status, warning)
 
     # Simulate a file that matches the exclude pattern
-    docname = "test_numpydoc"
     mangle_docstrings(
         app,
         "function",
