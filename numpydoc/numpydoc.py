@@ -194,7 +194,10 @@ def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
     else:
         # Test the obj to find the module path, and skip the check if it's path is matched by
         # numpydoc_validation_exclude_files
-        if app.config.numpydoc_validation_exclude_files:
+        if (
+            app.config.numpydoc_validation_exclude_files
+            and app.config.numpydoc_validation_checks
+        ):
             excluder = app.config.numpydoc_validation_files_excluder
             module = inspect.getmodule(obj)
             try:
