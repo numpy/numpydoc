@@ -196,29 +196,15 @@ def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
         # numpydoc_validation_exclude_files
         if app.config.numpydoc_validation_exclude_files:
             excluder = app.config.numpydoc_validation_files_excluder
-            module = getattr(obj, "__module__", None)
-            if module:
-                # Check if module is a string
-                if isinstance(module, str):
-                    if module in sys.modules:
-                        module_obj = sys.modules[module]
-                        path = (
-                            module_obj.__file__
-                            if hasattr(module_obj, "__file__")
-                            else None
-                        )
-                    else:
-                        # Just filter the module string as the path.
-                        path = module
-                # Check if module is module instance:
-                elif module.__class__.__name__ == "module":
-                    path = getattr(module, "__path__", None)
-                else:
-                    path = None
+            module = inspect.getmodule(obj)
+            try:
+                path = module.__file__ if module else None
+            except AttributeError:
+                path = None
 
-                if path and excluder and excluder.search(path):
-                    # Skip validation for this object.
-                    return
+            if path and excluder and excluder.search(path):
+                # Skip validation for this object.
+                return
 
         try:
             doc = get_doc_object(
