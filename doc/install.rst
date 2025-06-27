@@ -139,7 +139,7 @@ numpydoc_validation_exclude : set
     validation.
     Only has an effect when docstring validation is activated, i.e.
     ``numpydoc_validation_checks`` is not an empty set.
-  numpydoc_validation_exclude_files : set
+numpydoc_validation_exclude_files : set
     A container of strings using :py:mod:`re` syntax specifying path patterns to
     ignore for docstring validation.
     For example, to skip docstring validation for all objects in
