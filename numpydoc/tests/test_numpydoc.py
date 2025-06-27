@@ -31,6 +31,7 @@ class MockConfig:
     numpydoc_attributes_as_param_list = True
     numpydoc_validation_checks = set()
     numpydoc_validation_exclude = set()
+    numpydoc_validation_exclude_files = set()
     numpydoc_validation_overrides = dict()
 
 
@@ -285,6 +286,61 @@ def test_clean_backrefs():
     par += citation
     clean_backrefs(app=MockApp(), doc=par, docname="index")
     assert "id1" in citation["backrefs"]
+
+
+@pytest.mark.parametrize(
+    "exclude_files, has_warnings",
+    [
+        (
+            [
+                r"^doesnt_match_any_file$",
+            ],
+            True,
+        ),
+        (
+            [
+                r"^.*test_numpydoc\.py$",
+            ],
+            False,
+        ),
+    ],
+)
+def test_mangle_skip_exclude_files(exclude_files, has_warnings):
+    """
+    Check that the regex expressions in numpydoc_validation_files_exclude
+    are correctly used to skip checks on files that match the patterns.
+    """
+
+    def process_something_noop_function():
+        """Process something."""
+
+    app = MockApp()
+    app.config.numpydoc_validation_checks = {"all"}
+
+    # Class attributes for config persist - need to reset them to unprocessed states.
+    app.config.numpydoc_validation_exclude = set()  # Reset to default...
+    app.config.numpydoc_validation_overrides = dict()  # Reset to default...
+
+    app.config.numpydoc_validation_exclude_files = exclude_files
+    update_config(app)
+
+    # Setup for catching warnings
+    status, warning = StringIO(), StringIO()
+    logging.setup(app, status, warning)
+
+    # Simulate a file that matches the exclude pattern
+    mangle_docstrings(
+        app,
+        "function",
+        process_something_noop_function.__name__,
+        process_something_noop_function,
+        None,
+        process_something_noop_function.__doc__.split("\n"),
+    )
+
+    # Are warnings generated?
+    print(warning.getvalue())
+    assert bool(warning.getvalue()) is has_warnings
 
 
 if __name__ == "__main__":
