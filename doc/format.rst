@@ -212,6 +212,18 @@ used as a value, ``optional`` is preferred. These are all equivalent::
   copy : bool, default=True
   copy : bool, default: True
 
+If the shapes and sizes of the parameters are interrelated, then include
+that information in parentheses immediately before the type information.
+A trailing comma should be included inside the parentheses when the
+parameter is 1D::
+
+   a : (M,) array_like
+       First input vector.
+   b : (N,) array_like
+       Second input vector.
+   out : (M, N) ndarray, optional
+       A location where the result is stored.
+
 When a parameter can only assume one of a fixed set of values,
 those values can be listed in braces, with the default appearing first::
 
