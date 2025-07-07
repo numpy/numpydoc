@@ -2,7 +2,9 @@ import re
 import textwrap
 import warnings
 from collections import namedtuple
+from collections.abc import Callable
 from copy import deepcopy
+from functools import cached_property
 
 import jinja2
 import pytest
@@ -1623,7 +1625,6 @@ def test__error_location_no_name_attr():
 
     See gh-362
     """
-    from collections.abc import Callable
 
     # Create a Callable that doesn't have a __name__ attribute
     class Foo:
@@ -1644,7 +1645,6 @@ def test__error_location_no_name_attr():
 def test_class_docstring_cached_property():
     """Ensure that properties marked with the `cached_property` decorator
     are listed in the Methods section. See gh-432."""
-    from functools import cached_property
 
     class Foo:
         _x = [1, 2, 3]
@@ -1664,8 +1664,6 @@ def test_namedtuple_no_duplicate_attributes():
 
     See gh-257
     """
-    from collections import namedtuple
-
     foo = namedtuple("Foo", ("bar", "baz"))
 
     # Create the SphinxClassDoc object via get_doc_object
@@ -1678,8 +1676,6 @@ def test_namedtuple_class_docstring():
 
     See gh-257
     """
-    from collections import namedtuple
-
     foo = namedtuple("Foo", ("bar", "baz"))
 
     class MyFoo(foo):
