@@ -647,12 +647,14 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         report_GL08: bool = True
         # Check if the object is a class and has a docstring in the constructor
         # Also check if code_obj is defined, as undefined for the AstValidator in validate_docstrings.py.
-        if doc.name.endswith(".__init__") and doc.is_function_or_method:
+        if doc.is_function_or_method and doc.name.endswith(".__init__"):
+            # Import here at runtime to avoid circular import as
+            # AstValidator is a subclass of Validator class without `doc_obj` attribute.
             from numpydoc.hooks.validate_docstrings import (
                 AstValidator,  # Support abstract syntax tree hook.
             )
 
-            if hasattr(doc, "code_obj"):
+            if hasattr(doc, "code_obj"):  # All Validator objects have this attr.
                 cls_name = ".".join(
                     doc.code_obj.__qualname__.split(".")[:-1]
                 )  # Collect all class depths before the constructor.
