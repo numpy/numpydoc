@@ -18,6 +18,7 @@ It will:
 """
 
 import hashlib
+import importlib
 import inspect
 import itertools
 import pydoc
@@ -25,6 +26,7 @@ import re
 import sys
 from collections.abc import Callable
 from copy import deepcopy
+from pathlib import Path
 
 from docutils.nodes import Text, citation, comment, inline, reference, section
 from sphinx.addnodes import desc_content, pending_xref
@@ -201,8 +203,23 @@ def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
             excluder = app.config.numpydoc_validation_files_excluder
             module = inspect.getmodule(obj)
             try:
-                path = module.__file__ if module else None
-            except AttributeError:
+                # Get the module relative path from the name
+                if module:
+                    mod_path = Path(module.__file__)
+                    package_rel_path = mod_path.parent.relative_to(
+                        Path(
+                            importlib.import_module(
+                                module.__name__.split(".")[0]
+                            ).__file__
+                        ).parent
+                    ).as_posix()
+                    module_file = mod_path.as_posix().replace(
+                        mod_path.parent.as_posix(), ""
+                    )
+                    path = package_rel_path + module_file
+                else:
+                    path = None
+            except AttributeError as e:
                 path = None
 
             if path and excluder and excluder.search(path):
