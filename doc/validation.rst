@@ -36,8 +36,8 @@ the pre-commit hook as follows:
   expressions ``\.undocumented_method$`` or ``\.__repr__$``. This
   maps to ``numpydoc_validation_exclude`` from the
   :ref:`Sphinx build configuration <validation_during_sphinx_build>`.
-* ``exclude_files``: Exclude file paths matching the regular expressions
-  ``^tests/.*$`` or ``^module/gui.*$``. This maps to
+* ``exclude_files``: Exclude file paths (relative to the package root) matching
+  the regular expressions ``^tests/.*$`` or ``^module/gui.*$``. This maps to
   ``numpydoc_validation_exclude_files`` from the
   :ref:`Sphinx build configuration <validation_during_sphinx_build>`.
 * ``override_SS05``: Allow docstrings to start with "Process ", "Assess ",

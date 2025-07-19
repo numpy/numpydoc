@@ -141,11 +141,11 @@ numpydoc_validation_exclude : set
     ``numpydoc_validation_checks`` is not an empty set.
 numpydoc_validation_exclude_files : set
     A container of strings using :py:mod:`re` syntax specifying path patterns to
-    ignore for docstring validation.
+    ignore for docstring validation, relative to the package root.
     For example, to skip docstring validation for all objects in
     ``tests\``::
 
-        numpydoc_validation_exclude_files = {"$.*tests/.*"}
+        numpydoc_validation_exclude_files = {"^tests/.*$"}
 
     The default is an empty set meaning no paths are excluded from docstring
     validation.
