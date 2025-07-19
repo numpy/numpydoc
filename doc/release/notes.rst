@@ -20,7 +20,7 @@ Bug Fixes
 Documentation
 -------------
 
-- DOC: Do not use types for *args, **kwargs (`#585 <https://github.com/numpy/numpydoc/pull/585>`_).
+- DOC: Do not use types for ``*args``, ``**kwargs`` (`#585 <https://github.com/numpy/numpydoc/pull/585>`_).
 - mention conda-forge in installation docs (`#595 <https://github.com/numpy/numpydoc/pull/595>`_).
 - Fix typo in validation.rst (`#605 <https://github.com/numpy/numpydoc/pull/605>`_).
 - Fix broken link in ``format.rst`` (`#628 <https://github.com/numpy/numpydoc/pull/628>`_).
