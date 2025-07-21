@@ -273,7 +273,12 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
     dict
         Config options for the numpydoc validation hook.
     """
-    options = {"checks": {"all"}, "exclude": set(), "overrides": {}}
+    options = {
+        "checks": {"all"},
+        "exclude": set(),
+        "overrides": {},
+        "exclude_files": set(),
+    }
     dir_path = Path(dir_path).expanduser().resolve()
 
     toml_path = dir_path / "pyproject.toml"
@@ -306,6 +311,13 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
                 else [global_exclusions]
             )
 
+            file_exclusions = config.get("exclude_files", options["exclude_files"])
+            options["exclude_files"] = set(
+                file_exclusions
+                if not isinstance(file_exclusions, str)
+                else [file_exclusions]
+            )
+
             extract_check_overrides(options, config.items())
 
     elif cfg_path.is_file():
@@ -332,6 +344,16 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
             except configparser.NoOptionError:
                 pass
 
+            try:
+                options["exclude_files"] = set(
+                    config.get(numpydoc_validation_config_section, "exclude_files")
+                    .rstrip(",")
+                    .split(",")
+                    or options["exclude_files"]
+                )
+            except configparser.NoOptionError:
+                pass
+
             extract_check_overrides(
                 options, config.items(numpydoc_validation_config_section)
             )
@@ -341,6 +363,7 @@ def parse_config(dir_path: os.PathLike = None) -> dict:
 
     options["checks"] = validate.get_validation_checks(options["checks"])
     options["exclude"] = compile_regex(options["exclude"])
+    options["exclude_files"] = compile_regex(options["exclude_files"])
     return options
 
 
@@ -395,9 +418,12 @@ def run_hook(
     project_root, _ = find_project_root(files)
     config_options = parse_config(config or project_root)
     config_options["checks"] -= set(ignore or [])
+    exclude_re = config_options["exclude_files"]
 
     findings = False
     for file in files:
+        if exclude_re and exclude_re.match(file):
+            continue
         if file_issues := process_file(file, config_options):
             findings = True
 
