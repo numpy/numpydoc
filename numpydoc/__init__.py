@@ -7,6 +7,6 @@ from ._version import __version__
 
 
 def setup(app, *args, **kwargs):
-    from .numpydoc import setup
+    from .numpydoc import setup  # noqa: PLC0415
 
     return setup(app, *args, **kwargs)

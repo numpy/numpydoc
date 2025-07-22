@@ -1390,12 +1390,9 @@ class TestValidator:
             "too_short_header_underline",
         ],
     )
-    def test_bad_generic_functions(self, capsys, func):
-        with pytest.warns(UserWarning):
-            errors = validate_one(
-                self._import_path(klass="WarnGenericFormat", func=func)
-            )
-        assert "is too short" in w.msg
+    def test_bad_generic_functions_new(self, capsys, func):
+        with pytest.warns(UserWarning, match="is too short"):
+            validate_one(self._import_path(klass="WarnGenericFormat", func=func))
 
     @pytest.mark.parametrize(
         "func",
