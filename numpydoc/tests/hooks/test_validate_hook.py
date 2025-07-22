@@ -267,4 +267,67 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
     assert capsys.readouterr().err.strip() == expected
 
 
-# def test_validate_hook_
+@pytest.mark.parametrize(
+    "regex, expected_code",
+    [(".*(/|\\\\)example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
+)
+def test_validate_hook_exclude_files_option_pyproject(
+    example_module, regex, expected_code, tmp_path
+):
+    """
+    Test that the hook correctly processes the toml config and either includes
+    or excludes files based on the `exclude_files` option.
+    """
+
+    with open(tmp_path / "pyproject.toml", "w") as config_file:
+        config_file.write(
+            inspect.cleandoc(
+                f"""
+                [tool.numpydoc_validation]
+                checks = [
+                    "all",
+                    "EX01",
+                    "SA01",
+                    "ES01",
+                ]
+                exclude = '\\.__init__$'
+                override_SS05 = [
+                    '^Creates',
+                ]
+                exclude_files = [
+                    '{regex}',
+                ]"""
+            )
+        )
+
+    return_code = run_hook([example_module], config=tmp_path)
+    assert return_code == expected_code  # Should not-report/report findings.
+
+
+@pytest.mark.parametrize(
+    "regex, expected_code",
+    [(".*(/|\\\\)example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
+)
+def test_validate_hook_exclude_files_option_setup_cfg(
+    example_module, regex, expected_code, tmp_path
+):
+    """
+    Test that the hook correctly processes the setup config and either includes
+    or excludes files based on the `exclude_files` option.
+    """
+
+    with open(tmp_path / "setup.cfg", "w") as config_file:
+        config_file.write(
+            inspect.cleandoc(
+                f"""
+                [tool:numpydoc_validation]
+                checks = all,EX01,SA01,ES01
+                exclude = \\.NewClass$,\\.__init__$
+                override_SS05 = ^Creates
+                exclude_files = {regex}
+                """
+            )
+        )
+
+    return_code = run_hook([example_module], config=tmp_path)
+    assert return_code == expected_code  # Should not-report/report findings.
