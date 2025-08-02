@@ -187,7 +187,7 @@ def test_extended_summary(doc):
 def test_parameters(doc):
     assert len(doc["Parameters"]) == 4
     names = [n for n, _, _ in doc["Parameters"]]
-    assert all(a == b for a, b in zip(names, ["mean", "cov", "shape"], strict=True))
+    assert all(a == b for a, b in zip(names, ["mean", "cov", "shape", "dtype"], strict=True))
 
     arg, arg_type, desc = doc["Parameters"][1]
     assert arg_type == "(N, N) ndarray"
