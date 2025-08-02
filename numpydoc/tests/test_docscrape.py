@@ -187,7 +187,9 @@ def test_extended_summary(doc):
 def test_parameters(doc):
     assert len(doc["Parameters"]) == 4
     names = [n for n, _, _ in doc["Parameters"]]
-    assert all(a == b for a, b in zip(names, ["mean", "cov", "shape"]))
+    assert all(
+        a == b for a, b in zip(names, ["mean", "cov", "shape", "dtype"], strict=True)
+    )
 
     arg, arg_type, desc = doc["Parameters"][1]
     assert arg_type == "(N, N) ndarray"
@@ -242,7 +244,9 @@ def test_yields():
         ("b", "int", "bananas."),
         ("", "int", "unknowns."),
     ]
-    for (arg, arg_type, desc), (arg_, arg_type_, end) in zip(section, truth):
+    for (arg, arg_type, desc), (arg_, arg_type_, end) in zip(
+        section, truth, strict=True
+    ):
         assert arg == arg_
         assert arg_type == arg_type_
         assert desc[0].startswith("The number of")
@@ -253,7 +257,9 @@ def test_sent():
     section = doc_sent["Receives"]
     assert len(section) == 2
     truth = [("b", "int", "bananas."), ("c", "int", "oranges.")]
-    for (arg, arg_type, desc), (arg_, arg_type_, end) in zip(section, truth):
+    for (arg, arg_type, desc), (arg_, arg_type_, end) in zip(
+        section, truth, strict=True
+    ):
         assert arg == arg_
         assert arg_type == arg_type_
         assert desc[0].startswith("The number of")
@@ -374,7 +380,7 @@ def line_by_line_compare(a, b, n_lines=None):
     a = [l.rstrip() for l in _strip_blank_lines(a).split("\n")][:n_lines]
     b = [l.rstrip() for l in _strip_blank_lines(b).split("\n")][:n_lines]
     assert len(a) == len(b)
-    for ii, (aa, bb) in enumerate(zip(a, b)):
+    for ii, (aa, bb) in enumerate(zip(a, b, strict=True)):
         assert aa == bb
 
 

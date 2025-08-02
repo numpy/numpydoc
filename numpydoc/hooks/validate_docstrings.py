@@ -63,7 +63,7 @@ class AstValidator(validate.Validator):
 
     @property
     def is_function_or_method(self) -> bool:
-        return isinstance(self.node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        return isinstance(self.node, ast.FunctionDef | ast.AsyncFunctionDef)
 
     @property
     def is_mod(self) -> bool:
@@ -236,7 +236,7 @@ class DocstringVisitor(ast.NodeVisitor):
             The node to visit.
         """
         if isinstance(
-            node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+            node, ast.Module | ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef
         ):
             self.stack.append(node)
 
@@ -395,8 +395,8 @@ def process_file(filepath: os.PathLike, config: dict) -> "list[list[str]]":
 def run_hook(
     files: List[str],
     *,
-    config: Union[Dict[str, Any], None] = None,
-    ignore: Union[List[str], None] = None,
+    config: Dict[str, Any] | None = None,
+    ignore: List[str] | None = None,
 ) -> int:
     """
     Run the numpydoc validation hook.

@@ -6,7 +6,7 @@ requires = ['setuptools>=61.2']
 name = 'numpydoc'
 description = 'Sphinx extension to support docstrings in Numpy format'
 readme = 'README.rst'
-requires-python = '>=3.9'
+requires-python = '>=3.10'
 dynamic = ['version']
 keywords = [
     'sphinx',
@@ -20,7 +20,6 @@ classifiers = [
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
