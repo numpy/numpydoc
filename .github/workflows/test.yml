@@ -27,7 +27,7 @@ jobs:
       run:
         shell: bash -eo pipefail {0}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Python setup
         uses: actions/setup-python@v5
@@ -80,7 +80,7 @@ jobs:
         os: [ubuntu]
         python-version: ["3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Python setup
         uses: actions/setup-python@v5
