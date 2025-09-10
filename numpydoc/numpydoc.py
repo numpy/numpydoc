@@ -88,7 +88,7 @@ def _is_cite_in_numpydoc_docstring(citation_node):
     section_node = citation_node.parent
 
     def is_docstring_section(node):
-        return isinstance(node, (section, desc_content))
+        return isinstance(node, section | desc_content)
 
     while not is_docstring_section(section_node):
         section_node = section_node.parent
