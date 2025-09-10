@@ -256,14 +256,16 @@ class NumpyDocString(Mapping):
     # <FUNCNAME> is one of
     #   <PLAIN_FUNCNAME>
     #   COLON <ROLE> COLON BACKTICK <PLAIN_FUNCNAME> BACKTICK
+    #   COLON <ROLE> COLON BACKTICK <PLAIN_FUNCNAME> RIGHT_ANGLE_BRACKET <TARGET_NAME> LEFT_ANGLE_BRACKET BACKTICK
     # where
+    #   <TARGET_NAME> is a legal sphinx target for cross-linking
     #   <PLAIN_FUNCNAME> is a legal function name, and
     #   <ROLE> is any nonempty sequence of word characters.
-    # Examples: func_f1  :meth:`func_h1` :obj:`~baz.obj_r` :class:`class_j`
+    # Examples: func_f1  :meth:`func_h1` :obj:`~baz.obj_r` :class:`class_j` :class:`class_j <class_j>`
     # <DESC> is a string describing the function.
 
     _role = r":(?P<role>(py:)?\w+):"
-    _funcbacktick = r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_\.-]+)`"
+    _funcbacktick = r"`(?P<name>(?:~\w+\.)?[a-zA-Z0-9_\.-]+)\s?(?P<target_name>(?:\s?\<\w)[a-zA-Z0-9_\.-]+(?:\>))?`"
     _funcplain = r"(?P<name2>[a-zA-Z0-9_\.-]+)"
     _funcname = r"(" + _role + _funcbacktick + r"|" + _funcplain + r")"
     _funcnamenext = _funcname.replace("role", "rolenext")
@@ -299,12 +301,16 @@ class NumpyDocString(Mapping):
         items = []
 
         def parse_item_name(text):
-            """Match ':role:`name`' or 'name'."""
+            """Match ':role:`name`', ':role:`name <target>`' or 'name'."""
             m = self._func_rgx.match(text)
             if not m:
                 self._error_location(f"Error parsing See Also entry {line!r}")
             role = m.group("role")
             name = m.group("name") if role else m.group("name2")
+
+            target_name = m.group("target_name")
+            if target_name is not None:
+                name += f" {target_name}"
             return name, role, m.end()
 
         rest = []
