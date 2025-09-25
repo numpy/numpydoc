@@ -84,6 +84,7 @@ ERROR_MSGS = {
     "PR09": 'Parameter "{param_name}" description should finish with "."',
     "PR10": 'Parameter "{param_name}" requires a space before the colon '
     "separating the parameter name and type",
+    "PR11": 'Parameter "{param_name}" is optional but not documented, ' "or vice versa",
     "RT01": "No Returns section found",
     "RT02": "The first line of the Returns section should contain only the "
     "type, unless multiple values are being returned",
@@ -416,42 +417,58 @@ class Validator:
 
     @property
     def signature_parameters(self):
-        def add_stars(param_name, info):
-            """
-            Add stars to *args and **kwargs parameters
-            """
-            if info.kind == inspect.Parameter.VAR_POSITIONAL:
-                return f"*{param_name}"
-            elif info.kind == inspect.Parameter.VAR_KEYWORD:
-                return f"**{param_name}"
-            else:
-                return param_name
-
         if inspect.isclass(self.obj):
             if hasattr(self.obj, "_accessors") and (
                 self.name.split(".")[-1] in self.obj._accessors
             ):
                 # accessor classes have a signature but don't want to show this
-                return tuple()
+                return dict()
         try:
             sig = inspect.signature(self.obj)
         except (TypeError, ValueError):
             # Some objects, mainly in C extensions do not support introspection
             # of the signature
-            return tuple()
+            return dict()
+        params = dict(sig.parameters)
 
-        params = tuple(
-            add_stars(parameter, sig.parameters[parameter])
-            for parameter in sig.parameters
-        )
-        if params and params[0] in ("self", "cls"):
-            return params[1:]
+        if params:
+            first_param = next(iter(params.keys()))
+            if first_param in ("self", "cls"):
+                del params[first_param]
+
         return params
+
+    @staticmethod
+    def _add_stars(param_name, info):
+        """
+        Add stars to *args and **kwargs parameters
+        """
+        if info.kind == inspect.Parameter.VAR_POSITIONAL:
+            return f"*{param_name}"
+        elif info.kind == inspect.Parameter.VAR_KEYWORD:
+            return f"**{param_name}"
+        else:
+            return param_name
+
+    @property
+    def signature_parameters_names(self):
+        return tuple(
+            self._add_stars(param, info)
+            for param, info in self.signature_parameters.items()
+        )
+
+    @property
+    def optional_signature_parameters_names(self):
+        return tuple(
+            self._add_stars(param, info)
+            for param, info in self.signature_parameters.items()
+            if info.default is not inspect._empty
+        )
 
     @property
     def parameter_mismatches(self):
         errs = []
-        signature_params = self.signature_parameters
+        signature_params = self.signature_parameters_names
         all_params = tuple(param.replace("\\", "") for param in self.doc_all_parameters)
         missing = set(signature_params) - set(all_params)
         if missing:
@@ -731,7 +748,8 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
 
     for param, kind_desc in doc.doc_all_parameters.items():
         if not param.startswith("*"):  # Check can ignore var / kwargs
-            if not doc.parameter_type(param):
+            param_type = doc.parameter_type(param)
+            if not param_type:
                 if ":" in param:
                     errs.append(error("PR10", param_name=param.split(":")[0]))
                 else:
@@ -741,13 +759,19 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
                     errs.append(error("PR05", param_name=param))
                 # skip common_type_error checks when the param type is a set of
                 # options
-                if "{" in doc.parameter_type(param):
+                if "{" in param_type:
                     continue
                 common_type_errors = [
                     ("integer", "int"),
                     ("boolean", "bool"),
                     ("string", "str"),
                 ]
+
+                # check that documented optional param has default in sig
+                if "optional" in param_type or "default" in param_type:
+                    if param not in doc.optional_signature_parameters_names:
+                        errs.append(error("PR11", param_name=param))
+
                 for wrong_type, right_type in common_type_errors:
                     if wrong_type in set(re.split(r"\W", doc.parameter_type(param))):
                         errs.append(
@@ -758,7 +782,18 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
                                 wrong_type=wrong_type,
                             )
                         )
+
         errs.extend(_check_desc(kind_desc[1], "PR07", "PR08", "PR09", param_name=param))
+
+    # check param with default in sig is documented as optional
+    for param in doc.optional_signature_parameters_names:
+        param_type = doc.parameter_type(param)
+        if (
+            "optional" not in param_type
+            and "{" not in param_type
+            and "default" not in param_type
+        ):
+            errs.append(error("PR11", param_name=param))
 
     if doc.is_function_or_method:
         if not doc.returns:
