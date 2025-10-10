@@ -99,6 +99,7 @@ extend-select = [
 ignore = [
   "PLR09",    # Too many <...>
   "PLR2004",  # Magic value used in comparison
+  "PLC0415",  # Imports not at top of file (we often nest intentionally)
   "ISC001",   # Conflicts with formatter
   "ARG001",   # FIXME: consider removing this and the following rules from this list
   "ARG002",

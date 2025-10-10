@@ -211,7 +211,7 @@ def test_parameters(doc):
 def test_other_parameters(doc):
     assert len(doc["Other Parameters"]) == 1
     assert [n for n, _, _ in doc["Other Parameters"]] == ["spam"]
-    arg, arg_type, desc = doc["Other Parameters"][0]
+    _arg, arg_type, desc = doc["Other Parameters"][0]
     assert arg_type == "parrot"
     assert desc[0].startswith("A parrot off its mortal coil")
 
