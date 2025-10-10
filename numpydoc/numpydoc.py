@@ -185,9 +185,9 @@ def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
         "xref_aliases": app.config.numpydoc_xref_aliases_complete,
         "xref_ignore": app.config.numpydoc_xref_ignore,
     }
-    if isinstance(options, dict):
+    try:
         cfg.update(options or {})
-    else:
+    except TypeError:
         cfg.update(options.__dict__ or {})
     u_NL = "\n"
     if what == "module":
