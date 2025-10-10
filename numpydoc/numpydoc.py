@@ -185,6 +185,8 @@ def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
         "xref_aliases": app.config.numpydoc_xref_aliases_complete,
         "xref_ignore": app.config.numpydoc_xref_ignore,
     }
+    # TODO: Find a cleaner way to take care of this change away from dict
+    # https://github.com/sphinx-doc/sphinx/issues/13942
     try:
         cfg.update(options or {})
     except TypeError:
