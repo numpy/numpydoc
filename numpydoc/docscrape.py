@@ -597,7 +597,7 @@ class FunctionDoc(NumpyDocString):
     def __str__(self):
         out = ""
 
-        func, func_name = self.get_func()
+        _func, func_name = self.get_func()
 
         roles = {"func": "function", "meth": "method"}
 
