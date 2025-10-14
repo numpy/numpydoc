@@ -1,8 +1,10 @@
+import pytest
+pytest.importorskip("sphinx")
+
 import os.path as op
 import re
 import shutil
 
-import pytest
 from docutils import __version__ as docutils_version
 from packaging import version
 from sphinx.application import Sphinx
