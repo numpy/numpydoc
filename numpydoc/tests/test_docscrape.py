@@ -4,19 +4,10 @@ import warnings
 from collections import namedtuple
 from copy import deepcopy
 
-import jinja2
 import pytest
 from pytest import warns as assert_warns
 
-from numpydoc.docscrape import ClassDoc, FunctionDoc, NumpyDocString
-from numpydoc.docscrape_sphinx import (
-    SphinxClassDoc,
-    SphinxDocString,
-    SphinxFunctionDoc,
-    get_doc_object,
-)
-from numpydoc.numpydoc import update_config
-from numpydoc.xref import DEFAULT_LINKS
+from numpydoc.docscrape import ClassDoc, FunctionDoc, NumpyDocString, get_doc_object
 
 doc_txt = """\
   numpy.multivariate_normal(mean, cov, shape=None, spam=None)
@@ -338,10 +329,10 @@ That should break...
         """
 
     with pytest.raises(ValueError, match="Dummy class"):
-        SphinxClassDoc(Dummy)
+        ClassDoc(Dummy)
 
     with pytest.raises(ValueError, match="dummy_func"):
-        SphinxFunctionDoc(dummy_func)
+        FunctionDoc(dummy_func)
 
 
 def test_notes(doc):
@@ -567,153 +558,6 @@ def test_no_index_in_str():
         foo
     """
         )
-    )
-
-
-def test_sphinx_str():
-    sphinx_doc = SphinxDocString(doc_txt)
-    line_by_line_compare(
-        str(sphinx_doc),
-        """
-.. index:: random
-   single: random;distributions, random;gauss
-
-Draw values from a multivariate normal distribution with specified
-mean and covariance.
-
-The multivariate normal or Gaussian distribution is a generalisation
-of the one-dimensional normal distribution to higher dimensions.
-
-:Parameters:
-
-    **mean** : (N,) ndarray
-        Mean of the N-dimensional distribution.
-
-        .. math::
-
-           (1+2+3)/3
-
-    **cov** : (N, N) ndarray
-        Covariance matrix of the distribution.
-
-    **shape** : tuple of ints
-        Given a shape of, for example, (m,n,k), m*n*k samples are
-        generated, and packed in an m-by-n-by-k arrangement.  Because
-        each sample is N-dimensional, the output shape is (m,n,k,N).
-
-    **dtype** : data type object, optional (default : float)
-        The type and size of the data to be returned.
-
-:Returns:
-
-    **out** : ndarray
-        The drawn samples, arranged according to `shape`.  If the
-        shape given is (m,n,...), then the shape of `out` is
-        (m,n,...,N).
-
-        In other words, each entry ``out[i,j,...,:]`` is an N-dimensional
-        value drawn from the distribution.
-
-    list of str
-        This is not a real return value.  It exists to test
-        anonymous return values.
-
-    no_description
-        ..
-
-:Other Parameters:
-
-    **spam** : parrot
-        A parrot off its mortal coil.
-
-:Raises:
-
-    RuntimeError
-        Some error
-
-:Warns:
-
-    RuntimeWarning
-        Some warning
-
-.. warning::
-
-    Certain warnings apply.
-
-.. seealso::
-
-    :obj:`some`, :obj:`other`, :obj:`funcs`
-        ..
-    :obj:`otherfunc`
-        relationship
-    :py:meth:`spyder.widgets.mixins.GetHelpMixin.show_object_info`
-        ..
-
-.. rubric:: Notes
-
-Instead of specifying the full covariance matrix, popular
-approximations include:
-
-  - Spherical covariance (`cov` is a multiple of the identity matrix)
-  - Diagonal covariance (`cov` has non-negative elements only on the diagonal)
-
-This geometrical property can be seen in two dimensions by plotting
-generated data-points:
-
->>> mean = [0,0]
->>> cov = [[1,0],[0,100]] # diagonal covariance, points lie on x or y-axis
-
->>> x,y = multivariate_normal(mean,cov,5000).T
->>> plt.plot(x,y,'x'); plt.axis('equal'); plt.show()
-
-Note that the covariance matrix must be symmetric and non-negative
-definite.
-
-.. rubric:: References
-
-.. [1] A. Papoulis, "Probability, Random Variables, and Stochastic
-       Processes," 3rd ed., McGraw-Hill Companies, 1991
-.. [2] R.O. Duda, P.E. Hart, and D.G. Stork, "Pattern Classification,"
-       2nd ed., Wiley, 2001.
-
-.. only:: latex
-
-   [1]_, [2]_
-
-.. rubric:: Examples
-
->>> mean = (1,2)
->>> cov = [[1,0],[1,0]]
->>> x = multivariate_normal(mean,cov,(3,3))
->>> print(x.shape)
-(3, 3, 2)
-
-The following is probably true, given that 0.6 is roughly twice the
-standard deviation:
-
->>> print(list((x[0, 0, :] - mean) < 0.6))
-[True, True]
-""",
-    )
-
-
-def test_sphinx_yields_str():
-    sphinx_doc = SphinxDocString(doc_yields_txt)
-    line_by_line_compare(
-        str(sphinx_doc),
-        """Test generator
-
-:Yields:
-
-    **a** : int
-        The number of apples.
-
-    **b** : int
-        The number of bananas.
-
-    int
-        The number of unknowns.
-""",
     )
 
 
@@ -945,13 +789,6 @@ This should be ignored and warned about
         NumpyDocString(doc_text)
     assert len(record) == 1
 
-    # SphinxClassDoc has _obj.__name__ == "BadSection". Test that this is
-    # included in the message
-    msg_match = "Unknown section Nope in the docstring of BadSection"
-    with pytest.warns(UserWarning, match=msg_match) as record:
-        SphinxClassDoc(BadSection)
-    assert len(record) == 1
-
 
 doc7 = NumpyDocString(
     """
@@ -999,18 +836,8 @@ def test_trailing_colon():
     assert doc8["Parameters"][0].name == "data"
 
 
-def test_no_summary():
-    str(
-        SphinxDocString(
-            """
-    Parameters
-    ----------"""
-        )
-    )
-
-
 def test_unicode():
-    doc = SphinxDocString(
+    doc = NumpyDocString(
         """
     öäöäöäöäöåååå
 
@@ -1030,48 +857,6 @@ def test_unicode():
     )
     assert isinstance(doc["Summary"][0], str)
     assert doc["Summary"][0] == "öäöäöäöäöåååå"
-
-
-def test_plot_examples():
-    cfg = dict(use_plots=True)
-
-    doc = SphinxDocString(
-        """
-    Examples
-    --------
-    >>> import matplotlib.pyplot as plt
-    >>> plt.plot([1,2,3],[4,5,6])
-    >>> plt.show()
-    """,
-        config=cfg,
-    )
-    assert "plot::" in str(doc), str(doc)
-
-    doc = SphinxDocString(
-        """
-    Examples
-    --------
-    >>> from matplotlib import pyplot as plt
-    >>> plt.plot([1,2,3],[4,5,6])
-    >>> plt.show()
-    """,
-        config=cfg,
-    )
-    assert "plot::" in str(doc), str(doc)
-
-    doc = SphinxDocString(
-        """
-    Examples
-    --------
-    .. plot::
-
-       import matplotlib.pyplot as plt
-       plt.plot([1,2,3],[4,5,6])
-       plt.show()
-    """,
-        config=cfg,
-    )
-    assert str(doc).count("plot::") == 1, str(doc)
 
 
 def test_class_members():
@@ -1095,24 +880,20 @@ def test_class_members():
         class Ignorable:
             """local class, to be ignored"""
 
-    for cls in (ClassDoc, SphinxClassDoc):
-        doc = cls(Dummy, config=dict(show_class_members=False))
-        assert "Methods" not in str(doc), (cls, str(doc))
-        assert "spam" not in str(doc), (cls, str(doc))
-        assert "ham" not in str(doc), (cls, str(doc))
-        assert "spammity" not in str(doc), (cls, str(doc))
-        assert "Spammity index" not in str(doc), (cls, str(doc))
+    doc = ClassDoc(Dummy, config=dict(show_class_members=False))
+    assert "Methods" not in str(doc), (ClassDoc, str(doc))
+    assert "spam" not in str(doc), (ClassDoc, str(doc))
+    assert "ham" not in str(doc), (ClassDoc, str(doc))
+    assert "spammity" not in str(doc), (ClassDoc, str(doc))
+    assert "Spammity index" not in str(doc), (ClassDoc, str(doc))
 
-        doc = cls(Dummy, config=dict(show_class_members=True))
-        assert "Methods" in str(doc), (cls, str(doc))
-        assert "spam" in str(doc), (cls, str(doc))
-        assert "ham" in str(doc), (cls, str(doc))
-        assert "spammity" in str(doc), (cls, str(doc))
+    doc = ClassDoc(Dummy, config=dict(show_class_members=True))
+    assert "Methods" in str(doc), (ClassDoc, str(doc))
+    assert "spam" in str(doc), (ClassDoc, str(doc))
+    assert "ham" in str(doc), (ClassDoc, str(doc))
+    assert "spammity" in str(doc), (ClassDoc, str(doc))
 
-        if cls is SphinxClassDoc:
-            assert ".. autosummary::" in str(doc), str(doc)
-        else:
-            assert "Spammity index" in str(doc), str(doc)
+    assert "Spammity index" in str(doc), str(doc)
 
     class SubDummy(Dummy):
         """
@@ -1126,36 +907,29 @@ def test_class_members():
         def bar(self, a, b):
             """Bar\n\nNo bar"""
 
-    for cls in (ClassDoc, SphinxClassDoc):
-        doc = cls(
-            SubDummy,
-            config=dict(show_class_members=True, show_inherited_class_members=False),
-        )
-        assert "Methods" in str(doc), (cls, str(doc))
-        assert "spam" not in str(doc), (cls, str(doc))
-        assert "ham" in str(doc), (cls, str(doc))
-        assert "bar" in str(doc), (cls, str(doc))
-        assert "spammity" not in str(doc), (cls, str(doc))
+    doc = ClassDoc(
+        SubDummy,
+        config=dict(show_class_members=True, show_inherited_class_members=False),
+    )
+    assert "Methods" in str(doc), (ClassDoc, str(doc))
+    assert "spam" not in str(doc), (ClassDoc, str(doc))
+    assert "ham" in str(doc), (ClassDoc, str(doc))
+    assert "bar" in str(doc), (ClassDoc, str(doc))
+    assert "spammity" not in str(doc), (ClassDoc, str(doc))
 
-        if cls is SphinxClassDoc:
-            assert ".. autosummary::" in str(doc), str(doc)
-        else:
-            assert "Spammity index" not in str(doc), str(doc)
+    assert "Spammity index" not in str(doc), str(doc)
 
-        doc = cls(
-            SubDummy,
-            config=dict(show_class_members=True, show_inherited_class_members=True),
-        )
-        assert "Methods" in str(doc), (cls, str(doc))
-        assert "spam" in str(doc), (cls, str(doc))
-        assert "ham" in str(doc), (cls, str(doc))
-        assert "bar" in str(doc), (cls, str(doc))
-        assert "spammity" in str(doc), (cls, str(doc))
+    doc = ClassDoc(
+        SubDummy,
+        config=dict(show_class_members=True, show_inherited_class_members=True),
+    )
+    assert "Methods" in str(doc), (ClassDoc, str(doc))
+    assert "spam" in str(doc), (ClassDoc, str(doc))
+    assert "ham" in str(doc), (ClassDoc, str(doc))
+    assert "bar" in str(doc), (ClassDoc, str(doc))
+    assert "spammity" in str(doc), (ClassDoc, str(doc))
 
-        if cls is SphinxClassDoc:
-            assert ".. autosummary::" in str(doc), str(doc)
-        else:
-            assert "Spammity index" in str(doc), str(doc)
+    assert "Spammity index" in str(doc), str(doc)
 
 
 def test_duplicate_signature():
@@ -1226,226 +1000,6 @@ class_doc_txt = """
 """
 
 
-def test_class_members_doc():
-    doc = ClassDoc(None, class_doc_txt)
-    line_by_line_compare(
-        str(doc),
-        """
-    Foo
-
-    Parameters
-    ----------
-    f : callable ``f(t, y, *f_args)``
-        Aaa.
-    jac : callable ``jac(t, y, *jac_args)``
-        Bbb.
-
-    Attributes
-    ----------
-    t : float
-        Current time.
-    y : ndarray
-        Current variable values.
-
-        * hello
-        * world
-    an_attribute : float
-        The docstring is printed instead
-    no_docstring : str
-        But a description
-    no_docstring2 : str
-    multiline_sentence
-    midword_period
-    no_period
-
-    Methods
-    -------
-    a
-    b
-    c
-
-    Other Parameters
-    ----------------
-    another parameter : str
-        This parameter is less important.
-
-    Notes
-    -----
-    Some notes about the class.
-
-    Examples
-    --------
-    For usage examples, see `ode`.
-
-    """,
-    )
-
-
-def test_class_members_doc_sphinx():
-    class Foo:
-        @property
-        def an_attribute(self):
-            """Test attribute"""
-            return
-
-        @property
-        def no_docstring(self):
-            return None
-
-        @property
-        def no_docstring2(self):
-            return None
-
-        @property
-        def multiline_sentence(self):
-            """This is a
-            sentence. It spans multiple lines."""
-            return
-
-        @property
-        def midword_period(self):
-            """The sentence for numpy.org."""
-            return
-
-        @property
-        def no_period(self):
-            """This does not have a period
-            so we truncate its summary to the first linebreak
-
-            Apparently.
-            """
-            return
-
-    doc = SphinxClassDoc(Foo, class_doc_txt)
-    line_by_line_compare(
-        str(doc),
-        """
-    Foo
-
-    :Parameters:
-
-        **f** : callable ``f(t, y, *f_args)``
-            Aaa.
-
-        **jac** : callable ``jac(t, y, *jac_args)``
-            Bbb.
-
-    :Attributes:
-
-        **t** : float
-            Current time.
-
-        **y** : ndarray
-            Current variable values.
-
-            * hello
-            * world
-
-        :obj:`an_attribute <an_attribute>` : float
-            Test attribute
-
-        **no_docstring** : str
-            But a description
-
-        **no_docstring2** : str
-            ..
-
-        :obj:`multiline_sentence <multiline_sentence>`
-            This is a sentence.
-
-        :obj:`midword_period <midword_period>`
-            The sentence for numpy.org.
-
-        :obj:`no_period <no_period>`
-            This does not have a period
-
-    .. rubric:: Methods
-
-    =====  ==========
-    **a**
-    **b**
-    **c**
-    =====  ==========
-
-    :Other Parameters:
-
-        **another parameter** : str
-            This parameter is less important.
-
-    .. rubric:: Notes
-
-    Some notes about the class.
-
-    .. rubric:: Examples
-
-    For usage examples, see `ode`.
-
-    """,
-    )
-
-
-def test_class_attributes_as_member_list():
-    class Foo:
-        """
-        Class docstring.
-
-        Attributes
-        ----------
-        an_attribute
-            Another description that is not used.
-
-        """
-
-        @property
-        def an_attribute(self):
-            """Test attribute"""
-            return
-
-    attr_doc = """:Attributes:
-
-    :obj:`an_attribute <an_attribute>`
-        Test attribute"""
-
-    assert attr_doc in str(SphinxClassDoc(Foo))
-    assert "Another description" not in str(SphinxClassDoc(Foo))
-
-    attr_doc2 = """.. rubric:: Attributes
-
-.. autosummary::
-   :toctree:
-
-   an_attribute"""
-
-    cfg = dict(attributes_as_param_list=False)
-    assert attr_doc2 in str(SphinxClassDoc(Foo, config=cfg))
-    assert "Another description" not in str(SphinxClassDoc(Foo, config=cfg))
-
-
-def test_templated_sections():
-    doc = SphinxClassDoc(
-        None,
-        class_doc_txt,
-        config={"template": jinja2.Template("{{examples}}\n{{parameters}}")},
-    )
-    line_by_line_compare(
-        str(doc),
-        """
-    .. rubric:: Examples
-
-    For usage examples, see `ode`.
-
-    :Parameters:
-
-        **f** : callable ``f(t, y, *f_args)``
-            Aaa.
-
-        **jac** : callable ``jac(t, y, *jac_args)``
-            Bbb.
-
-    """,
-    )
-
-
 def test_nonstandard_property():
     # test discovery of a property that does not satisfy isinstace(.., property)
 
@@ -1469,158 +1023,6 @@ def test_nonstandard_property():
 
     doc = get_doc_object(Dummy)
     assert "test attribute" in str(doc)
-
-
-def test_args_and_kwargs():
-    cfg = dict()
-    doc = SphinxDocString(
-        """
-    Parameters
-    ----------
-    param1 : int
-        First parameter
-    *args : tuple
-        Arguments
-    **kwargs : dict
-        Keyword arguments
-    """,
-        config=cfg,
-    )
-    line_by_line_compare(
-        str(doc),
-        r"""
-:Parameters:
-
-    **param1** : int
-        First parameter
-
-    **\*args** : tuple
-        Arguments
-
-    **\*\*kwargs** : dict
-        Keyword arguments
-    """,
-    )
-
-
-def test_autoclass():
-    cfg = dict(show_class_members=True, show_inherited_class_members=True)
-    doc = SphinxClassDoc(
-        str,
-        """
-A top section before
-
-.. autoclass:: str
-    """,
-        config=cfg,
-    )
-    line_by_line_compare(
-        str(doc),
-        r"""
-A top section before
-
-.. autoclass:: str
-
-.. rubric:: Methods
-
-
-    """,
-        5,
-    )
-
-
-xref_doc_txt = """
-Test xref in Parameters, Other Parameters and Returns
-
-Parameters
-----------
-p1 : int
-    Integer value
-
-p2 : float, optional
-    Integer value
-
-Other Parameters
-----------------
-p3 : list[int]
-    List of integers
-p4 : :class:`pandas.DataFrame`
-    A dataframe
-p5 : sequence of `int`
-    A sequence
-
-Returns
--------
-out : array
-    Numerical return value
-"""
-
-
-xref_doc_txt_expected = r"""
-Test xref in Parameters, Other Parameters and Returns
-
-
-:Parameters:
-
-    **p1** : :class:`python:int`
-        Integer value
-
-    **p2** : :class:`python:float`, optional
-        Integer value
-
-:Returns:
-
-    **out** : :obj:`array <numpy.ndarray>`
-        Numerical return value
-
-
-:Other Parameters:
-
-    **p3** : :class:`python:list`\[:class:`python:int`]
-        List of integers
-
-    **p4** : :class:`pandas.DataFrame`
-        A dataframe
-
-    **p5** : :obj:`python:sequence` of `int`
-        A sequence
-"""
-
-
-def test_xref():
-    xref_aliases = {
-        "sequence": ":obj:`python:sequence`",
-    }
-
-    class Config:
-        def __init__(self, a, b):
-            self.numpydoc_xref_aliases = a
-            self.numpydoc_xref_aliases_complete = b
-            # numpydoc.update_config fails if this config option not present
-            self.numpydoc_validation_checks = set()
-            self.numpydoc_validation_exclude = set()
-            self.numpydoc_validation_exclude_files = set()
-            self.numpydoc_validation_overrides = dict()
-
-    xref_aliases_complete = deepcopy(DEFAULT_LINKS)
-    for key, val in xref_aliases.items():
-        xref_aliases_complete[key] = val
-    config = Config(xref_aliases, xref_aliases_complete)
-    app = namedtuple("config", "config")(config)
-    update_config(app)
-
-    xref_ignore = {"of", "default", "optional"}
-
-    doc = SphinxDocString(
-        xref_doc_txt,
-        config=dict(
-            xref_param_type=True,
-            xref_aliases=xref_aliases_complete,
-            xref_ignore=xref_ignore,
-        ),
-    )
-
-    line_by_line_compare(str(doc), xref_doc_txt_expected)
 
 
 def test__error_location_no_name_attr():
@@ -1675,9 +1077,9 @@ def test_namedtuple_no_duplicate_attributes():
 
     foo = namedtuple("Foo", ("bar", "baz"))
 
-    # Create the SphinxClassDoc object via get_doc_object
-    sds = get_doc_object(foo)
-    assert sds["Attributes"] == []
+    # Create the ClassDoc object via get_doc_object
+    nds = get_doc_object(foo)
+    assert nds["Attributes"] == []
 
 
 def test_namedtuple_class_docstring():
@@ -1692,9 +1094,9 @@ def test_namedtuple_class_docstring():
     class MyFoo(foo):
         """MyFoo's class docstring"""
 
-    # Create the SphinxClassDoc object via get_doc_object
-    sds = get_doc_object(MyFoo)
-    assert sds["Summary"] == ["MyFoo's class docstring"]
+    # Create the ClassDoc object via get_doc_object
+    nds = get_doc_object(MyFoo)
+    assert nds["Summary"] == ["MyFoo's class docstring"]
 
     # Example dataclass where constructor params are documented explicit.
     # Parameter names/descriptions should be included in the docstring, but
@@ -1714,12 +1116,12 @@ def test_namedtuple_class_docstring():
         bar: str
         baz: str
 
-    sds = get_doc_object(MyFooWithParams)
-    assert "MyFoo's class docstring" in sds["Summary"]
-    assert len(sds["Attributes"]) == 0
-    assert len(sds["Parameters"]) == 2
-    assert sds["Parameters"][0].desc[0] == "The bar attribute"
-    assert sds["Parameters"][1].desc[0] == "The baz attribute"
+    nds = get_doc_object(MyFooWithParams)
+    assert "MyFoo's class docstring" in nds["Summary"]
+    assert len(nds["Attributes"]) == 0
+    assert len(nds["Parameters"]) == 2
+    assert nds["Parameters"][0].desc[0] == "The bar attribute"
+    assert nds["Parameters"][1].desc[0] == "The baz attribute"
 
 
 if __name__ == "__main__":
