@@ -19,155 +19,14 @@ from numpydoc.docscrape_sphinx import (
 from numpydoc.numpydoc import update_config
 from numpydoc.xref import DEFAULT_LINKS
 
-doc_txt = """\
-  numpy.multivariate_normal(mean, cov, shape=None, spam=None)
-
-  Draw values from a multivariate normal distribution with specified
-  mean and covariance.
-
-  The multivariate normal or Gaussian distribution is a generalisation
-  of the one-dimensional normal distribution to higher dimensions.
-
-  Parameters
-  ----------
-  mean : (N,) ndarray
-      Mean of the N-dimensional distribution.
-
-      .. math::
-
-         (1+2+3)/3
-
-  cov : (N, N) ndarray
-      Covariance matrix of the distribution.
-  shape : tuple of ints
-      Given a shape of, for example, (m,n,k), m*n*k samples are
-      generated, and packed in an m-by-n-by-k arrangement.  Because
-      each sample is N-dimensional, the output shape is (m,n,k,N).
-  dtype : data type object, optional (default : float)
-      The type and size of the data to be returned.
-
-  Returns
-  -------
-  out : ndarray
-      The drawn samples, arranged according to `shape`.  If the
-      shape given is (m,n,...), then the shape of `out` is
-      (m,n,...,N).
-
-      In other words, each entry ``out[i,j,...,:]`` is an N-dimensional
-      value drawn from the distribution.
-  list of str
-      This is not a real return value.  It exists to test
-      anonymous return values.
-  no_description
-
-  Other Parameters
-  ----------------
-  spam : parrot
-      A parrot off its mortal coil.
-
-  Raises
-  ------
-  RuntimeError
-      Some error
-
-  Warns
-  -----
-  RuntimeWarning
-      Some warning
-
-  Warnings
-  --------
-  Certain warnings apply.
-
-  Notes
-  -----
-  Instead of specifying the full covariance matrix, popular
-  approximations include:
-
-    - Spherical covariance (`cov` is a multiple of the identity matrix)
-    - Diagonal covariance (`cov` has non-negative elements only on the diagonal)
-
-  This geometrical property can be seen in two dimensions by plotting
-  generated data-points:
-
-  >>> mean = [0,0]
-  >>> cov = [[1,0],[0,100]] # diagonal covariance, points lie on x or y-axis
-
-  >>> x,y = multivariate_normal(mean,cov,5000).T
-  >>> plt.plot(x,y,'x'); plt.axis('equal'); plt.show()
-
-  Note that the covariance matrix must be symmetric and non-negative
-  definite.
-
-  References
-  ----------
-  .. [1] A. Papoulis, "Probability, Random Variables, and Stochastic
-         Processes," 3rd ed., McGraw-Hill Companies, 1991
-  .. [2] R.O. Duda, P.E. Hart, and D.G. Stork, "Pattern Classification,"
-         2nd ed., Wiley, 2001.
-
-  See Also
-  --------
-  some, other, funcs
-  otherfunc : relationship
-  :py:meth:`spyder.widgets.mixins.GetHelpMixin.show_object_info`
-
-  Examples
-  --------
-  >>> mean = (1,2)
-  >>> cov = [[1,0],[1,0]]
-  >>> x = multivariate_normal(mean,cov,(3,3))
-  >>> print(x.shape)
-  (3, 3, 2)
-
-  The following is probably true, given that 0.6 is roughly twice the
-  standard deviation:
-
-  >>> print(list((x[0, 0, :] - mean) < 0.6))
-  [True, True]
-
-  .. index:: random
-     :refguide: random;distributions, random;gauss
-
-  """
-
+from test_docscrape import doc_txt, doc_yields_txt, doc_sent_txt, class_doc_txt
 
 @pytest.fixture(params=["", "\n    "], ids=["flush", "newline_indented"])
 def doc(request):
     return SphinxDocString(request.param + doc_txt)
 
 
-doc_yields_txt = """
-Test generator
-
-Yields
-------
-a : int
-    The number of apples.
-b : int
-    The number of bananas.
-int
-    The number of unknowns.
-"""
 doc_yields = SphinxDocString(doc_yields_txt)
-
-
-doc_sent_txt = """
-Test generator
-
-Yields
-------
-a : int
-    The number of apples.
-
-Receives
---------
-b : int
-    The number of bananas.
-c : int
-    The number of oranges.
-
-"""
 doc_sent = SphinxDocString(doc_sent_txt)
 
 
@@ -954,58 +813,6 @@ def test_duplicate_signature():
     )
 
     assert doc["Signature"].strip() == "z(a, theta)"
-
-
-class_doc_txt = """
-    Foo
-
-    Parameters
-    ----------
-    f : callable ``f(t, y, *f_args)``
-        Aaa.
-    jac : callable ``jac(t, y, *jac_args)``
-
-        Bbb.
-
-    Attributes
-    ----------
-    t : float
-        Current time.
-    y : ndarray
-        Current variable values.
-
-        * hello
-        * world
-    an_attribute : float
-        The docstring is printed instead
-    no_docstring : str
-        But a description
-    no_docstring2 : str
-    multiline_sentence
-    midword_period
-    no_period
-
-    Methods
-    -------
-    a
-    b
-    c
-
-    Other Parameters
-    ----------------
-
-    another parameter : str
-        This parameter is less important.
-
-    Notes
-    -----
-
-    Some notes about the class.
-
-    Examples
-    --------
-    For usage examples, see `ode`.
-"""
 
 
 def test_class_members_doc_sphinx():
