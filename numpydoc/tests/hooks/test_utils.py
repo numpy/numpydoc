@@ -23,7 +23,11 @@ def test_find_project_root(tmp_path, request, reason_file, files, expected_reaso
         (tmp_path / reason_file).touch()
 
     if files:
-        expected_dir = Path("/") if expected_reason == "file system root" else tmp_path
+        if expected_reason == "file system root":
+            expected_dir = Path(tmp_path.drive + tmp_path.root)
+        else:
+            expected_dir = tmp_path
+
         for file in files:
             (tmp_path / file).touch()
     else:
