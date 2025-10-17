@@ -1,4 +1,5 @@
 import pytest
+
 pytest.importorskip("sphinx")
 
 import re
@@ -9,6 +10,7 @@ from copy import deepcopy
 
 import jinja2
 from pytest import warns as assert_warns
+from test_docscrape import class_doc_txt, doc_sent_txt, doc_txt, doc_yields_txt
 
 from numpydoc.docscrape_sphinx import (
     SphinxClassDoc,
@@ -19,7 +21,6 @@ from numpydoc.docscrape_sphinx import (
 from numpydoc.numpydoc import update_config
 from numpydoc.xref import DEFAULT_LINKS
 
-from test_docscrape import doc_txt, doc_yields_txt, doc_sent_txt, class_doc_txt
 
 @pytest.fixture(params=["", "\n    "], ids=["flush", "newline_indented"])
 def doc(request):

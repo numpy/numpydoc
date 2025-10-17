@@ -1,4 +1,5 @@
 import pytest
+
 pytest.importorskip("sphinx")
 
 import os.path as op

@@ -1,4 +1,5 @@
 import pytest
+
 pytest.importorskip("sphinx")
 pytest.importorskip("docutils")
 

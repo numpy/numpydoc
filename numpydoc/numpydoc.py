@@ -34,10 +34,10 @@ from sphinx.application import Sphinx as SphinxApp
 from sphinx.util import logging
 
 from . import __version__
+from ._utils import _clean_text_signature
 from .docscrape_sphinx import get_doc_object
 from .validate import get_validation_checks, validate
 from .xref import DEFAULT_LINKS
-from ._utils import _clean_text_signature
 
 logger = logging.getLogger(__name__)
 
