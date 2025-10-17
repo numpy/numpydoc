@@ -999,13 +999,12 @@ def test_trailing_colon():
 
 
 def test_no_summary():
-    str(
-        SphinxDocString(
-            """
-    Parameters
-    ----------"""
-        )
+    ds = SphinxDocString(
+        """
+        Parameters
+        ----------"""
     )
+    assert ds["Summary"] == [""]
 
 
 def test_unicode():
