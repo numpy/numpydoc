@@ -6,7 +6,6 @@ from copy import deepcopy
 
 import jinja2
 import pytest
-from pytest import warns as assert_warns
 
 from numpydoc.docscrape import ClassDoc, FunctionDoc, NumpyDocString
 from numpydoc.docscrape_sphinx import (
@@ -907,7 +906,7 @@ def test_see_also_print():
 
 def test_see_also_trailing_comma_warning():
     warnings.filterwarnings("error")
-    with assert_warns(
+    with pytest.warns(
         Warning,
         match="Unexpected comma or period after function list at index 43 of line .*",
     ):
@@ -1000,13 +999,12 @@ def test_trailing_colon():
 
 
 def test_no_summary():
-    str(
-        SphinxDocString(
-            """
-    Parameters
-    ----------"""
-        )
+    ds = SphinxDocString(
+        """
+        Parameters
+        ----------"""
     )
+    assert ds["Summary"] == [""]
 
 
 def test_unicode():
