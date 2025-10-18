@@ -168,6 +168,7 @@ attr = 'numpydoc.__version__'
 [tool.setuptools.package-data]
 numpydoc = [
     'tests/test_*.py',
+    'tests/hooks/test_*.py',
     'tests/tinybuild/Makefile',
     'tests/tinybuild/index.rst',
     'tests/tinybuild/*.py',
