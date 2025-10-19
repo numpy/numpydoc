@@ -6,7 +6,7 @@ requires = ['setuptools>=61.2']
 name = 'numpydoc'
 description = 'Sphinx extension to support docstrings in Numpy format'
 readme = 'README.rst'
-requires-python = '>=3.9'
+requires-python = '>=3.10'
 dynamic = ['version']
 keywords = [
     'sphinx',
@@ -20,7 +20,6 @@ classifiers = [
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
@@ -46,7 +45,6 @@ Source = 'https://github.com/numpy/numpydoc/'
 [dependency-groups]
 dev = [
     'pre-commit>=3.3',
-    "tomli; python_version < '3.11'",
     { include-group = "doc" },
     { include-group = "test" }
 ]
@@ -100,6 +98,7 @@ extend-select = [
 ignore = [
   "PLR09",    # Too many <...>
   "PLR2004",  # Magic value used in comparison
+  "PLC0415",  # Imports not at top of file (we often nest intentionally)
   "ISC001",   # Conflicts with formatter
   "ARG001",   # FIXME: consider removing this and the following rules from this list
   "ARG002",
