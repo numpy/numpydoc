@@ -45,7 +45,6 @@ Source = 'https://github.com/numpy/numpydoc/'
 [dependency-groups]
 dev = [
     'pre-commit>=3.3',
-    "tomli; python_version < '3.11'",
     { include-group = "doc" },
     { include-group = "test" }
 ]
