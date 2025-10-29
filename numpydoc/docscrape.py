@@ -88,7 +88,7 @@ class Reader:
         return self.read_to_condition(is_unindented)
 
     def peek(self, n=0):
-        if self._l + n < len(self._str):
+        if 0 <= self._l + n < len(self._str):
             return self[self._l + n]
         else:
             return ""
@@ -197,14 +197,34 @@ class NumpyDocString(Mapping):
 
         return doc[i : len(doc) - j]
 
+    def read_to_next_empty_line(self):
+        data = []
+        while True:
+            old_line = self._doc._l
+            if self._is_at_section() and self._doc.peek(-1).strip() != "":
+                section_name = self._doc.peek()
+                self._error_location(
+                    "missing empty line before the %s section" % section_name,
+                    error=False,
+                )
+            self._doc._l = old_line
+
+            current = self._doc.read()
+            if not current.strip():
+                break
+
+            data.append(current)
+
+        return data
+
     def _read_to_next_section(self):
-        section = self._doc.read_to_next_empty_line()
+        section = self.read_to_next_empty_line()
 
         while not self._is_at_section() and not self._doc.eof():
             if not self._doc.peek(-1).strip():  # previous line was empty
                 section += [""]
 
-            section += self._doc.read_to_next_empty_line()
+            section += self.read_to_next_empty_line()
 
         return section
 
@@ -368,7 +388,7 @@ class NumpyDocString(Mapping):
 
         # If several signatures present, take the last one
         while True:
-            summary = self._doc.read_to_next_empty_line()
+            summary = self.read_to_next_empty_line()
             summary_str = " ".join([s.strip() for s in summary]).strip()
             compiled = re.compile(r"^([\w., ]+=)?\s*[\w\.]+\(.*\)$")
             if compiled.match(summary_str):
