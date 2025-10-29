@@ -308,7 +308,7 @@ class GoodDocStrings:
 
         Parameters
         ----------
-        n : int
+        n : int, default 5
             Number of values to return.
 
         Returns
@@ -342,7 +342,7 @@ class GoodDocStrings:
 
         Parameters
         ----------
-        n : int
+        n : int, default 5
             4 Number of values to return.
 
         Returns
@@ -615,6 +615,33 @@ class GoodDocStrings:
         --------
         >>> result = 1 + 1
         """
+
+    def optional_params(self, *, not_optional, a=None, b=2, c="Thing 1"):
+        """
+        Test different ways of testing optional parameters.
+
+        There are three ways to document optional paramters.
+
+        Parameters
+        ----------
+        not_optional : str
+            A keyword arg that is not optional.
+        a : int, optional
+            Default is implicitly determined.
+        b : int, default 5
+            Default is explicitly documented.
+        c : {"Thing 1", "Thing 2"}
+            Which thing.
+
+        See Also
+        --------
+        related : Something related.
+
+        Examples
+        --------
+        >>> result = 1 + 1
+        """
+        pass
 
     def parameter_with_wrong_types_as_substrings(self, a, b, c, d, e, f):
         r"""
@@ -1046,6 +1073,53 @@ class BadParameters:
             Foo bar baz.
         """
 
+    def no_documented_optional(self, a=5):
+        """
+        Missing optional in docstring.
+
+        Parameters
+        ----------
+        a : int
+             Missing optional.
+        """
+        pass
+
+    def documented_optional_but_kwarg(self, *, a):
+        """
+        Missing optional in docstring.
+
+        Parameters
+        ----------
+        a : int, optional
+            Keyword arg mislabelled as optional when there is no
+            default.
+        """
+        pass
+
+    def no_documented_optional_when_None(self, a=None):
+        """
+        Missing optional in docstring when default is None.
+
+        Parameters
+        ----------
+        a : int
+             Missing optional.
+        """
+        pass
+
+    def no_default_when_documented_optional(self, a, b):
+        """
+        Missing default in signature.
+
+        Parameters
+        ----------
+        a : int, optional
+            One way to denote optional.
+        b : int, default 5
+            Another way to denote optional.
+        """
+        pass
+
 
 class BadReturns:
     def return_not_documented(self):
@@ -1369,6 +1443,7 @@ class TestValidator:
             "warnings",
             "valid_options_in_parameter_description_sets",
             "parameters_with_trailing_underscores",
+            "optional_params",
             "parameter_with_wrong_types_as_substrings",
         ],
     )
@@ -1578,6 +1653,19 @@ class TestValidator:
                 "blank_lines",
                 ("No error yet?",),
                 marks=pytest.mark.xfail,
+            ),
+            (
+                "BadParameters",
+                "no_documented_optional",
+                ('Parameter "a" is optional but not documented, or vice versa',),
+            ),
+            (
+                "BadParameters",
+                "no_default_when_documented_optional",
+                (
+                    'Parameter "a" is optional but not documented, or vice versa',
+                    'Parameter "b" is optional but not documented, or vice versa',
+                ),
             ),
             # Returns tests
             ("BadReturns", "return_not_documented", ("No Returns section found",)),
