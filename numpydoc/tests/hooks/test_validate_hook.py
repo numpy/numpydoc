@@ -251,7 +251,7 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
 
 @pytest.mark.parametrize(
     "regex, expected_code",
-    [(r".*(/|\\\\)example.*\.py", 0), (r".*/non_existent_match.*\.py", 1)],
+    [(".*(/|\\\\)example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
 )
 def test_validate_hook_exclude_files_option_pyproject(
     example_module, regex, expected_code, tmp_path
@@ -288,7 +288,7 @@ def test_validate_hook_exclude_files_option_pyproject(
 
 @pytest.mark.parametrize(
     "regex, expected_code",
-    [(r".*(/|\\\\)example.*\.py", 0), (r".*/non_existent_match.*\.py", 1)],
+    [(".*(/|\\\\)example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
 )
 def test_validate_hook_exclude_files_option_setup_cfg(
     example_module, regex, expected_code, tmp_path
