@@ -1,7 +1,6 @@
 """Test the numpydoc validate pre-commit hook."""
 
 import inspect
-import sys
 from pathlib import Path
 
 import pytest
