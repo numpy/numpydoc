@@ -37,7 +37,7 @@ class SphinxDocString(NumpyDocString):
             self.template = template_env.get_template("numpydoc_docstring.rst")
 
     # string conversion routines
-    def _str_header(self, name, symbol="`"):
+    def _str_header(self, name):
         return [".. rubric:: " + name, ""]
 
     def _str_field_list(self, name):
