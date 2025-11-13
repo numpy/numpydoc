@@ -47,7 +47,6 @@ default = [
 ]
 dev = [
     'pre-commit>=3.3',
-    "tomli; python_version < '3.11'",
     { include-group = "doc" },
     { include-group = "test" }
 ]
@@ -171,6 +170,7 @@ attr = 'numpydoc.__version__'
 [tool.setuptools.package-data]
 numpydoc = [
     'tests/test_*.py',
+    'tests/hooks/test_*.py',
     'tests/tinybuild/Makefile',
     'tests/tinybuild/index.rst',
     'tests/tinybuild/*.py',

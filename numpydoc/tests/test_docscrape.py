@@ -5,7 +5,6 @@ from collections import namedtuple
 from copy import deepcopy
 
 import pytest
-from pytest import warns as assert_warns
 
 from numpydoc.docscrape import ClassDoc, FunctionDoc, NumpyDocString, get_doc_object
 
@@ -751,7 +750,7 @@ def test_see_also_print():
 
 def test_see_also_trailing_comma_warning():
     warnings.filterwarnings("error")
-    with assert_warns(
+    with pytest.warns(
         Warning,
         match="Unexpected comma or period after function list at index 43 of line .*",
     ):
