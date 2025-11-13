@@ -1,6 +1,7 @@
 """Test the numpydoc validate pre-commit hook."""
 
 import inspect
+import re
 from pathlib import Path
 
 import pytest
@@ -249,16 +250,17 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
 
 
 @pytest.mark.parametrize(
-    "regex, expected_code",
-    [(".*(/|\\\\)example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
+    "file_exists, expected_code",
+    [(True, 0), (False, 1)],
 )
 def test_validate_hook_exclude_files_option_pyproject(
-    example_module, regex, expected_code, tmp_path
+    example_module, file_exists, expected_code, tmp_path
 ):
     """
     Test that the hook correctly processes the toml config and either includes
     or excludes files based on the `exclude_files` option.
     """
+    exclude = str(example_module) if file_exists else "does_not_exist.py"
 
     with open(tmp_path / "pyproject.toml", "w") as config_file:
         config_file.write(
@@ -276,7 +278,7 @@ def test_validate_hook_exclude_files_option_pyproject(
                     '^Creates',
                 ]
                 exclude_files = [
-                    '{regex}',
+                    '{re.escape(exclude)}',
                 ]"""
             )
         )
@@ -286,16 +288,17 @@ def test_validate_hook_exclude_files_option_pyproject(
 
 
 @pytest.mark.parametrize(
-    "regex, expected_code",
-    [(".*(/|\\\\)example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
+    "file_exists, expected_code",
+    [(True, 0), (False, 1)],
 )
 def test_validate_hook_exclude_files_option_setup_cfg(
-    example_module, regex, expected_code, tmp_path
+    example_module, file_exists, expected_code, tmp_path
 ):
     """
     Test that the hook correctly processes the setup config and either includes
     or excludes files based on the `exclude_files` option.
     """
+    exclude = str(example_module) if file_exists else "does_not_exist.py"
 
     with open(tmp_path / "setup.cfg", "w") as config_file:
         config_file.write(
@@ -305,7 +308,7 @@ def test_validate_hook_exclude_files_option_setup_cfg(
                 checks = all,EX01,SA01,ES01
                 exclude = \\.NewClass$,\\.__init__$
                 override_SS05 = ^Creates
-                exclude_files = {regex}
+                exclude_files = {re.escape(exclude)}
                 """
             )
         )
