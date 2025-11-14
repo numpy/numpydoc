@@ -78,7 +78,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu]
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v5
 
@@ -95,7 +95,7 @@ jobs:
 
       - name: Install
         run: |
-          python -m pip install . --group test --group doc
+          python -m pip install --pre . --group test --group doc
           pip list
 
       - name: Run test suite
