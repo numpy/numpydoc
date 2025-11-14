@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 
 from numpydoc.docscrape import get_doc_object
+
 from .hooks import utils, validate_docstrings
 from .validate import ERROR_MSGS, Validator, validate
 
