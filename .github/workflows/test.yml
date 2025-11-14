@@ -32,7 +32,6 @@ jobs:
       - name: Setup environment
         run: |
           python -m pip install --upgrade pip wheel setuptools
-          python -m pip install codecov
           python -m pip install "${{ matrix.sphinx-version }}"
           python -m pip list
 
@@ -44,10 +43,6 @@ jobs:
       - name: Run test suite
         run: |
           pytest -v --pyargs numpydoc
-
-      - name: Test coverage
-        run: |
-          codecov
 
       - name: Make sure CLI works
         run: |
@@ -116,7 +111,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu]
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v5
 
@@ -128,7 +123,6 @@ jobs:
       - name: Setup environment
         run: |
           python -m pip install --upgrade pip wheel setuptools
-          python -m pip install codecov
           python -m pip list
 
       - name: Install
@@ -139,10 +133,6 @@ jobs:
       - name: Run test suite
         run: |
           pytest -v --pyargs .
-
-      - name: Test coverage
-        run: |
-          codecov
 
       - name: Make sure CLI works
         run: |
@@ -160,3 +150,32 @@ jobs:
         run: |
           make -C doc html SPHINXOPTS="-nT"
           make -C doc latexpdf SPHINXOPTS="-nT"
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Python setup
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Setup environment
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install codecov
+          python -m pip list
+
+      - name: Install
+        run: |
+          python -m pip install --pre . --group test --group doc
+          pip list
+
+      - name: Run test suite
+        run: |
+          pytest -v --pyargs numpydoc
+
+      - name: Test coverage
+        run: |
+          codecov
