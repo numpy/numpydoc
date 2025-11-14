@@ -90,6 +90,7 @@ jobs:
           pytest -v --pyargs numpydoc
 
       - name: Make sure CLI works
+        if: runner.os == 'Linux'
         run: |
           numpydoc render numpydoc.tests.test_main._capture_stdout
           echo '! numpydoc render numpydoc.tests.test_main._invalid_docstring' | bash
@@ -97,11 +98,13 @@ jobs:
           echo '! numpydoc validate numpydoc.tests.test_main._docstring_with_errors' | bash
 
       - name: Setup for doc build
+        if: runner.os == 'Linux'
         run: |
           sudo apt update
           sudo apt install -y texlive texlive-latex-extra latexmk dvipng
 
       - name: Build documentation
+        if: runner.os == 'Linux'
         run: |
           make -C doc html SPHINXOPTS="-nT"
           make -C doc latexpdf SPHINXOPTS="-nT"
