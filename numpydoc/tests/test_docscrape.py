@@ -1007,6 +1007,43 @@ def test_no_summary():
     assert ds["Summary"] == [""]
 
 
+@pytest.mark.parametrize(
+    ["docstring", "expected_warning"],
+    (
+        (
+            """\
+            Parameters without separating empty line:
+            Parameters
+            ----------
+            data
+                some parameter
+            """,
+            "missing empty line before the Parameters section",
+        ),
+        (
+            """\
+            Parameters
+            ----------
+            data
+                some parameter
+            Returns
+            -------
+            int
+            """,
+            "missing empty line before the Returns section",
+        ),
+    ),
+    ids=[
+        "missing empty line after summary",
+        "missing empty line between sections",
+    ],
+)
+def test_section_detection_warnings(docstring, expected_warning):
+    warning_re = ".*%s.*" % expected_warning
+    with pytest.warns(UserWarning, match=warning_re):
+        _ = NumpyDocString(docstring)
+
+
 def test_unicode():
     doc = SphinxDocString(
         """
