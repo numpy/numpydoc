@@ -62,6 +62,22 @@ def test_validate_hook(example_module, config, capsys):
         {example_module!s}:26: EX01 No examples section found
 
         {example_module!s}:30: GL08 The object does not have a docstring
+
+        {example_module!s}:31: SA01 See Also section not found
+
+        {example_module!s}:31: EX01 No examples section found
+
+        {example_module!s}:46: SA01 See Also section not found
+
+        {example_module!s}:46: EX01 No examples section found
+
+        {example_module!s}:58: ES01 No extended summary found
+
+        {example_module!s}:58: PR01 Parameters {{'name'}} not documented
+
+        {example_module!s}:58: SA01 See Also section not found
+
+        {example_module!s}:58: EX01 No examples section found
         """
     )
 
@@ -89,6 +105,8 @@ def test_validate_hook_with_ignore(example_module, capsys):
         {example_module!s}:26: SS05 Summary must start with infinitive verb, not third person (e.g. use "Generate" instead of "Generates")
 
         {example_module!s}:30: GL08 The object does not have a docstring
+
+        {example_module!s}:58: PR01 Parameters {{'name'}} not documented
         """
     )
 
