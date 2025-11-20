@@ -73,13 +73,13 @@ def test_validate_hook(example_module, config, capsys):
 
         {example_module!s}:58: ES01 No extended summary found
 
-        {example_module!s}:58: PR01 Parameters {"name"} not documented
+        {example_module!s}:58: PR01 Parameters {{'name'}} not documented
 
         {example_module!s}:58: SA01 See Also section not found
 
         {example_module!s}:58: EX01 No examples section found
         """
-    ).replace("/", os.sep)
+    )
 
     return_code = run_hook([example_module], config=config)
     assert return_code == 1
@@ -106,9 +106,9 @@ def test_validate_hook_with_ignore(example_module, capsys):
 
         {example_module!s}:30: GL08 The object does not have a docstring
 
-        {example_module!s}:58: PR01 Parameters {"name"} not documented
+        {example_module!s}:58: PR01 Parameters {{'name'}} not documented
         """
-    ).replace("/", os.sep)
+    )
 
     return_code = run_hook([example_module], ignore=["ES01", "SA01", "EX01"])
 
@@ -151,7 +151,7 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
 
         {example_module!s}:30: GL08 The object does not have a docstring
         """
-    ).replace("/", os.sep)
+    )
 
     return_code = run_hook([example_module], config=tmp_path)
     assert return_code == 1
@@ -186,7 +186,7 @@ def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
 
         {example_module!s}:30: GL08 The object does not have a docstring
         """
-    ).replace("/", os.sep)
+    )
 
     return_code = run_hook([example_module], config=tmp_path)
     assert return_code == 1
@@ -227,7 +227,7 @@ def test_validate_hook_exclude_option_pyproject(example_module, tmp_path, capsys
 
         {example_module!s}:30: GL08 The object does not have a docstring
         """
-    ).replace("/", os.sep)
+    )
 
     return_code = run_hook([example_module], config=tmp_path)
     assert return_code == 1
@@ -260,7 +260,7 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
 
         {example_module!s}:17: PR07 Parameter "*args" has no description
         """
-    ).replace("/", os.sep)
+    )
 
     return_code = run_hook([example_module], config=tmp_path)
     assert return_code == 1
