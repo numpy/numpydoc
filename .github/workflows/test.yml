@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [Ubuntu]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         sphinx-version:
           ["sphinx==6.0", "sphinx==6.2", "sphinx==7.0", "sphinx>=7.3"]
         include:
@@ -27,10 +27,10 @@ jobs:
       run:
         shell: bash -eo pipefail {0}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Python setup
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -79,12 +79,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu]
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Python setup
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -96,7 +96,7 @@ jobs:
 
       - name: Install
         run: |
-          python -m pip install . --pre --group test --group doc
+          python -m pip install --pre . --group test --group doc
           pip list
 
       - name: Run test suite

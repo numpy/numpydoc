@@ -88,7 +88,7 @@ def _is_cite_in_numpydoc_docstring(citation_node):
     section_node = citation_node.parent
 
     def is_docstring_section(node):
-        return isinstance(node, (section, desc_content))
+        return isinstance(node, section | desc_content)
 
     while not is_docstring_section(section_node):
         section_node = section_node.parent
@@ -185,8 +185,12 @@ def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
         "xref_aliases": app.config.numpydoc_xref_aliases_complete,
         "xref_ignore": app.config.numpydoc_xref_ignore,
     }
-
-    cfg.update(options or {})
+    # TODO: Find a cleaner way to take care of this change away from dict
+    # https://github.com/sphinx-doc/sphinx/issues/13942
+    try:
+        cfg.update(options or {})
+    except TypeError:
+        cfg.update(options.__dict__ or {})
     u_NL = "\n"
     if what == "module":
         # Strip top title

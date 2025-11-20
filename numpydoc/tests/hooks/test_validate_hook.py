@@ -1,7 +1,7 @@
 """Test the numpydoc validate pre-commit hook."""
 
 import inspect
-import os
+import re
 from pathlib import Path
 
 import pytest
@@ -26,58 +26,58 @@ def test_validate_hook(example_module, config, capsys):
     """Test that a file is correctly processed in the absence of config files."""
 
     expected = inspect.cleandoc(
-        """
-        numpydoc/tests/hooks/example_module.py:4: ES01 No extended summary found
+        f"""
+        {example_module!s}:4: ES01 No extended summary found
 
-        numpydoc/tests/hooks/example_module.py:4: PR01 Parameters {'name'} not documented
+        {example_module!s}:4: PR01 Parameters {{'name'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:4: SA01 See Also section not found
+        {example_module!s}:4: SA01 See Also section not found
 
-        numpydoc/tests/hooks/example_module.py:4: EX01 No examples section found
+        {example_module!s}:4: EX01 No examples section found
 
-        numpydoc/tests/hooks/example_module.py:8: ES01 No extended summary found
+        {example_module!s}:8: ES01 No extended summary found
 
-        numpydoc/tests/hooks/example_module.py:8: SA01 See Also section not found
+        {example_module!s}:8: SA01 See Also section not found
 
-        numpydoc/tests/hooks/example_module.py:8: EX01 No examples section found
+        {example_module!s}:8: EX01 No examples section found
 
-        numpydoc/tests/hooks/example_module.py:11: GL08 The object does not have a docstring
+        {example_module!s}:11: GL08 The object does not have a docstring
 
-        numpydoc/tests/hooks/example_module.py:17: ES01 No extended summary found
+        {example_module!s}:17: ES01 No extended summary found
 
-        numpydoc/tests/hooks/example_module.py:17: PR01 Parameters {'**kwargs'} not documented
+        {example_module!s}:17: PR01 Parameters {{'**kwargs'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:17: PR07 Parameter "*args" has no description
+        {example_module!s}:17: PR07 Parameter "*args" has no description
 
-        numpydoc/tests/hooks/example_module.py:17: SA01 See Also section not found
+        {example_module!s}:17: SA01 See Also section not found
 
-        numpydoc/tests/hooks/example_module.py:17: EX01 No examples section found
+        {example_module!s}:17: EX01 No examples section found
 
-        numpydoc/tests/hooks/example_module.py:26: SS05 Summary must start with infinitive verb, not third person (e.g. use "Generate" instead of "Generates")
+        {example_module!s}:26: SS05 Summary must start with infinitive verb, not third person (e.g. use "Generate" instead of "Generates")
 
-        numpydoc/tests/hooks/example_module.py:26: ES01 No extended summary found
+        {example_module!s}:26: ES01 No extended summary found
 
-        numpydoc/tests/hooks/example_module.py:26: SA01 See Also section not found
+        {example_module!s}:26: SA01 See Also section not found
 
-        numpydoc/tests/hooks/example_module.py:26: EX01 No examples section found
+        {example_module!s}:26: EX01 No examples section found
 
-        numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
+        {example_module!s}:30: GL08 The object does not have a docstring
 
-        numpydoc/tests/hooks/example_module.py:31: SA01 See Also section not found
+        {example_module!s}:31: SA01 See Also section not found
 
-        numpydoc/tests/hooks/example_module.py:31: EX01 No examples section found
+        {example_module!s}:31: EX01 No examples section found
 
-        numpydoc/tests/hooks/example_module.py:46: SA01 See Also section not found
+        {example_module!s}:46: SA01 See Also section not found
 
-        numpydoc/tests/hooks/example_module.py:46: EX01 No examples section found
+        {example_module!s}:46: EX01 No examples section found
 
-        numpydoc/tests/hooks/example_module.py:58: ES01 No extended summary found
+        {example_module!s}:58: ES01 No extended summary found
 
-        numpydoc/tests/hooks/example_module.py:58: PR01 Parameters {'name'} not documented
+        {example_module!s}:58: PR01 Parameters {"name"} not documented
 
-        numpydoc/tests/hooks/example_module.py:58: SA01 See Also section not found
+        {example_module!s}:58: SA01 See Also section not found
 
-        numpydoc/tests/hooks/example_module.py:58: EX01 No examples section found
+        {example_module!s}:58: EX01 No examples section found
         """
     ).replace("/", os.sep)
 
@@ -93,20 +93,20 @@ def test_validate_hook_with_ignore(example_module, capsys):
     """
 
     expected = inspect.cleandoc(
-        """
-        numpydoc/tests/hooks/example_module.py:4: PR01 Parameters {'name'} not documented
+        f"""
+        {example_module!s}:4: PR01 Parameters {{'name'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:11: GL08 The object does not have a docstring
+        {example_module!s}:11: GL08 The object does not have a docstring
 
-        numpydoc/tests/hooks/example_module.py:17: PR01 Parameters {'**kwargs'} not documented
+        {example_module!s}:17: PR01 Parameters {{'**kwargs'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:17: PR07 Parameter "*args" has no description
+        {example_module!s}:17: PR07 Parameter "*args" has no description
 
-        numpydoc/tests/hooks/example_module.py:26: SS05 Summary must start with infinitive verb, not third person (e.g. use "Generate" instead of "Generates")
+        {example_module!s}:26: SS05 Summary must start with infinitive verb, not third person (e.g. use "Generate" instead of "Generates")
 
-        numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
+        {example_module!s}:30: GL08 The object does not have a docstring
 
-        numpydoc/tests/hooks/example_module.py:58: PR01 Parameters {'name'} not documented
+        {example_module!s}:58: PR01 Parameters {"name"} not documented
         """
     ).replace("/", os.sep)
 
@@ -142,14 +142,14 @@ def test_validate_hook_with_toml_config(example_module, tmp_path, capsys):
         )
 
     expected = inspect.cleandoc(
-        """
-        numpydoc/tests/hooks/example_module.py:4: PR01 Parameters {'name'} not documented
+        f"""
+        {example_module!s}:4: PR01 Parameters {{'name'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:17: PR01 Parameters {'**kwargs'} not documented
+        {example_module!s}:17: PR01 Parameters {{'**kwargs'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:17: PR07 Parameter "*args" has no description
+        {example_module!s}:17: PR07 Parameter "*args" has no description
 
-        numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
+        {example_module!s}:30: GL08 The object does not have a docstring
         """
     ).replace("/", os.sep)
 
@@ -177,14 +177,14 @@ def test_validate_hook_with_setup_cfg(example_module, tmp_path, capsys):
         )
 
     expected = inspect.cleandoc(
-        """
-        numpydoc/tests/hooks/example_module.py:4: PR01 Parameters {'name'} not documented
+        f"""
+        {example_module!s}:4: PR01 Parameters {{'name'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:17: PR01 Parameters {'**kwargs'} not documented
+        {example_module!s}:17: PR01 Parameters {{'**kwargs'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:17: PR07 Parameter "*args" has no description
+        {example_module!s}:17: PR07 Parameter "*args" has no description
 
-        numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
+        {example_module!s}:30: GL08 The object does not have a docstring
         """
     ).replace("/", os.sep)
 
@@ -222,10 +222,10 @@ def test_validate_hook_exclude_option_pyproject(example_module, tmp_path, capsys
         )
 
     expected = inspect.cleandoc(
-        """
-        numpydoc/tests/hooks/example_module.py:4: PR01 Parameters {'name'} not documented
+        f"""
+        {example_module!s}:4: PR01 Parameters {{'name'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:30: GL08 The object does not have a docstring
+        {example_module!s}:30: GL08 The object does not have a docstring
         """
     ).replace("/", os.sep)
 
@@ -253,12 +253,12 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
         )
 
     expected = inspect.cleandoc(
-        """
-        numpydoc/tests/hooks/example_module.py:4: PR01 Parameters {'name'} not documented
+        f"""
+        {example_module!s}:4: PR01 Parameters {{'name'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:17: PR01 Parameters {'**kwargs'} not documented
+        {example_module!s}:17: PR01 Parameters {{'**kwargs'}} not documented
 
-        numpydoc/tests/hooks/example_module.py:17: PR07 Parameter "*args" has no description
+        {example_module!s}:17: PR07 Parameter "*args" has no description
         """
     ).replace("/", os.sep)
 
@@ -268,16 +268,17 @@ def test_validate_hook_exclude_option_setup_cfg(example_module, tmp_path, capsys
 
 
 @pytest.mark.parametrize(
-    "regex, expected_code",
-    [(".*(/|\\\\)example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
+    "file_exists, expected_code",
+    [(True, 0), (False, 1)],
 )
 def test_validate_hook_exclude_files_option_pyproject(
-    example_module, regex, expected_code, tmp_path
+    example_module, file_exists, expected_code, tmp_path
 ):
     """
     Test that the hook correctly processes the toml config and either includes
     or excludes files based on the `exclude_files` option.
     """
+    exclude = str(example_module) if file_exists else "does_not_exist.py"
 
     with open(tmp_path / "pyproject.toml", "w") as config_file:
         config_file.write(
@@ -295,7 +296,7 @@ def test_validate_hook_exclude_files_option_pyproject(
                     '^Creates',
                 ]
                 exclude_files = [
-                    '{regex}',
+                    '{re.escape(exclude)}',
                 ]"""
             )
         )
@@ -305,16 +306,17 @@ def test_validate_hook_exclude_files_option_pyproject(
 
 
 @pytest.mark.parametrize(
-    "regex, expected_code",
-    [(".*(/|\\\\)example.*\.py", 0), (".*/non_existent_match.*\.py", 1)],
+    "file_exists, expected_code",
+    [(True, 0), (False, 1)],
 )
 def test_validate_hook_exclude_files_option_setup_cfg(
-    example_module, regex, expected_code, tmp_path
+    example_module, file_exists, expected_code, tmp_path
 ):
     """
     Test that the hook correctly processes the setup config and either includes
     or excludes files based on the `exclude_files` option.
     """
+    exclude = str(example_module) if file_exists else "does_not_exist.py"
 
     with open(tmp_path / "setup.cfg", "w") as config_file:
         config_file.write(
@@ -324,7 +326,7 @@ def test_validate_hook_exclude_files_option_setup_cfg(
                 checks = all,EX01,SA01,ES01
                 exclude = \\.NewClass$,\\.__init__$
                 override_SS05 = ^Creates
-                exclude_files = {regex}
+                exclude_files = {re.escape(exclude)}
                 """
             )
         )

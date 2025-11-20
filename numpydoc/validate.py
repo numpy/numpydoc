@@ -17,7 +17,7 @@ import re
 import textwrap
 import tokenize
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Set
 
 from .docscrape import get_doc_object
 
@@ -124,7 +124,7 @@ def _unwrap(obj):
 # and pandas, and they had between ~500 and ~1300 .py files as of 2023-08-16.
 @functools.lru_cache(maxsize=2000)
 def extract_ignore_validation_comments(
-    filepath: Optional[os.PathLike],
+    filepath: os.PathLike | None,
     encoding: str = "utf-8",
 ) -> Dict[int, List[str]]:
     """
