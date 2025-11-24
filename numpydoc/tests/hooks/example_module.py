@@ -28,4 +28,35 @@ class MyClass:
 
 
 class NewClass:
-    pass
+    class GoodConstructor:
+        """
+        A nested class to test constructors via AST hook.
+
+        Implements constructor via class docstring.
+
+        Parameters
+        ----------
+        name : str
+            The name of the new class.
+        """
+
+        def __init__(self, name):
+            self.name = name
+
+    class BadConstructor:
+        """
+        A nested class to test constructors via AST hook.
+
+        Implements a bad constructor docstring despite having a good class docstring.
+
+        Parameters
+        ----------
+        name : str
+            The name of the new class.
+        """
+
+        def __init__(self, name):
+            """
+            A failing constructor implementation without parameters.
+            """
+            self.name = name
