@@ -22,7 +22,7 @@ jobs:
       run:
         shell: bash -eo pipefail {0}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Python setup
         uses: actions/setup-python@v6
@@ -42,7 +42,7 @@ jobs:
 
       - name: Run test suite
         run: |
-          pytest -v --pyargs numpydoc
+          pytest -v --pyargs .
 
       - name: Make sure CLI works
         run: |
@@ -157,7 +157,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Python setup
         uses: actions/setup-python@v6

@@ -572,6 +572,14 @@ def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
     return errs
 
 
+def _find_class_node(module_node: ast.AST, cls_name) -> ast.ClassDef:
+    #  Find the class node within a module, when checking constructor docstrings.
+    for node in ast.walk(module_node):
+        if isinstance(node, ast.ClassDef) and node.name == cls_name:
+            return node
+    raise ValueError(f"Could not find class node {cls_name}")
+
+
 def validate(obj_name, validator_cls=None, **validator_kwargs):
     """
     Validate the docstring.
@@ -639,20 +647,49 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         report_GL08: bool = True
         # Check if the object is a class and has a docstring in the constructor
         # Also check if code_obj is defined, as undefined for the AstValidator in validate_docstrings.py.
-        if (
-            doc.name.endswith(".__init__")
-            and doc.is_function_or_method
-            and hasattr(doc, "code_obj")
-        ):
-            cls_name = doc.code_obj.__qualname__.split(".")[0]
-            cls = Validator._load_obj(f"{doc.code_obj.__module__}.{cls_name}")
-            # cls = Validator._load_obj(f"{doc.name[:-9]}.{cls_name}") ## Alternative
-            cls_doc = Validator(get_doc_object(cls))
+        if doc.is_function_or_method and doc.name.endswith(".__init__"):
+            # Import here at runtime to avoid circular import as
+            # AstValidator is a subclass of Validator class without `doc_obj` attribute.
+            from numpydoc.hooks.validate_docstrings import (
+                AstValidator,  # Support abstract syntax tree hook.
+            )
+
+            if hasattr(doc, "code_obj"):  # All Validator objects have this attr.
+                cls_name = ".".join(
+                    doc.code_obj.__qualname__.split(".")[:-1]
+                )  # Collect all class depths before the constructor.
+                cls = Validator._load_obj(f"{doc.code_obj.__module__}.{cls_name}")
+                # cls = Validator._load_obj(f"{doc.name[:-9]}.{cls_name}") ## Alternative
+                cls_doc = Validator(get_doc_object(cls))
+            elif isinstance(doc, AstValidator):  # Supports class traversal for ASTs.
+                ancestry = doc.ancestry
+                if len(ancestry) > 2:  # e.g. module.class.__init__
+                    parent = doc.ancestry[-1]  # Get the parent
+                    cls_name = ".".join(
+                        [
+                            getattr(node, "name", node.__module__)
+                            for node in doc.ancestry
+                        ]
+                    )
+                    cls_doc = AstValidator(
+                        ast_node=parent,
+                        filename=doc.source_file_name,
+                        obj_name=cls_name,
+                        ancestry=doc.ancestry[:-1],
+                    )
+                else:
+                    # Ignore edge case: __init__ functions that don't belong to a class.
+                    cls_doc = None
+            else:
+                raise TypeError(
+                    f"Cannot load {doc.name} as a usable Validator object (Validator does not have `doc_obj` attr or type `AstValidator`)."
+                )
 
             # Parameter_mismatches, PR01, PR02, PR03 are checked for the class docstring.
             # If cls_doc has PR01, PR02, PR03 errors, i.e. invalid class docstring,
             # then we also report missing constructor docstring, GL08.
-            report_GL08 = len(cls_doc.parameter_mismatches) > 0
+            if cls_doc:
+                report_GL08 = len(cls_doc.parameter_mismatches) > 0
 
         # Check if GL08 is to be ignored:
         if "GL08" in ignore_validation_comments:
