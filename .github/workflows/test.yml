@@ -215,5 +215,8 @@ jobs:
           pip list
 
       - name: Run test suite
+        # NOTE: Move outside of source directory to prevent any file pickup -
+        # ensure all tests/tests files are derived from the package *only*
         run: |
+          mkdir foo && cd foo
           pytest -v --pyargs numpydoc
