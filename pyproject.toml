@@ -27,7 +27,6 @@ classifiers = [
     'Topic :: Documentation',
 ]
 dependencies = [
-    'sphinx>=6',
     "tomli>=1.1.0;python_version<'3.11'",
 ]
 
@@ -43,6 +42,9 @@ Homepage = 'https://numpydoc.readthedocs.io'
 Source = 'https://github.com/numpy/numpydoc/'
 
 [dependency-groups]
+default = [
+    'sphinx>=6',
+]
 dev = [
     'pre-commit>=3.3',
     { include-group = "doc" },
