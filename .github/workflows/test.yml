@@ -211,6 +211,7 @@ jobs:
         run: python -m build
 
       - name: Install numpydoc from source tarball
+        run: |
           python -m pip install --no-binary numpydoc dist/*.tar.gz
           pip list
 
