@@ -13,6 +13,10 @@ from numpydoc.hooks.validate_docstrings import run_hook
 
 @pytest.fixture
 def example_module(request):
+    # TODO: When Python3.13 is the minimum version supported version, this
+    # can be simplified to:
+    # with importlib.resources.path(numpydoc, "tests/hooks/example_module.py") as fpath:
+    #     fullpath = str(fpath)
     with importlib.resources.path(numpydoc, "tests") as fpath:
         fullpath = str(fpath / "hooks/example_module.py")
     return str(fullpath)
