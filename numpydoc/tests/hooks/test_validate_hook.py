@@ -1,24 +1,21 @@
 """Test the numpydoc validate pre-commit hook."""
 
+import importlib.resources
 import inspect
 import re
 from pathlib import Path
 
 import pytest
 
+import numpydoc
 from numpydoc.hooks.validate_docstrings import run_hook
 
 
 @pytest.fixture
 def example_module(request):
-    fullpath = (
-        Path(request.config.rootdir)
-        / "numpydoc"
-        / "tests"
-        / "hooks"
-        / "example_module.py"
-    )
-    return str(fullpath.relative_to(request.config.rootdir))
+    with importlib.resources.path(numpydoc, "tests") as fpath:
+        fullpath = str(fpath / "hooks/example_module.py")
+    return str(fullpath)
 
 
 @pytest.mark.parametrize("config", [None, "fake_dir"])

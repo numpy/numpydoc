@@ -1,3 +1,4 @@
+import importlib.resources
 import inspect
 import io
 import sys
@@ -119,12 +120,15 @@ def test_validate_perfect_docstring():
 
 @pytest.mark.parametrize("args", [[], ["--ignore", "SS03"]])
 def test_lint(capsys, args):
-    argv = ["lint", "numpydoc/__main__.py"] + args
+    with importlib.resources.path(numpydoc, "__main__.py") as fpath:
+        strpath = str(fpath)
+
+    argv = ["lint", strpath] + args
     if args:
         expected = ""
         expected_status = 0
     else:
-        expected = "numpydoc/__main__.py:1: SS03 Summary does not end with a period"
+        expected = f"{strpath}:1: SS03 Summary does not end with a period"
         expected_status = 1
 
     return_status = numpydoc.cli.main(argv)
