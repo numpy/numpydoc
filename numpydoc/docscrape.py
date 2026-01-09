@@ -9,6 +9,7 @@ import textwrap
 from collections import namedtuple
 from collections.abc import Callable, Mapping
 from functools import cached_property
+from typing import get_type_hints
 from warnings import warn
 
 
@@ -236,7 +237,8 @@ class NumpyDocString(Mapping):
                 if single_element_is_type:
                     arg_name, arg_type = "", header
                 else:
-                    arg_name, arg_type = header, ""
+                    arg_name = header
+                    arg_type = self._get_type_from_signature(header)
 
             desc = r.read_to_next_unindented_line()
             desc = dedent_lines(desc)
@@ -245,6 +247,28 @@ class NumpyDocString(Mapping):
             params.append(Parameter(arg_name, arg_type, desc))
 
         return params
+
+    def _get_type_from_signature(self, arg_name: str) -> str:
+        return ""
+
+    @staticmethod
+    def _handle_combined_parameters(arg_names: str, parameters: dict[str, inspect.Parameter]):
+        arg_names = arg_names.split(',')
+        try:
+            parameter1 = parameters[arg_names[0].strip()]
+        except KeyError:
+            return None
+
+        for arg_name in arg_names[1:]:
+            try:
+                parameter = parameters[arg_name.strip()]
+            except KeyError:
+                return None
+
+            if parameter.annotation != parameter1.annotation:
+                return None
+
+        return parameter1
 
     # See also supports the following formats.
     #
@@ -576,6 +600,11 @@ def dedent_lines(lines):
 class FunctionDoc(NumpyDocString):
     def __init__(self, func, role="func", doc=None, config=None):
         self._f = func
+        try:
+            self._signature = inspect.signature(func)
+        except ValueError:
+            self._signature = None
+
         self._role = role  # e.g. "func" or "meth"
 
         if doc is None:
@@ -608,6 +637,20 @@ class FunctionDoc(NumpyDocString):
 
         out += super().__str__(func_role=self._role)
         return out
+
+    def _get_type_from_signature(self, arg_name: str) -> str:
+        if self._signature is None:
+            return ""
+
+        arg_name = arg_name.replace("*", "")
+        try:
+            parameter = self._signature.parameters[arg_name]
+        except KeyError:
+            parameter = self._handle_combined_parameters(arg_name, self._signature.parameters)
+            if parameter is None:
+                return ""
+
+        return _annotation_to_string(parameter.annotation)
 
 
 class ObjDoc(NumpyDocString):
@@ -643,6 +686,14 @@ class ClassDoc(NumpyDocString):
             if cls is None:
                 raise ValueError("No class or documentation string given")
             doc = pydoc.getdoc(cls)
+
+        if cls is not None:
+            try:
+                self._signature = inspect.signature(cls.__init__)
+            except ValueError:
+                self._signature = None
+        else:
+            self._signature = None
 
         NumpyDocString.__init__(self, doc)
 
@@ -726,6 +777,63 @@ class ClassDoc(NumpyDocString):
             # or class member is not inherited
             or name in self._cls.__dict__
         )
+
+    def _get_type_from_signature(self, arg_name: str) -> str:
+        if self._signature is None:
+            return ""
+
+        arg_name = arg_name.replace("*", "")
+        try:
+            parameter = self._signature.parameters[arg_name]
+        except KeyError:
+            parameter = self._handle_combined_parameters(arg_name, self._signature.parameters)
+            if parameter is None:
+                return self._handle_combined_attributes(arg_name, self._cls)
+
+        return _annotation_to_string(parameter.annotation)
+
+    def _handle_combined_attributes(self, arg_names: str, cls: type):
+        arg_names = arg_names.split(',')
+        hint1 = self._find_type_hint(cls, arg_names[0].strip())
+
+        for arg_name in arg_names[1:]:
+            hint = self._find_type_hint(cls, arg_name.strip())
+
+            if  hint != hint1:
+                return ""
+
+        return hint1
+
+    @staticmethod
+    def _find_type_hint(obj: type, arg_name: str) -> str:
+        type_hints = get_type_hints(obj, include_extras=True)
+        try:
+            annotation = type_hints[arg_name]
+        except KeyError:
+            try:
+                attr = getattr(obj, arg_name)
+            except AttributeError:
+                return ""
+
+            if isinstance(attr, property):
+                try:
+                    signature = inspect.signature(attr.fget)
+                except ValueError:
+                    return ""
+                return _annotation_to_string(signature.return_annotation)
+
+            return type(attr).__name__
+
+        return _annotation_to_string(annotation)
+
+
+def _annotation_to_string(annotation) -> str:
+    if annotation == inspect.Signature.empty:
+        return ""
+    elif type(annotation) is type:
+        return str(annotation.__name__)
+    else:
+        return str(annotation)
 
 
 def get_doc_object(
