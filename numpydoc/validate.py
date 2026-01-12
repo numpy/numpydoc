@@ -328,7 +328,7 @@ class Validator:
             def_line = next(
                 i
                 for i, x in enumerate(
-                    re.match("^ *(def|class) ", s) for s in sourcelines[0]
+                    re.match(r"^\s*(async\s+)?(?:def|class)\s+", s) for s in sourcelines[0]
                 )
                 if x is not None
             )
