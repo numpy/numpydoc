@@ -207,6 +207,20 @@ def test_parameters(doc):
     assert desc[0].startswith("The type and size")
 
 
+def test_type_continuation():
+    doc = NumpyDocString("""
+    Parameters
+    ----------
+    foo : a type that goes across \
+          multiple lines
+        This is the description line.
+    """)
+    arg, arg_type, desc = doc["Parameters"][0]
+    assert arg == "foo"
+    assert arg_type == "a type that goes across multiple lines"
+    assert desc[0] == "This is the description line."
+
+
 def test_other_parameters(doc):
     assert len(doc["Other Parameters"]) == 1
     assert [n for n, _, _ in doc["Other Parameters"]] == ["spam"]
