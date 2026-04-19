@@ -1,5 +1,6 @@
 import re
 import textwrap
+import typing
 import warnings
 from collections import namedtuple
 from copy import deepcopy
@@ -1718,6 +1719,285 @@ def test_namedtuple_class_docstring():
     assert len(sds["Parameters"]) == 2
     assert sds["Parameters"][0].desc[0] == "The bar attribute"
     assert sds["Parameters"][1].desc[0] == "The baz attribute"
+
+
+T = typing.TypeVar("T")
+
+
+class CustomTypeClass: ...
+
+
+type_hints = [
+    (None, "None"),
+    (int, "int"),
+    (str, "str"),
+    (float, "float"),
+    (complex, "complex"),
+    (bool, "bool"),
+    (list, "list"),
+    (list[int], "list[int]"),
+    (set, "set"),
+    (set[str], "set[str]"),
+    (frozenset, "frozenset"),
+    (frozenset[str], "frozenset[str]"),
+    (tuple, "tuple"),
+    (tuple[int], "tuple[int]"),
+    (tuple[int, float, complex], "tuple[int, float, complex]"),
+    (tuple[int, ...], "tuple[int, ...]"),
+    (range, "range"),
+    (dict, "dict"),
+    (dict[str, int], "dict[str, int]"),
+    (dict[str, dict[int, list[float]]], "dict[str, dict[int, list[float]]]"),
+    (typing.Union[int, float], "typing.Union[int, float]"),
+    (typing.Optional[str], "typing.Optional[str]"),
+    (typing.Callable[[], float], "typing.Callable[[], float]"),
+    (typing.Callable[[int, int], str], "typing.Callable[[int, int], str]"),
+    (typing.Callable[[int, Exception], None],
+     "typing.Callable[[int, Exception], NoneType]"),
+    (typing.Callable[..., typing.Awaitable[None]],
+     "typing.Callable[..., typing.Awaitable[NoneType]]"),
+    (typing.Callable[[T], T], "typing.Callable[[~T], ~T]"),
+    (typing.Any, "typing.Any"),
+    (typing.Literal["a", "b", "c"], "typing.Literal['a', 'b', 'c']"),
+    (typing.Annotated[float, "min=0", "max=42"], "typing.Annotated[float, 'min=0', 'max=42']"),
+    (typing.Annotated[dict[str, dict[str, list[typing.Union[float, tuple[int, complex]]]]],
+                      typing.Callable[[], typing.NoReturn], "help='description'"],
+     "typing.Annotated[dict[str, dict[str, list[typing.Union[float, tuple[int, complex]]]]], "
+     "typing.Callable[[], typing.NoReturn], \"help='description'\"]"),
+    (CustomTypeClass, "CustomTypeClass")
+]
+
+@pytest.mark.parametrize("typ,expected", type_hints)
+def test_type_hints_func(typ, expected):
+    def foo(a: typ, b: typ):
+        """Short description\n
+        Parameters
+        ----------
+        a
+            Description for a.
+
+        Other Parameters
+        ----------------
+        b
+            Description for b.
+        """
+
+    doc = FunctionDoc(foo)
+    assert doc["Parameters"][0].type == expected
+    assert doc["Other Parameters"][0].type == expected
+
+
+@pytest.mark.parametrize("typ,expected", type_hints)
+def test_type_hints_class_parameters(typ, expected):
+    class Foo:
+        """Short description\n
+        Parameters
+        ----------
+        a
+            Description for a.
+
+        Other Parameters
+        ----------------
+        b
+            Description for b.
+        """
+
+        def __init__(self, a: typ, b: typ): ...
+
+    doc = ClassDoc(Foo)
+    assert doc["Parameters"][0].type == expected
+    assert doc["Other Parameters"][0].type == expected
+
+
+type_hints_attributes = type_hints.copy()
+type_hints_attributes[0] = (None, "NoneType")
+
+@pytest.mark.parametrize("typ,expected", type_hints_attributes)
+def test_type_hints_class_attributes(typ, expected):
+    class Foo:
+        """Short description\n
+        Attributes
+        ----------
+        a
+            Description for a.
+        """
+        a: typ
+
+    class Bar(Foo):
+        """Short description\n
+        Attributes
+        ----------
+        a
+            Description for a.
+        b
+            Description for b.
+        """
+        b: typ
+
+    doc_foo = ClassDoc(Foo)
+    doc_bar = ClassDoc(Bar)
+    assert doc_foo["Attributes"][0].type == expected
+    assert doc_bar["Attributes"][0].type == expected
+    assert doc_bar["Attributes"][1].type == expected
+
+
+@pytest.mark.parametrize("typ,expected", type_hints)
+def test_type_hints_class_properties(typ, expected):
+    class Foo:
+        """Short description\n
+        Attributes
+        ----------
+        a
+        """
+        @property
+        def a(self) -> typ: ...
+
+    doc_foo = ClassDoc(Foo)
+    assert doc_foo["Attributes"][0].type == expected
+
+
+@pytest.mark.parametrize("typ,__", type_hints)
+def test_type_hints_class_methods(typ, __):
+    class Foo:
+        """Short description\n
+        Methods
+        -------
+        a
+            Description for a.
+        """
+
+        def a(self) -> typ: ...
+
+    doc = ClassDoc(Foo)
+    assert doc["Methods"][0].type == "function"
+
+
+def test_type_hints_args_kwargs():
+    def foo(*args: int, **kwargs: float):
+        """Short description\n
+        Parameters
+        ----------
+        *args
+            Args description.
+        **kwargs
+            Kwargs description.
+        """
+
+    class Bar:
+        """Short description\n
+        Parameters
+        ----------
+        *args
+            Args description.
+        **kwargs
+            Kwargs description.
+        """
+        def __init__(self, *args: int, **kwargs: float): ...
+
+    for cls, obj in zip((FunctionDoc, ClassDoc), (foo, Bar)):
+        doc = cls(obj)
+        assert doc["Parameters"][0].type == "int"
+        assert doc["Parameters"][1].type == "float"
+
+
+def test_type_hints_combined_parameters_valid():
+    def foo(a: int, b: int, c: int, d: int):
+        """Short description\n
+        Parameters
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+
+    class Bar:
+        """Short description\n
+        Parameters
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+        def __init__(self, a: int, b: int, c: int, d: int): ...
+
+    for cls, obj in zip((FunctionDoc, ClassDoc), (foo, Bar)):
+        doc = cls(obj)
+        assert doc["Parameters"][0].type == "int"
+
+
+def test_type_hints_combined_parameters_invalid():
+    def foo(a: int, b: float, c: str, d: list):
+        """Short description\n
+        Parameters
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+
+    class Bar:
+        """Short description\n
+        Parameters
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+        def __init__(self, a: int, b: float, c: str, d: list): ...
+
+    for cls, obj in zip((FunctionDoc, ClassDoc), (foo, Bar)):
+        doc = cls(obj)
+        assert doc["Parameters"][0].type == ""
+
+
+def test_type_hints_combined_attributes_valid():
+    class Bar:
+        """Short description\n
+        Attributes
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+        a: int
+        b: int
+        c: int
+        d: int
+
+    doc = ClassDoc(Bar)
+    assert doc["Attributes"][0].type == "int"
+
+
+def test_type_hints_combined_attributes_invalid():
+    class Bar:
+        """Short description\n
+        Attributes
+        ----------
+        a, b, c, d
+            Combined description.
+        """
+        a: int
+        b: float
+        c: str
+        d: list
+
+    doc = ClassDoc(Bar)
+    assert doc["Attributes"][0].type == ""
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    ((42, "int"), (4.2, "float"), ("string", "str"), (True, "bool"), (None, "NoneType"),
+     ([1, 2, 3], "list"), ({'a': 42}, "dict"), (CustomTypeClass(), "CustomTypeClass"),
+     (CustomTypeClass, "type"))
+)
+def test_type_hints_implied_from_class_attribute(value, expected):
+    class Foo:
+        """Short description\n
+        Attributes
+        ----------
+        a
+            Description for a.
+        """
+        a = value
+
+    doc = ClassDoc(Foo)
+    assert doc["Attributes"][0].type == expected
 
 
 if __name__ == "__main__":
