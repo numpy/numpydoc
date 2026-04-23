@@ -1862,6 +1862,9 @@ class DecoratorClass:
     def test_three_decorators(self):
         """Test method with three decorators."""
 
+    async def test_async(self):
+        """Test async method."""
+
 
 class TestValidatorClass:
     @pytest.mark.parametrize("invalid_name", ["unknown_mod", "unknown_mod.MyClass"])
@@ -1902,6 +1905,10 @@ class TestValidatorClass:
             [
                 "numpydoc.tests.test_validate.DecoratorClass.test_three_decorators",
                 getsourcelines(DecoratorClass.test_three_decorators)[-1] + 3,
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_async",
+                getsourcelines(DecoratorClass.test_async)[-1],
             ],
         ],
     )
