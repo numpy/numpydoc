@@ -1198,6 +1198,7 @@ class_doc_txt = """
         But a description
     no_docstring2 : str
     multiline_sentence
+    multiline_single_sentence
     midword_period
     no_period
 
@@ -1253,6 +1254,7 @@ def test_class_members_doc():
         But a description
     no_docstring2 : str
     multiline_sentence
+    multiline_single_sentence
     midword_period
     no_period
 
@@ -1298,6 +1300,12 @@ def test_class_members_doc_sphinx():
         def multiline_sentence(self):
             """This is a
             sentence. It spans multiple lines."""
+            return
+
+        @property
+        def multiline_single_sentence(self):
+            """This is a
+            sentence."""
             return
 
         @property
@@ -1349,6 +1357,9 @@ def test_class_members_doc_sphinx():
             ..
 
         :obj:`multiline_sentence <multiline_sentence>`
+            This is a sentence.
+
+        :obj:`multiline_single_sentence <multiline_single_sentence>`
             This is a sentence.
 
         :obj:`midword_period <midword_period>`
@@ -1417,6 +1428,53 @@ def test_class_attributes_as_member_list():
     cfg = dict(attributes_as_param_list=False)
     assert attr_doc2 in str(SphinxClassDoc(Foo, config=cfg))
     assert "Another description" not in str(SphinxClassDoc(Foo, config=cfg))
+
+
+def test_class_properties_with_abbreviations():
+    class Foo:
+        """
+        Class docstring.
+
+        Attributes
+        ----------
+        using_ie
+        using_ie_in_parens
+        using_others
+        """
+
+        @property
+        def using_ie(self):
+            """
+            Test property, i.e. a method that works like an attribute. More.
+            """
+            return
+
+        @property
+        def using_ie_in_parens(self):
+            """
+            Test property (i.e. a method that works like an attribute). More.
+            """
+            return
+
+        @property
+        def using_others(self):
+            """
+            Test others et al. and e.g. and vs. are ok. More.
+            """
+            return
+
+    attr_doc = """:Attributes:
+
+    :obj:`using_ie <using_ie>`
+        Test property, i.e. a method that works like an attribute.
+
+    :obj:`using_ie_in_parens <using_ie_in_parens>`
+        Test property (i.e. a method that works like an attribute).
+
+    :obj:`using_others <using_others>`
+        Test others et al. and e.g. and vs. are ok."""
+
+    assert attr_doc in str(SphinxClassDoc(Foo))
 
 
 def test_templated_sections():
