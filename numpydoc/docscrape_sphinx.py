@@ -14,6 +14,10 @@ from .xref import make_xref
 
 IMPORT_MATPLOTLIB_RE = r"\b(import +matplotlib|from +matplotlib +import)\b"
 
+# Used to help identify the first sentence of an object's description. These
+# values are based on sphinx.ext.autosummary.
+WELL_KNOWN_ABBREVIATIONS = ('et al.', 'e.g.', 'i.e.', 'vs.')
+
 
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config=None):
@@ -159,16 +163,22 @@ class SphinxDocString(NumpyDocString):
         # Referenced object has a docstring
         display_param = f":obj:`{param} <{link_prefix}{param}>`"
         if obj_doc:
-            # Overwrite desc. Take summary logic of autosummary
-            desc = re.split(r"\n\s*\n", obj_doc.strip(), maxsplit=1)[0]
-            # XXX: Should this have DOTALL?
-            #      It does not in autosummary
-            m = re.search(r"^([A-Z].*?\.)(?:\s|$)", " ".join(desc.split()))
-            if m:
-                desc = m.group(1).strip()
+            # Overwrite desc with the first sentence. Based on
+            # sphinx.ext.autosummary's `extract_summary()`.
+            stanza = re.split(r"\n\s*\n", obj_doc.strip(), maxsplit=1)[0]
+            sentences = re.split(r"\.(?:\s+|$)", " ".join(stanza.split()))
+            if len(sentences) == 1:
+                # If there are no periods, use only the first line. This
+                # differs from autosummary, which takes the whole stanza.
+                desc = stanza.partition("\n")[0]
             else:
-                desc = desc.partition("\n")[0]
-            desc = desc.split("\n")
+                desc = ''
+                for i in range(len(sentences)):
+                    desc = '. '.join(sentences[: i + 1]).rstrip('.') + '.'
+                    if not desc.endswith(WELL_KNOWN_ABBREVIATIONS):
+                        break
+            desc = [desc]
+
         return display_param, desc
 
     def _str_param_list(self, name, fake_autosummary=False):
