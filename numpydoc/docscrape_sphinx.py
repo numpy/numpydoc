@@ -16,7 +16,7 @@ IMPORT_MATPLOTLIB_RE = r"\b(import +matplotlib|from +matplotlib +import)\b"
 
 # Used to help identify the first sentence of an object's description. These
 # values are based on sphinx.ext.autosummary.
-WELL_KNOWN_ABBREVIATIONS = ('et al.', 'e.g.', 'i.e.', 'vs.')
+WELL_KNOWN_ABBREVIATIONS = ("et al.", "e.g.", "i.e.", "vs.")
 
 
 class SphinxDocString(NumpyDocString):
@@ -172,9 +172,9 @@ class SphinxDocString(NumpyDocString):
                 # differs from autosummary, which takes the whole stanza.
                 desc = stanza.partition("\n")[0]
             else:
-                desc = ''
+                desc = ""
                 for i in range(len(sentences)):
-                    desc = '. '.join(sentences[: i + 1]).rstrip('.') + '.'
+                    desc = ". ".join(sentences[: i + 1]).rstrip(".") + "."
                     if not desc.endswith(WELL_KNOWN_ABBREVIATIONS):
                         break
             desc = [desc]
