@@ -574,7 +574,7 @@ def dedent_lines(lines):
 
 
 class FunctionDoc(NumpyDocString):
-    def __init__(self, func, role="func", doc=None, config=None):
+    def __init__(self, func, role=None, doc=None, config=None):
         self._f = func
         self._role = role  # e.g. "func" or "meth"
 

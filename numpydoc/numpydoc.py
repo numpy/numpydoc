@@ -34,6 +34,7 @@ from sphinx.application import Sphinx as SphinxApp
 from sphinx.util import logging
 
 from . import __version__
+from ._utils import _clean_text_signature
 from .docscrape_sphinx import get_doc_object
 from .validate import get_validation_checks, validate
 from .xref import DEFAULT_LINKS
@@ -299,18 +300,6 @@ def mangle_signature(app: SphinxApp, what, name, obj, options, sig, retann):
     if sig:
         sig = re.sub("^[^(]*", "", sig)
         return sig, ""
-
-
-def _clean_text_signature(sig):
-    if sig is None:
-        return None
-    start_pattern = re.compile(r"^[^(]*\(")
-    start, end = start_pattern.search(sig).span()
-    start_sig = sig[start:end]
-    sig = sig[end:-1]
-    sig = re.sub(r"^\$(self|module|type)(,\s|$)", "", sig, count=1)
-    sig = re.sub(r"(^|(?<=,\s))/,\s\*", "*", sig, count=1)
-    return start_sig + sig + ")"
 
 
 def setup(app: SphinxApp, get_doc_object_=get_doc_object):
