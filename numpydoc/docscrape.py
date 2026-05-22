@@ -229,16 +229,11 @@ class NumpyDocString(Mapping):
             header = r.read().strip()
             if " : " in header:
                 arg_name, arg_type_w_whitespace = header.split(" : ", maxsplit=1)
-                N = len(arg_name)
 
-                # This strips spaces that arose from
-                # backslash-continued lines.  Unfortunately, we don't
-                # know the offset of the original docstring, and
-                # therefore also not the number of spaces introduced
-                # by the continued line. However, we can set a lower
-                # bound: length of the parameter, plus three (for
-                # space-colon-space).
-                arg_type = re.sub(rf" {{{N + 3},}}", " ", arg_type_w_whitespace)
+                # Strip extra spaces from backslash-continued parameter type
+                # lines. Continuation lines are indented, although we don't know by how
+                # much. So, we compact any run of 2+ whitespace.
+                arg_type = re.sub(r"\s{2,}", " ", arg_type_w_whitespace)
             else:
                 # NOTE: param line with single element should never have a
                 # a " :" before the description line, so this should probably
