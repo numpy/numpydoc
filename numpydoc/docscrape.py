@@ -232,8 +232,7 @@ class NumpyDocString(Mapping):
                 # NOTE: param line with single element should never have a
                 # a " :" before the description line, so this should probably
                 # warn.
-                if header.endswith(" :"):
-                    header = header[:-2]
+                header = header.removesuffix(" :")
                 if single_element_is_type:
                     arg_name, arg_type = "", header
                 else:
@@ -344,7 +343,7 @@ class NumpyDocString(Mapping):
 
     def _parse_index(self, section, content):
         """
-        .. index: default
+        .. index:: default
            :refguide: something, else, and more
 
         """
@@ -446,7 +445,7 @@ class NumpyDocString(Mapping):
         if error:
             raise ValueError(msg)
         else:
-            warn(msg)
+            warn(msg, stacklevel=3)
 
     # string conversion routines
 
@@ -598,7 +597,7 @@ class FunctionDoc(NumpyDocString):
     def __str__(self):
         out = ""
 
-        func, func_name = self.get_func()
+        _func, func_name = self.get_func()
 
         roles = {"func": "function", "meth": "method"}
 
@@ -629,8 +628,17 @@ class ClassDoc(NumpyDocString):
 
         if "sphinx" in sys.modules:
             from sphinx.ext.autodoc import ALL
+
+            try:
+                from sphinx.ext.autodoc._sentinels import EMPTY
+            except ImportError:
+                try:
+                    from sphinx.ext.autodoc import EMPTY
+                except ImportError:
+                    EMPTY = object()
         else:
             ALL = object()
+            EMPTY = object()
 
         if config is None:
             config = {}
@@ -650,7 +658,11 @@ class ClassDoc(NumpyDocString):
         _members = config.get("members", [])
         if _members is ALL:
             _members = None
-        _exclude = config.get("exclude-members", [])
+        _exclude = config.get("exclude_members")
+        if _exclude is None:
+            _exclude = config.get("exclude-members", [])
+        if _exclude is EMPTY:
+            _exclude = ALL
 
         if config.get("show_class_members", True) and _exclude is not ALL:
 
@@ -702,7 +714,7 @@ class ClassDoc(NumpyDocString):
                 and not self._should_skip_member(name, self._cls)
                 and (
                     func is None
-                    or isinstance(func, (property, cached_property))
+                    or isinstance(func, property | cached_property)
                     or inspect.isdatadescriptor(func)
                 )
                 and self._is_show_member(name)

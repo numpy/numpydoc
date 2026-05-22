@@ -37,7 +37,7 @@ class SphinxDocString(NumpyDocString):
             self.template = template_env.get_template("numpydoc_docstring.rst")
 
     # string conversion routines
-    def _str_header(self, name, symbol="`"):
+    def _str_header(self, name):
         return [".. rubric:: " + name, ""]
 
     def _str_field_list(self, name):
@@ -160,7 +160,7 @@ class SphinxDocString(NumpyDocString):
         display_param = f":obj:`{param} <{link_prefix}{param}>`"
         if obj_doc:
             # Overwrite desc. Take summary logic of autosummary
-            desc = re.split(r"\n\s*\n", obj_doc.strip(), 1)[0]
+            desc = re.split(r"\n\s*\n", obj_doc.strip(), maxsplit=1)[0]
             # XXX: Should this have DOTALL?
             #      It does not in autosummary
             m = re.search(r"^([A-Z].*?\.)(?:\s|$)", " ".join(desc.split()))
