@@ -639,8 +639,17 @@ class ClassDoc(NumpyDocString):
 
         if "sphinx" in sys.modules:
             from sphinx.ext.autodoc import ALL
+
+            try:
+                from sphinx.ext.autodoc._sentinels import EMPTY
+            except ImportError:
+                try:
+                    from sphinx.ext.autodoc import EMPTY
+                except ImportError:
+                    EMPTY = object()
         else:
             ALL = object()
+            EMPTY = object()
 
         if config is None:
             config = {}
@@ -660,7 +669,11 @@ class ClassDoc(NumpyDocString):
         _members = config.get("members", [])
         if _members is ALL:
             _members = None
-        _exclude = config.get("exclude-members", [])
+        _exclude = config.get("exclude_members")
+        if _exclude is None:
+            _exclude = config.get("exclude-members", [])
+        if _exclude is EMPTY:
+            _exclude = ALL
 
         if config.get("show_class_members", True) and _exclude is not ALL:
 
