@@ -23,11 +23,14 @@ def test_find_project_root(tmp_path, request, reason_file, files, expected_reaso
         (tmp_path / reason_file).touch()
 
     if files:
-        expected_dir = Path("/") if expected_reason == "file system root" else tmp_path
+        expected_dir = (
+            Path(tmp_path.anchor) if expected_reason == "file system root" else tmp_path
+        )
+
         for file in files:
             (tmp_path / file).touch()
     else:
-        expected_dir = request.config.rootdir
+        expected_dir = Path.cwd()
 
     root_dir, reason = utils.find_project_root(files if not files else [tmp_path])
     assert reason == expected_reason

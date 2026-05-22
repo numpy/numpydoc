@@ -1,13 +1,38 @@
 name: Build Wheel and Release
 on:
+  pull_request:
+    branches:
+      - main
   push:
     tags:
       - v*
 
 jobs:
+  sdist_wheel:
+    name: sdist and wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Build wheels
+        run: |
+          git clean -fxd
+          pip install -U build twine wheel
+          python -m build --sdist --wheel
+      - run: twine check --strict dist/*
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dist
+          path: dist
+
   pypi-publish:
+    needs: sdist_wheel
     name: upload release to PyPI
-    if: github.repository_owner == 'numpy' && startsWith(github.ref, 'refs/tags/v') && github.actor == 'jarrodmillman' && always()
+    if: github.repository_owner == 'numpy' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     # Specifying a GitHub environment is optional, but strongly encouraged
     environment: release
@@ -15,20 +40,8 @@ jobs:
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v5
-        name: Install Python
-        with:
-          python-version: "3.12"
-
-      - name: Build wheels
-        run: |
-          git clean -fxd
-          pip install -U build twine wheel
-          python -m build --sdist --wheel
-
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+          name: dist
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0

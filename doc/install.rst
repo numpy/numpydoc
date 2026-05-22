@@ -5,10 +5,11 @@ Getting started
 Installation
 ============
 
-This extension requires Python 3.9+, sphinx 6+ and is available from:
+This extension requires Python 3.10+, sphinx 6+ and is available from:
 
 * `numpydoc on PyPI <http://pypi.python.org/pypi/numpydoc>`_
 * `numpydoc on GitHub <https://github.com/numpy/numpydoc/>`_
+* `numpydoc on conda-forge <https://prefix.dev/channels/conda-forge/packages/numpydoc>`_
 
 `'numpydoc'` should be added to the ``extensions`` option in your Sphinx
 ``conf.py``. ``'sphinx.ext.autosummary'`` will automatically be loaded
@@ -135,6 +136,18 @@ numpydoc_validation_exclude : set
         numpydoc_validation_exclude = {r"mypkg\.mymodule\.", r"MyClass\.get$"}
 
     The default is an empty set meaning no objects are excluded from docstring
+    validation.
+    Only has an effect when docstring validation is activated, i.e.
+    ``numpydoc_validation_checks`` is not an empty set.
+numpydoc_validation_exclude_files : set
+    A container of strings using :py:mod:`re` syntax specifying path patterns to
+    ignore for docstring validation, relative to the package root.
+    For example, to skip docstring validation for all objects in
+    ``tests\``::
+
+        numpydoc_validation_exclude_files = {"^tests/.*$"}
+
+    The default is an empty set meaning no paths are excluded from docstring
     validation.
     Only has an effect when docstring validation is activated, i.e.
     ``numpydoc_validation_checks`` is not an empty set.

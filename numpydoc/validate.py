@@ -17,13 +17,13 @@ import re
 import textwrap
 import tokenize
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Set
 
 from .docscrape import get_doc_object
 
 DIRECTIVES = ["versionadded", "versionchanged", "deprecated"]
 DIRECTIVE_PATTERN = re.compile(
-    r"^\s*\.\. ({})(?!::)".format("|".join(DIRECTIVES)), re.I | re.M
+    r"^\s*\.\. ({})(?!::)".format("|".join(DIRECTIVES)), re.IGNORECASE | re.MULTILINE
 )
 ALLOWED_SECTIONS = [
     "Parameters",
@@ -80,8 +80,7 @@ ERROR_MSGS = {
     "PR06": 'Parameter "{param_name}" type should use "{right_type}" instead '
     'of "{wrong_type}"',
     "PR07": 'Parameter "{param_name}" has no description',
-    "PR08": 'Parameter "{param_name}" description should start with a '
-    "capital letter",
+    "PR08": 'Parameter "{param_name}" description should start with a capital letter',
     "PR09": 'Parameter "{param_name}" description should finish with "."',
     "PR10": 'Parameter "{param_name}" requires a space before the colon '
     "separating the parameter name and type",
@@ -125,7 +124,7 @@ def _unwrap(obj):
 # and pandas, and they had between ~500 and ~1300 .py files as of 2023-08-16.
 @functools.lru_cache(maxsize=2000)
 def extract_ignore_validation_comments(
-    filepath: Optional[os.PathLike],
+    filepath: os.PathLike | None,
     encoding: str = "utf-8",
 ) -> Dict[int, List[str]]:
     """
@@ -278,6 +277,10 @@ class Validator:
         return inspect.isfunction(self.obj)
 
     @property
+    def is_mod(self):
+        return inspect.ismodule(self.obj)
+
+    @property
     def is_generator_function(self):
         return inspect.isgeneratorfunction(_unwrap(self.obj))
 
@@ -325,7 +328,8 @@ class Validator:
             def_line = next(
                 i
                 for i, x in enumerate(
-                    re.match("^ *(def|class) ", s) for s in sourcelines[0]
+                    re.match(r"^\s*(async\s+)?(?:def|class)\s+", s)
+                    for s in sourcelines[0]
                 )
                 if x is not None
             )
@@ -569,6 +573,14 @@ def _check_desc(desc, code_no_desc, code_no_upper, code_no_period, **kwargs):
     return errs
 
 
+def _find_class_node(module_node: ast.AST, cls_name) -> ast.ClassDef:
+    #  Find the class node within a module, when checking constructor docstrings.
+    for node in ast.walk(module_node):
+        if isinstance(node, ast.ClassDef) and node.name == cls_name:
+            return node
+    raise ValueError(f"Could not find class node {cls_name}")
+
+
 def validate(obj_name, validator_cls=None, **validator_kwargs):
     """
     Validate the docstring.
@@ -633,7 +645,58 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
 
     errs = []
     if not doc.raw_doc:
-        if "GL08" not in ignore_validation_comments:
+        report_GL08: bool = True
+        # Check if the object is a class and has a docstring in the constructor
+        # Also check if code_obj is defined, as undefined for the AstValidator in validate_docstrings.py.
+        if doc.is_function_or_method and doc.name.endswith(".__init__"):
+            # Import here at runtime to avoid circular import as
+            # AstValidator is a subclass of Validator class without `doc_obj` attribute.
+            from numpydoc.hooks.validate_docstrings import (
+                AstValidator,  # Support abstract syntax tree hook.
+            )
+
+            if hasattr(doc, "code_obj"):  # All Validator objects have this attr.
+                cls_name = ".".join(
+                    doc.code_obj.__qualname__.split(".")[:-1]
+                )  # Collect all class depths before the constructor.
+                cls = Validator._load_obj(f"{doc.code_obj.__module__}.{cls_name}")
+                # cls = Validator._load_obj(f"{doc.name[:-9]}.{cls_name}") ## Alternative
+                cls_doc = Validator(get_doc_object(cls))
+            elif isinstance(doc, AstValidator):  # Supports class traversal for ASTs.
+                ancestry = doc.ancestry
+                if len(ancestry) > 2:  # e.g. module.class.__init__
+                    parent = doc.ancestry[-1]  # Get the parent
+                    cls_name = ".".join(
+                        [
+                            getattr(node, "name", node.__module__)
+                            for node in doc.ancestry
+                        ]
+                    )
+                    cls_doc = AstValidator(
+                        ast_node=parent,
+                        filename=doc.source_file_name,
+                        obj_name=cls_name,
+                        ancestry=doc.ancestry[:-1],
+                    )
+                else:
+                    # Ignore edge case: __init__ functions that don't belong to a class.
+                    cls_doc = None
+            else:
+                raise TypeError(
+                    f"Cannot load {doc.name} as a usable Validator object (Validator does not have `doc_obj` attr or type `AstValidator`)."
+                )
+
+            # Parameter_mismatches, PR01, PR02, PR03 are checked for the class docstring.
+            # If cls_doc has PR01, PR02, PR03 errors, i.e. invalid class docstring,
+            # then we also report missing constructor docstring, GL08.
+            if cls_doc:
+                report_GL08 = len(cls_doc.parameter_mismatches) > 0
+
+        # Check if GL08 is to be ignored:
+        if "GL08" in ignore_validation_comments:
+            report_GL08 = False
+        # Add GL08 error?
+        if report_GL08:
             errs.append(error("GL08"))
         return {
             "type": doc.type,
@@ -685,12 +748,18 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
             errs.append(error("SS03"))
         if doc.summary != doc.summary.lstrip():
             errs.append(error("SS04"))
-        elif doc.is_function_or_method and doc.summary.split(" ")[0][-1] == "s":
+        # Heuristic to check for infinitive verbs - shouldn't end in "s"
+        elif (
+            doc.is_function_or_method
+            and len(doc.summary.split(" ")[0]) > 1
+            and doc.summary.split(" ")[0][-1] == "s"
+            and doc.summary.split(" ")[0][-2] != "s"
+        ):
             errs.append(error("SS05"))
         if doc.num_summary_lines > 1:
             errs.append(error("SS06"))
 
-    if not doc.extended_summary:
+    if not doc.is_mod and not doc.extended_summary:
         errs.append(("ES01", "No extended summary found"))
 
     # PR01: Parameters not documented
@@ -742,20 +811,21 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         if not doc.yields and doc.is_generator_function:
             errs.append(error("YD01"))
 
-    if not doc.see_also:
-        errs.append(error("SA01"))
-    else:
-        for rel_name, rel_desc in doc.see_also.items():
-            if rel_desc:
-                if not rel_desc.endswith("."):
-                    errs.append(error("SA02", reference_name=rel_name))
-                if rel_desc[0].isalpha() and not rel_desc[0].isupper():
-                    errs.append(error("SA03", reference_name=rel_name))
-            else:
-                errs.append(error("SA04", reference_name=rel_name))
+    if not doc.is_mod:
+        if not doc.see_also:
+            errs.append(error("SA01"))
+        else:
+            for rel_name, rel_desc in doc.see_also.items():
+                if rel_desc:
+                    if not rel_desc.endswith("."):
+                        errs.append(error("SA02", reference_name=rel_name))
+                    if rel_desc[0].isalpha() and not rel_desc[0].isupper():
+                        errs.append(error("SA03", reference_name=rel_name))
+                else:
+                    errs.append(error("SA04", reference_name=rel_name))
 
-    if not doc.examples:
-        errs.append(error("EX01"))
+        if not doc.examples:
+            errs.append(error("EX01"))
 
     errs = [err for err in errs if err[0] not in ignore_validation_comments]
 

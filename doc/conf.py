@@ -12,6 +12,8 @@ import os
 import sys
 from datetime import date
 
+from intersphinx_registry import get_intersphinx_mapping
+
 import numpydoc
 
 # for example.py
@@ -80,7 +82,7 @@ pygments_style = "sphinx"
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "show_prev_next": False,
-    "navbar_end": ["theme-switcher", "search-field.html", "navbar-icon-links.html"],
+    "navbar_end": ["theme-switcher", "navbar-icon-links.html"],
     "icon_links": [
         {
             "name": "GitHub",
@@ -136,9 +138,6 @@ latex_documents = [
 
 # -- Intersphinx setup ----------------------------------------------------
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "numpy": ("https://numpy.org/devdocs/", None),
-    "sklearn": ("https://scikit-learn.org/stable/", None),
-}
+# Example configuration for intersphinx: refer to several Python libraries.
+
+intersphinx_mapping = get_intersphinx_mapping(packages=["python", "numpy", "sklearn"])

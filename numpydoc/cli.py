@@ -5,14 +5,14 @@ import ast
 import re
 from collections.abc import Sequence
 from pathlib import Path
-from typing import List, Union
+from typing import List
 
 from .docscrape_sphinx import get_doc_object
 from .hooks import utils, validate_docstrings
 from .validate import ERROR_MSGS, Validator, validate
 
 
-def render_object(import_path: str, config: Union[List[str], None] = None) -> int:
+def render_object(import_path: str, config: List[str] | None = None) -> int:
     """Test numpydoc docstring generation for a given object."""
     # TODO: Move Validator._load_obj to a better place than validate
     print(get_doc_object(Validator._load_obj(import_path), config=dict(config or [])))
@@ -103,10 +103,11 @@ def get_parser() -> argparse.ArgumentParser:
         "--ignore",
         help=(
             f"""Check codes to ignore.{
-                ' Currently ignoring the following from '
-                f'{Path(project_root_from_cwd) / config_file}: {ignored_checks_text}'
-                'Values provided here will be in addition to the above, unless an alternate config is provided.'
-                if ignored_checks else ''
+                " Currently ignoring the following from "
+                f"{Path(project_root_from_cwd) / config_file}: {ignored_checks_text}"
+                "Values provided here will be in addition to the above, unless an alternate config is provided."
+                if ignored_checks
+                else ""
             }"""
         ),
         action="append",
@@ -116,7 +117,7 @@ def get_parser() -> argparse.ArgumentParser:
     return ap
 
 
-def main(argv: Union[Sequence[str], None] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     """CLI for numpydoc."""
     ap = get_parser()
 

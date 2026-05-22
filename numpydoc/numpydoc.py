@@ -18,15 +18,19 @@ It will:
 """
 
 import hashlib
+import importlib
 import inspect
 import itertools
 import pydoc
 import re
+import sys
 from collections.abc import Callable
 from copy import deepcopy
+from pathlib import Path
 
 from docutils.nodes import Text, citation, comment, inline, reference, section
 from sphinx.addnodes import desc_content, pending_xref
+from sphinx.application import Sphinx as SphinxApp
 from sphinx.util import logging
 
 from . import __version__
@@ -52,13 +56,15 @@ def _traverse_or_findall(node, condition, **kwargs):
     )
 
 
-def rename_references(app, what, name, obj, options, lines):
+def rename_references(app: SphinxApp, what, name, obj, options, lines):
     # decorate reference numbers so that there are no duplicates
     # these are later undecorated in the doctree, in relabel_references
     references = set()
     for line in lines:
         line = line.strip()
-        m = re.match(r"^\.\. +\[(%s)\]" % app.config.numpydoc_citation_re, line, re.I)
+        m = re.match(
+            r"^\.\. +\[(%s)\]" % app.config.numpydoc_citation_re, line, re.IGNORECASE
+        )
         if m:
             references.add(m.group(1))
 
@@ -82,7 +88,7 @@ def _is_cite_in_numpydoc_docstring(citation_node):
     section_node = citation_node.parent
 
     def is_docstring_section(node):
-        return isinstance(node, (section, desc_content))
+        return isinstance(node, section | desc_content)
 
     while not is_docstring_section(section_node):
         section_node = section_node.parent
@@ -112,7 +118,7 @@ def _is_cite_in_numpydoc_docstring(citation_node):
     return False
 
 
-def relabel_references(app, doc):
+def relabel_references(app: SphinxApp, doc):
     # Change 'hash-ref' to 'ref' in label text
     for citation_node in _traverse_or_findall(doc, citation):
         if not _is_cite_in_numpydoc_docstring(citation_node):
@@ -139,7 +145,7 @@ def relabel_references(app, doc):
             ref.replace(ref_text, new_text.copy())
 
 
-def clean_backrefs(app, doc, docname):
+def clean_backrefs(app: SphinxApp, doc, docname):
     # only::latex directive has resulted in citation backrefs without reference
     known_ref_ids = set()
     for ref in _traverse_or_findall(doc, reference, descend=True):
@@ -159,7 +165,7 @@ def clean_backrefs(app, doc, docname):
 DEDUPLICATION_TAG = "    !! processed by numpydoc !!"
 
 
-def mangle_docstrings(app, what, name, obj, options, lines):
+def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
     if DEDUPLICATION_TAG in lines:
         return
     show_inherited_class_members = app.config.numpydoc_show_inherited_class_members
@@ -179,15 +185,58 @@ def mangle_docstrings(app, what, name, obj, options, lines):
         "xref_aliases": app.config.numpydoc_xref_aliases_complete,
         "xref_ignore": app.config.numpydoc_xref_ignore,
     }
-
-    cfg.update(options or {})
+    # TODO: Find a cleaner way to take care of this change away from dict
+    # https://github.com/sphinx-doc/sphinx/issues/13942
+    if options is not None:
+        if isinstance(options, dict):
+            cfg.update(options)
+        elif hasattr(options, "from_directive_options"):
+            # Sphinx 9.x _AutoDocumenterOptions
+            cfg.update(vars(options))
+        else:
+            try:
+                cfg.update(options or {})
+            except TypeError:
+                cfg.update(options.__dict__ or {})
     u_NL = "\n"
     if what == "module":
         # Strip top title
         pattern = "^\\s*[#*=]{4,}\\n[a-z0-9 -]+\\n[#*=]{4,}\\s*"
-        title_re = re.compile(pattern, re.I | re.S)
+        title_re = re.compile(pattern, re.IGNORECASE | re.DOTALL)
         lines[:] = title_re.sub("", u_NL.join(lines)).split(u_NL)
     else:
+        # Test the obj to find the module path, and skip the check if it's path is matched by
+        # numpydoc_validation_exclude_files
+        if (
+            app.config.numpydoc_validation_exclude_files
+            and app.config.numpydoc_validation_checks
+        ):
+            excluder = app.config.numpydoc_validation_files_excluder
+            module = inspect.getmodule(obj)
+            try:
+                # Get the module relative path from the name
+                if module:
+                    mod_path = Path(module.__file__)
+                    package_rel_path = mod_path.parent.relative_to(
+                        Path(
+                            importlib.import_module(
+                                module.__name__.split(".")[0]
+                            ).__file__
+                        ).parent
+                    ).as_posix()
+                    module_file = mod_path.as_posix().replace(
+                        mod_path.parent.as_posix(), ""
+                    )
+                    path = package_rel_path + module_file
+                else:
+                    path = None
+            except AttributeError as e:
+                path = None
+
+            if path and excluder and excluder.search(path):
+                # Skip validation for this object.
+                return
+
         try:
             doc = get_doc_object(
                 obj, what, u_NL.join(lines), config=cfg, builder=app.builder
@@ -237,7 +286,7 @@ def mangle_docstrings(app, what, name, obj, options, lines):
     lines += ["..", DEDUPLICATION_TAG]
 
 
-def mangle_signature(app, what, name, obj, options, sig, retann):
+def mangle_signature(app: SphinxApp, what, name, obj, options, sig, retann):
     # Do not try to inspect classes that don't define `__init__`
     if inspect.isclass(obj) and (
         not hasattr(obj, "__init__")
@@ -271,7 +320,7 @@ def _clean_text_signature(sig):
     return start_sig + sig + ")"
 
 
-def setup(app, get_doc_object_=get_doc_object):
+def setup(app: SphinxApp, get_doc_object_=get_doc_object):
     if not hasattr(app, "add_config_value"):
         return None  # probably called by nose, better bail out
 
@@ -294,9 +343,10 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value("numpydoc_attributes_as_param_list", True, True)
     app.add_config_value("numpydoc_xref_param_type", False, True)
     app.add_config_value("numpydoc_xref_aliases", dict(), True)
-    app.add_config_value("numpydoc_xref_ignore", set(), True)
+    app.add_config_value("numpydoc_xref_ignore", set(), True, types=[set, str])
     app.add_config_value("numpydoc_validation_checks", set(), True)
     app.add_config_value("numpydoc_validation_exclude", set(), False)
+    app.add_config_value("numpydoc_validation_exclude_files", set(), False)
     app.add_config_value("numpydoc_validation_overrides", dict(), False)
 
     # Extra mangling domains
@@ -307,7 +357,7 @@ def setup(app, get_doc_object_=get_doc_object):
     return metadata
 
 
-def update_config(app, config=None):
+def update_config(app: SphinxApp, config=None):
     """Update the configuration with default values."""
     if config is None:  # needed for testing and old Sphinx
         config = app.config
@@ -340,6 +390,21 @@ def update_config(app, config=None):
         )
         config.numpydoc_validation_excluder = exclude_expr
 
+    # Generate the regexp for files to ignore during validation
+    if isinstance(config.numpydoc_validation_exclude_files, str):
+        raise ValueError(
+            f"numpydoc_validation_exclude_files must be a container of strings, "
+            f"e.g. [{config.numpydoc_validation_exclude_files!r}]."
+        )
+
+    config.numpydoc_validation_files_excluder = None
+    if config.numpydoc_validation_exclude_files:
+        exclude_files_expr = re.compile(
+            r"|".join(exp for exp in config.numpydoc_validation_exclude_files)
+        )
+        config.numpydoc_validation_files_excluder = exclude_files_expr
+
+    # Generate the regexp for validation overrides
     for check, patterns in config.numpydoc_validation_overrides.items():
         config.numpydoc_validation_overrides[check] = re.compile(
             r"|".join(exp for exp in patterns)

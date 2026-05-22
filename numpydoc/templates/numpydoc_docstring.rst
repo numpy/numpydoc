@@ -2,6 +2,8 @@
 {{summary}}
 {{extended_summary}}
 {{parameters}}
+{{attributes}}
+{{methods}}
 {{returns}}
 {{yields}}
 {{receives}}
@@ -13,5 +15,3 @@
 {{notes}}
 {{references}}
 {{examples}}
-{{attributes}}
-{{methods}}

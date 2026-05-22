@@ -1,5 +1,6 @@
 import warnings
 from contextlib import nullcontext
+from dataclasses import dataclass
 from functools import cached_property, partial, wraps
 from inspect import getsourcefile, getsourcelines
 
@@ -1198,6 +1199,216 @@ class BadExamples:
         """
 
 
+class ConstructorDocumentedInClassAndInit:
+    """
+    Class to test constructor documented via class and constructor docstrings.
+
+    A case where both the class docstring and the constructor docstring are
+    defined.
+
+    Parameters
+    ----------
+    param1 : int
+        Description of param1.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClassAndInit.
+    """
+
+    def __init__(self, param1: int) -> None:
+        """
+        Constructor docstring with additional information.
+
+        Extended information.
+
+        Parameters
+        ----------
+        param1 : int
+            Description of param1 with extra details.
+
+        See Also
+        --------
+        otherclass : A class that does something else.
+
+        Examples
+        --------
+        This is an example of how to use ConstructorDocumentedInClassAndInit.
+        """
+
+
+class ConstructorDocumentedInClass:
+    """
+    Class to test constructor documented via class docstring.
+
+    Useful to ensure that validation of `__init__` does not signal GL08,
+    when the class docstring properly documents the `__init__` constructor.
+
+    Parameters
+    ----------
+    param1 : int
+        Description of param1.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClass.
+    """
+
+    def __init__(self, param1: int) -> None:
+        pass
+
+
+class ConstructorDocumentedInClassWithNoParameters:
+    """
+    Class to test constructor documented via class docstring with no parameters.
+
+    Useful to ensure that validation of `__init__` does not signal GL08,
+    when the class docstring properly documents the `__init__` constructor.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use ConstructorDocumentedInClassWithNoParameters.
+    """
+
+    def __init__(self) -> None:
+        pass
+
+
+class IncompleteConstructorDocumentedInClass:
+    """
+    Class to test an incomplete constructor docstring.
+
+    This class does not properly document parameters.
+    Unnecessary extended summary.
+
+    See Also
+    --------
+    otherclass : A class that does something else.
+
+    Examples
+    --------
+    This is an example of how to use IncompleteConstructorDocumentedInClass.
+    """
+
+    def __init__(self, param1: int):
+        pass
+
+
+class ConstructorDocumentedinEmbeddedClass:  # ignore Gl08, ES01
+    """
+    Class to test the initialisation behaviour of a embedded class.
+    """
+
+    class EmbeddedClass1:  # ignore GL08, ES01
+        """
+        An additional level for embedded class documentation checking.
+        """
+
+        class EmbeddedClass2:
+            """
+            This is an embedded class.
+
+            Extended summary.
+
+            Parameters
+            ----------
+            param1 : int
+                Description of param1.
+
+            See Also
+            --------
+            otherclass : A class that does something else.
+
+            Examples
+            --------
+            This is an example of how to use EmbeddedClass.
+            """
+
+            def __init__(self, param1: int) -> None:
+                pass
+
+
+class IncompleteConstructorDocumentedinEmbeddedClass:
+    """
+    Class to test the initialisation behaviour of a embedded class.
+    """
+
+    class EmbeddedClass1:
+        """
+        An additional level for embedded class documentation checking.
+        """
+
+        class EmbeddedClass2:
+            """
+            This is an embedded class.
+
+            Extended summary.
+
+            See Also
+            --------
+            otherclass : A class that does something else.
+
+            Examples
+            --------
+            This is an example of how to use EmbeddedClass.
+            """
+
+            def __init__(self, param1: int) -> None:
+                pass
+
+
+@dataclass
+class DataclassWithDocstring:
+    """
+    A class decorated by `dataclass`.
+
+    To check the functionality of `dataclass` objects do not break the Validator.
+    As param1 is not documented this class should also raise PR01.
+    """
+
+    param1: int
+
+
+class ClassWithPropertyObject:
+    """
+    A class with a `property`.
+
+    To check the functionality of `property` objects do not break the Validator.
+
+    Parameters
+    ----------
+    param1 : int
+        Description of param1.
+    """
+
+    def __init__(self, param1: int) -> None:
+        self._param1 = param1
+
+    @property
+    def param1(self) -> int:
+        """
+        Get the value of param1.
+
+        Returns
+        -------
+        int
+            The value of param1.
+        """
+        return self._param1
+
+
 class TestValidator:
     def _import_path(self, klass=None, func=None):
         """
@@ -1284,11 +1495,8 @@ class TestValidator:
         ],
     )
     def test_bad_generic_functions(self, capsys, func):
-        with pytest.warns(UserWarning):
-            errors = validate_one(
-                self._import_path(klass="WarnGenericFormat", func=func)
-            )
-        assert "is too short" in w.msg
+        with pytest.warns(UserWarning, match="is too short"):
+            validate_one(self._import_path(klass="WarnGenericFormat", func=func))
 
     @pytest.mark.parametrize(
         "func",
@@ -1536,6 +1744,85 @@ class TestValidator:
         for msg in msgs:
             assert msg in " ".join(err[1] for err in result["errors"])
 
+    @pytest.mark.parametrize(
+        "klass,exp_init_codes,exc_init_codes,exp_klass_codes",
+        [
+            ("ConstructorDocumentedInClass", tuple(), ("GL08",), tuple()),
+            ("ConstructorDocumentedInClassAndInit", tuple(), ("GL08",), tuple()),
+            (
+                "ConstructorDocumentedInClassWithNoParameters",
+                tuple(),
+                ("GL08",),
+                tuple(),
+            ),
+            (
+                "IncompleteConstructorDocumentedInClass",
+                ("GL08",),
+                tuple(),
+                ("PR01"),  # Parameter not documented in class constructor
+            ),
+            (
+                "ConstructorDocumentedinEmbeddedClass.EmbeddedClass1.EmbeddedClass2",
+                tuple(),
+                ("GL08",),
+                tuple(),
+            ),
+            (
+                "IncompleteConstructorDocumentedinEmbeddedClass.EmbeddedClass1.EmbeddedClass2",
+                ("GL08",),
+                tuple(),
+                ("PR01",),
+            ),
+        ],
+    )
+    def test_constructor_docstrings(
+        self, klass, exp_init_codes, exc_init_codes, exp_klass_codes
+    ):
+        # First test the class docstring itself, checking expected_klass_codes match
+        result = validate_one(self._import_path(klass=klass))
+        for err in result["errors"]:
+            assert err[0] in exp_klass_codes
+
+        # Then test the constructor docstring
+        result = validate_one(self._import_path(klass=klass, func="__init__"))
+        for code in exp_init_codes:
+            assert code in " ".join(err[0] for err in result["errors"])
+        for code in exc_init_codes:
+            assert code not in " ".join(err[0] for err in result["errors"])
+
+        if klass == "ConstructorDocumentedinEmbeddedClass":
+            raise NotImplementedError(
+                "Test for embedded class constructor docstring not implemented yet."
+            )
+
+    def test_dataclass_object(self):
+        # Test validator methods complete execution on dataclass objects and methods
+        # Test case ought to be removed if dataclass objects properly supported.
+        result = validate_one(self._import_path(klass="DataclassWithDocstring"))
+        # Check codes match as expected for dataclass objects.
+        errs = ["ES01", "SA01", "EX01", "PR01"]
+        for error in result["errors"]:
+            assert error[0] in errs
+            errs.remove(error[0])
+
+        # Test initialisation method (usually undocumented in dataclass) raises any errors.
+        init_fn = self._import_path(klass="DataclassWithDocstring", func="__init__")
+        result = validate_one(init_fn)
+        # Check that __init__ raises GL08 when the class docstring doesn't document params.
+        assert result["errors"][0][0] == "GL08"
+
+    def test_property_object(self):
+        # Test validator methods complete execution on class property objects
+        # Test case ought to be removed if property objects properly supported.
+        result = validate_one(
+            self._import_path(klass="ClassWithPropertyObject", func="param1")
+        )
+        # Check codes match as expected for property objects.
+        errs = ["ES01", "SA01", "EX01"]
+        for error in result["errors"]:
+            assert error[0] in errs
+            errs.remove(error[0])
+
 
 def decorator(x):
     """Test decorator."""
@@ -1574,6 +1861,9 @@ class DecoratorClass:
     @decorator
     def test_three_decorators(self):
         """Test method with three decorators."""
+
+    async def test_async(self):
+        """Test async method."""
 
 
 class TestValidatorClass:
@@ -1615,6 +1905,10 @@ class TestValidatorClass:
             [
                 "numpydoc.tests.test_validate.DecoratorClass.test_three_decorators",
                 getsourcelines(DecoratorClass.test_three_decorators)[-1] + 3,
+            ],
+            [
+                "numpydoc.tests.test_validate.DecoratorClass.test_async",
+                getsourcelines(DecoratorClass.test_async)[-1],
             ],
         ],
     )
