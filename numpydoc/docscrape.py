@@ -576,6 +576,8 @@ class NumpyDocString(Mapping):
 
 def dedent_lines(lines):
     """Deindent a list of lines maximally"""
+    if not lines:
+        return lines
     return textwrap.dedent("\n".join(lines)).split("\n")
 
 
