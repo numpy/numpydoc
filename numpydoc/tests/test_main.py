@@ -1,4 +1,4 @@
-import inspect
+import importlib.resources
 import io
 import sys
 
@@ -119,27 +119,16 @@ def test_validate_perfect_docstring():
 
 @pytest.mark.parametrize(
     "args",
-    [[], ["--ignore", "ES01,SA01,EX01"], ["--ignore", "ES01", "--ignore", "SA01 EX01"]],
+    [[], ["--ignore", "SS03,ES01"], ["--ignore", "SS03", "--ignore", "ES01 SA01"]],
 )
 def test_lint(capsys, args):
-    argv = ["lint", "numpydoc/__main__.py"] + args
+    fpath = str(importlib.resources.files(numpydoc).joinpath("__main__.py"))
+    argv = ["lint", fpath] + args
     if args:
         expected = ""
         expected_status = 0
     else:
-        expected = inspect.cleandoc(
-            """
-            +------------------------+----------+---------+----------------------------+
-            | file                   | item     | check   | description                |
-            +========================+==========+=========+============================+
-            | numpydoc/__main__.py:1 | __main__ | ES01    | No extended summary found  |
-            +------------------------+----------+---------+----------------------------+
-            | numpydoc/__main__.py:1 | __main__ | SA01    | See Also section not found |
-            +------------------------+----------+---------+----------------------------+
-            | numpydoc/__main__.py:1 | __main__ | EX01    | No examples section found  |
-            +------------------------+----------+---------+----------------------------+
-        """
-        )
+        expected = f"{fpath}:1: SS03 Summary does not end with a period"
         expected_status = 1
 
     return_status = numpydoc.cli.main(argv)

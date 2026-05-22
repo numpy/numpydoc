@@ -102,7 +102,10 @@ def get_parser() -> argparse.ArgumentParser:
     lint_parser.add_argument(
         "--ignore",
         help=(
-            f"""Check codes to ignore.{
+            "Check codes to ignore. Can be specified multiple times; each value\n"
+            "may contain multiple comma or space separated codes\n"
+            "(e.g., --ignore ES01,SA01 or --ignore ES01 --ignore 'SA01 EX01')."
+            f"""{
                 " Currently ignoring the following from "
                 f"{Path(project_root_from_cwd) / config_file}: {ignored_checks_text}"
                 "Values provided here will be in addition to the above, unless an alternate config is provided."
