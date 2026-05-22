@@ -1,4 +1,3 @@
-import importlib.resources
 import io
 import sys
 
@@ -121,14 +120,15 @@ def test_validate_perfect_docstring():
     "args",
     [[], ["--ignore", "SS03,ES01"], ["--ignore", "SS03", "--ignore", "ES01 SA01"]],
 )
-def test_lint(capsys, args):
-    fpath = str(importlib.resources.files(numpydoc).joinpath("__main__.py"))
-    argv = ["lint", fpath] + args
+def test_lint(capsys, tmp_path, args):
+    f = tmp_path / "example.py"
+    f.write_text('"""Summary without period"""\n')
+    argv = ["lint", str(f)] + args
     if args:
         expected = ""
         expected_status = 0
     else:
-        expected = f"{fpath}:1: SS03 Summary does not end with a period"
+        expected = f"{f}:1: SS03 Summary does not end with a period"
         expected_status = 1
 
     return_status = numpydoc.cli.main(argv)
