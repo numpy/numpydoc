@@ -118,7 +118,7 @@ def test_validate_perfect_docstring():
 
 @pytest.mark.parametrize(
     "args",
-    [[], ["--ignore", "SS03,ES01"], ["--ignore", "SS03", "--ignore", "ES01 SA01"]],
+    [[], ["--ignore", "SS03,ES01"], ["--ignore", "ES01", "--ignore", "SA01 SS03"]],
 )
 def test_lint(capsys, tmp_path, args):
     f = tmp_path / "example.py"
