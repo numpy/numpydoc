@@ -638,10 +638,7 @@ class ClassDoc(NumpyDocString):
             try:
                 from sphinx.ext.autodoc._sentinels import EMPTY
             except ImportError:
-                try:
-                    from sphinx.ext.autodoc import EMPTY
-                except ImportError:
-                    EMPTY = object()
+                from sphinx.ext.autodoc import EMPTY
         else:
             ALL = object()
             EMPTY = object()

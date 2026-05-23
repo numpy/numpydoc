@@ -11,13 +11,12 @@ on:
     branches: [main]
 
 jobs:
-  test-oldsphinx:
-    runs-on: ${{ matrix.os }}-latest
+  test-sphinx:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [Ubuntu]
-        python-version: ["3.10", "3.11"]
-        sphinx-version: ["sphinx<7", "sphinx<8", "sphinx<9"]
+        python-version: ["3.12"]
+        sphinx-version: ["sphinx==8", "sphinx>=9"]
     defaults:
       run:
         shell: bash -eo pipefail {0}
@@ -66,7 +65,7 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu", "macos", "windows"]
-        python-version: ["3.12", "3.13", "3.14"]
+        python-version: ["3.13", "3.14"]
     steps:
       - uses: actions/checkout@v6
 
