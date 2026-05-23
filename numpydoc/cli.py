@@ -2,6 +2,7 @@
 
 import argparse
 import ast
+import re
 from collections.abc import Sequence
 from pathlib import Path
 from typing import List
@@ -100,10 +101,11 @@ def get_parser() -> argparse.ArgumentParser:
     )
     lint_parser.add_argument(
         "--ignore",
-        type=str,
-        nargs="*",
         help=(
-            f"""Check codes to ignore.{
+            "Check codes to ignore. Can be specified multiple times; each value\n"
+            "may contain multiple comma or space separated codes\n"
+            "(e.g., --ignore ES01,SA01 or --ignore ES01 --ignore 'SA01 EX01')."
+            f"""{
                 " Currently ignoring the following from "
                 f"{Path(project_root_from_cwd) / config_file}: {ignored_checks_text}"
                 "Values provided here will be in addition to the above, unless an alternate config is provided."
@@ -111,6 +113,7 @@ def get_parser() -> argparse.ArgumentParser:
                 else ""
             }"""
         ),
+        action="append",
     )
     lint_parser.set_defaults(func=validate_docstrings.run_hook)
 
@@ -122,6 +125,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap = get_parser()
 
     args = vars(ap.parse_args(argv))
+
+    # Parse --ignored=SA01,EX01
+    ignored_checks = []
+    if args.get("ignore", None) is not None:
+        for checks in args["ignore"]:
+            ignored_checks += re.split("\\W+", checks)
+        args["ignore"] = ignored_checks
 
     try:
         func = args.pop("func")
