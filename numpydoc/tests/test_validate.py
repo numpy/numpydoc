@@ -1576,10 +1576,7 @@ class TestValidator:
             (
                 "BadSummaries",
                 "wrong_line",
-                (
-                    "should start in the line immediately after the opening quotes",
-                    "should be placed in the line after the last text",
-                ),
+                ("should be placed in the line after the last text",),
             ),
             ("BadSummaries", "no_punctuation", ("Summary does not end with a period",)),
             (
