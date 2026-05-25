@@ -212,6 +212,13 @@ used as a value, ``optional`` is preferred. These are all equivalent::
   copy : bool, default=True
   copy : bool, default: True
 
+Use ``positional-only`` for positional-only parameters, and ``keyword-only``
+for keyword-only parameters::
+
+  x : int, positional-only
+  y : int, keyword-only
+  z : int, keyword-only, optional
+
 When a parameter can only assume one of a fixed set of values,
 those values can be listed in braces, with the default appearing first::
 
