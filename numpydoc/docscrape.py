@@ -11,6 +11,9 @@ from collections.abc import Callable, Mapping
 from functools import cached_property
 from warnings import warn
 
+from sphinx.util import logging
+
+logger = logging.getLogger(__name__)
 
 def strip_blank_lines(l):
     "Remove leading and trailing blank lines from a list of lines"
@@ -139,6 +142,18 @@ class NumpyDocString(Mapping):
     def __init__(self, docstring, config=None):
         orig_docstring = docstring
         docstring = textwrap.dedent(docstring).split("\n")
+
+        if config is not None:
+            extra_sections = config.get("extra_sections", dict())
+            for section, fmt in extra_sections.items():
+                if fmt in ("param_list", "member_list", "returns", "warnings", "see_also", "notes"):
+                    default = []
+                elif fmt in ("references", "examples"):
+                    default = ""
+                else:
+                    logger.warning("Unrecognized section format %r for section %s", fmt, section)
+
+                NumpyDocString.sections.update({section: default})
 
         self._doc = Reader(docstring)
         self._parsed_data = copy.deepcopy(self.sections)
