@@ -3,14 +3,18 @@ import os
 import pydoc
 import re
 import textwrap
+from pathlib import Path
 
 from jinja2 import FileSystemLoader
 from jinja2.sandbox import SandboxedEnvironment
 from sphinx.jinja2glue import BuiltinTemplateLoader
+from sphinx.util import logging
 
 from .docscrape import ClassDoc, FunctionDoc, NumpyDocString, ObjDoc
 from .docscrape import get_doc_object as get_doc_object_orig
 from .xref import make_xref
+
+logger = logging.getLogger(__name__)
 
 IMPORT_MATPLOTLIB_RE = r"\b(import +matplotlib|from +matplotlib +import)\b"
 
@@ -29,12 +33,20 @@ class SphinxDocString(NumpyDocString):
         self.xref_param_type = config.get("xref_param_type", False)
         self.xref_aliases = config.get("xref_aliases", dict())
         self.xref_ignore = config.get("xref_ignore", set())
-        self.template = config.get("template", None)
+        self.extra_sections = config.get("extra_sections", dict())
+        self.template = config.get("template")
+        self.template_file = config.get("template_file")
         if self.template is None:
-            template_dirs = [os.path.join(os.path.dirname(__file__), "templates")]
+            if self.template_file is not None:
+                template_file = Path(template_file).resolve(strict=True)
+                template_dirs = [template_file.parent]
+            else:
+                template_dirs = [Path(__file__).parent / "templates"]
+                template_file = template_dirs[0] / "numpydoc_docstring.rst"
+
             template_loader = FileSystemLoader(template_dirs)
             template_env = SandboxedEnvironment(loader=template_loader)
-            self.template = template_env.get_template("numpydoc_docstring.rst")
+            config["template"] = template_env.get_template(template_file.name)
 
     # string conversion routines
     def _str_header(self, name):
@@ -377,6 +389,31 @@ class SphinxDocString(NumpyDocString):
             "references": self._str_references(),
             "examples": self._str_examples(),
         }
+
+        for section, fmt in self.extra_sections.items():
+            if not self.get(section):
+                continue
+
+            match fmt:
+                case "param_list":
+                    ns.update({section.lower(): self._str_param_list(section)})
+                case "member_list":
+                    ns.update({section.lower(): self._str_member_list(section)})
+                case "returns":
+                    ns.update({section.lower(): self._str_returns(section)})
+                case "warnings":
+                    ns.update({section.lower(): self._str_warnings(section)})
+                case "see_also":
+                    ns.update({section.lower(): self._str_see_also(section)})
+                case "notes":
+                    ns.update({section.lower(): self._str_section(section)})
+                case "references":
+                    ns.update({section.lower(): self._str_references(section)})
+                case "examples":
+                    ns.update({section.lower(): self._str_examples(section)})
+                case _:
+                    logger.warning("[numpydoc] Unknown section format: %r", fmt)
+
         ns = {k: "\n".join(v) for k, v in ns.items()}
 
         rendered = self.template.render(**ns)
@@ -411,14 +448,20 @@ def get_doc_object(obj, what=None, doc=None, config=None, builder=None):
     if config is None:
         config = {}
 
-    template_dirs = [os.path.join(os.path.dirname(__file__), "templates")]
+    if (template_file := config.get("template_file")) is not None:
+        template_file = Path(template_file).resolve(strict=True)
+        template_dirs = [template_file.parent]
+    else:
+        template_dirs = [Path(__file__).parent / "templates"]
+        template_file = template_dirs[0] / "numpydoc_docstring.rst"
+
     if builder is not None:
         template_loader = BuiltinTemplateLoader()
         template_loader.init(builder, dirs=template_dirs)
     else:
         template_loader = FileSystemLoader(template_dirs)
     template_env = SandboxedEnvironment(loader=template_loader)
-    config["template"] = template_env.get_template("numpydoc_docstring.rst")
+    config["template"] = template_env.get_template(template_file.name)
 
     return get_doc_object_orig(
         obj,
