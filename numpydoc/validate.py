@@ -738,7 +738,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
     directives_without_two_colons = doc.directives_without_two_colons
     if directives_without_two_colons:
         errs.append(error("GL10", directives=directives_without_two_colons))
-    
+
     # GL11: Bullet list missing blank line after ":"
     lines = doc.raw_doc.splitlines()
 
