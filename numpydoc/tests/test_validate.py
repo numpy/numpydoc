@@ -1977,3 +1977,23 @@ def test_is_generator_validation_with_decorator():
     # Wrapped multiple times
     v = Validator(get_doc_object(baz))
     assert v.is_generator_function
+
+
+def test_gl11_missing_blank_line_before_bullet():
+    """Test GL11 error detection for missing blank line before bullet list after colon."""
+
+    def dummy():
+        """
+        Example function.
+
+        This function does something.
+
+        Options:
+        - first option
+        - second option
+        """
+
+    result = validate_one(get_doc_object(dummy))
+    errors = result["errors"]
+
+    assert any("GL11" in str(e) for e in errors)
