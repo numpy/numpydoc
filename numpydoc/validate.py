@@ -97,6 +97,7 @@ ERROR_MSGS = {
     '"{reference_name}" reference',
     "SA04": 'Missing description for See Also "{reference_name}" reference',
     "EX01": "No examples section found",
+    "GL11": "Missing blank line before bullet list after a colon in docstring.",
 }
 # end-err-msg
 # NOTE: The above comment is a sentinel for embedding in the docs - do not
@@ -739,21 +740,25 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
     if directives_without_two_colons:
         errs.append(error("GL10", directives=directives_without_two_colons))
 
-    # GL11: Bullet list missing blank line after ":"
+    # GL11: bullet list missing blank line after ":"
     lines = doc.raw_doc.splitlines()
 
     for i in range(len(lines) - 1):
 
-        current = lines[i].rstrip()
-        next_line = lines[i + 1].lstrip()
+       current = lines[i].rstrip()
 
-        # line ends with ":" and next line starts with bullet
-        if current.endswith(":") and re.match(r"^[-*+]\s", next_line):
+       if current.endswith(":"):
 
-            # missing blank line check
-            if i > 0 and lines[i + 1].strip() != "" and lines[i] != "":
-                errs.append(error("GL11"))
-                break
+           # find next meaningful line (skip empty lines)
+           j = i + 1
+           while j < len(lines) and lines[j].strip() == "":
+               j += 1
+
+           # if next meaningful line is bullet → error
+           if j < len(lines) and re.match(r"^[-*+]\s", lines[j]):
+              errs.append(error("GL11"))
+              break
+    
 
     if not doc.summary:
         errs.append(error("SS01"))
