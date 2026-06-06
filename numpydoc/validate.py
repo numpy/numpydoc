@@ -624,7 +624,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
     - Last two characters: Numeric error code inside the section
 
     For example, PR02 is the second codified error in the Parameters section
-    (which in this case is assigned to the error when unknown parameters are documented).
+    (assigned to the error when unknown parameters are documented).
 
     The error codes, their corresponding error messages, and the details on how
     they are validated, are not documented more than in the source code of this
@@ -647,8 +647,8 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
     errs = []
     if not doc.raw_doc:
         report_GL08: bool = True
-        # Check if the object is a class and has a docstring in the constructor
-        # Also check if code_obj is defined, as undefined for the AstValidator in validate_docstrings.py.
+        # Check if object is a class with docstring in constructor.
+        # Also check if code_obj is defined (undefined for AstValidator).
         if doc.is_function_or_method and doc.name.endswith(".__init__"):
             # Import here at runtime to avoid circular import as
             # AstValidator is a subclass of Validator class without `doc_obj` attribute.
@@ -659,9 +659,9 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
             if hasattr(doc, "code_obj"):  # All Validator objects have this attr.
                 cls_name = ".".join(
                     doc.code_obj.__qualname__.split(".")[:-1]
-                )  # Collect all class depths before the constructor.
+                )  # Collect all class depths before constructor.
                 cls = Validator._load_obj(f"{doc.code_obj.__module__}.{cls_name}")
-                # cls = Validator._load_obj(f"{doc.name[:-9]}.{cls_name}") ## Alternative
+                # cls = Validator._load_obj(...)  # Alternative
                 cls_doc = Validator(get_doc_object(cls))
             elif isinstance(doc, AstValidator):  # Supports class traversal for ASTs.
                 ancestry = doc.ancestry
@@ -684,12 +684,13 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
                     cls_doc = None
             else:
                 raise TypeError(
-                    f"Cannot load {doc.name} as a usable Validator object (Validator does not have `doc_obj` attr or type `AstValidator`)."
+                    f"Cannot load {doc.name} as a usable Validator object "
+                    f"(Validator does not have `doc_obj` attr or `AstValidator` type)."
                 )
 
-            # Parameter_mismatches, PR01, PR02, PR03 are checked for the class docstring.
-            # If cls_doc has PR01, PR02, PR03 errors, i.e. invalid class docstring,
-            # then we also report missing constructor docstring, GL08.
+            # Parameter_mismatches (PR01, PR02, PR03) checked for class docstring.
+            # If cls_doc has PR01/PR02/PR03 errors (invalid class docstring),
+            # then report missing constructor docstring (GL08).
             if cls_doc:
                 report_GL08 = len(cls_doc.parameter_mismatches) > 0
 
