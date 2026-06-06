@@ -741,19 +741,21 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         errs.append(error("GL10", directives=directives_without_two_colons))
 
     # GL11: Bullet list missing blank line after ":" in docstring
+    # Only flag if a bullet list immediately follows a colon with NO blank line.
+    # This ensures we don't flag legitimate reStructuredText where blank lines
+    # properly separate the colon from the bullet list.
     lines = doc.raw_doc.splitlines()
 
     for i in range(len(lines) - 1):
         current = lines[i].rstrip()
 
         if current.endswith(":"):
-            # find next meaningful line (skip empty lines)
-            j = i + 1
-            while j < len(lines) and lines[j].strip() == "":
-                j += 1
-
-            # if next meaningful line is bullet → error
-            if j < len(lines) and re.match(r"^\s*[-*+]\s", lines[j]):
+            # Check only the immediately next line (i+1), not after skipping blanks.
+            # If there's a blank line at i+1, that's correct formatting and we skip.
+            # If there's a bullet at i+1 with no blank line, that's the error we flag.
+            next_line = lines[i + 1]
+            if next_line and re.match(r"^\s*[-*+]\s", next_line):
+                # Bullet list immediately after colon with no blank line
                 errs.append(error("GL11"))
                 break
 
