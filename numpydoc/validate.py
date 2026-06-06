@@ -747,19 +747,51 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
     # properly separate the colon from the bullet list.
     lines = doc.raw_doc.splitlines()
 
+    # Track whether we are inside a named section (Parameters, Returns, etc.)
+    # to avoid false positives on "param_name :" style colons.
+    in_named_section = False
+    section_header_pattern = re.compile(
+       r"^(" + "|".join(re.escape(s) for s in ALLOWED_SECTIONS) + r")\s*$"
+    )
+    section_underline_pattern = re.compile(r"^-+\s*$")
+
     for i in range(len(lines) - 1):
         current = lines[i].rstrip()
 
-        if current.endswith(":"):
-            # Check only the immediately next line (i+1), not after skipping blanks.
-            # If there's a blank line at i+1, that's correct formatting and we skip.
-            # If there's a bullet at i+1 with no blank line, that's the error we flag.
-            next_line = lines[i + 1]
-            if next_line and re.match(r"^\s*[-*+]\s", next_line):
-                # Bullet list immediately after colon with no blank line
-                errs.append(error("GL11"))
-                break
+       # Detect section headers (e.g. "Parameters", "Returns") and their underlines
+        if section_header_pattern.match(current.strip()):
+          in_named_section = True
+          continue
+        if in_named_section and section_underline_pattern.match(current.strip()):
+          continue
 
+        if current.endswith(":"):
+            stripped = current.strip()
+
+            # Skip field list entries like "param_name :" or "param_name : type"
+            # These are normal numpydoc parameter definitions, not prose colons.
+            if re.match(r"^\S.*\s+:(\s|$)", current):
+              continue
+
+            # Skip if the colon is the ONLY character on the stripped line
+            # (bare section-like lines in Parameters body)
+            if stripped == ":":
+              continue
+
+            next_line = lines[i + 1]
+            next_stripped = next_line.strip()
+
+            # Skip blank next line (correct formatting)
+            if not next_stripped:
+             continue
+
+            # Skip if inside a named section where colons are param definitions
+            if in_named_section:
+              continue
+
+            if re.match(r"^\s*[-*+]\s", next_line):
+               errs.append(error("GL11"))
+               break
     if not doc.summary:
         errs.append(error("SS01"))
     else:
