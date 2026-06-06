@@ -742,9 +742,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
         errs.append(error("GL10", directives=directives_without_two_colons))
 
     # GL11: Check summary + extended summary lines only (before any named section).
-    pre_section_lines = list(doc.doc["Summary"]) + list(
-        doc.doc["Extended Summary"]
-    )
+    pre_section_lines = list(doc.doc["Summary"]) + list(doc.doc["Extended Summary"])
     for i in range(len(pre_section_lines) - 1):
         current = pre_section_lines[i].rstrip()
         if current.endswith(":"):
