@@ -126,10 +126,10 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     args = vars(ap.parse_args(argv))
 
-    # Parse --ignored=SA01,EX01
+    # Parse --ignore=SA01,EX01
     ignored_checks = []
-    if args.get("ignore", None) is not None:
-        for checks in args["ignore"]:
+    if ignore := args.get("ignore"):
+        for checks in ignore:
             ignored_checks += re.split("\\W+", checks)
         args["ignore"] = ignored_checks
 
