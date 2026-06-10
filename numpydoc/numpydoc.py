@@ -184,6 +184,8 @@ def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
         "xref_param_type": app.config.numpydoc_xref_param_type,
         "xref_aliases": app.config.numpydoc_xref_aliases_complete,
         "xref_ignore": app.config.numpydoc_xref_ignore,
+        "template_file": app.config.numpydoc_template_file,
+        "extra_sections": app.config.numpydoc_extra_sections,
     }
     # TODO: Find a cleaner way to take care of this change away from dict
     # https://github.com/sphinx-doc/sphinx/issues/13942
@@ -348,6 +350,8 @@ def setup(app: SphinxApp, get_doc_object_=get_doc_object):
     app.add_config_value("numpydoc_validation_exclude", set(), False)
     app.add_config_value("numpydoc_validation_exclude_files", set(), False)
     app.add_config_value("numpydoc_validation_overrides", dict(), False)
+    app.add_config_value("numpydoc_template_file", None, True)
+    app.add_config_value("numpydoc_extra_sections", dict(), True)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
