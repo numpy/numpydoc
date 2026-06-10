@@ -60,3 +60,21 @@ class NewClass:
             A failing constructor implementation without parameters.
             """
             self.name = name
+
+
+def deprecated_function():
+    """Compute my function.
+
+    .. deprecated:: v0.1
+        This function is listed for future removal.
+
+    What it does in more detail.
+
+    See Also
+    --------
+    related : Something related.
+
+    Examples
+    --------
+    >>> result = 1 + 1
+    """
