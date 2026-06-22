@@ -47,7 +47,7 @@ jobs:
       - name: Make sure CLI works
         run: |
           numpydoc render numpydoc.tests.test_main._capture_stdout
-          numpydoc render numpydoc.tests.test_main._invalid_docstring || true
+          ! numpydoc render numpydoc.tests.test_main._invalid_docstring
           numpydoc validate numpydoc.tests.test_main._capture_stdout
           numpydoc validate numpydoc.tests.test_main._docstring_with_errors || true
 
