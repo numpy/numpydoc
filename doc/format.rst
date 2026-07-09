@@ -696,6 +696,42 @@ Note that license and author info, while often included in source files, do not
 belong in docstrings.
 
 
+Adding custom sections
+----------------------
+
+A recent addition to numpydoc is the ability to add custom sections for your
+docstrings. This can be done in four steps:
+
+1. Copy the existing numpydoc template file into a new file.
+
+   - This file should probably go in your documentation's ``_static`` directory.
+
+2. Add your custom section to the file
+   
+   .. code-block:: rest
+
+        ...
+        {{references}}
+        {{examples}}
+        {{custom_section}}
+
+3. Pass the path to that file through the ``numpydoc_template_file`` variable in
+   your ``conf.py`` file.
+
+   .. code-block:: python
+
+        numpydoc_template_file = Path(__file__).parent / "_static/numpydoc_template.rst"
+
+4. Choose the format for your custom section with the ``numpydoc_extra_sections``
+   variable in your ``conf.py`` file.
+
+   .. code-block:: python
+
+        numpydoc_extra_sections = {
+            "Custom Section": "member_list",
+        }
+
+
 Other points to keep in mind
 ----------------------------
 * Equations : as discussed in the :ref:`Notes <notes>` section above, LaTeX
@@ -791,3 +827,4 @@ This document itself was written in ReStructuredText.
 .. _vim-flake8: https://github.com/nvie/vim-flake8
 .. _SciPy: https://www.scipy.org
 .. _numpy-discussion list: https://mail.python.org/mailman3/lists/numpy-discussion.python.org/
+.. _numpydoc template file: https://github.com/numpy/numpydoc/blob/main/numpydoc/templates/numpydoc_docstring.rst?plain=1

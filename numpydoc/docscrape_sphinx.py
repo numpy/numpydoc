@@ -1,5 +1,4 @@
 import inspect
-import os
 import pydoc
 import re
 import textwrap
@@ -394,25 +393,28 @@ class SphinxDocString(NumpyDocString):
             if not self.get(section):
                 continue
 
+            # The sections in `numpydoc_template.rst` are snake case
+            # even if they aren't in the docstring itself.
+            section_key = section.lower().replace(" ", "_")
             match fmt:
                 case "param_list":
-                    ns.update({section.lower(): self._str_param_list(section)})
+                    ns.update({section_key: self._str_param_list(section)})
                 case "member_list":
-                    ns.update({section.lower(): self._str_member_list(section)})
+                    ns.update({section_key: self._str_member_list(section)})
                 case "returns":
-                    ns.update({section.lower(): self._str_returns(section)})
+                    ns.update({section_key: self._str_returns(section)})
                 case "warnings":
-                    ns.update({section.lower(): self._str_warnings(section)})
+                    ns.update({section_key: self._str_warnings(section)})
                 case "see_also":
-                    ns.update({section.lower(): self._str_see_also(section)})
+                    ns.update({section_key: self._str_see_also(section)})
                 case "notes":
-                    ns.update({section.lower(): self._str_section(section)})
+                    ns.update({section_key: self._str_section(section)})
                 case "references":
-                    ns.update({section.lower(): self._str_references(section)})
+                    ns.update({section_key: self._str_references(section)})
                 case "examples":
-                    ns.update({section.lower(): self._str_examples(section)})
+                    ns.update({section_key: self._str_examples(section)})
                 case _:
-                    logger.warning("[numpydoc] Unknown section format: %r", fmt)
+                    logger.warning("[numpydoc] Unknown section format %r for section %s", fmt, section)
 
         ns = {k: "\n".join(v) for k, v in ns.items()}
 
