@@ -67,15 +67,24 @@ def test_no_file():
             {1: ["EX01", "SA01"]},
         ],
         [
-            "class MyClass:\n    def my_method():  # numpydoc ignore:EX01\n        pass",
+            (
+                "class MyClass:\n    def my_method():  # numpydoc ignore:EX01\n        "
+                "pass"
+            ),
             {2: ["EX01"]},
         ],
         [
-            "class MyClass:\n    def my_method():  # numpydoc ignore: EX01,PR01\n        pass",
+            (
+                "class MyClass:\n    def my_method():  # numpydoc ignore: "
+                "EX01,PR01\n        pass"
+            ),
             {2: ["EX01", "PR01"]},
         ],
         [
-            "class MyClass:  # numpydoc ignore=GL08\n    def my_method():  # numpydoc ignore:EX01,PR01\n        pass",
+            (
+                "class MyClass:  # numpydoc ignore=GL08\n    def my_method():  "
+                "# numpydoc ignore:EX01,PR01\n        pass"
+            ),
             {1: ["GL08"], 2: ["EX01", "PR01"]},
         ],
     ],
@@ -1494,7 +1503,7 @@ class TestValidator:
             "too_short_header_underline",
         ],
     )
-    def test_bad_generic_functions(self, capsys, func):
+    def test_bad_generic_functions_warn(self, capsys, func):
         with pytest.warns(UserWarning, match="is too short"):
             validate_one(self._import_path(klass="WarnGenericFormat", func=func))
 
@@ -1802,10 +1811,10 @@ class TestValidator:
             assert error[0] in errs
             errs.remove(error[0])
 
-        # Test initialisation method (usually undocumented in dataclass) raises any errors.
+        # Test init method (usually undocumented in dataclass) raises errors.
         init_fn = self._import_path(klass="DataclassWithDocstring", func="__init__")
         result = validate_one(init_fn)
-        # Check that __init__ raises GL08 when the class docstring doesn't document params.
+        # Check that __init__ raises GL08 when class docstring doesn't document params.
         assert result["errors"][0][0] == "GL08"
 
     def test_property_object(self):
@@ -1977,3 +1986,170 @@ def test_is_generator_validation_with_decorator():
     # Wrapped multiple times
     v = Validator(get_doc_object(baz))
     assert v.is_generator_function
+
+
+def test_gl11_missing_blank_line_before_bullet_error():
+    """Test GL11 correctly detects missing blank line between colon and bullet."""
+
+    def dummy():
+        """
+        Example function.
+
+        Extended summary.
+
+        Options:
+        - first option
+        - second option
+
+        See Also
+        --------
+        other : Some reference.
+
+        Examples
+        --------
+        >>> print("test")
+        test
+        """
+
+    result = validate_one(get_doc_object(dummy))
+    errors = result["errors"]
+
+    # Should have GL11 error: colon immediately followed by bullet (no blank line)
+    assert any("GL11" in str(e) for e in errors), (
+        f"Expected GL11 error for 'Options:\\n- item', got: {errors}"
+    )
+
+
+def test_gl11_with_blank_line_passes():
+    """Test GL11 does NOT flag when blank line exists between colon and bullet."""
+
+    def dummy():
+        """
+        Example function.
+
+        Extended summary with a colon that precedes content:
+
+        - first option
+        - second option
+
+        See Also
+        --------
+        other : Some reference.
+
+        Examples
+        --------
+        >>> print("test")
+        test
+        """
+
+    result = validate_one(get_doc_object(dummy))
+    errors = result["errors"]
+
+    # Should NOT have GL11 error: blank line exists before bullet
+    gl11_errors = [e for e in errors if "GL11" in str(e)]
+    assert not gl11_errors, (
+        f"Expected no GL11 error when blank line is present, got: {gl11_errors}"
+    )
+
+
+def test_gl11_multiple_colons_with_bullets():
+    """Test GL11 with multiple colon-ending lines and mixed formatting."""
+
+    def dummy():
+        """
+        Example function.
+
+        First list:
+        - item 1
+        - item 2
+
+        Second list (this one is correct):
+
+        - item 1
+        - item 2
+
+        See Also
+        --------
+        other : Some reference.
+
+        Examples
+        --------
+        >>> print("test")
+        test
+        """
+
+    result = validate_one(get_doc_object(dummy))
+    errors = result["errors"]
+
+    # Should flag only the first one (no blank line)
+    gl11_errors = [e for e in errors if "GL11" in str(e)]
+    assert len(gl11_errors) == 1, (
+        f"Expected exactly 1 GL11 error, got {len(gl11_errors)}: {gl11_errors}"
+    )
+
+
+def test_gl11_colon_without_bullet_passes():
+    """Test GL11 does not flag when line ends with colon but no bullet follows."""
+
+    def dummy():
+        """
+        Example function.
+
+        This ends with a colon: and continues with text, not a bullet.
+        The next line has actual content.
+        This is perfectly valid.
+
+        See Also
+        --------
+        other : Some reference.
+
+        Examples
+        --------
+        >>> print("test")
+        test
+        """
+
+    result = validate_one(get_doc_object(dummy))
+    errors = result["errors"]
+
+    # Should NOT have GL11 error
+    gl11_errors = [e for e in errors if "GL11" in str(e)]
+    assert not gl11_errors, (
+        f"Expected no GL11 error when no bullet follows colon, got: {gl11_errors}"
+    )
+
+
+def test_gl11_field_list_passes():
+    """Test GL11 does not flag reStructuredText field lists."""
+
+    def dummy():
+        """
+        Example function.
+
+        Extended summary.
+
+        Parameters
+        ----------
+        param1 : str
+            First parameter.
+        param2 : int
+            Second parameter.
+
+        See Also
+        --------
+        other : Some reference.
+
+        Examples
+        --------
+        >>> print("test")
+        test
+        """
+
+    result = validate_one(get_doc_object(dummy))
+    errors = result["errors"]
+
+    # Should NOT have GL11 error (Parameter-ending colons are part of docstring format)
+    gl11_errors = [e for e in errors if "GL11" in str(e)]
+    assert not gl11_errors, (
+        f"Expected no GL11 error in Parameters section, got: {gl11_errors}"
+    )
