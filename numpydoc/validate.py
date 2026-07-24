@@ -14,6 +14,7 @@ import inspect
 import os
 import pydoc
 import re
+import sys
 import textwrap
 import tokenize
 from copy import deepcopy
@@ -435,7 +436,19 @@ class Validator:
                 # accessor classes have a signature but don't want to show this
                 return tuple()
         try:
-            sig = inspect.signature(self.obj)
+            if sys.version_info >= (3, 14):
+                # PEP 649: on Python 3.14+ ``inspect.signature`` evaluates annotations
+                # eagerly, raising ``NameError`` for forward references that only
+                # resolve under ``TYPE_CHECKING``. Only parameter names and kinds are
+                # used below, so request the forward-ref-preserving format to
+                # introspect the signature without evaluating annotations.
+                import annotationlib
+
+                sig = inspect.signature(
+                    self.obj, annotation_format=annotationlib.Format.FORWARDREF
+                )
+            else:
+                sig = inspect.signature(self.obj)
         except (TypeError, ValueError):
             # Some objects, mainly in C extensions do not support introspection
             # of the signature
