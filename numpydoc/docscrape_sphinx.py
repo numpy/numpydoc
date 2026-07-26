@@ -414,7 +414,11 @@ class SphinxDocString(NumpyDocString):
                 case "examples":
                     ns.update({section_key: self._str_examples(section)})
                 case _:
-                    logger.warning("[numpydoc] Unknown section format %r for section %s", fmt, section)
+                    logger.warning(
+                        "[numpydoc] Unknown section format %r for section %s",
+                        fmt,
+                        section,
+                    )
 
         ns = {k: "\n".join(v) for k, v in ns.items()}
 
