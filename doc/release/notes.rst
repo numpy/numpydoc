@@ -1,3 +1,133 @@
+1.11.0rc0
+=========
+
+We're happy to announce the release of numpydoc 1.11.0rc0!
+
+Enhancements
+------------
+
+- Remove spaces resulting from line continuation in arg type descriptor (`#676 <https://github.com/numpy/numpydoc/pull/676>`_).
+- Make ``numpydoc lint --ignore ...`` parsing more robust (`#560 <https://github.com/numpy/numpydoc/pull/560>`_).
+
+Bug Fixes
+---------
+
+- fix: resolve numpydoc StopIteration error for async functions (`#675 <https://github.com/numpy/numpydoc/pull/675>`_).
+- fix: handle Sphinx 9.x new autodoc options key format and sentinels (`#688 <https://github.com/numpy/numpydoc/pull/688>`_).
+- GL01 catches valid docstring example (`#574 <https://github.com/numpy/numpydoc/pull/574>`_).
+- Dedent section starting with ``.. deprecation::`` (`#575 <https://github.com/numpy/numpydoc/pull/575>`_).
+
+Documentation
+-------------
+
+- Add 1.10.0 release notes (`#696 <https://github.com/numpy/numpydoc/pull/696>`_).
+
+Maintenance
+-----------
+
+- MAINT: Bump to dev (`#672 <https://github.com/numpy/numpydoc/pull/672>`_).
+- TST,CI: Add workflow to check sdist (`#670 <https://github.com/numpy/numpydoc/pull/670>`_).
+- Bump the actions group with 3 updates (`#673 <https://github.com/numpy/numpydoc/pull/673>`_).
+- [pre-commit.ci] pre-commit autoupdate (`#674 <https://github.com/numpy/numpydoc/pull/674>`_).
+- Bump the actions group with 2 updates (`#680 <https://github.com/numpy/numpydoc/pull/680>`_).
+- Bump actions/download-artifact from 8.0.0 to 8.0.1 in the actions group (`#681 <https://github.com/numpy/numpydoc/pull/681>`_).
+- [pre-commit.ci] pre-commit autoupdate (`#682 <https://github.com/numpy/numpydoc/pull/682>`_).
+- Bump the actions group with 2 updates (`#685 <https://github.com/numpy/numpydoc/pull/685>`_).
+- Add sphinx8 to oldsphinx testing matrix (`#689 <https://github.com/numpy/numpydoc/pull/689>`_).
+- Update classifiers to show 3.14 support (`#695 <https://github.com/numpy/numpydoc/pull/695>`_).
+
+Contributors
+------------
+
+7 authors added to this release (alphabetically):
+
+- Eric Larson (`@larsoner <https://github.com/larsoner>`_)
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Julien Schueller (`@jschueller <https://github.com/jschueller>`_)
+- Linyan Zhang (`@LinyanZhang <https://github.com/LinyanZhang>`_)
+- Ross Barnowski (`@rossbar <https://github.com/rossbar>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+- Stefanie Molin (`@stefmolin <https://github.com/stefmolin>`_)
+
+7 reviewers added to this release (alphabetically):
+
+- Charles Harris (`@charris <https://github.com/charris>`_)
+- Eric Larson (`@larsoner <https://github.com/larsoner>`_)
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Lars Grüter (`@lagru <https://github.com/lagru>`_)
+- Ross Barnowski (`@rossbar <https://github.com/rossbar>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+- Stefanie Molin (`@stefmolin <https://github.com/stefmolin>`_)
+
+_These lists are automatically generated, and may not be complete or may contain
+duplicates._
+
+1.10.0
+======
+
+We're happy to announce the release of numpydoc 1.10.0!
+
+Enhancements
+------------
+
+- Added "exclude_files" option for pyproject.toml config usage (`#635 <https://github.com/numpy/numpydoc/pull/635>`_).
+- Constructor checking for AST validator (`#622 <https://github.com/numpy/numpydoc/pull/622>`_).
+
+Bug Fixes
+---------
+
+- FIX: account for unreleased changes to sphinx (`#649 <https://github.com/numpy/numpydoc/pull/649>`_).
+
+Documentation
+-------------
+
+- Fix circleci doc buld (`#634 <https://github.com/numpy/numpydoc/pull/634>`_).
+
+Maintenance
+-----------
+
+- Bump the actions group across 1 directory with 3 updates (`#644 <https://github.com/numpy/numpydoc/pull/644>`_).
+- build(pyproject.toml): drop support for python 3.9 (require 3.10+) (`#641 <https://github.com/numpy/numpydoc/pull/641>`_).
+- [pre-commit.ci] pre-commit autoupdate (`#639 <https://github.com/numpy/numpydoc/pull/639>`_).
+- MAINT: Make pre-commit run --all pass (`#650 <https://github.com/numpy/numpydoc/pull/650>`_).
+- Remove duplicate dependency in pyproject.toml (`#654 <https://github.com/numpy/numpydoc/pull/654>`_).
+- TST: A few minor test improvements (`#652 <https://github.com/numpy/numpydoc/pull/652>`_).
+- Fix test warnings about invalid regex escape (`#655 <https://github.com/numpy/numpydoc/pull/655>`_).
+- Bump the actions group with 3 updates (`#647 <https://github.com/numpy/numpydoc/pull/647>`_).
+- Bump the actions group with 2 updates (`#657 <https://github.com/numpy/numpydoc/pull/657>`_).
+- MAINT: rm unused kwarg from private method (`#658 <https://github.com/numpy/numpydoc/pull/658>`_).
+- Fix pytest warning regression by switching to re.escape() (`#660 <https://github.com/numpy/numpydoc/pull/660>`_).
+- CI version updates (`#662 <https://github.com/numpy/numpydoc/pull/662>`_).
+- Bump actions/checkout from 5 to 6 in the actions group (`#666 <https://github.com/numpy/numpydoc/pull/666>`_).
+- More CI updates (`#663 <https://github.com/numpy/numpydoc/pull/663>`_).
+- MAINT: Prep for v1.10.0 (`#667 <https://github.com/numpy/numpydoc/pull/667>`_).
+
+Contributors
+------------
+
+7 authors added to this release (alphabetically):
+
+- Eric Larson (`@larsoner <https://github.com/larsoner>`_)
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Matt Gebert (`@mattgebert <https://github.com/mattgebert>`_)
+- Ross Barnowski (`@rossbar <https://github.com/rossbar>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+- Stefanie Molin (`@stefmolin <https://github.com/stefmolin>`_)
+- Thomas A Caswell (`@tacaswell <https://github.com/tacaswell>`_)
+
+8 reviewers added to this release (alphabetically):
+
+- Charles Harris (`@charris <https://github.com/charris>`_)
+- Eric Larson (`@larsoner <https://github.com/larsoner>`_)
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Lars Grüter (`@lagru <https://github.com/lagru>`_)
+- Matt Gebert (`@mattgebert <https://github.com/mattgebert>`_)
+- Ross Barnowski (`@rossbar <https://github.com/rossbar>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+- Stefanie Molin (`@stefmolin <https://github.com/stefmolin>`_)
+
+_These lists are automatically generated, and may not be complete or may contain duplicates._
+
 1.9.0
 =====
 

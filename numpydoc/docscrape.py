@@ -231,7 +231,7 @@ class NumpyDocString(Mapping):
 
             section += self._doc.read_to_next_empty_line()
 
-        return section
+        return dedent_lines(section)
 
     def _read_sections(self):
         while not self._doc.eof():
@@ -601,6 +601,8 @@ class NumpyDocString(Mapping):
 
 def dedent_lines(lines):
     """Deindent a list of lines maximally"""
+    if not lines:
+        return lines
     return textwrap.dedent("\n".join(lines)).split("\n")
 
 

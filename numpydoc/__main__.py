@@ -1,6 +1,6 @@
 """
-Implementing `python -m numpydoc` functionality
-"""  # '.' omitted at end of docstring for testing purposes!
+Implements ``python -m numpydoc`` functionality.
+"""
 
 from .cli import main
 
