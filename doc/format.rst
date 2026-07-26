@@ -707,7 +707,7 @@ docstrings. This can be done in four steps:
    - This file should probably go in your documentation's ``_static`` directory.
 
 2. Add your custom section to the file
-   
+
    .. code-block:: rest
 
         ...
