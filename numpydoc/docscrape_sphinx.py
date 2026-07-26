@@ -45,7 +45,7 @@ class SphinxDocString(NumpyDocString):
 
             template_loader = FileSystemLoader(template_dirs)
             template_env = SandboxedEnvironment(loader=template_loader)
-            config["template"] = template_env.get_template(template_file.name)
+            self.template = template_env.get_template(template_file.name)
 
     # string conversion routines
     def _str_header(self, name):
