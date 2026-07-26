@@ -1,4 +1,6 @@
+import warnings
 from collections import defaultdict
+from collections.abc import Mapping
 from copy import deepcopy
 from io import StringIO
 from pathlib import PosixPath
@@ -117,6 +119,32 @@ A top section before
     lines = [x.strip() for x in lines]
     assert ("rpartition" in lines) is has_rpartition
     assert ("upper" in lines) is has_upper
+
+
+def test_mangle_docstrings_does_not_use_deprecated_options_mapping():
+    class DeprecatedMappingOptions(Mapping):
+        def __init__(self):
+            self.exclude_members = {"upper"}
+
+        def __getitem__(self, key):
+            warnings.warn("mapping interface used", DeprecationWarning, stacklevel=2)
+            return vars(self)[key]
+
+        def __iter__(self):
+            warnings.warn("mapping interface used", DeprecationWarning, stacklevel=2)
+            return iter(vars(self))
+
+        def __len__(self):
+            return len(vars(self))
+
+    lines = [".. autoclass:: str"]
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        mangle_docstrings(
+            MockApp(), "class", "str", str, DeprecatedMappingOptions(), lines
+        )
+
+    assert "upper" not in [line.strip() for line in lines]
 
 
 def test_mangle_docstrings_inherited_class_members():

@@ -190,14 +190,8 @@ def mangle_docstrings(app: SphinxApp, what, name, obj, options, lines):
     if options is not None:
         if isinstance(options, dict):
             cfg.update(options)
-        elif hasattr(options, "from_directive_options"):
-            # Sphinx 9.x _AutoDocumenterOptions
-            cfg.update(vars(options))
         else:
-            try:
-                cfg.update(options or {})
-            except TypeError:
-                cfg.update(options.__dict__ or {})
+            cfg.update(vars(options))
     u_NL = "\n"
     if what == "module":
         # Strip top title
