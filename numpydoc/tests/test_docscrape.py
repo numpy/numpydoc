@@ -1459,7 +1459,7 @@ def test_templated_sections():
 
 
 def test_nonstandard_property():
-    # test discovery of a property that does not satisfy isinstace(.., property)
+    # test discovery of a property that does not satisfy isinstance(.., property)
 
     class SpecialProperty:
         def __init__(self, axis=0, doc=""):
