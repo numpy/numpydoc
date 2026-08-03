@@ -1,3 +1,4 @@
+import sys
 import warnings
 from contextlib import nullcontext
 from dataclasses import dataclass
@@ -55,6 +56,18 @@ def test_no_file():
     """Test that validation can be done on functions made on the fly."""
     # Just a smoke test for now, <list> will have a None filename
     validate.validate("numpydoc.tests.test_validate._DummyList.clear")
+
+
+@pytest.mark.skipif(sys.version_info < (3, 14), reason="PEP 649 lazy annotations")
+def test_signature_params_with_typechecking_only_annotation():
+    ns = {}
+    exec("def func(a, b=1, *args, **kwargs) -> OnlyUnderTypeChecking: ...", ns)
+    assert Validator(get_doc_object(ns["func"])).signature_parameters == (
+        "a",
+        "b",
+        "*args",
+        "**kwargs",
+    )
 
 
 @pytest.mark.parametrize(
