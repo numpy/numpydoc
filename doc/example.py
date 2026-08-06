@@ -37,8 +37,16 @@ import matplotlib.pyplot as plt
 def foo(var1, var2, *args, long_var_name="hi", only_seldom_used_keyword=0, **kwargs):
     r"""Summarize the function in one line.
 
+    .. warning:: Warning number 1
+
     Several sentences providing an extended description. Refer to
     variables using back-ticks, e.g. `var`.
+
+    .. warning:: 
+
+       A slightly longer, multiline warning.
+
+       Placed in the extended summary.
 
     Parameters
     ----------
@@ -46,6 +54,19 @@ def foo(var1, var2, *args, long_var_name="hi", only_seldom_used_keyword=0, **kwa
         Array_like means all those objects -- lists, nested lists, etc. --
         that can be converted to an array.  We can also refer to
         variables like `var1`.
+
+        .. warning::
+
+           An even richer warning in the parameter description that contains
+           a list:
+           
+           - point 1
+           - point 2
+
+           and code::
+
+              a**2 + b**2 = c**2
+
     var2 : int
         The type above can either refer to an actual Python type
         (e.g. ``int``), or describe the type of the variable in more
@@ -81,6 +102,8 @@ def foo(var1, var2, *args, long_var_name="hi", only_seldom_used_keyword=0, **kwa
     BadException
         Because you shouldn't have done that.
 
+        .. warning:: But seriously
+
     See Also
     --------
     numpy.array : Relationship (optional).
@@ -93,6 +116,8 @@ def foo(var1, var2, *args, long_var_name="hi", only_seldom_used_keyword=0, **kwa
     Notes about the implementation algorithm (if needed).
 
     This can have multiple paragraphs.
+
+    .. warning:: A final warning, for good measure
 
     You may include some math:
 
