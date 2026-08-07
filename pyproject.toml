@@ -28,7 +28,7 @@ classifiers = [
     'Topic :: Documentation',
 ]
 dependencies = [
-    'sphinx>=6',
+    'sphinx>=8',
     "tomli>=1.1.0;python_version<'3.11'",
 ]
 
