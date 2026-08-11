@@ -165,3 +165,34 @@ numpydoc_validation_overrides : dict
     ``numpydoc_validation_checks`` is not an empty set. Use
     :ref:`inline ignore comments <inline_ignore_comments>` to turn off
     specific checks for parts of your code.
+numpydoc_template_file : path_like
+    A path to a template file with all of the sections you wish to include
+    in your docstrings. This includes default numpydoc sections and any
+    custom sections you wish to add.
+    See the `default numpydoc_docstring.rst file <https://github.com/numpy/numpydoc/blob/main/numpydoc/templates/numpydoc_docstring.rst?plain=1>`_
+    for an example of the expected formatting. Note that the section names
+    should be all lowercase in the template file.
+numpydoc_extra_sections : dict
+    A dictionary mapping the name of any custom sections you've added to
+    your custom template file to an existing one of numpydoc's section
+    formats.
+
+    The available formats are:
+
+    - ``"param_list"``
+    - ``"member_list"``
+    - ``"returns"``
+    - ``"warnings"``
+    - ``"see_also"``
+    - ``"notes"``
+    - ``"references"``
+    - ``"examples"``
+
+    For example, if you wanted to add a custom section called ``Members``,
+    you would use
+
+    .. code-block:: python
+
+        numpydoc_extra_sections = {
+            "Members": "member_list",
+        }

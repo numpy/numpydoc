@@ -43,6 +43,8 @@ class MockConfig:
     numpydoc_validation_exclude = set()
     numpydoc_validation_exclude_files = set()
     numpydoc_validation_overrides = dict()
+    numpydoc_template_file = None
+    numpydoc_extra_sections = dict()
 
 
 class MockBuilder:
