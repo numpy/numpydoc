@@ -91,7 +91,7 @@ numpydoc_xref_ignore : set or ``"all"``
   used in parameter type descriptions that may be confused for
   classes of the same name. For example::
 
-      numpydoc_xref_ignore = {'type', 'optional', 'default'}
+      numpydoc_xref_ignore = {'type', 'optional', 'default', 'keyword-only', 'positional-only'}
 
   The default is an empty set.
 
