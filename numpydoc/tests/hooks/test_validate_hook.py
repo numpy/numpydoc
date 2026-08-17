@@ -79,6 +79,8 @@ def test_validate_hook(example_module, config, capsys):
         {example_module!s}:58: SA01 See Also section not found
 
         {example_module!s}:58: EX01 No examples section found
+
+        {example_module!s}:93: GL08 The object does not have a docstring
         """
     )
 
@@ -108,6 +110,8 @@ def test_validate_hook_with_ignore(example_module, capsys):
         {example_module!s}:30: GL08 The object does not have a docstring
 
         {example_module!s}:58: PR01 Parameters {{'name'}} not documented
+
+        {example_module!s}:93: GL08 The object does not have a docstring
         """
     )
 
