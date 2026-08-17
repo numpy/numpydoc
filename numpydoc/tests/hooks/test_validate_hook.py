@@ -42,8 +42,6 @@ def test_validate_hook(example_module, config, capsys):
 
         {example_module!s}:8: EX01 No examples section found
 
-        {example_module!s}:11: GL08 The object does not have a docstring
-
         {example_module!s}:17: ES01 No extended summary found
 
         {example_module!s}:17: PR01 Parameters {{'**kwargs'}} not documented
@@ -79,8 +77,6 @@ def test_validate_hook(example_module, config, capsys):
         {example_module!s}:58: SA01 See Also section not found
 
         {example_module!s}:58: EX01 No examples section found
-
-        {example_module!s}:93: GL08 The object does not have a docstring
         """
     )
 
@@ -99,8 +95,6 @@ def test_validate_hook_with_ignore(example_module, capsys):
         f"""
         {example_module!s}:4: PR01 Parameters {{'name'}} not documented
 
-        {example_module!s}:11: GL08 The object does not have a docstring
-
         {example_module!s}:17: PR01 Parameters {{'**kwargs'}} not documented
 
         {example_module!s}:17: PR07 Parameter "*args" has no description
@@ -110,8 +104,6 @@ def test_validate_hook_with_ignore(example_module, capsys):
         {example_module!s}:30: GL08 The object does not have a docstring
 
         {example_module!s}:58: PR01 Parameters {{'name'}} not documented
-
-        {example_module!s}:93: GL08 The object does not have a docstring
         """
     )
 
