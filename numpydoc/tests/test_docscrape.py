@@ -1353,7 +1353,7 @@ def test_class_members_doc_sphinx():
             * hello
             * world
 
-        :obj:`an_attribute <an_attribute>` : float
+        :obj:`an_attribute <.an_attribute>` : float
             Test attribute
 
         **no_docstring** : str
@@ -1362,13 +1362,13 @@ def test_class_members_doc_sphinx():
         **no_docstring2** : str
             ..
 
-        :obj:`multiline_sentence <multiline_sentence>`
+        :obj:`multiline_sentence <.multiline_sentence>`
             This is a sentence.
 
-        :obj:`midword_period <midword_period>`
+        :obj:`midword_period <.midword_period>`
             The sentence for numpy.org.
 
-        :obj:`no_period <no_period>`
+        :obj:`no_period <.no_period>`
             This does not have a period
 
     .. rubric:: Methods
@@ -1415,7 +1415,7 @@ def test_class_attributes_as_member_list():
 
     attr_doc = """:Attributes:
 
-    :obj:`an_attribute <an_attribute>`
+    :obj:`an_attribute <.an_attribute>`
         Test attribute"""
 
     assert attr_doc in str(SphinxClassDoc(Foo))
