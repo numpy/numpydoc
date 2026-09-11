@@ -1353,7 +1353,7 @@ def test_class_members_doc_sphinx():
             * hello
             * world
 
-        :obj:`an_attribute <an_attribute>` : float
+        :obj:`an_attribute <.an_attribute>` : float
             Test attribute
 
         **no_docstring** : str
@@ -1362,13 +1362,13 @@ def test_class_members_doc_sphinx():
         **no_docstring2** : str
             ..
 
-        :obj:`multiline_sentence <multiline_sentence>`
+        :obj:`multiline_sentence <.multiline_sentence>`
             This is a sentence.
 
-        :obj:`midword_period <midword_period>`
+        :obj:`midword_period <.midword_period>`
             The sentence for numpy.org.
 
-        :obj:`no_period <no_period>`
+        :obj:`no_period <.no_period>`
             This does not have a period
 
     .. rubric:: Methods
@@ -1415,7 +1415,7 @@ def test_class_attributes_as_member_list():
 
     attr_doc = """:Attributes:
 
-    :obj:`an_attribute <an_attribute>`
+    :obj:`an_attribute <.an_attribute>`
         Test attribute"""
 
     assert attr_doc in str(SphinxClassDoc(Foo))
@@ -1431,6 +1431,31 @@ def test_class_attributes_as_member_list():
     cfg = dict(attributes_as_param_list=False)
     assert attr_doc2 in str(SphinxClassDoc(Foo, config=cfg))
     assert "Another description" not in str(SphinxClassDoc(Foo, config=cfg))
+
+
+def test_attribute_link_is_class_scoped():
+    class Foo:
+        """
+        Class docstring.
+
+        Attributes
+        ----------
+        identity
+            Another description that is not used.
+
+        """
+
+        @property
+        def identity(self):
+            """Test attribute"""
+            return
+
+    attr_doc = """:Attributes:
+
+    :obj:`identity <.identity>`
+        Test attribute"""
+
+    assert attr_doc in str(SphinxClassDoc(Foo))
 
 
 def test_templated_sections():

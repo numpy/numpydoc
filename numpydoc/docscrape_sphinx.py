@@ -154,7 +154,8 @@ class SphinxDocString(NumpyDocString):
         if prefix:
             link_prefix = f"{prefix}."
         else:
-            link_prefix = ""
+            # leading dot: resolve in the class scope before the module scope
+            link_prefix = "."
 
         # Referenced object has a docstring
         display_param = f":obj:`{param} <{link_prefix}{param}>`"
