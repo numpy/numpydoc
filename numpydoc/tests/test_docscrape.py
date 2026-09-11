@@ -1433,6 +1433,31 @@ def test_class_attributes_as_member_list():
     assert "Another description" not in str(SphinxClassDoc(Foo, config=cfg))
 
 
+def test_attribute_link_is_class_scoped():
+    class Foo:
+        """
+        Class docstring.
+
+        Attributes
+        ----------
+        identity
+            Another description that is not used.
+
+        """
+
+        @property
+        def identity(self):
+            """Test attribute"""
+            return
+
+    attr_doc = """:Attributes:
+
+    :obj:`identity <.identity>`
+        Test attribute"""
+
+    assert attr_doc in str(SphinxClassDoc(Foo))
+
+
 def test_templated_sections():
     doc = SphinxClassDoc(
         None,
