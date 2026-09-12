@@ -47,9 +47,9 @@ jobs:
       - name: Make sure CLI works
         run: |
           numpydoc render numpydoc.tests.test_main._capture_stdout
-          ! numpydoc render numpydoc.tests.test_main._invalid_docstring
+          ! numpydoc render numpydoc.tests.test_main._invalid_docstring || exit 1
           numpydoc validate numpydoc.tests.test_main._capture_stdout
-          numpydoc validate numpydoc.tests.test_main._docstring_with_errors || true
+          ! numpydoc validate numpydoc.tests.test_main._docstring_with_errors || exit 1
 
       - name: Setup for doc build
         run: |
@@ -93,9 +93,9 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           numpydoc render numpydoc.tests.test_main._capture_stdout
-          numpydoc render numpydoc.tests.test_main._invalid_docstring || true
+          ! numpydoc render numpydoc.tests.test_main._invalid_docstring || exit 1
           numpydoc validate numpydoc.tests.test_main._capture_stdout
-          numpydoc validate numpydoc.tests.test_main._docstring_with_errors || true
+          ! numpydoc validate numpydoc.tests.test_main._docstring_with_errors || exit 1
 
       - name: Setup for doc build
         if: runner.os == 'Linux'
@@ -140,9 +140,9 @@ jobs:
       - name: Make sure CLI works
         run: |
           numpydoc render numpydoc.tests.test_main._capture_stdout
-          numpydoc render numpydoc.tests.test_main._invalid_docstring || true
+          ! numpydoc render numpydoc.tests.test_main._invalid_docstring || exit 1
           numpydoc validate numpydoc.tests.test_main._capture_stdout
-          numpydoc validate numpydoc.tests.test_main._docstring_with_errors || true
+          ! numpydoc validate numpydoc.tests.test_main._docstring_with_errors || exit 1
 
       - name: Setup for doc build
         run: |
