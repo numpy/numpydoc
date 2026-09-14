@@ -999,6 +999,25 @@ class BadParameters:
            this is not capitalized.
         """
 
+    def option_set_no_description(self, kind):
+        """
+        Lacks the description, with a set of options as the type.
+
+        Parameters
+        ----------
+        kind : {'integer', 'boolean'}
+        """
+
+    def option_set_bad_description(self, kind):
+        """
+        Forgets to capitalize and to end with a period, with an options set type.
+
+        Parameters
+        ----------
+        kind : {'integer', 'boolean'}
+           this doesn't end with a dot
+        """
+
     def blank_lines(self, kind):
         """
         Adds a blank line after the section header.
@@ -1651,6 +1670,19 @@ class TestValidator:
                 "BadParameters",
                 "parameter_capitalization",
                 ('Parameter "kind" description should start with a capital letter',),
+            ),
+            (
+                "BadParameters",
+                "option_set_no_description",
+                ('Parameter "kind" has no description',),
+            ),
+            (
+                "BadParameters",
+                "option_set_bad_description",
+                (
+                    'Parameter "kind" description should start with a capital letter',
+                    'Parameter "kind" description should finish with "."',
+                ),
             ),
             (
                 "BadParameters",

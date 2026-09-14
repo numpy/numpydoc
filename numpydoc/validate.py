@@ -791,24 +791,25 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
                 if doc.parameter_type(param)[-1] == ".":
                     errs.append(error("PR05", param_name=param))
                 # skip common_type_error checks when the param type is a set of
-                # options
-                if "{" in doc.parameter_type(param):
-                    continue
-                common_type_errors = [
-                    ("integer", "int"),
-                    ("boolean", "bool"),
-                    ("string", "str"),
-                ]
-                for wrong_type, right_type in common_type_errors:
-                    if wrong_type in set(re.split(r"\W", doc.parameter_type(param))):
-                        errs.append(
-                            error(
-                                "PR06",
-                                param_name=param,
-                                right_type=right_type,
-                                wrong_type=wrong_type,
+                # options; the description checks below still apply
+                if "{" not in doc.parameter_type(param):
+                    common_type_errors = [
+                        ("integer", "int"),
+                        ("boolean", "bool"),
+                        ("string", "str"),
+                    ]
+                    for wrong_type, right_type in common_type_errors:
+                        if wrong_type in set(
+                            re.split(r"\W", doc.parameter_type(param))
+                        ):
+                            errs.append(
+                                error(
+                                    "PR06",
+                                    param_name=param,
+                                    right_type=right_type,
+                                    wrong_type=wrong_type,
+                                )
                             )
-                        )
         errs.extend(_check_desc(kind_desc[1], "PR07", "PR08", "PR09", param_name=param))
 
     if doc.is_function_or_method:
