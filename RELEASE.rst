@@ -12,7 +12,11 @@ version string to edit by hand. Example ``__version__`` values:
 - 1.8               # tag ``v1.8`` (1.8 release)
 - 1.9.dev2+gdef     # 2 commits after ``v1.8`` (development version)
 
-Test release candidates on numpy, scipy, matplotlib, scikit-image, and networkx.
+The CircleCI ``integration`` jobs build numpy, matplotlib, scikit-image and
+networkx against this checkout; they run on every push to ``main`` and on a
+pull request only once it carries the ``integration-tests`` label (add the
+label, then re-run the workflow).  ``scipy`` is not in CI -- run
+``python tools/integration/build_docs.py scipy`` by hand before a release.
 
 Process
 -------

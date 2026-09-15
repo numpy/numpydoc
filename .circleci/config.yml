@@ -1,4 +1,14 @@
-version: 2
+version: 2.1
+
+# gen3 resource classes are only valid with the `current` machine image tag -- a
+# pinned dated tag is rejected with "is not a valid resource class".
+_machine: &machine
+  machine:
+    image: ubuntu-2604:current
+  # large.gen3: 4 vCPUs / 16 GiB, both faster and cheaper per minute than the
+  # gen1 `large` class.  Revert to `large` if gen3 queue times become a problem.
+  resource_class: large.gen3
+
 jobs:
   build_docs:
     docker:
@@ -48,9 +58,101 @@ jobs:
           path: numpydoc/tests/tinybuild/_build/html/
           destination: tinybuild
 
-workflows:
-  version: 2
+  # Build a downstream project's documentation against the numpydoc in this
+  # checkout, so that regressions are caught before a release rather than by our
+  # users.  `tools/integration/build_docs.py` does all of the work and is meant
+  # to be run by hand with the same arguments to reproduce a failure locally.
+  integration:
+    parameters:
+      project:
+        description: a project name understood by tools/integration/build_docs.py
+        type: string
+      apt:
+        description: Debian packages the project's conf.py needs on PATH.
+        type: string
+        default: ""
+    <<: *machine
+    steps:
+      - checkout
+      # Pull requests build only when they carry the `integration-tests` label;
+      # pushes to main always do.  CircleCI does not retrigger on label events,
+      # so a label added later needs a re-run of the workflow.  A GitHub API
+      # hiccup (the CircleCI IP is shared and rate-limited) builds anyway.
+      - run:
+          name: Check for the integration-tests label
+          command: |
+            [ -n "$CIRCLE_PULL_REQUEST" ] || exit 0
+            API=$(echo "$CIRCLE_PULL_REQUEST" |
+              sed -E 's#.*github.com/(.+)/pull/([0-9]+)#https://api.github.com/repos/\1/pulls/\2#')
+            LABELS=$(curl -fsS "$API" | python3 -c \
+              'import json,sys; print("\n".join(l["name"] for l in json.load(sys.stdin)["labels"]))' \
+              2>/dev/null) || {
+              echo "Could not read labels from $API; building anyway."; exit 0; }
+            echo "$LABELS" | grep -qx integration-tests || {
+              echo "Not labelled integration-tests; skipping $CIRCLE_JOB."
+              circleci-agent step halt; }
+      - run:
+          name: Install apt packages
+          command: |
+            if [ -n "<< parameters.apt >>" ]; then
+              sudo apt-get -qq update
+              sudo apt-get install -yy --no-install-recommends << parameters.apt >>
+            fi
+      # uv builds the per-project virtualenv and installs into it; the machine
+      # image's python3 is only what uv copies the interpreter from.
+      - run:
+          name: Install uv
+          command: |
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+      # uv's download cache.  Caches are immutable, so key on the recipe that
+      # decides what gets installed, with a prefix fallback in between.
+      - restore_cache:
+          keys:
+            - uv-cache-v1-<< parameters.project >>-{{ checksum "tools/integration/build_docs.py" }}
+            - uv-cache-v1-<< parameters.project >>-
+      - run:
+          name: Build the << parameters.project >> documentation
+          # Sphinx streams progress, but a slow wheel download does not.
+          no_output_timeout: 30m
+          command: python3 tools/integration/build_docs.py << parameters.project >>
+      - save_cache:
+          key: uv-cache-v1-<< parameters.project >>-{{ checksum "tools/integration/build_docs.py" }}
+          when: always
+          paths:
+            - ~/.cache/uv
+      # The HTML runs from tens to hundreds of megabytes per project and nobody
+      # reads it; the two logs are what a failure is diagnosed from.
+      - run:
+          name: Collect the logs
+          when: always
+          command: |
+            mkdir -p /tmp/integration-logs
+            cp build/integration/*-build.txt build/integration/*-warnings.txt \
+              /tmp/integration-logs/ || true
+      - store_artifacts:
+          path: /tmp/integration-logs
+          destination: logs
 
+workflows:
   default:
     jobs:
       - build_docs
+      # One job per downstream project, all on every push and pull request.
+      # scipy is deliberately absent: too slow for a per-PR job, run it by hand.
+      # `name` is spelled twice because a job cannot read its own workflow alias
+      # as a parameter.
+      - integration:
+          name: networkx
+          project: networkx
+      - integration:
+          name: scikit-image
+          project: scikit-image
+      - integration:
+          name: matplotlib
+          project: matplotlib
+          # matplotlib's conf.py hard-errors when `dot` or `latex` are missing.
+          apt: graphviz texlive-latex-base
+      - integration:
+          name: numpy
+          project: numpy
