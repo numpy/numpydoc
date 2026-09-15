@@ -3,7 +3,10 @@ This package provides the numpydoc Sphinx extension for handling docstrings
 formatted according to the NumPy documentation format.
 """
 
-from ._version import __version__
+from importlib.metadata import version
+
+__version__ = version("numpydoc")
+del version
 
 
 def setup(app, *args, **kwargs):

@@ -4,13 +4,13 @@ Release process for ``numpydoc``
 Introduction
 ------------
 
-Example ``__version__``
+The version is derived from git tags by ``setuptools_scm``; there is no
+version string to edit by hand. Example ``__version__`` values:
 
-- 1.8rc0.dev0  # development version of 1.8 (first release candidate)
-- 1.8rc0       # 1.8 release candidate 1
-- 1.8rc1.dev0  # development version of 1.8 (second release candidate)
-- 1.8          # 1.8 release
-- 1.9rc0.dev0  # development version of 1.9 (first release candidate)
+- 1.8rc0            # tag ``v1.8rc0`` (1.8 release candidate 1)
+- 1.8rc1.dev3+gabc  # 3 commits after ``v1.8rc0`` (development version)
+- 1.8               # tag ``v1.8`` (1.8 release)
+- 1.9.dev2+gdef     # 2 commits after ``v1.8`` (development version)
 
 Test release candidates on numpy, scipy, matplotlib, scikit-image, and networkx.
 
@@ -31,11 +31,9 @@ Process
    changelist ${ORG}/${REPO} v${PREVIOUS} main --version ${VERSION} --config pyproject.toml --out ${VERSION}.md
    cat ${VERSION}.rst | cat - ${LOG} > temp && mv temp ${LOG} && rm ${VERSION}.rst
 
-- Update ``__version__`` in ``numpydoc/_version.py``.
-
 - Commit changes::
 
-    git add numpydoc/_version.py ${LOG}
+    git add ${LOG}
     git commit -m "Designate ${VERSION} release"
 
 - Add the version number (e.g., `v1.2.0`) as a tag in git::
@@ -59,15 +57,12 @@ Process
    - if pre-release check the box labelled `Set as a pre-release`
 
 
+  Pushing the tag triggers the ``Build Wheel and Release`` workflow, which
+  builds the sdist and wheel and uploads them to PyPI. Check that the run
+  succeeded and that the new version appears on
+  https://pypi.org/project/numpydoc/.
+
 - Update https://github.com/numpy/numpydoc/milestones::
 
    - close old milestone
    - ensure new milestone exists (perhaps setting due date)
-
-- Update ``__version__`` in ``numpydoc/_version.py``.
-
-- Commit changes::
-
-    git add numpydoc/_version.py
-    git commit -m 'Bump version'
-    git push origin main

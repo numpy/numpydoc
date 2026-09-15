@@ -23,6 +23,8 @@ jobs:
         shell: bash -eo pipefail {0}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Python setup
         uses: actions/setup-python@v7
@@ -69,6 +71,8 @@ jobs:
         python-version: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Python setup
         uses: actions/setup-python@v7
@@ -117,6 +121,8 @@ jobs:
         python-version: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Python setup
         uses: actions/setup-python@v7
@@ -158,6 +164,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Python setup
         uses: actions/setup-python@v7
@@ -191,6 +199,8 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Python setup
         uses: actions/setup-python@v7
