@@ -6,10 +6,11 @@ takes the same argument by hand::
 
     python tools/integration/build_docs.py networkx
 
-Every project gets a throwaway virtualenv under ``build/integration``: we
-install its released wheel, clone its docs at the matching tag, install its
-documentation requirements, force-install numpydoc from this checkout on top,
-and run sphinx-build.  A nonzero sphinx-build exit is the failure criterion.
+Every project gets a throwaway virtualenv under ``build/integration``, built
+and filled by ``uv``: we install the project's released wheel, clone its docs at
+the matching tag, install its documentation requirements, force-install numpydoc
+from this checkout on top, and run sphinx-build.  A nonzero sphinx-build exit is
+the failure criterion.
 
 Warnings are errors, because that is how a numpydoc regression usually shows
 up.  A project with no ``allowed_warnings`` is built with ``-W --keep-going``
@@ -25,8 +26,8 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import time
-import venv
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -169,6 +170,13 @@ def setup(app):
 }
 
 
+#: An intersphinx inventory that could not be downloaded.  Its cross-references
+#: then fail to resolve, which looks exactly like a numpydoc regression.
+_INVENTORY_RE = re.compile(
+    r"inventory '\S+' not fetchable|failed to reach any of the inventories"
+)
+
+
 def run(cmd: list, **kwargs) -> subprocess.CompletedProcess:
     """Run ``cmd``, echoing it first, and raise on a nonzero exit."""
     cmd = [str(arg) for arg in cmd]
@@ -189,6 +197,31 @@ def filter_requirements(path: Path, exclude: tuple[str, ...]) -> Path:
     out = path.with_name(f"{path.stem}-numpydoc{path.suffix}")
     out.write_text("\n".join(kept) + "\n")
     return out
+
+
+def run_sphinx(cmd: list[str], source: Path, build_log: Path) -> int:
+    """Run ``cmd``, teeing its output into ``build_log``, and return its status."""
+    print(f"\n==> {subprocess.list2cmdline(cmd)}", flush=True)
+    start = time.monotonic()
+    # Line-buffered, and readline() rather than iterating the pipe (which reads
+    # a buffer ahead), so a slow build keeps printing and a killed one still
+    # leaves its log behind for the CI artifact.
+    with build_log.open("w", buffering=1) as fid:
+        proc = subprocess.Popen(
+            cmd,
+            cwd=source,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        )
+        for line in iter(proc.stdout.readline, ""):
+            print(line, end="", flush=True)
+            fid.write(line)
+        returncode = proc.wait()
+    minutes = (time.monotonic() - start) / 60
+    print(f"\nsphinx-build exited {returncode} after {minutes:.1f} min")
+    return returncode
 
 
 def check_warnings(name: str, project: Project, warnings_log: Path) -> int:
@@ -213,16 +246,18 @@ def build(name: str, project: Project) -> int:
 
     # A fresh virtualenv per project: this installs dozens of packages and
     # force-reinstalls numpydoc, so the caller's environment is off limits.
+    # Nothing in it needs pip, which is why uv never seeds one.
     env_dir = WORKDIR / f"venv-{name}"
     print(f"\n==> Creating the build environment in {env_dir}", flush=True)
-    venv.create(env_dir, with_pip=True, clear=True)
+    run(["uv", "venv", "--python", sys.executable, env_dir])
     python = env_dir / "bin" / "python"
 
     def pip(*args) -> None:
-        run([python, "-m", "pip", "install", *args])
-
-    # matplotlib's PEP 735 group needs a newer pip than venv bundles.
-    pip("--upgrade", "pip")
+        # --compile-bytecode because pip byte-compiles on install and uv does
+        # not: an old dependency whose source has an invalid escape sequence
+        # then emits a SyntaxWarning on first import, which matplotlib's
+        # `warnings.filterwarnings("error")` conf.py turns into a hard failure.
+        run(["uv", "pip", "install", "--compile-bytecode", "--python", python, *args])
 
     # 1. Install the released wheel -- never build the project from source.
     pip("--only-binary", ":all:", name)
@@ -265,36 +300,29 @@ def build(name: str, project: Project) -> int:
 
     # 6. Build the docs.
     source = checkout / project.source_dir
+    doctrees, out_dir = WORKDIR / f"{name}-doctrees", WORKDIR / f"{name}-html"
     cmd = [python, "-m", "sphinx", "-b", "html", "-j", "auto", "-T"]
-    cmd += ["-d", WORKDIR / f"{name}-doctrees", "-w", warnings_log]
+    cmd += ["-d", doctrees, "-w", warnings_log]
     if not project.allowed_warnings:
         # `--keep-going` is a no-op in sphinx >= 8.1 but is upstream's spelling.
         cmd += ["-W", "--keep-going"]
     for define in project.sphinx_defines:
         cmd += ["-D", define]
-    cmd += [source, WORKDIR / f"{name}-html"]
+    cmd += [source, out_dir]
     cmd = [str(arg) for arg in cmd]
 
-    print(f"\n==> {subprocess.list2cmdline(cmd)}", flush=True)
-    start = time.monotonic()
-    # Line-buffered, and readline() rather than iterating the pipe (which reads
-    # a buffer ahead), so a slow build keeps printing and a killed one still
-    # leaves its log behind for the CI artifact.
-    with build_log.open("w", buffering=1) as fid:
-        proc = subprocess.Popen(
-            cmd,
-            cwd=source,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            env={**os.environ, "PYTHONUNBUFFERED": "1"},
-        )
-        for line in iter(proc.stdout.readline, ""):
-            print(line, end="", flush=True)
-            fid.write(line)
-        returncode = proc.wait()
-    minutes = (time.monotonic() - start) / 60
-    print(f"\nsphinx-build exited {returncode} after {minutes:.1f} min")
+    # matplotlib's wxPython inventory once failed to download on CircleCI, and
+    # the unresolved references it left behind are indistinguishable from a
+    # numpydoc regression, so a build that blames the network gets one retry --
+    # from scratch, because a second pass over the cached doctrees would write
+    # nothing and report no warnings at all.
+    for _ in range(2):
+        returncode = run_sphinx(cmd, source, build_log)
+        if not _INVENTORY_RE.search(warnings_log.read_text(errors="replace")):
+            break
+        print("\n==> an intersphinx inventory was unreachable; rebuilding once")
+        shutil.rmtree(doctrees, ignore_errors=True)
+        shutil.rmtree(out_dir, ignore_errors=True)
     return returncode or check_warnings(name, project, warnings_log)
 
 

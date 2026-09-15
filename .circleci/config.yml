@@ -74,30 +74,53 @@ jobs:
     <<: *machine
     steps:
       - checkout
+      # Pull requests build only when they carry the `integration-tests` label;
+      # pushes to main always do.  CircleCI does not retrigger on label events,
+      # so a label added later needs a re-run of the workflow.  A GitHub API
+      # hiccup (the CircleCI IP is shared and rate-limited) builds anyway.
+      - run:
+          name: Check for the integration-tests label
+          command: |
+            [ -n "$CIRCLE_PULL_REQUEST" ] || exit 0
+            API=$(echo "$CIRCLE_PULL_REQUEST" |
+              sed -E 's#.*github.com/(.+)/pull/([0-9]+)#https://api.github.com/repos/\1/pulls/\2#')
+            LABELS=$(curl -fsS "$API" | python3 -c \
+              'import json,sys; print("\n".join(l["name"] for l in json.load(sys.stdin)["labels"]))' \
+              2>/dev/null) || {
+              echo "Could not read labels from $API; building anyway."; exit 0; }
+            echo "$LABELS" | grep -qx integration-tests || {
+              echo "Not labelled integration-tests; skipping $CIRCLE_JOB."
+              circleci-agent step halt; }
       - run:
           name: Install apt packages
-          # python3-venv because the build script makes its own virtualenv and
-          # Ubuntu ships `python3` without ensurepip.
           command: |
-            sudo apt-get -qq update
-            sudo apt-get install -yy --no-install-recommends \
-              python3-venv << parameters.apt >>
-      # Caches are immutable, so key on the build number to write a fresh one
-      # every run and fall back to the newest cache with the same prefix.
+            if [ -n "<< parameters.apt >>" ]; then
+              sudo apt-get -qq update
+              sudo apt-get install -yy --no-install-recommends << parameters.apt >>
+            fi
+      # uv builds the per-project virtualenv and installs into it; the machine
+      # image's python3 is only what uv copies the interpreter from.
+      - run:
+          name: Install uv
+          command: |
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$BASH_ENV"
+      # uv's download cache.  Caches are immutable, so key on the recipe that
+      # decides what gets installed, with a prefix fallback in between.
       - restore_cache:
           keys:
-            - pip-cache-v1-<< parameters.project >>-{{ .BuildNum }}
-            - pip-cache-v1-<< parameters.project >>-
+            - uv-cache-v1-<< parameters.project >>-{{ checksum "tools/integration/build_docs.py" }}
+            - uv-cache-v1-<< parameters.project >>-
       - run:
           name: Build the << parameters.project >> documentation
           # Sphinx streams progress, but a slow wheel download does not.
           no_output_timeout: 30m
           command: python3 tools/integration/build_docs.py << parameters.project >>
       - save_cache:
-          key: pip-cache-v1-<< parameters.project >>-{{ .BuildNum }}
+          key: uv-cache-v1-<< parameters.project >>-{{ checksum "tools/integration/build_docs.py" }}
           when: always
           paths:
-            - ~/.cache/pip
+            - ~/.cache/uv
       # The HTML runs from tens to hundreds of megabytes per project and nobody
       # reads it; the two logs are what a failure is diagnosed from.
       - run:
