@@ -1,4 +1,14 @@
-version: 2
+version: 2.1
+
+# gen3 resource classes are only valid with the `current` machine image tag -- a
+# pinned dated tag is rejected with "is not a valid resource class".
+_machine: &machine
+  machine:
+    image: ubuntu-2604:current
+  # large.gen3: 4 vCPUs / 16 GiB, both faster and cheaper per minute than the
+  # gen1 `large` class.  Revert to `large` if gen3 queue times become a problem.
+  resource_class: large.gen3
+
 jobs:
   build_docs:
     docker:
@@ -48,9 +58,78 @@ jobs:
           path: numpydoc/tests/tinybuild/_build/html/
           destination: tinybuild
 
-workflows:
-  version: 2
+  # Build a downstream project's documentation against the numpydoc in this
+  # checkout, so that regressions are caught before a release rather than by our
+  # users.  `tools/integration/build_docs.py` does all of the work and is meant
+  # to be run by hand with the same arguments to reproduce a failure locally.
+  integration:
+    parameters:
+      project:
+        description: a project name understood by tools/integration/build_docs.py
+        type: string
+      apt:
+        description: Debian packages the project's conf.py needs on PATH.
+        type: string
+        default: ""
+    <<: *machine
+    steps:
+      - checkout
+      - run:
+          name: Install apt packages
+          # python3-venv because the build script makes its own virtualenv and
+          # Ubuntu ships `python3` without ensurepip.
+          command: |
+            sudo apt-get -qq update
+            sudo apt-get install -yy --no-install-recommends \
+              python3-venv << parameters.apt >>
+      # Caches are immutable, so key on the build number to write a fresh one
+      # every run and fall back to the newest cache with the same prefix.
+      - restore_cache:
+          keys:
+            - pip-cache-v1-<< parameters.project >>-{{ .BuildNum }}
+            - pip-cache-v1-<< parameters.project >>-
+      - run:
+          name: Build the << parameters.project >> documentation
+          # Sphinx streams progress, but a slow wheel download does not.
+          no_output_timeout: 30m
+          command: python3 tools/integration/build_docs.py << parameters.project >>
+      - save_cache:
+          key: pip-cache-v1-<< parameters.project >>-{{ .BuildNum }}
+          when: always
+          paths:
+            - ~/.cache/pip
+      # The HTML runs from tens to hundreds of megabytes per project and nobody
+      # reads it; the two logs are what a failure is diagnosed from.
+      - run:
+          name: Collect the logs
+          when: always
+          command: |
+            mkdir -p /tmp/integration-logs
+            cp build/integration/*-build.txt build/integration/*-warnings.txt \
+              /tmp/integration-logs/ || true
+      - store_artifacts:
+          path: /tmp/integration-logs
+          destination: logs
 
+workflows:
   default:
     jobs:
       - build_docs
+      # One job per downstream project, all on every push and pull request.
+      # scipy is deliberately absent: too slow for a per-PR job, run it by hand.
+      # `name` is spelled twice because a job cannot read its own workflow alias
+      # as a parameter.
+      - integration:
+          name: networkx
+          project: networkx
+      - integration:
+          name: scikit-image
+          project: scikit-image
+      - integration:
+          name: matplotlib
+          project: matplotlib
+          # matplotlib's conf.py hard-errors when `dot` or `latex` are missing.
+          apt: graphviz texlive-latex-base
+      - integration:
+          name: numpy
+          project: numpy
