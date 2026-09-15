@@ -1,7 +1,7 @@
-1.11.0rc0
-=========
+1.11.0
+======
 
-We're happy to announce the release of numpydoc 1.11.0rc0!
+We're happy to announce the release of numpydoc 1.11.0!
 
 Enhancements
 ------------
@@ -16,6 +16,9 @@ Bug Fixes
 - fix: handle Sphinx 9.x new autodoc options key format and sentinels (`#688 <https://github.com/numpy/numpydoc/pull/688>`_).
 - GL01 catches valid docstring example (`#574 <https://github.com/numpy/numpydoc/pull/574>`_).
 - Dedent section starting with ``.. deprecation::`` (`#575 <https://github.com/numpy/numpydoc/pull/575>`_).
+- FIX: don't evaluate annotations when collecting signature parameters (Python 3.14 / PEP 649) (`#700 <https://github.com/numpy/numpydoc/pull/700>`_).
+- Avoid deprecated Sphinx autodoc options mapping (`#701 <https://github.com/numpy/numpydoc/pull/701>`_).
+- FIX: resolve attribute cross-links in the class scope first (`#706 <https://github.com/numpy/numpydoc/pull/706>`_).
 
 Documentation
 -------------
@@ -27,30 +30,34 @@ Maintenance
 
 - MAINT: Bump to dev (`#672 <https://github.com/numpy/numpydoc/pull/672>`_).
 - TST,CI: Add workflow to check sdist (`#670 <https://github.com/numpy/numpydoc/pull/670>`_).
-- Bump the actions group with 3 updates (`#673 <https://github.com/numpy/numpydoc/pull/673>`_).
-- [pre-commit.ci] pre-commit autoupdate (`#674 <https://github.com/numpy/numpydoc/pull/674>`_).
-- Bump the actions group with 2 updates (`#680 <https://github.com/numpy/numpydoc/pull/680>`_).
-- Bump actions/download-artifact from 8.0.0 to 8.0.1 in the actions group (`#681 <https://github.com/numpy/numpydoc/pull/681>`_).
-- [pre-commit.ci] pre-commit autoupdate (`#682 <https://github.com/numpy/numpydoc/pull/682>`_).
-- Bump the actions group with 2 updates (`#685 <https://github.com/numpy/numpydoc/pull/685>`_).
 - Add sphinx8 to oldsphinx testing matrix (`#689 <https://github.com/numpy/numpydoc/pull/689>`_).
 - Update classifiers to show 3.14 support (`#695 <https://github.com/numpy/numpydoc/pull/695>`_).
+
+Other
+-----
+
+- fix: correct typo in test (`#702 <https://github.com/numpy/numpydoc/pull/702>`_).
 
 Contributors
 ------------
 
-7 authors added to this release (alphabetically):
+11 authors added to this release (alphabetically):
 
 - Eric Larson (`@larsoner <https://github.com/larsoner>`_)
 - Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
 - Julien Schueller (`@jschueller <https://github.com/jschueller>`_)
+- Lazizbek Ergashev (`@lazerg <https://github.com/lazerg>`_)
 - Linyan Zhang (`@LinyanZhang <https://github.com/LinyanZhang>`_)
+- Mathieu Scheltienne (`@mscheltienne <https://github.com/mscheltienne>`_)
 - Ross Barnowski (`@rossbar <https://github.com/rossbar>`_)
+- Samarth D N (`@TheGreatApollyon <https://github.com/TheGreatApollyon>`_)
 - Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
 - Stefanie Molin (`@stefmolin <https://github.com/stefmolin>`_)
+- Utkarsh Tiwari (`@utkarshalpha <https://github.com/utkarshalpha>`_)
 
-7 reviewers added to this release (alphabetically):
+8 reviewers added to this release (alphabetically):
 
+- `@Copilot <https://github.com/apps/copilot-pull-request-reviewer>`_
 - Charles Harris (`@charris <https://github.com/charris>`_)
 - Eric Larson (`@larsoner <https://github.com/larsoner>`_)
 - Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
@@ -61,6 +68,7 @@ Contributors
 
 _These lists are automatically generated, and may not be complete or may contain
 duplicates._
+
 
 1.10.0
 ======
