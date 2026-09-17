@@ -78,3 +78,17 @@ def deprecated_function():
     --------
     >>> result = 1 + 1
     """
+
+
+class GoodConstructor:  #  numpydoc ignore=EX01,ES01,SA01
+    """
+    A class providing its constructor docstring in the class documentation.
+
+    Parameters
+    ----------
+    name : str
+        The name of the new class.
+    """
+
+    def __init__(self, name):
+        self.name = name
