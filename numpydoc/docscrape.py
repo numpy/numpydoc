@@ -220,6 +220,9 @@ class NumpyDocString(Mapping):
             else:
                 yield name, self._strip(data[2:])
 
+    # "name: type" or "x1, x2: type", optionally with leading * or **
+    _missing_colon_space_rgx = re.compile(r"^\*{0,2}\w+(\s*,\s*\*{0,2}\w+)*: ")
+
     def _parse_param_list(self, content, single_element_is_type=False):
         content = dedent_lines(content)
 
@@ -235,7 +238,13 @@ class NumpyDocString(Mapping):
                 # much. So, we compact any run of 2+ whitespace.
                 arg_type = re.sub(r"\s{2,}", " ", arg_type_w_whitespace)
             else:
-                if not single_element_is_type and ": " in header:
+                # Only warn when what precedes ": " looks like parameter
+                # name(s), so that prose like ".. note:: ..." or
+                # "Implementation note: ..." that ended up in a parameter
+                # section does not trigger a misleading warning.
+                if not single_element_is_type and self._missing_colon_space_rgx.match(
+                    header
+                ):
                     self._error_location(
                         f"Parameter {header!r} has no space before the colon",
                         error=False,

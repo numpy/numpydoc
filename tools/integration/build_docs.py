@@ -85,6 +85,17 @@ PROJECTS: dict[str, Project] = {
         exclude_requirements=("pygraphviz",),
         # Don't execute the gallery examples or the myst-nb tutorial.
         sphinx_defines=("plot_gallery=0", "nb_execution_mode=off"),
+        # The networkx 3.7 release notes have an unbalanced `*Matcher` that
+        # docutils warns about (fixed upstream after 3.7); a no-op otherwise.
+        pre_build_cwd="doc",
+        pre_build=(
+            (
+                "sed",
+                "-i",
+                r"s/^- Expose \*Matcher classes/- Expose ``*Matcher`` classes/",
+                "release/release_3.7.rst",
+            ),
+        ),
     ),
     # Upstream builds with SPHINXOPTS="-W -j auto" and so do we, once the images
     # `plot_gallery=0` never renders are suppressed.  suppress_warnings repeats
@@ -129,6 +140,14 @@ PROJECTS: dict[str, Project] = {
         # them instead would defeat the point.
         pre_build_cwd="doc",
         pre_build=(("sed", "-i", "-E", _MPL_SED, "missing-references.json"),),
+        # conf.py turns every warning into an error, and released matplotlib
+        # has "name: type" parameter headers that numpydoc now warns about
+        # (fixed upstream after 3.11.x).  Keep them visible but non-fatal.
+        conf_append="""\
+warnings.filterwarnings(
+    "default", message=r".*has no space before the colon", category=UserWarning
+)
+""",
     ),
     # numpy and scipy get sphinx-build pointed straight at doc/source: their
     # Makefiles insist the installed library was built from the checkout.

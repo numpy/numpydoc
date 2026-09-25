@@ -219,6 +219,47 @@ def test_parameter_missing_space_before_colon_warns():
     assert params == [("val: int", "", ["Input value."])]
 
 
+@pytest.mark.parametrize(
+    "header",
+    [
+        "x1, x2: array_like",
+        "*args: tuple",
+        "**kwargs: dict, optional",
+        "default:  any Python object (default=None)",
+    ],
+)
+def test_parameter_missing_space_before_colon_warns_variants(header):
+    doc = f"""
+    Parameters
+    ----------
+    {header}
+        Input value.
+    """
+    with pytest.warns(UserWarning, match="space before the colon"):
+        NumpyDocString(doc)
+
+
+@pytest.mark.parametrize(
+    "header",
+    [
+        ".. note:: You must specify exactly one of deg or rad.",
+        "Implementation note: this function creates an intermediate graph",
+    ],
+)
+def test_parameter_prose_with_colon_does_not_warn(header):
+    doc = f"""
+    Parameters
+    ----------
+    val : int
+        Input value.
+
+    {header}
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        NumpyDocString(doc)
+
+
 def test_type_continuation():
     doc = NumpyDocString("""
     Parameters
