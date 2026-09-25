@@ -207,6 +207,18 @@ def test_parameters(doc):
     assert desc[0].startswith("The type and size")
 
 
+def test_parameter_missing_space_before_colon_warns():
+    doc = """
+    Parameters
+    ----------
+    val: int
+        Input value.
+    """
+    with pytest.warns(UserWarning, match="space before the colon"):
+        params = NumpyDocString(doc)["Parameters"]
+    assert params == [("val: int", "", ["Input value."])]
+
+
 def test_type_continuation():
     doc = NumpyDocString("""
     Parameters

@@ -235,6 +235,11 @@ class NumpyDocString(Mapping):
                 # much. So, we compact any run of 2+ whitespace.
                 arg_type = re.sub(r"\s{2,}", " ", arg_type_w_whitespace)
             else:
+                if not single_element_is_type and ": " in header:
+                    self._error_location(
+                        f"Parameter {header!r} has no space before the colon",
+                        error=False,
+                    )
                 # NOTE: param line with single element should never have a
                 # a " :" before the description line, so this should probably
                 # warn.

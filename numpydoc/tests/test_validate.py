@@ -1524,9 +1524,12 @@ class TestValidator:
         ],
     )
     def test_bad_generic_functions(self, capsys, func):
-        errors = validate_one(
-            self._import_path(klass="BadGenericDocStrings", func=func)
-        )["errors"]
+        path = self._import_path(klass="BadGenericDocStrings", func=func)
+        if func == "plot":
+            with pytest.warns(UserWarning, match="space before the colon"):
+                errors = validate_one(path)["errors"]
+        else:
+            errors = validate_one(path)["errors"]
         assert isinstance(errors, list)
         assert errors
 
@@ -1749,7 +1752,10 @@ class TestValidator:
     def test_bad_docstrings(self, capsys, klass, func, msgs):
         with warnings.catch_warnings(record=True) as w:
             result = validate_one(self._import_path(klass=klass, func=func))
-        if len(w):
+        if func == "bad_colon_spacing":
+            assert len(w) == 1
+            assert "space before the colon" in str(w[0].message)
+        elif len(w):
             assert all("Unknown section" in str(ww.message) for ww in w)
         for msg in msgs:
             assert msg in " ".join(err[1] for err in result["errors"])
