@@ -26,3 +26,6 @@ The `numpydoc docstring guide
 <https://numpydoc.readthedocs.io/en/latest/format.html>`_ explains how
 to write docs formatted for this extension, and the `user guide
 <https://numpydoc.readthedocs.io>`_ explains how to use it with Sphinx.
+
+Contributions are welcome! See `CONTRIBUTING.md
+<https://github.com/numpy/numpydoc/blob/main/CONTRIBUTING.md>`_ for details.
