@@ -1,18 +1,22 @@
 version: 2.1
 
 # gen3 resource classes are only valid with the `current` machine image tag -- a
-# pinned dated tag is rejected with "is not a valid resource class".
-_machine: &machine
-  machine:
-    image: ubuntu-2604:current
-  # large.gen3: 4 vCPUs / 16 GiB, both faster and cheaper per minute than the
-  # gen1 `large` class.  Revert to `large` if gen3 queue times become a problem.
-  resource_class: large.gen3
+# pinned dated tag is rejected with "is not a valid resource class".  They are
+# both faster and cheaper per minute than their gen1 equivalents; revert to
+# `medium` / `large` if gen3 queue times become a problem.
+executors:
+  linux:
+    parameters:
+      size:
+        type: string
+        default: medium.gen3
+    machine:
+      image: ubuntu-2604:current
+    resource_class: << parameters.size >>
 
 jobs:
   build_docs:
-    docker:
-      - image: "cimg/python:3.11"
+    executor: linux
     steps:
       - checkout
       - run:
@@ -20,7 +24,7 @@ jobs:
           command: sudo apt-get update
       - run:
           name: Install TeX
-          command: sudo apt install dvipng texlive-fonts-recommended texlive-latex-recommended texlive-latex-extra latexmk texlive-xetex
+          command: sudo apt-get install -yy --no-install-recommends dvipng texlive-fonts-recommended texlive-latex-recommended texlive-latex-extra latexmk texlive-xetex
       - restore_cache:
           keys:
             - pip-cache
@@ -71,26 +75,12 @@ jobs:
         description: Debian packages the project's conf.py needs on PATH.
         type: string
         default: ""
-    <<: *machine
+    # large.gen3: 4 vCPUs / 16 GiB
+    executor:
+      name: linux
+      size: large.gen3
     steps:
       - checkout
-      # Pull requests build only when they carry the `integration-tests` label;
-      # pushes to main always do.  CircleCI does not retrigger on label events,
-      # so a label added later needs a re-run of the workflow.  A GitHub API
-      # hiccup (the CircleCI IP is shared and rate-limited) builds anyway.
-      - run:
-          name: Check for the integration-tests label
-          command: |
-            [ -n "$CIRCLE_PULL_REQUEST" ] || exit 0
-            API=$(echo "$CIRCLE_PULL_REQUEST" |
-              sed -E 's#.*github.com/(.+)/pull/([0-9]+)#https://api.github.com/repos/\1/pulls/\2#')
-            LABELS=$(curl -fsS "$API" | python3 -c \
-              'import json,sys; print("\n".join(l["name"] for l in json.load(sys.stdin)["labels"]))' \
-              2>/dev/null) || {
-              echo "Could not read labels from $API; building anyway."; exit 0; }
-            echo "$LABELS" | grep -qx integration-tests || {
-              echo "Not labelled integration-tests; skipping $CIRCLE_JOB."
-              circleci-agent step halt; }
       - run:
           name: Install apt packages
           command: |
