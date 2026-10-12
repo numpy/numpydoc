@@ -228,7 +228,7 @@ When documenting variable length positional, or keyword arguments, leave the
 leading star(s) in front of the name and do not specify a type::
 
   *args
-      Additional arguments should be passed as keyword arguments
+      Additional arguments should be passed as positional arguments.
   **kwargs
       Extra arguments to `metric`: refer to each metric documentation for a
       list of all possible arguments.
