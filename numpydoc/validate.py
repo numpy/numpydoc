@@ -677,7 +677,7 @@ def validate(obj_name, validator_cls=None, **validator_kwargs):
                 cls_doc = Validator(get_doc_object(cls))
             elif isinstance(doc, AstValidator):  # Supports class traversal for ASTs.
                 ancestry = doc.ancestry
-                if len(ancestry) > 2:  # e.g. module.class.__init__
+                if len(ancestry) >= 2:  # e.g. module.class.__init__
                     parent = doc.ancestry[-1]  # Get the parent
                     cls_name = ".".join(
                         [
