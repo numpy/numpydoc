@@ -63,7 +63,14 @@ templates_path = ["_templates"]
 # master_doc = "index"  # NOTE: will be changed to `root_doc` in sphinx 4
 
 numpydoc_xref_param_type = True
-numpydoc_xref_ignore = {"optional", "type_without_description", "BadException"}
+numpydoc_xref_ignore = {
+    "optional",
+    "type_without_description",
+    "BadException",
+    "keyword-only",
+    "positional-only",
+}
+
 # Run docstring validation as part of build process
 numpydoc_validation_checks = {"all", "GL01", "SA04", "RT03"}
 
